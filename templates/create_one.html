@@ -1,0 +1,129 @@
+{% extends 'body.html' %}
+{% load static %}
+
+
+{% block head %}
+
+    {% block head_list %}
+
+    {% endblock %}
+
+{% endblock %}
+
+{% block content %}
+    <div class="card mt-5">
+        <div class="card-header p-3 pt-2">
+            <div class="icon icon-lg icon-shape bg-gradient-dark shadow text-center border-radius-xl mt-n4 me-3 float-start">
+                <i class="material-symbols-rounded opacity-10">event</i>
+              </div>
+            <h5 class="mb-0">{{ entity }}</h5>
+            <p class="text-sm mb-0">
+                {{ subtitle }}
+            </p>
+        </div>
+        <div class="card-body">
+{#            <form action="{{ action }}">#}
+{#              #}
+{#                    <div class="input-group input-group-outline my-3">#}
+{#                        <label class="form-label">Email address</label>#}
+{#                        <input type="email" class="form-control">#}
+{#                    </div>#}
+{#                    <div class="input-group input-group-static mb-4">#}
+{#                        <label for="exampleFormControlSelect1" class="ms-0">Example select</label>#}
+{#                        <select class="form-control" id="exampleFormControlSelect1">#}
+{#                            <option>1</option>#}
+{#                            <option>2</option>#}
+{#                            <option>3</option>#}
+{#                            <option>4</option>#}
+{#                            <option>5</option>#}
+{#                        </select>#}
+{#                    </div>             #}
+{#               #}
+{#            </form>#}
+            <form enctype="multipart/form-data" method="post" action="" class="form-horizontal">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="{{ action }}">
+                        {% for field in form.visible_fields %}
+                            {% if forloop.first %}
+                                <div class="row">
+                            {% endif %}
+                            <div class="col-md-4">
+                                <div {% if field.name == 'photo' or field.name == 'companyLogo' %} class="fileinput fileinput-new text-center" data-provides="fileinput"
+                                {% elif field.name == 'groups' %}class="col-sm-12 mt-sm-3 mt-5" {% else %}class="input-group input-group-outline my-3" {% endif %}>
+                                {% if field.name == 'photo' or field.name == 'companyLogo' %}
+                                    <div class="fileinput-preview fileinput-exists thumbnail"></div>
+                                    <div>
+                                        <span class="btn btn-rose btn-round btn-file">
+                                            <span class="fileinput-new">Seleccionar imagen</span>
+                                            <span class="fileinput-exists">Cambiar</span>
+                                            {{ field }}
+                                        </span>
+                                        {% if field.help_text %}
+                                            <sub>*{{ field.help_text }}</sub>
+                                        {% endif %}
+                                        <a href="#" class="btn btn-danger btn-round fileinput-exists"
+                                           data-dismiss="fileinput"><i class="fa fa-times"></i> Eliminar</a>
+                                    </div>
+                                {% else %}
+                                    <label for=id_{{ field.name }} class="form-label ms-0">
+                                        {{ field.label }}{% if field.field.required %}*{% endif %}
+                                    </label>
+{#                                    {% if field.help_text %}#}
+{#                                        <sub class="mb-1">*{{ field.help_text }}</sub>#}
+{#                                    {% endif %}#}
+                                        {{ field }}
+                                    </div>
+                                    </div>
+                                {% endif %}
+                        {% if forloop.last %}
+                        {% elif forloop.counter|divisibleby:3 %}
+                            </div>
+                            <div class="row">
+                        {% endif %}
+                        {% endfor %}
+                        </div>
+                        <div class="card-footer text-center">
+                            <button type="submit" class="btn btn-success me-2" id="btnSubmit">Guardar</button>
+                            <a href="{{ list_url }}" class="btn btn-danger">Cancelar</a>
+                        </div>
+                    </form>
+
+        </div>
+    </div>
+
+{% endblock %}
+{% block scripts_detail %}
+    <script type="application/javascript">
+    
+        if (document.getElementById('groups')) {
+            var element = document.getElementById('groups');
+            const example = new Choices(element, {
+                searchEnabled: false
+            });
+        }
+
+        $('form').on('submit', function (e) {
+            e.preventDefault();
+            var parameters = new FormData(this);
+            $.ajax({
+                url: window.location.pathname,
+                type: 'POST',
+                data: parameters,
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+            }).done(function (data) {
+                console.log(data);
+                if (!data.hasOwnProperty('error')) {
+                    location.href = '{{ list_url }}';
+                    return false;
+                }
+                message_error(data.error);
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                alert(textStatus + ': ' + errorThrown);
+            }).always(function (data) {
+            });
+        });
+        
+    </script>
+{% endblock %}
