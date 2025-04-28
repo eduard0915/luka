@@ -57,113 +57,31 @@
         {#    });#}
         {##}
         {# });#}
-    
-    
-        $(function () {
+
+
+        $(document).ready(function() {
 
             $('#data').DataTable({
                 responsive: true,
                 autoWidth: false,
                 language: {
                     url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
-                },
-             });
+                }
+            });
 
-            $('.btnTest').on('click', function () {
+            $('.btnTest').on('click', function() {
                 $.ajax({
                     url: window.location.pathname,
                     type: 'POST',
                     data: {id: 1},
                     dataType: 'json'
-                }).done(function (data) {
+                }).done(function(data) {
                     console.log(data);
-                }).fail(function (jqXHR, textStatus, errorThrown) {
+                }).fail(function(jqXHR, textStatus, errorThrown) {
                     alert(textStatus + ': ' + errorThrown);
-                }).always(function (data) {
                 });
-             });
-         });
-        
+            });
+        });
     </script>
-    
-{#    <script type="application/javascript">#}
-{##}
-        {#$(function () {#}
-        {#    $('#data').DataTable({#}
-        {#        responsive: true,#}
-        {#        autoWidth: false,#}
-        {#        language: {#}
-        {#            url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"#}
-        {#         },#}
-        {#    });#}
-{##}
-            {#$('.btnTest').on('click', function () {#}
-            {#    $.ajax({#}
-            {#        url: window.location.pathname,#}
-            {#        type: 'POST',#}
-            {#        data: {id: 1},#}
-            {#        dataType: 'json'#}
-            {#    }).done(function (data) {#}
-            {#        console.log(data);#}
-            {#    }).fail(function (jqXHR, textStatus, errorThrown) {#}
-            {#        alert(textStatus + ': ' + errorThrown);#}
-            {#    }).always(function (data) {#}
-            {#    });#}
-            {# });#}
-         {# });#}
-{##}
-{#        $(document).ready(function () {#}
-{#            $('#data').DataTable({#}
-{#                responsive: true,#}
-{#                autoWidth: false,#}
-{#                language: {#}
-{#                    "emptyTable": "No hay información",#}
-{#                    "info": "Mostrando _START_ a _END_ de _TOTAL_ Registros",#}
-{#                    "infoEmpty": "Mostrando 0 to 0 of 0 Registros",#}
-{#                    "infoFiltered": "(Filtrado de _MAX_ total Registros)",#}
-{#                    "lengthMenu": "Mostrar _MENU_ Registros",#}
-{#                    "loadingRecords": "Cargando...",#}
-{#                    "processing": "Procesando...",#}
-{#                    "search": "Buscar:",#}
-{#                    "zeroRecords": "Sin resultados encontrados",#}
-{#                },#}
-{#            });#}
-            {##}
-            {#$('.btnTest').on('click', function () {#}
-            {#    $.ajax({#}
-            {#        url: window.location.pathname,#}
-            {#        type: 'POST',#}
-            {#        data: {id: 1},#}
-            {#        dataType: 'json'#}
-            {#    }).done(function (data) {#}
-            {#        console.log(data);#}
-            {#    }).fail(function (jqXHR, textStatus, errorThrown) {#}
-            {#        alert(textStatus + ': ' + errorThrown);#}
-            {#    }).always(function (data) {#}
-            {#    });#}
-            {# });#}
-{#         });#}
-{#    #}
-        {#let table = new DataTable('#data', {#}
-        {#    responsive: true,#}
-        {#    autoWidth: false,#}
-        {#    language: {#}
-        {#        "emptyTable": "No hay información",#}
-        {#        "info": "Mostrando _START_ a _END_ de _TOTAL_ Registros",#}
-        {#        "infoEmpty": "Mostrando 0 to 0 of 0 Registros",#}
-        {#        "infoFiltered": "(Filtrado de _MAX_ total Registros)",#}
-        {#        "lengthMenu": "Mostrar _MENU_ Registros",#}
-        {#        "loadingRecords": "Cargando...",#}
-        {#        "processing": "Procesando...",#}
-        {#        "search": "Buscar:",#}
-        {#        "zeroRecords": "Sin resultados encontrados",#}
-        {#    },#}
-        {# });#}
-{##}
-{##}
-{##}
-{##}
-{#    </script>#}
-    
     
 {% endblock %}
