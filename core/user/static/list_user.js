@@ -5,7 +5,15 @@ $(document).ready(function($) {
         destroy: true,
         deferRender: true,
         language: {
-            url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
+            "emptyTable": "No hay información",
+            "info": "Mostrando _START_ a _END_ de _TOTAL_ Registros",
+            "infoEmpty": "Mostrando 0 to 0 of 0 Registros",
+            "infoFiltered": "(Filtrado de _MAX_ total Registros)",
+            "lengthMenu": "Mostrar _MENU_ Registros",
+            "loadingRecords": "Cargando...",
+            "processing": "Procesando...",
+            "search": "Buscar:",
+            "zeroRecords": "Sin resultados encontrados",
         },
         ajax: {
             url: window.location.pathname,
@@ -40,7 +48,7 @@ $(document).ready(function($) {
                 targets: [3],
                 class: 'td-actions text-center',
                 render: function (data, type, row) {
-                    return '<span class="badge badge-pill badge-primary">' + row['groups__name'] + '</span>'
+                    return '<span class="badge bg-gradient-info">' + row['groups__name'] + '</span>'
                 }
             },
             {
@@ -65,8 +73,8 @@ $(document).ready(function($) {
                 orderable: false,
                 render: function (data, type, row) {
                     let actions
-                    actions = '<a href="/user/detail/' + row['slug'] + '/" type="button" rel="tooltip" class="btn btn-info btn-link btn-icon btn-sm" title="Detalle Perfil"><i class="nc-icon nc-tv-2"></i></a>&nbsp';
-                    actions += '<a href="/user/update-password/' + row['slug'] + '/" type="button" rel="tooltip" class="btn btn-success btn-link btn-icon btn-sm" title="Resetear Contraseña"><i class="nc-icon nc-key-25"></i></a>';
+                    actions = '<a href="/user/detail/' + row['slug'] + '/" type="button" title="Detalle Perfil"><i class="fa-solid fa-user-check text-warning"></i></a>  &nbsp';
+                    actions += '<a href="/user/update-password/' + row['slug'] + '/" type="button" title="Resetear Contraseña"><i class="fa-solid fa-lock text-success"></i></a>';
                     return actions
                 }
             },

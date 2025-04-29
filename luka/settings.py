@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     # Libs
     'widget_tweaks',
     'django_password_history',
+    'fontawesomefree'
 ]
 
 MIDDLEWARE = [
