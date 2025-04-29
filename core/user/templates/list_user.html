@@ -6,19 +6,22 @@
     <script src="{% static 'list_user.js' %}"></script>
 {% endblock %}
 
-{% block new_create %}
-{#    <a href="{{ create_url }}" class="btn btn-primary ml-3"><i class="nc-icon nc-simple-add"></i> Nuevo</a>#}
+{% block buttons %}
+    <a href="{{ create_url }}" class="btn bg-gradient-dark mb-0"><i class="fa-solid fa-plus"></i> Nuevo</a>
+{#    <button type="button" class="btn btn-outline-success mb-0">#}
+{#        <i class="fa-solid fa-file-excel"></i> Descargar#}
+{#    </button>#}
 {% endblock %}
 
 {% block columns %}
     <tr>
-        <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-10" style="width:22%">Nombre Completo</th>
-        <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-10" style="width:12%">Usuario</th>
-        <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-10" style="width:16%">Cargo</th>
-        <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-10" style="width:10%">Roles</th>
-        <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-10" style="width:20%">Email</th>
-        <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-10" style="width:10%">Estado</th>
-        <th class="text-uppercase text-secondary text-xs font-weight-bolder opacity-10" style="width:10%">Acciones</th>
+        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:22%">Nombre Completo</th>
+        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:12%">Usuario</th>
+        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:16%">Cargo</th>
+        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:10%">Roles</th>
+        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:20%">Email</th>
+        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:10%">Estado</th>
+        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:10%">Acciones</th>
     </tr>
 {% endblock %}
 

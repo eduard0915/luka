@@ -83,7 +83,7 @@ class UserListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView
                     'first_name',
                     'last_name',
                     'slug'
-                ).order_by('first_name'))
+                ).filter(is_superuser=False).order_by('first_name'))
                 return JsonResponse(usuarios, safe=False)
             else:
                 data['error'] = 'Ha ocurrido un error'
