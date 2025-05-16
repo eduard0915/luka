@@ -84,7 +84,7 @@ DATABASES = {
     'dev': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'luka_db',
-        'USER': 'postgres',
+        'USER': 'eduard',
         'PASSWORD': '12345',
         'HOST': 'localhost',
         'PORT': '5432',
@@ -174,14 +174,14 @@ TIME_PASSWORD_EXPIRE = 90
 
 # access with url from cloud run service
 CSRF_TRUSTED_ORIGINS = [
-    'http://127.0.0.1:7000/',
-    'http://localhost:7000/',
-    'https://*.mybatch.online',
+    'http://127.0.0.1:8000/',
+    'http://localhost:8000/',
+    'https://*.lukalims.com',
     'https://*.herokuapp.com',
     'https://*.run.app',
 ]
 
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:8000',
-    'http://*youripaddress*',
+    'http://*.lukalims.com',
 ]
