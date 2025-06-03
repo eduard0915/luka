@@ -14,12 +14,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = config('SECRET_KEY')
-SECRET_KEY = 'z&2&zb+#eh*1vsrmwpj!4d5stai45ek@!@&ye#2^fs@h#uli1b'
+SECRET_KEY = config('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-# DEBUG = config('DEBUG')
+DEBUG = config('DEBUG')
 
 ALLOWED_HOSTS = ['127.0.0.1', '.herokuapp.com', 'localhost', '.run.app']
 
@@ -37,6 +34,7 @@ INSTALLED_APPS = [
     'core.start',
     'core.login',
     'core.home',
+    'core.company',
     # Libs
     'widget_tweaks',
     'django_password_history',
@@ -81,14 +79,9 @@ WSGI_APPLICATION = 'luka.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'dev': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'luka_db',
-        'USER': 'eduard',
-        'PASSWORD': '12345',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    },
+    'dev': dj_database_url.config(
+        default=config('DATABASE_TEST')
+    ),
     'production': dj_database_url.config(
         default=config('DATABASE_URL')
     )
@@ -185,3 +178,39 @@ CORS_ORIGIN_WHITELIST = [
     'http://localhost:8000',
     'http://*.lukalims.com',
 ]
+
+# Conexión AWS S3
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = config('BUCKET')
+REGION_NAME = config('REGION_NAME')
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None
+DEFAULT_FILE_STORAGE = 'config.storages.MediaStore'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': 'django_errors.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'WARNING',
+            'propagate': True,
+        },
+    },
+}

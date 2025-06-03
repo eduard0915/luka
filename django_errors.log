@@ -1,0 +1,609 @@
+WARNING 2025-06-02 20:05:02,472 log 49821 134545751930560 Not Found: /user/detail/7726ce29-30d5-4c9f-a608-486a7dedcf0a/
+WARNING 2025-06-02 20:05:02,472 basehttp 49821 134545751930560 "GET /user/detail/7726ce29-30d5-4c9f-a608-486a7dedcf0a/ HTTP/1.1" 404 3900
+WARNING 2025-06-02 20:12:40,533 log 50386 135710896027328 Not Found: /user/update-password/2daa3ed2-ca7e-48a9-b288-698938d85d9e/
+WARNING 2025-06-02 20:12:40,533 basehttp 50386 135710896027328 "GET /user/update-password/2daa3ed2-ca7e-48a9-b288-698938d85d9e/ HTTP/1.1" 404 3927
+WARNING 2025-06-02 21:02:51,900 log 54012 126766158968512 Not Found: /user/assets/img/bruce-mars.jpg
+WARNING 2025-06-02 21:02:51,903 log 54012 126766150575808 Not Found: /user/assets/img/kal-visuals-square.jpg
+WARNING 2025-06-02 21:02:51,903 basehttp 54012 126766158968512 "GET /user/assets/img/bruce-mars.jpg HTTP/1.1" 404 4407
+WARNING 2025-06-02 21:02:51,903 basehttp 54012 126766150575808 "GET /user/assets/img/kal-visuals-square.jpg HTTP/1.1" 404 4431
+WARNING 2025-06-02 21:02:51,914 log 54012 126766150575808 Not Found: /user/assets/img/marie.jpg
+WARNING 2025-06-02 21:02:51,917 log 54012 126766142183104 Not Found: /user/assets/img/ivana-square.jpg
+WARNING 2025-06-02 21:02:51,920 log 54012 126766133790400 Not Found: /user/assets/img/team-4.jpg
+WARNING 2025-06-02 21:02:51,920 basehttp 54012 126766150575808 "GET /user/assets/img/marie.jpg HTTP/1.1" 404 4392
+WARNING 2025-06-02 21:02:51,921 basehttp 54012 126766142183104 "GET /user/assets/img/ivana-square.jpg HTTP/1.1" 404 4413
+WARNING 2025-06-02 21:02:51,921 basehttp 54012 126766133790400 "GET /user/assets/img/team-4.jpg HTTP/1.1" 404 4395
+WARNING 2025-06-02 21:02:51,924 log 54012 126766125397696 Not Found: /user/assets/img/team-3.jpg
+WARNING 2025-06-02 21:02:51,925 basehttp 54012 126766125397696 "GET /user/assets/img/team-3.jpg HTTP/1.1" 404 4395
+WARNING 2025-06-02 21:04:19,591 log 54012 126766158968512 Not Found: /user/assets/img/kal-visuals-square.jpg
+WARNING 2025-06-02 21:04:19,592 basehttp 54012 126766158968512 "GET /user/assets/img/kal-visuals-square.jpg HTTP/1.1" 404 4431
+WARNING 2025-06-02 21:04:19,607 log 54012 126766142183104 Not Found: /user/assets/img/team-3.jpg
+WARNING 2025-06-02 21:04:19,610 log 54012 126766158968512 Not Found: /user/assets/img/marie.jpg
+WARNING 2025-06-02 21:04:19,613 log 54012 126766133790400 Not Found: /user/assets/img/team-4.jpg
+WARNING 2025-06-02 21:04:19,615 log 54012 126766125397696 Not Found: /user/assets/img/ivana-square.jpg
+WARNING 2025-06-02 21:04:19,615 basehttp 54012 126766158968512 "GET /user/assets/img/marie.jpg HTTP/1.1" 404 4392
+WARNING 2025-06-02 21:04:19,615 basehttp 54012 126766142183104 "GET /user/assets/img/team-3.jpg HTTP/1.1" 404 4395
+WARNING 2025-06-02 21:04:19,616 basehttp 54012 126766125397696 "GET /user/assets/img/ivana-square.jpg HTTP/1.1" 404 4413
+WARNING 2025-06-02 21:04:19,616 basehttp 54012 126766133790400 "GET /user/assets/img/team-4.jpg HTTP/1.1" 404 4395
+WARNING 2025-06-02 21:06:00,561 log 54012 126766125397696 Not Found: /user/assets/img/kal-visuals-square.jpg
+WARNING 2025-06-02 21:06:00,564 log 54012 126766158968512 Not Found: /user/assets/img/marie.jpg
+WARNING 2025-06-02 21:06:00,565 basehttp 54012 126766125397696 "GET /user/assets/img/kal-visuals-square.jpg HTTP/1.1" 404 4431
+WARNING 2025-06-02 21:06:00,565 basehttp 54012 126766158968512 "GET /user/assets/img/marie.jpg HTTP/1.1" 404 4392
+WARNING 2025-06-02 21:06:00,587 log 54012 126766158968512 Not Found: /user/assets/img/ivana-square.jpg
+WARNING 2025-06-02 21:06:00,592 log 54012 126766150575808 Not Found: /user/assets/img/team-3.jpg
+WARNING 2025-06-02 21:06:00,593 basehttp 54012 126766158968512 "GET /user/assets/img/ivana-square.jpg HTTP/1.1" 404 4413
+WARNING 2025-06-02 21:06:00,596 log 54012 126766125397696 Not Found: /user/assets/img/team-4.jpg
+WARNING 2025-06-02 21:06:00,596 basehttp 54012 126766125397696 "GET /user/assets/img/team-4.jpg HTTP/1.1" 404 4395
+WARNING 2025-06-02 21:06:00,596 basehttp 54012 126766150575808 "GET /user/assets/img/team-3.jpg HTTP/1.1" 404 4395
+WARNING 2025-06-02 21:21:27,573 log 54564 125786967242432 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-02 21:21:27,573 basehttp 54564 125786967242432 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3258
+WARNING 2025-06-02 21:21:27,779 basehttp 54564 125786967242432 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-02 21:21:27,782 basehttp 54564 125786958849728 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-02 21:21:27,821 basehttp 54564 125786958849728 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-02 21:21:47,998 log 54564 125786958849728 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-02 21:21:47,998 basehttp 54564 125786958849728 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3258
+WARNING 2025-06-02 21:21:48,173 basehttp 54564 125786958849728 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-02 21:21:48,191 basehttp 54564 125786967242432 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-02 21:21:48,325 basehttp 54564 125786967242432 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-02 21:36:09,660 log 54564 125786967242432 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-02 21:36:09,660 basehttp 54564 125786967242432 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3258
+WARNING 2025-06-02 21:36:09,918 basehttp 54564 125786967242432 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-02 21:36:09,921 basehttp 54564 125786950457024 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-02 21:36:09,952 basehttp 54564 125786950457024 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-02 21:38:43,987 log 54564 125786950457024 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-02 21:38:43,987 basehttp 54564 125786950457024 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3258
+WARNING 2025-06-02 21:38:44,238 basehttp 54564 125786950457024 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-02 21:38:44,241 basehttp 54564 125786967242432 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-02 21:38:44,274 basehttp 54564 125786967242432 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-02 21:39:52,715 log 54564 125786967242432 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-02 21:39:52,716 basehttp 54564 125786967242432 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3258
+WARNING 2025-06-02 21:39:53,002 basehttp 54564 125786967242432 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-02 21:39:53,002 basehttp 54564 125786950457024 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-02 21:39:53,038 basehttp 54564 125786950457024 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+ERROR 2025-06-02 22:53:28,649 log 60841 125358439397056 Internal Server Error: /user/detail/2daa3ed2-ca7e-48a9-b288-698938d85d9e/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 220, in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 171, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/urls/base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/urls/resolvers.py", line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'create_training' with arguments '(2,)' not found. 1 pattern(s) tried: ['user/training/add/(?P<pk>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/\\Z']
+ERROR 2025-06-02 22:53:28,651 basehttp 60841 125358439397056 "GET /user/detail/2daa3ed2-ca7e-48a9-b288-698938d85d9e/ HTTP/1.1" 500 242162
+WARNING 2025-06-02 22:53:28,931 log 60841 125358439397056 Not Found: /favicon.ico
+WARNING 2025-06-02 22:53:28,931 basehttp 60841 125358439397056 "GET /favicon.ico HTTP/1.1" 404 3147
+ERROR 2025-06-02 22:53:52,663 log 60841 125358439397056 Internal Server Error: /user/detail/2daa3ed2-ca7e-48a9-b288-698938d85d9e/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 220, in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 171, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/urls/base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/urls/resolvers.py", line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'create_training' with arguments '(2,)' not found. 1 pattern(s) tried: ['user/training/add/(?P<pk>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/\\Z']
+ERROR 2025-06-02 22:53:52,665 basehttp 60841 125358439397056 "GET /user/detail/2daa3ed2-ca7e-48a9-b288-698938d85d9e/ HTTP/1.1" 500 242025
+WARNING 2025-06-02 22:54:48,198 log 60841 125358431004352 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-02 22:54:48,198 basehttp 60841 125358431004352 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3258
+WARNING 2025-06-02 22:54:48,451 basehttp 60841 125358431004352 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-02 22:54:48,451 basehttp 60841 125358208706240 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-02 22:54:48,484 basehttp 60841 125358439397056 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-02 22:55:13,840 log 60841 125358200313536 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-02 22:55:13,840 basehttp 60841 125358200313536 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3258
+WARNING 2025-06-02 22:55:13,975 basehttp 60841 125358200313536 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-02 22:55:14,005 basehttp 60841 125358217098944 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-02 22:55:14,126 basehttp 60841 125358191920832 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-02 22:56:18,706 log 60841 125358191920832 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-02 22:56:18,707 basehttp 60841 125358191920832 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3258
+WARNING 2025-06-02 22:56:18,723 basehttp 60841 125358191920832 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-02 22:56:18,735 basehttp 60841 125358191920832 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-02 22:56:18,743 basehttp 60841 125358191920832 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+ERROR 2025-06-02 22:56:57,971 log 60841 125358191920832 Internal Server Error: /user/training/add/2daa3ed2-ca7e-48a9-b288-698938d85d9e/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/utils/decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 178, in get
+    return super().get(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 142, in get
+    return self.render_to_response(self.get_context_data())
+                                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 49, in get_context_data
+    context = super().get_context_data(**kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 72, in get_context_data
+    kwargs["form"] = self.get_form()
+                     ^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 37, in get_form
+    return form_class(**self.get_form_kwargs())
+                        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 44, in get_form_kwargs
+    user = User.objects.get(slug=self.kwargs.get('slug'))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 633, in get
+    raise self.model.DoesNotExist(
+core.user.models.User.DoesNotExist: User matching query does not exist.
+ERROR 2025-06-02 22:56:57,973 basehttp 60841 125358191920832 "GET /user/training/add/2daa3ed2-ca7e-48a9-b288-698938d85d9e/ HTTP/1.1" 500 139307
+WARNING 2025-06-02 22:56:58,011 log 60841 125358191920832 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-02 22:56:58,012 basehttp 60841 125358191920832 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3258
+WARNING 2025-06-02 22:56:58,280 log 60841 125358191920832 Not Found: /favicon.ico
+WARNING 2025-06-02 22:56:58,280 basehttp 60841 125358191920832 "GET /favicon.ico HTTP/1.1" 404 3147
+ERROR 2025-06-02 22:57:57,470 log 61356 134083795482304 Internal Server Error: /user/training/add/2daa3ed2-ca7e-48a9-b288-698938d85d9e/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/utils/decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 178, in get
+    return super().get(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 142, in get
+    return self.render_to_response(self.get_context_data())
+                                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 49, in get_context_data
+    context = super().get_context_data(**kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 72, in get_context_data
+    kwargs["form"] = self.get_form()
+                     ^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 37, in get_form
+    return form_class(**self.get_form_kwargs())
+                        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 44, in get_form_kwargs
+    user = User.objects.get(slug=self.kwargs.get('slug'))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 633, in get
+    raise self.model.DoesNotExist(
+core.user.models.User.DoesNotExist: User matching query does not exist.
+ERROR 2025-06-02 22:57:57,472 basehttp 61356 134083795482304 "GET /user/training/add/2daa3ed2-ca7e-48a9-b288-698938d85d9e/ HTTP/1.1" 500 139434
+ERROR 2025-06-02 22:58:27,938 log 61391 127141811320512 Internal Server Error: /user/training/add/2daa3ed2-ca7e-48a9-b288-698938d85d9e/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/utils/decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 178, in get
+    return super().get(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 142, in get
+    return self.render_to_response(self.get_context_data())
+                                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 49, in get_context_data
+    context = super().get_context_data(**kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 72, in get_context_data
+    kwargs["form"] = self.get_form()
+                     ^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 37, in get_form
+    return form_class(**self.get_form_kwargs())
+                        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 44, in get_form_kwargs
+    user = User.objects.get(slug=self.kwargs.get('slug'))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 633, in get
+    raise self.model.DoesNotExist(
+core.user.models.User.DoesNotExist: User matching query does not exist.
+ERROR 2025-06-02 22:58:27,941 basehttp 61391 127141811320512 "GET /user/training/add/2daa3ed2-ca7e-48a9-b288-698938d85d9e/ HTTP/1.1" 500 139336
+ERROR 2025-06-02 23:00:16,911 log 61493 139125443262144 Internal Server Error: /user/training/add/2daa3ed2-ca7e-48a9-b288-698938d85d9e/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/utils/decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 178, in get
+    return super().get(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 142, in get
+    return self.render_to_response(self.get_context_data())
+                                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 49, in get_context_data
+    context = super().get_context_data(**kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 72, in get_context_data
+    kwargs["form"] = self.get_form()
+                     ^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 37, in get_form
+    return form_class(**self.get_form_kwargs())
+                        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 44, in get_form_kwargs
+    user = User.objects.get(slug=self.kwargs.get('slug'))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 633, in get
+    raise self.model.DoesNotExist(
+core.user.models.User.DoesNotExist: User matching query does not exist.
+ERROR 2025-06-02 23:00:16,912 basehttp 61493 139125443262144 "GET /user/training/add/2daa3ed2-ca7e-48a9-b288-698938d85d9e/ HTTP/1.1" 500 139336
+ERROR 2025-06-02 23:02:18,963 log 61553 134913546254016 Internal Server Error: /user/training/add/2daa3ed2-ca7e-48a9-b288-698938d85d9e/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/utils/decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 178, in get
+    return super().get(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 142, in get
+    return self.render_to_response(self.get_context_data())
+                                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 50, in get_context_data
+    context = super().get_context_data(**kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 72, in get_context_data
+    kwargs["form"] = self.get_form()
+                     ^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 37, in get_form
+    return form_class(**self.get_form_kwargs())
+                        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 44, in get_form_kwargs
+    user = User.objects.get(slug=self.kwargs.get('slug'))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 633, in get
+    raise self.model.DoesNotExist(
+core.user.models.User.DoesNotExist: User matching query does not exist.
+ERROR 2025-06-02 23:02:18,964 basehttp 61553 134913546254016 "GET /user/training/add/2daa3ed2-ca7e-48a9-b288-698938d85d9e/ HTTP/1.1" 500 139272
+ERROR 2025-06-02 23:02:59,791 log 61598 125004310116032 Internal Server Error: /user/training/add/2daa3ed2-ca7e-48a9-b288-698938d85d9e/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/utils/decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 178, in get
+    return super().get(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 142, in get
+    return self.render_to_response(self.get_context_data())
+                                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 53, in get_context_data
+    user = User.objects.get(slug=self.kwargs.get('slug'))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 633, in get
+    raise self.model.DoesNotExist(
+core.user.models.User.DoesNotExist: User matching query does not exist.
+ERROR 2025-06-02 23:02:59,794 basehttp 61598 125004310116032 "GET /user/training/add/2daa3ed2-ca7e-48a9-b288-698938d85d9e/ HTTP/1.1" 500 126798
+WARNING 2025-06-02 23:03:59,315 log 61689 137527583307456 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-02 23:03:59,316 basehttp 61689 137527583307456 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3258
+WARNING 2025-06-02 23:03:59,516 basehttp 61689 137527583307456 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-02 23:03:59,519 basehttp 61689 137527574914752 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-02 23:03:59,558 basehttp 61689 137527574914752 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-02 23:10:08,201 log 61689 137527574914752 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-02 23:10:08,201 basehttp 61689 137527574914752 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3258
+WARNING 2025-06-02 23:10:08,443 basehttp 61689 137527574914752 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-02 23:10:08,443 basehttp 61689 137527583307456 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-02 23:10:08,505 basehttp 61689 137527574914752 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-02 23:14:47,472 log 61689 137527549736640 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-02 23:14:47,472 basehttp 61689 137527549736640 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3258
+WARNING 2025-06-02 23:14:47,766 basehttp 61689 137527549736640 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-02 23:14:47,767 basehttp 61689 137527558129344 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-02 23:14:47,808 basehttp 61689 137527566522048 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-02 23:16:14,277 log 61689 137527574914752 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-02 23:16:14,277 basehttp 61689 137527574914752 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3258
+WARNING 2025-06-02 23:16:14,317 basehttp 61689 137527574914752 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-02 23:16:14,332 basehttp 61689 137527201625792 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-02 23:16:14,333 basehttp 61689 137527583307456 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188

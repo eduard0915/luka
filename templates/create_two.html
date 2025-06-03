@@ -29,7 +29,7 @@
                     {% if forloop.first %}
                         <div class="row">
                     {% endif %}
-                <div class="col-md-4">
+                <div class="col-md-3">
                     {% if field.name == 'groups' or field.name == 'is_active' %}
                         <div class="input-group input-group-static mb-4">
                             <label class="form-label mt-5 ms-0">
@@ -38,34 +38,18 @@
                             {{ field }}
                         </div>
                     {% else %}
-                        <div {% if field.name == 'photo' or field.name == 'companyLogo' %}
+                        <div {% if field.name == 'photo' or field.name == 'company_logo' %}
                             class="fileinput fileinput-new text-center" data-provides="fileinput"
                             {% else %}class="input-group input-group-outline my-3" {% endif %}>
-                            {% if field.name == 'photo' or field.name == 'companyLogo' %}
-                                <div class="fileinput-preview fileinput-exists thumbnail"></div>
-                                <div>
-                                    <span class="btn btn-rose btn-round btn-file">
-                                            <span class="fileinput-new">Seleccionar imagen</span>
-                                            <span class="fileinput-exists">Cambiar</span>
-                                            {{ field }}
-                                        </span>
-                                    {% if field.help_text %}
-                                        <sub>*{{ field.help_text }}</sub>
-                                    {% endif %}
-                                    <a href="#" class="btn btn-danger btn-round fileinput-exists"
-                                       data-dismiss="fileinput"><i class="fa fa-times"></i> Eliminar</a>
-                                </div>
-                            {% else %}
                                 <label for=id_{{ field.name }} class="form-label ms-0">
                                     {{ field.label }}{% if field.field.required %}*{% endif %}
                                 </label>
                                 {{ field }}
                                 </div>
                                 </div>
-                            {% endif %}
                     {% endif %}
                 {% if forloop.last %}
-                {% elif forloop.counter|divisibleby:3 %}
+                {% elif forloop.counter|divisibleby:4 %}
                     </div>
                     <div class="row">
                 {% endif %}

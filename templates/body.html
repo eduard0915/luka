@@ -27,6 +27,8 @@
         </div>
     </main>
 
+     <div class="modal fade" id="modal_template" tabindex="-1" role="dialog" aria-labelledby="modal_template" aria-hidden="true"></div>
+
     <!--   Core JS Files   -->
     <script src="{% static 'lib/material-dashboard-pro/assets/js/core/popper.min.js' %}"></script>
     <script src="{% static 'lib/material-dashboard-pro/assets/js/core/bootstrap.min.js' %}"></script>
@@ -65,7 +67,16 @@
             }
         }
     </script>
-    
+    <script type="application/javascript">
+
+        function open_modal(url) {
+            $('#modal_template').load(url, function () {
+                $(this).modal('show');
+            });
+        }
+    </script>
+
+
     {% block scripts_detail %}
         
     	
