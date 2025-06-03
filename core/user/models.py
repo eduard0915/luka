@@ -68,3 +68,39 @@ class PasswordHistoryUser(models.Model):
     def remember_password(cls, user):
         if user:
             cls(username=user, old_pass=user.password, pass_date=localtime()).save()
+
+
+# Competencias
+class Competence(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    description_competence = models.CharField(max_length=200, verbose_name='Descripción')
+    institution = models.CharField(max_length=200, verbose_name='Institución')
+    date_competence = models.DateField(verbose_name='Fecha Certificación')
+    support_competence = models.FileField(upload_to='competence/%Y%m%d', verbose_name='Soporte')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='')
+
+    def __str__(self):
+        return str(self.description_competence)
+
+    class Meta:
+        verbose_name = 'Competence'
+        verbose_name_plural = 'Competences'
+        db_table = 'Competence'
+
+
+# Capacitaciones
+class Training(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    description_training = models.CharField(max_length=120, verbose_name='Capacitación')
+    training_by = models.CharField(max_length=200, verbose_name='Realizado por')
+    date_training = models.DateField(verbose_name='Fecha')
+    support_training = models.FileField(upload_to='support_training/%Y%m%d', verbose_name='Soporte')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='')
+
+    def __str__(self):
+        return str(self.description_training)
+
+    class Meta:
+        verbose_name = 'Training'
+        verbose_name_plural = 'Trainings'
+        db_table = 'Training'

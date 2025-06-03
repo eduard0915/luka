@@ -48,7 +48,7 @@ $(document).ready(function($) {
                 targets: [3],
                 class: 'td-actions text-center',
                 render: function (data, type, row) {
-                    return '<span class="badge bg-gradient-info">' + row['groups__name'] + '</span>'
+                    return '<span class="text-info">' + row['groups__name'] + '</span>'
                 }
             },
             {
@@ -58,10 +58,10 @@ $(document).ready(function($) {
                     let estado = null;
                     switch (row['is_active']) {
                         case true:
-                            estado = 'Activo'
+                            return '<span class="badge badge-sm badge-success">' + 'Activo' + '</span>';
                             break;
                         case false:
-                            estado = 'Inactivo'
+                            return '<span class="badge badge-sm badge-danger">' + 'InActivo' + '</span>';
                             break;
                     }
                     return estado;
@@ -73,7 +73,8 @@ $(document).ready(function($) {
                 orderable: false,
                 render: function (data, type, row) {
                     let actions
-                    actions = '<a href="/user/detail/' + row['slug'] + '/" type="button" title="Detalle Perfil"><i class="fa-solid fa-user-check text-warning"></i></a>  &nbsp';
+                    actions = '<a href="/user/detail/' + row['slug'] + '/" type="button" title="Detalle Perfil"><i class="fa-solid fa-user-check text-info"></i></a> &nbsp';
+                    actions += '<a href="/user/update/' + row['slug'] + '/" type="button" title="Editar"><i class="fa-solid fa-user-edit text-warning"></i></a> &nbsp';
                     actions += '<a href="/user/update-password/' + row['slug'] + '/" type="button" title="Resetear Contraseña"><i class="fa-solid fa-lock text-success"></i></a>';
                     return actions
                 }

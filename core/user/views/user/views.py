@@ -17,7 +17,7 @@ from core.user.models import User
 class UserCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
     model = User
     form_class = UserForm
-    template_name = 'create_user.html'
+    template_name = 'user/create_user.html'
     success_url = reverse_lazy('user:user_list')
     permission_required = 'user.add_user'
     url_redirect = success_url
@@ -50,14 +50,14 @@ class UserCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Create
         context['list_url'] = self.success_url
         context['action'] = 'add'
         context['entity'] = 'Creación de Usuario'
-        context['div'] = 8
+        context['div'] = '10'
         return context
 
 
 # Listado de usuarios
 class UserListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
     model = User
-    template_name = 'list_user.html'
+    template_name = 'user/list_user.html'
     permission_required = 'user.add_user'
 
     @method_decorator(csrf_exempt)
@@ -97,5 +97,67 @@ class UserListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView
         context['create_url'] = reverse_lazy('user:user_create')
         context['list_url'] = reverse_lazy('user:user_list')
         context['entity'] = 'Usuarios'
-        context['div'] = '12'
+        context['div'] = '10'
+        return context
+
+
+# Edición de usuario por Administrador
+class UserUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    model = User
+    form_class = UserUpdateForm
+    template_name = 'user/create_user.html'
+    success_url = reverse_lazy('user:user_list')
+    permission_required = 'user.change_user'
+    url_redirect = success_url
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'edit':
+                form = self.get_form()
+                if form.is_valid():
+                    form.save()
+                    name_username = form.cleaned_data.get('username')
+                    messages.success(request, f'Usuario "{name_username}" actualizado satisfactoriamente!')
+                else:
+                    messages.error(request, form.errors)
+            else:
+                data['error'] = 'No ha ingresado datos en los campos'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Edición de Usuarios'
+        context['list_url'] = self.success_url
+        context['entity'] = 'Editar Usuario'
+        context['action'] = 'edit'
+        # context['users'] = User.objects.all()
+        return context
+
+
+# Detalle de Usuario por administrador
+class UserDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    model = User
+    template_name = 'user/detail_user.html'
+    permission_required = 'user.change_user'
+
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return super(UserDetailView, self).get_queryset()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Perfil de Usuario'
+        context['entity'] = 'Perfil de Usuario'
+        context['group_user'] = User.objects.values('groups__name').filter(slug=self.kwargs['slug'])
         return context
