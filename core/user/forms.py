@@ -112,7 +112,7 @@ class UserUpdateForm(ModelForm):
 # Creación de capacitación
 class TrainingForm(ModelForm):
     def __init__(self, *args, **kwargs):
-        # self.user = kwargs.pop('user')
+        self.user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -121,10 +121,10 @@ class TrainingForm(ModelForm):
         model = Training
         fields = ['description_training', 'training_by', 'date_training', 'support_training']
         widgets = {
-            'description_training': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'training_by': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'support_training': FileInput(attrs={'class': 'form-control-file'}),
-            'date_training': DateInput(attrs={'class': 'form-control'})
+            'description_training': TextInput(attrs={'class': 'form-control', 'required': True, 'type': 'text'}),
+            'training_by': TextInput(attrs={'class': 'form-control', 'required': True, 'type': 'text'}),
+            'support_training': FileInput(attrs={'class': 'form-control', 'type': 'file'}),
+            'date_training': DateInput(attrs={'class': 'form-control', 'type': 'date'})
 
         }
 
@@ -134,7 +134,7 @@ class TrainingForm(ModelForm):
         try:
             if form.is_valid():
                 data = form.save(commit=False)
-                # data.user_id = self.user.id
+                data.user_id = self.user.id
                 data.save()
             else:
                 data['error'] = form.errors

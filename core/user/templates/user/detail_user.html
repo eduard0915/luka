@@ -36,27 +36,26 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="row mt-3">
-                    <div class="col-12 col-md-6 col-xl-3 pe-0">
-                        <div class="card card-plain h-100">
-                            <div class="card-header pb-0 p-3">
-                                <div class="row">
-                                    <div class="col-md-8 d-flex align-items-center">
-                                        <h6 class="mb-0">Información de Usuario</h6>
-                                    </div>
-                                    <div class="col-md-4 text-end">
-                                        <a href="#">
-                                            <i class="fas fa-user-edit text-secondary text-sm" data-bs-toggle="tooltip"
-                                               data-bs-placement="top" title="Editar Perfil"></i>
-                                        </a>
-                                    </div>
+            <div class="row mt-3">
+                <div class="col-12 col-md-6 col-xl-3 pe-0">
+                    <div class="card card-plain h-100">
+                        <div class="card-header pb-0 p-3">
+                            <div class="row">
+                                <div class="col-md-8 d-flex align-items-center">
+                                    <h6 class="mb-0">Información de Usuario</h6>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <a href="#">
+                                        <i class="fas fa-user-edit text-secondary text-sm" data-bs-toggle="tooltip"
+                                           data-bs-placement="top" title="Editar Perfil"></i>
+                                    </a>
                                 </div>
                             </div>
                             <div class="card-body p-3">
                                 <ul class="list-group">
                                     <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">
-                                        Usuario:</strong> &nbsp; {{ object.username}}
+                                        Usuario:</strong> &nbsp; {{ object.username }}
+                                    </li>
                                     <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">
                                         Email:</strong> &nbsp; {{ object.email }}
                                     </li>
@@ -75,25 +74,26 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-md-6 col-xl-5 pe-0">
-                        <div class="card card-plain h-100">
-                            <div class="card-header pb-0 p-3">
-                                <div class="row">
-                                    <div class="col-md-8 d-flex align-items-center">
-                                        <h6 class="mb-0">Capacitaciones</h6>
-                                    </div>
-                                    <div class="col-md-4 text-end">
-                                        <a onclick="open_modal('{% url 'user:create_training' object.slug %}')">
-                                            <i class="fa-solid fa-user-graduate text-secondary text-sm" data-bs-toggle="tooltip"
-                                               data-bs-placement="top" title="Registrar Capacitación"></i>
-                                        </a>
-                                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-5 pe-0">
+                    <div class="card card-plain h-100">
+                        <div class="card-header pb-0 p-3">
+                            <div class="row">
+                                <div class="col-md-8 d-flex align-items-center">
+                                    <h6 class="mb-0">Capacitaciones</h6>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <a onclick="open_modal('{% url 'user:create_training' object.slug %}')">
+                                        <i class="fa-solid fa-user-graduate text-secondary text-sm"
+                                           data-bs-toggle="tooltip"
+                                           data-bs-placement="top" title="Registrar Capacitación"></i>
+                                    </a>
                                 </div>
                             </div>
                             <div class="card-body p-1">
                                 <div class="card">
                                     <div class="table-responsive">
-                                        <table class="table align-items-center mb-0">
+                                        <table class="table align-items-center mb-0" id="data_0">
                                             <thead>
                                             <tr>
                                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
@@ -112,31 +112,42 @@
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex px-2 py-1">
-                                                        <div class="d-flex flex-column justify-content-center">
-                                                            <h6 class="mb-0 text-xs">Developer software</h6>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <a href="#"><i class="fa-solid fa-file-pdf text-danger"></i></a>
-                                                </td>
-                                                <td class="align-middle text-center text-sm">
-                                                    <p class="text-xs text-secondary mb-0">John Michael Alviz</p>
-                                                </td>
-                                                <td class="align-middle text-center">
-                                                    <span class="text-secondary text-xs font-weight-normal">23/04/18</span>
-                                                </td>
-                                                <td class="align-middle">
-                                                    <a href="#"
-                                                       class="text-secondary font-weight-normal text-xs"
-                                                       data-toggle="tooltip" data-original-title="Editar">
-                                                        Edit
-                                                    </a>
-                                                </td>
-                                            </tr>
+                                            {% if training %}
+                                                {% for foo in training %}
+                                                    <tr>
+                                                        <td>
+                                                            <div class="d-flex px-2 py-1">
+                                                                <div class="d-flex flex-column justify-content-center">
+                                                                    <h6 class="mb-0 text-xs">{{ foo.description_training }}</h6>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <a href="#"><i class="fa-solid fa-file-pdf text-danger"></i></a>
+                                                        </td>
+                                                        <td class="align-middle text-center text-sm">
+                                                            <p class="text-xs text-secondary mb-0">{{ foo.training_by }}</p>
+                                                        </td>
+                                                        <td class="align-middle text-center">
+                                                            <span class="text-secondary text-xs font-weight-normal">{{ foo.date_training | date:'Y-m-d' }}</span>
+                                                        </td>
+                                                        <td class="align-middle">
+                                                            <a href="#"
+                                                               class="text-secondary font-weight-normal text-xs"
+                                                               data-toggle="tooltip" data-original-title="Eliminar">
+                                                                <i class="fas fa-trash text-danger text-sm m-2"></i>
+                                                            </a>
+                                                            <a href="#"
+                                                               class="text-secondary font-weight-normal text-xs"
+                                                               data-toggle="tooltip" data-original-title="Editar">
+                                                                <i class="fas fa-edit text-warning text-sm"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            {% else %}
+                                                Sin capacitaciones registradas
+                                            {% endif %}
                                             </tbody>
                                         </table>
                                     </div>
@@ -144,66 +155,67 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-md-6 col-xl-4 pe-0">
-                        <div class="card card-plain h-100">
-                            <div class="card-header pb-0 p-3">
-                                <div class="row">
-                                    <div class="col-md-8 d-flex align-items-center">
-                                        <h6 class="mb-0">Competencias</h6>
-                                    </div>
-                                    <div class="col-md-4 text-end">
-                                        <a onclick="open_modal('{% url 'user:create_training' object.slug %}')">
-                                            <i class="fa-solid fa-graduation-cap text-secondary text-sm"
-                                               data-bs-toggle="tooltip"
-                                               data-bs-placement="top" title="Registrar Capacitación"></i>
-                                        </a>
-                                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4 pe-0">
+                    <div class="card card-plain h-100">
+                        <div class="card-header pb-0 p-3">
+                            <div class="row">
+                                <div class="col-md-8 d-flex align-items-center">
+                                    <h6 class="mb-0">Competencias</h6>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <!-- Competencies functionality not implemented yet -->
+                                    <a href="#" class="disabled" title="Funcionalidad no implementada">
+                                        <i class="fa-solid fa-graduation-cap text-secondary text-sm"
+                                           data-bs-toggle="tooltip"
+                                           data-bs-placement="top" title="Registrar Competencia (No implementado)"></i>
+                                    </a>
                                 </div>
                             </div>
-                            <div class="card-body p-1">
-                                <div class="card">
-                                    <div class="table-responsive">
-                                        <table class="table align-items-center mb-0">
-                                            <thead>
-                                            <tr>
-                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                                    Descripción
-                                                </th>
-                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
-                                                    Ver
-                                                </th>
-                                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                                    Institución
-                                                </th>
-                                                <th class="text-secondary opacity-7"></th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex px-2 py-1">
-                                                        <div class="d-flex flex-column justify-content-center">
-                                                            <h6 class="mb-0 text-xs">Developer software</h6>
-                                                        </div>
+                        </div>
+                        <div class="card-body p-1">
+                            <div class="card">
+                                <div class="table-responsive">
+                                    <table class="table align-items-center mb-0">
+                                        <thead>
+                                        <tr>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                Descripción
+                                            </th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
+                                                Ver
+                                            </th>
+                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                Institución
+                                            </th>
+                                            <th class="text-secondary opacity-7"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex px-2 py-1">
+                                                    <div class="d-flex flex-column justify-content-center">
+                                                        <h6 class="mb-0 text-xs">Developer software</h6>
                                                     </div>
-                                                </td>
-                                                <td>
-                                                    <a href="#"><i class="fa-solid fa-file-pdf text-danger"></i></a>
-                                                </td>
-                                                <td class="align-middle text-center text-sm">
-                                                    <p class="text-xs text-secondary mb-0">John Michael Alviz</p>
-                                                </td>
-                                                <td class="align-middle">
-                                                    <a href="#"
-                                                       class="text-secondary font-weight-normal text-xs"
-                                                       data-toggle="tooltip" data-original-title="Editar">
-                                                        Edit
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <a href="#"><i class="fa-solid fa-file-pdf text-danger"></i></a>
+                                            </td>
+                                            <td class="align-middle text-center text-sm">
+                                                <p class="text-xs text-secondary mb-0">John Michael Alviz</p>
+                                            </td>
+                                            <td class="align-middle">
+                                                <a href="#"
+                                                   class="text-secondary font-weight-normal text-xs"
+                                                   data-toggle="tooltip" data-original-title="Editar">
+                                                    Edit
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -213,12 +225,83 @@
         </div>
     </div>
 
-
-
 {% endblock %}
 
 {% block scripts_detail %}
 
+    <script>
+        // Initialize tooltips
+        document.addEventListener("DOMContentLoaded", function () {
+            // Inicializar tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
 
+            // Inicializar DataTable con la variable global
+            try {
+                if (typeof DataTable === 'function') {
+                    new DataTable('#data_0', {
+                        responsive: true,
+                        autoWidth: false,
+                        info: false,
+                        pageLength: 5,
+                        lengthMenu: [5, 10, 25, 50, 75, 100],
+                        order: [[3, 'desc']],
+                        language: {
+                            "emptyTable": "No hay información",
+                            "info": "Mostrando _START_ a _END_ de _TOTAL_ Registros",
+                            "infoEmpty": "Mostrando 0 to 0 of 0 Registros",
+                            "infoFiltered": "(Filtrado de _MAX_ total Registros)",
+                            "lengthMenu": "Mostrar _MENU_ Registros",
+                            "loadingRecords": "Cargando...",
+                            "processing": "Procesando...",
+                            "search": "Buscar:",
+                            "zeroRecords": "Sin resultados encontrados",
+                        }
+                    });
+                } else {
+                    console.error('La función DataTable no está disponible');
+                }
+            } catch (error) {
+                console.error('Error al inicializar DataTable:', error);
+            }
+        });
+
+        // Handle form submission in modal using vanilla JavaScript
+        document.addEventListener('submit', function (e) {
+            // Check if the form is inside a modal
+            if (e.target.closest('.modal') && e.target.tagName === 'FORM') {
+                e.preventDefault();
+                var form = e.target;
+                var url = form.getAttribute('action');
+                var data = new FormData(form);
+
+                // Use fetch API instead of $.ajax
+                fetch(url, {
+                    method: 'POST',
+                    body: data
+                })
+                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.hasOwnProperty('error')) {
+                            // Close modal using Bootstrap 5 syntax
+                            var modalElement = document.getElementById('modal_template');
+                            var modalInstance = bootstrap.Modal.getInstance(modalElement);
+                            modalInstance.hide();
+                            // Reload page to show new data
+                            location.reload();
+                        } else {
+                            // Show error message
+                            alert(response.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error en el envío del formulario');
+                    });
+            }
+        });
+    </script>
 
 {% endblock %}
