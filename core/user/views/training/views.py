@@ -39,20 +39,16 @@ class TrainingCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cr
             data['error'] = str(e)
         return JsonResponse(data)
 
-    # def get_form_kwargs(self):
-    #     kwargs = super().get_form_kwargs()
-    #     user = User.objects.get(slug=self.kwargs.get('slug'))
-    #     print(user)
-    #     kwargs.update({'user': user})
-    #     return kwargs
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        user = User.objects.get(slug=self.kwargs.get('pk'))
+        kwargs.update({'user': user})
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
-        context['entity'] = 'Registro de Capacitación'
-        # user = User.objects.get(slug=self.kwargs.get('slug'))
-
-        # context['field_number'] = 4
-        # context['field_width'] = 3
-        # context['act'] = reverse_lazy('user:create_training', kwargs={'pk': user.slug})
+        context['title'] = 'Registro de Capacitación'
+        user = User.objects.get(slug=self.kwargs.get('pk'))
+        context['user'] = user
         return context

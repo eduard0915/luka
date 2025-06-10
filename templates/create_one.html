@@ -38,10 +38,11 @@
                             {{ field }}
                         </div>
                     {% else %}
-                        <div {% if field.name == 'photo' or field.name == 'companyLogo' %}
-                            class="fileinput fileinput-new text-center" data-provides="fileinput"
-                            {% else %}class="input-group input-group-outline my-3" {% endif %}>
-                            {% if field.name == 'photo' or field.name == 'companyLogo' %}
+{#                        <div class="{% if field.field.widget.input_type == 'file' %}input-group custom-file-button#}
+{#                        {% elif field.field.widget.input_type == 'date' %}input-group input-group-static my-3#}
+{#                        {% else %}input-group input-group-outline my-3{% endif %}">#}
+                        {% if field.name == 'photo' or field.name == 'companyLogo' %}
+                            <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                                 <div class="fileinput-preview fileinput-exists thumbnail"></div>
                                 <div>
                                     <span class="btn btn-rose btn-round btn-file">
@@ -55,13 +56,26 @@
                                     <a href="#" class="btn btn-danger btn-round fileinput-exists"
                                        data-dismiss="fileinput"><i class="fa fa-times"></i> Eliminar</a>
                                 </div>
-                            {% else %}
-                                <label for=id_{{ field.name }} class="form-label ms-0">
+                            </div>
+                            {% elif field.field.widget.input_type == 'file' %}
+                            <div class="file-input-div">
+                                <label for="id_{{ field.name }}" class="file-input-label">
                                     {{ field.label }}{% if field.field.required %}*{% endif %}
                                 </label>
                                 {{ field }}
-                                </div>
-                                </div>
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                            </div>
+                            </div>
+                            {% else %}
+                            <div class="input-group input-group-outline my-3">
+                                <label for="id_{{ field.name }}" class="form-label ms-0">
+                                    {{ field.label }}{% if field.field.required %}*{% endif %}
+                                </label>
+                                {{ field }}
+                            </div>
+                            </div>
                             {% endif %}
                     {% endif %}
                 {% if forloop.last %}

@@ -3,7 +3,7 @@
 
 
 {% block body %}
-    
+
     <body class="g-sidenav-show  bg-gray-100">
 
     {% include 'sidebar.html' %}
@@ -15,6 +15,34 @@
         <div class="container-fluid py-2">
             <div class="row">
                 <div class="col-{{ div }}">
+                    {% if messages %}
+                        {% for message in messages %}
+{#                            <div id="message" class="alert alert-{{ message.tags }}" role="alert">#}
+{#                                {{ message }}#}
+{#                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">#}
+{#                                    <span aria-hidden="true">&times;</span>#}
+{#                                </button>#}
+{#                            </div>#}
+                            <div id="message" class="alert alert-{{ message.tags }} alert-dismissible text-white fade show" role="alert">
+                                <span class="alert-text">
+                                    <strong>
+                                        {% if message.tags == 'success' %}
+                                            <i class="fas fa-check"></i>
+                                        {% elif message.tags == 'error' %}
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        {% elif message.tags == 'warning' %}
+                                            <i class="fas fa-exclamation-circle"></i>
+                                        {% else %}
+                                            <i class="fas fa-info-circle"></i>
+                                        {% endif %}
+                                    </strong>
+                                    {{ message }}</span>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
                     {% block content %}
 
 
@@ -30,6 +58,7 @@
      <div class="modal fade" id="modal_template" tabindex="-1" role="dialog" aria-labelledby="modal_template" aria-hidden="true"></div>
 
     <!--   Core JS Files   -->
+    <script src="{% static 'lib/jquery-3.7.1/jquery-3.7.1.min.js' %}"></script>
     <script src="{% static 'lib/material-dashboard-pro/assets/js/core/popper.min.js' %}"></script>
     <script src="{% static 'lib/material-dashboard-pro/assets/js/core/bootstrap.min.js' %}"></script>
     <script src="{% static 'lib/material-dashboard-pro/assets/js/plugins/perfect-scrollbar.min.js' %}"></script>
@@ -68,18 +97,28 @@
         }
     </script>
     <script type="application/javascript">
-
         function open_modal(url) {
-            $('#modal_template').load(url, function () {
-                $(this).modal('show');
-            });
+            // Use vanilla JavaScript instead of jQuery
+            fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('modal_template').innerHTML = html;
+                    // Bootstrap 5 way to initialize and show modal
+                    var modalElement = document.getElementById('modal_template');
+                    var modalInstance = new bootstrap.Modal(modalElement, {
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    modalInstance.show();
+                })
+                .catch(error => console.error('Error loading modal:', error));
         }
     </script>
 
 
     {% block scripts_detail %}
-        
-    	
+
+
     {% endblock %}
 
     </body>
