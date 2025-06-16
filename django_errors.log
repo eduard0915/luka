@@ -2102,3 +2102,720 @@ WARNING 2025-06-10 00:39:10,939 basehttp 34954 139566543521472 "GET /.well-known
 WARNING 2025-06-10 00:39:11,084 basehttp 34954 139566543521472 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
 WARNING 2025-06-10 00:39:11,097 basehttp 34954 139566535128768 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
 WARNING 2025-06-10 00:39:11,153 basehttp 34954 139566560306880 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-11 21:32:07,234 basehttp 21695 124945589860032 "GET /static/lib/material-dashboard-pro/assets/img/favicon.png HTTP/1.1" 404 2074
+ERROR 2025-06-11 22:00:47,218 log 24051 133878146660032 Internal Server Error: /start/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/urls/base.py", line 81, in reverse
+    extra, resolver = resolver.namespace_dict[ns]
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^
+KeyError: 'company'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 220, in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 171, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 210, in render
+    return template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 173, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/urls/base.py", line 92, in reverse
+    raise NoReverseMatch("%s is not a registered namespace" % key)
+django.urls.exceptions.NoReverseMatch: 'company' is not a registered namespace
+ERROR 2025-06-11 22:00:47,220 basehttp 24051 133878146660032 "GET /start/ HTTP/1.1" 500 254816
+ERROR 2025-06-11 22:01:45,267 log 24392 134929643992768 Internal Server Error: /start/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/urls/base.py", line 81, in reverse
+    extra, resolver = resolver.namespace_dict[ns]
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^
+KeyError: 'company'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 220, in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 171, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 210, in render
+    return template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 173, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/urls/base.py", line 92, in reverse
+    raise NoReverseMatch("%s is not a registered namespace" % key)
+django.urls.exceptions.NoReverseMatch: 'company' is not a registered namespace
+ERROR 2025-06-11 22:01:45,269 basehttp 24392 134929643992768 "GET /start/ HTTP/1.1" 500 254816
+ERROR 2025-06-11 22:02:23,889 log 24472 131075888117440 Internal Server Error: /start/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/urls/base.py", line 81, in reverse
+    extra, resolver = resolver.namespace_dict[ns]
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^
+KeyError: 'company'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 220, in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 171, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 210, in render
+    return template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 173, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/urls/base.py", line 92, in reverse
+    raise NoReverseMatch("%s is not a registered namespace" % key)
+django.urls.exceptions.NoReverseMatch: 'company' is not a registered namespace
+ERROR 2025-06-11 22:02:23,891 basehttp 24472 131075888117440 "GET /start/ HTTP/1.1" 500 254816
+ERROR 2025-06-11 22:05:04,273 log 24591 133807323739840 Internal Server Error: /company/add/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "Company" does not exist
+LINE 1: ...."company_city", "Company"."company_country" FROM "Company" ...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/company/views/company/views.py", line 26, in dispatch
+    company = Company.objects.first()
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 1104, in first
+    for obj in queryset[:1]:
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 384, in __iter__
+    self._fetch_all()
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 1945, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "Company" does not exist
+LINE 1: ...."company_city", "Company"."company_country" FROM "Company" ...
+                                                             ^
+
+ERROR 2025-06-11 22:05:04,275 basehttp 24591 133807323739840 "GET /company/add/ HTTP/1.1" 500 145115
+ERROR 2025-06-11 22:07:06,866 log 24922 139085091960512 Internal Server Error: /company/add/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "Company" does not exist
+LINE 1: SELECT 1 AS "a" FROM "Company" LIMIT 1
+                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/company/views/company/views.py", line 26, in dispatch
+    if Company.objects.exists():
+       ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 1294, in exists
+    return self.query.has_results(using=self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 674, in has_results
+    return compiler.has_results()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1591, in has_results
+    return bool(self.execute_sql(SINGLE))
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "Company" does not exist
+LINE 1: SELECT 1 AS "a" FROM "Company" LIMIT 1
+                             ^
+
+ERROR 2025-06-11 22:07:06,868 basehttp 24922 139085091960512 "GET /company/add/ HTTP/1.1" 500 137019
+ERROR 2025-06-11 22:11:05,895 log 26040 135504953603776 Internal Server Error: /company/add/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "Company" does not exist
+LINE 1: SELECT 1 AS "a" FROM "Company" LIMIT 1
+                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/company/views/company/views.py", line 26, in dispatch
+    if Company.objects.exists():
+       ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 1294, in exists
+    return self.query.has_results(using=self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 674, in has_results
+    return compiler.has_results()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1591, in has_results
+    return bool(self.execute_sql(SINGLE))
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "Company" does not exist
+LINE 1: SELECT 1 AS "a" FROM "Company" LIMIT 1
+                             ^
+
+ERROR 2025-06-11 22:11:05,897 basehttp 26040 135504953603776 "GET /company/add/ HTTP/1.1" 500 136993
+ERROR 2025-06-11 22:11:07,802 log 26040 135504953603776 Internal Server Error: /company/add/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "Company" does not exist
+LINE 1: SELECT 1 AS "a" FROM "Company" LIMIT 1
+                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/company/views/company/views.py", line 26, in dispatch
+    if Company.objects.exists():
+       ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 1294, in exists
+    return self.query.has_results(using=self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 674, in has_results
+    return compiler.has_results()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1591, in has_results
+    return bool(self.execute_sql(SINGLE))
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "Company" does not exist
+LINE 1: SELECT 1 AS "a" FROM "Company" LIMIT 1
+                             ^
+
+ERROR 2025-06-11 22:11:07,803 basehttp 26040 135504953603776 "GET /company/add/ HTTP/1.1" 500 136993
+ERROR 2025-06-11 22:11:16,964 log 26094 140665782531776 Internal Server Error: /company/add/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "Company" does not exist
+LINE 1: SELECT 1 AS "a" FROM "Company" LIMIT 1
+                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/company/views/company/views.py", line 26, in dispatch
+    if Company.objects.exists():
+       ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 1294, in exists
+    return self.query.has_results(using=self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 674, in has_results
+    return compiler.has_results()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1591, in has_results
+    return bool(self.execute_sql(SINGLE))
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "Company" does not exist
+LINE 1: SELECT 1 AS "a" FROM "Company" LIMIT 1
+                             ^
+
+ERROR 2025-06-11 22:11:16,966 basehttp 26094 140665782531776 "GET /company/add/ HTTP/1.1" 500 136993
+WARNING 2025-06-11 22:26:42,022 base 30192 140184135923392 Method Not Allowed (GET): /login/logout/
+WARNING 2025-06-11 22:26:42,023 log 30192 140184135923392 Method Not Allowed: /login/logout/
+WARNING 2025-06-11 22:26:42,023 basehttp 30192 140184135923392 "GET /login/logout/ HTTP/1.1" 405 0
+WARNING 2025-06-11 22:26:48,321 base 30192 140184135923392 Method Not Allowed (GET): /login/logout/
+WARNING 2025-06-11 22:26:48,322 log 30192 140184135923392 Method Not Allowed: /login/logout/
+WARNING 2025-06-11 22:26:48,323 basehttp 30192 140184135923392 "GET /login/logout/ HTTP/1.1" 405 0
+WARNING 2025-06-11 22:29:39,233 base 30192 140183907333824 Method Not Allowed (GET): /login/logout/
+WARNING 2025-06-11 22:29:39,234 log 30192 140183907333824 Method Not Allowed: /login/logout/
+WARNING 2025-06-11 22:29:39,234 basehttp 30192 140183907333824 "GET /login/logout/ HTTP/1.1" 405 0
+WARNING 2025-06-11 22:31:59,630 base 31513 123574731929280 Method Not Allowed (GET): /login/logout/
+WARNING 2025-06-11 22:31:59,631 log 31513 123574731929280 Method Not Allowed: /login/logout/
+WARNING 2025-06-11 22:31:59,631 basehttp 31513 123574731929280 "GET /login/logout/ HTTP/1.1" 405 0
+WARNING 2025-06-11 22:32:17,644 base 31619 126990669575872 Method Not Allowed (GET): /login/logout/
+WARNING 2025-06-11 22:32:17,645 log 31619 126990669575872 Method Not Allowed: /login/logout/
+WARNING 2025-06-11 22:32:17,646 basehttp 31619 126990669575872 "GET /login/logout/ HTTP/1.1" 405 0
+WARNING 2025-06-11 22:36:58,308 log 32774 124727205033664 Not Found: /favicon.ico
+WARNING 2025-06-11 22:36:58,308 basehttp 32774 124727205033664 "GET /favicon.ico HTTP/1.1" 404 3298
+WARNING 2025-06-11 22:37:06,012 base 32774 124727205033664 Method Not Allowed (GET): /login/logout/
+WARNING 2025-06-11 22:37:06,013 log 32774 124727205033664 Method Not Allowed: /login/logout/
+WARNING 2025-06-11 22:37:06,014 basehttp 32774 124727205033664 "GET /login/logout/ HTTP/1.1" 405 0
+WARNING 2025-06-11 22:37:31,316 base 32866 139905382479552 Method Not Allowed (GET): /login/logout/
+WARNING 2025-06-11 22:37:31,317 log 32866 139905382479552 Method Not Allowed: /login/logout/
+WARNING 2025-06-11 22:37:31,318 basehttp 32866 139905382479552 "GET /login/logout/ HTTP/1.1" 405 0
+WARNING 2025-06-11 22:40:05,709 basehttp 33049 125664283850432 "GET /static/lib/material-dashboard-pro/assets/img/favicon.png HTTP/1.1" 404 2074
+WARNING 2025-06-11 22:40:11,333 base 33049 125664275457728 Method Not Allowed (GET): /login/logout/
+WARNING 2025-06-11 22:40:11,334 log 33049 125664275457728 Method Not Allowed: /login/logout/
+WARNING 2025-06-11 22:40:11,334 basehttp 33049 125664275457728 "GET /login/logout/ HTTP/1.1" 405 0
+WARNING 2025-06-11 22:44:35,290 base 33572 127022005221056 Method Not Allowed (GET): /login/logout/
+WARNING 2025-06-11 22:44:35,292 log 33572 127022005221056 Method Not Allowed: /login/logout/
+WARNING 2025-06-11 22:44:35,292 basehttp 33572 127022005221056 "GET /login/logout/ HTTP/1.1" 405 0
+WARNING 2025-06-11 22:48:41,776 base 33572 127022005221056 Method Not Allowed (GET): /login/logout/
+WARNING 2025-06-11 22:48:41,776 log 33572 127022005221056 Method Not Allowed: /login/logout/
+WARNING 2025-06-11 22:48:41,776 basehttp 33572 127022005221056 "GET /login/logout/ HTTP/1.1" 405 0
+WARNING 2025-06-11 22:49:49,089 log 34089 128226705798848 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-11 22:49:49,089 basehttp 34089 128226705798848 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3409
+WARNING 2025-06-11 22:49:49,353 basehttp 34089 128226705798848 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-11 22:49:49,358 basehttp 34089 128226697406144 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-11 22:49:49,396 basehttp 34089 128226697406144 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-11 22:50:25,395 log 34202 139083542165184 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-11 22:50:25,396 basehttp 34202 139083542165184 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3409
+WARNING 2025-06-11 22:50:25,602 basehttp 34202 139083542165184 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-11 22:50:25,847 basehttp 34202 139083533772480 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-11 22:50:26,063 basehttp 34202 139083533772480 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-11 22:51:50,682 base 34277 126300693984960 Method Not Allowed (GET): /login/logout/
+WARNING 2025-06-11 22:51:50,683 log 34277 126300693984960 Method Not Allowed: /login/logout/
+WARNING 2025-06-11 22:51:50,684 basehttp 34277 126300693984960 "GET /login/logout/ HTTP/1.1" 405 0
+WARNING 2025-06-11 22:52:50,115 base 34517 132845265745600 Method Not Allowed (GET): /login/logout/
+WARNING 2025-06-11 22:52:50,117 log 34517 132845265745600 Method Not Allowed: /login/logout/
+WARNING 2025-06-11 22:52:50,118 basehttp 34517 132845265745600 "GET /login/logout/ HTTP/1.1" 405 0
+WARNING 2025-06-11 22:52:54,014 base 34517 132845265745600 Method Not Allowed (GET): /login/logout/
+WARNING 2025-06-11 22:52:54,015 log 34517 132845265745600 Method Not Allowed: /login/logout/
+WARNING 2025-06-11 22:52:54,016 basehttp 34517 132845265745600 "GET /login/logout/ HTTP/1.1" 405 0
+WARNING 2025-06-11 22:54:16,045 log 34586 135704424216256 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-11 22:54:16,045 basehttp 34586 135704424216256 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3409
+WARNING 2025-06-11 22:54:16,295 basehttp 34586 135704424216256 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-11 22:54:16,296 basehttp 34586 135704415823552 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-11 22:54:16,333 basehttp 34586 135704415823552 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-16 00:45:31,204 basehttp 48150 123733974972096 "GET /static/lib/material-dashboard-pro/assets/img/favicon.png HTTP/1.1" 404 2074
