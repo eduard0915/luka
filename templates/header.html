@@ -12,7 +12,8 @@
         </div>
         <nav aria-label="breadcrumb" class="ps-2">
             <ol class="breadcrumb bg-transparent mb-0 p-0">
-                <li class="breadcrumb-item text-sm text-dark active font-weight-bold" aria-current="page">Company Name
+                <li class="breadcrumb-item text-sm text-dark active font-weight-bold" aria-current="page">
+                    {% if company %}{{ company }}{% else %}Company Name{% endif %}
                 </li>
             </ol>
         </nav>

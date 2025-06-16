@@ -1,0 +1,45 @@
+{% extends 'body.html' %}
+{% load static %}
+
+{% block head %}
+
+    {% block head_list %}
+
+    {% endblock %}
+
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-6">
+            <div class="card my-4">
+                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                    <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+                        <h6 class="text-white text-capitalize ps-3">{{ title }}</h6>
+                    </div>
+                </div>
+                <div class="card-body px-0 pb-2">
+                    <div class="table-responsive p-0">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <img src="{{ company_logo }}" alt="Company Logo" class="img-fluid">
+                                </div>
+                                <div class="col-md-8">
+                                    <h3>{{ object.company_name }}</h3>
+                                    <p><strong>NIT:</strong> {{ object.company_nit }}</p>
+                                    <p><strong>Dirección:</strong> {{ object.company_address }}</p>
+                                    <p><strong>Ciudad:</strong> {{ object.company_city }}</p>
+                                    <p><strong>País:</strong> {{ object.company_country }}</p>
+                                    <a href="{% url 'company:company_update' object.id %}" class="btn btn-primary">Editar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
