@@ -45,7 +45,7 @@
                                     <h6 class="mb-0">Información de Usuario</h6>
                                 </div>
                                 <div class="col-md-4 text-end">
-                                    <a href="#">
+                                    <a href="{% url 'user:user_update' object.slug %}">
                                         <i class="fas fa-user-edit text-secondary text-sm" data-bs-toggle="tooltip"
                                            data-bs-placement="top" title="Editar Perfil"></i>
                                     </a>
@@ -84,7 +84,7 @@
                                 </div>
                                 <div class="col-md-4 text-end">
                                     <a onclick="open_modal('{% url 'user:create_training' object.slug %}')">
-                                        <i class="fa-solid fa-user-graduate text-secondary text-sm"
+                                        <i class="fa fa-plus"></i> <i class="fa-solid fa-user-graduate text-secondary text-sm"
                                            data-bs-toggle="tooltip"
                                            data-bs-placement="top" title="Registrar Capacitación"></i>
                                     </a>
@@ -164,11 +164,10 @@
                                     <h6 class="mb-0">Competencias</h6>
                                 </div>
                                 <div class="col-md-4 text-end">
-                                    <!-- Competencies functionality not implemented yet -->
-                                    <a href="#" class="disabled" title="Funcionalidad no implementada">
-                                        <i class="fa-solid fa-graduation-cap text-secondary text-sm"
+                                    <a href="#" title="Registrar Competencia">
+                                        <i class="fa fa-plus"></i> <i class="fa-solid fa-graduation-cap text-secondary text-sm"
                                            data-bs-toggle="tooltip"
-                                           data-bs-placement="top" title="Registrar Competencia (No implementado)"></i>
+                                           data-bs-placement="top"></i>
                                     </a>
                                 </div>
                             </div>

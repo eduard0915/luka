@@ -7,6 +7,7 @@ from django.db import models
 from django.utils.text import slugify
 from django.utils.timezone import localtime
 
+from core.company.models import Site
 from luka.settings import MEDIA_URL, STATIC_URL
 
 
@@ -31,6 +32,7 @@ class User(AbstractUser):
     photo = models.ImageField(
         upload_to='user/%Y%m%d', null=True, blank=True, verbose_name='Foto', validators=[validator_file_image])
     slug = models.SlugField(unique=True, null=False, blank=False)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, verbose_name='Planta', null=True, blank=True)
 
     def __init__(self, *args, **kwargs):
         super(User, self).__init__(*args, **kwargs)

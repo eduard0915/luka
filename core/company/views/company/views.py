@@ -3,11 +3,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import redirect
-
 from django.urls import reverse_lazy
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import CreateView, UpdateView, ListView, DetailView
+from django.views.generic import CreateView, UpdateView, DetailView
 
 from core.company.forms import *
 from core.company.models import *
@@ -22,6 +19,7 @@ class CompanyCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
     permission_required = 'company.add_company'
 
     def dispatch(self, request, *args, **kwargs):
+        self.object = None
         try:
             if Company.objects.exists():
                 company = Company.objects.first()
@@ -41,6 +39,7 @@ class CompanyCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
                     messages.success(request, f'Empresa configurada satisfactoriamente!')
                 else:
                     messages.error(request, form.errors)
+                return redirect(self.get_context_data()['list_url'])
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -52,7 +51,9 @@ class CompanyCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
         context['title'] = 'Perfil Empresa'
         context['entity'] = 'Perfil Empresa'
         context['action'] = 'add'
+        context['div'] = '10'
         context['list_url'] = reverse_lazy('start:start')
+        context['icon'] = 'factory'
         return context
 
 
@@ -76,8 +77,11 @@ class CompanyUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
                 if form.is_valid():
                     form.save()
                     messages.success(request, f'La Empresa se ha editado satisfactoriamente!')
+                    # Return a direct redirect response instead of relying on client-side redirection
+                    return redirect(self.get_context_data()['list_url'])
                 else:
                     messages.error(request, form.errors)
+                    data['error'] = form.errors
             else:
                 data['error'] = 'No ha editado los campos'
         except Exception as e:
@@ -89,7 +93,9 @@ class CompanyUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
         context['title'] = 'Editar Empresa'
         context['entity'] = 'Editar Información Empresa'
         context['action'] = 'edit'
-        context['list_url'] = reverse_lazy('company:company_detail', kwargs={'pk': self.object.id})
+        context['div'] = '10'
+        context['list_url'] = reverse_lazy('company:company_detail', kwargs={'pk': self.kwargs['pk']})
+        context['icon'] = 'factory'
         return context
 
 
@@ -113,7 +119,7 @@ class CompanyDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Det
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Perfil Empresa'
-        context['entity'] = 'Perfil Empresa'
+        context['title'] = 'Empresa'
+        context['entity'] = 'Empresa'
         context['company_logo'] = self.logo()
         return context

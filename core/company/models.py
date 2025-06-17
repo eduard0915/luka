@@ -39,6 +39,7 @@ class Site(models.Model):
     site_city = models.CharField(max_length=60, verbose_name='Ciudad')
     site_country = models.CharField(max_length=60, verbose_name='País')
     company = models.ForeignKey(Company, on_delete=models.CASCADE, verbose_name='')
+    site_enable = models.BooleanField(default=True, verbose_name='Habilitado')
 
     def __str__(self):
         return str(self.site_name)

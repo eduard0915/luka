@@ -14,7 +14,7 @@
     <div class="card mt-5">
         <div class="card-header p-3 pt-2">
             <div class="icon icon-lg icon-shape bg-gradient-dark shadow text-center border-radius-xl mt-n4 me-3 float-start">
-                <i class="material-symbols-rounded opacity-10">event</i>
+                <i class="material-symbols-rounded opacity-10">{{ icon }}</i>
             </div>
             <h5 class="mb-0">{{ entity }}</h5>
             <p class="text-sm mb-0">
@@ -30,9 +30,9 @@
                         <div class="row">
                     {% endif %}
                 <div class="col-md-3">
-                    {% if field.name == 'groups' or field.name == 'is_active' %}
+                    {% if field.name == 'groups' or field.name == 'is_active' or field.name == 'site' %}
                         <div class="input-group input-group-static mb-4">
-                            <label class="form-label mt-5 ms-0">
+                            <label for=id_{{ field.name }} class="ms-0">
                                 {{ field.label }}{% if field.field.required %}*{% endif %}
                             </label>
                             {{ field }}
@@ -41,13 +41,13 @@
                         <div {% if field.name == 'photo' or field.name == 'company_logo' %}
                             class="fileinput fileinput-new text-center" data-provides="fileinput"
                             {% else %}class="input-group input-group-outline my-3" {% endif %}>
-                                <label for=id_{{ field.name }} class="form-label ms-0">
-                                    {{ field.label }}{% if field.field.required %}*{% endif %}
-                                </label>
-                                {{ field }}
-                                </div>
-                                </div>
+                            <label for=id_{{ field.name }} class="form-label ms-0">
+                                {{ field.label }}{% if field.field.required %}*{% endif %}
+                            </label>
+                            {{ field }}
+                        </div>
                     {% endif %}
+                </div>
                 {% if forloop.last %}
                 {% elif forloop.counter|divisibleby:4 %}
                     </div>
@@ -68,15 +68,15 @@
 {% block scripts_detail %}
     <script type="application/javascript">
 
-        if (document.getElementById('id_groups')) {
-            const element = document.getElementById('id_groups');
-            const choices = new Choices(element, {
-                removeItemButton: true,
-                searchEnabled: true,
-                placeholder: true,
-                placeholderValue: 'Seleccionar'
-            });
-        }
+        {#if (document.getElementById('id_groups')) {#}
+        {#    const element = document.getElementById('id_groups');#}
+        {#    const choices = new Choices(element, {#}
+        {#        removeItemButton: true,#}
+        {#        searchEnabled: true,#}
+        {#        placeholder: true,#}
+        {#        placeholderValue: 'Seleccionar'#}
+        {#    });#}
+        {# }#}
 
         document.querySelector('form').addEventListener('submit', function (e) {
             e.preventDefault();
@@ -99,6 +99,14 @@
                 });
 
         });
+
+        $("#btnSubmit").click(function () {
+            $(this).prop("disabled", true); //deshabilitamos el botón
+            $(this).submit()
+            $(this).html(
+                `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...` //añadimos el spinner
+            );
+         });
 
     </script>
 {% endblock %}
