@@ -1,0 +1,31 @@
+{% extends 'list_one.html' %}
+{% load static %}
+
+
+{% block head_list %}
+    <script src="{% static 'list_site.js' %}"></script>
+{% endblock %}
+
+{% block buttons %}
+    <a href="{{ create_url }}" class="btn bg-gradient-dark mb-0"><i class="fa-solid fa-plus"></i> Nuevo</a>
+{% endblock %}
+
+{% block columns %}
+    <tr>
+        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:25%">Planta</th>
+        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:15%">Dirección</th>
+        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:20%">Ciudad</th>
+        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:20%">País</th>
+        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:10%">Activo</th>
+        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:10%">Acciones</th>
+    </tr>
+{% endblock %}
+
+{% block rows %}
+
+
+{% endblock %}
+
+{% block scripts_detail %}
+
+{% endblock %}

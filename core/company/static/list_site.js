@@ -24,40 +24,24 @@ $(document).ready(function($) {
             dataSrc: ""
         },
         columns: [
-            {'data': 'first_name'},
-            {'data': 'username'},
-            {'data': 'cargo'},
-            {'data': 'groups__name'},
-            {'data': 'email'},
-            {'data': 'site__site_name'},
-            {'data': 'is_active'},
+            {'data': 'site_name'},
+            {'data': 'site_address'},
+            {'data': 'site_city'},
+            {'data': 'site_country'},
+            {'data': 'site_enable'},
             {'data': 'id'}
         ],
         columnDefs: [
             {
-                targets: [1, 2, 4, 5],
+                targets: [0, 1, 2, 3],
                 class: 'td-actions text-center'
             },
             {
-                targets: [0],
-                className: 'td-actions text-center',
-                render: function (data, type, row) {
-                    return row['first_name'] + ' ' + row['last_name'];
-                }
-            },
-            {
-                targets: [3],
-                class: 'td-actions text-center',
-                render: function (data, type, row) {
-                    return '<span class="text-info">' + row['groups__name'] + '</span>'
-                }
-            },
-            {
-                targets: [6],
+                targets: [4],
                 className: 'td-actions text-center',
                 render: function (data, type, row) {
                     let estado = null;
-                    switch (row['is_active']) {
+                    switch (row['site_enable']) {
                         case true:
                             return '<span class="badge badge-sm badge-success">' + 'Activo' + '</span>';
                             break;
@@ -69,14 +53,13 @@ $(document).ready(function($) {
                 }
             },
             {
-                targets: [7],
+                targets: [5],
                 class: 'td-actions text-center',
                 orderable: false,
                 render: function (data, type, row) {
                     let actions
-                    actions = '<a href="/user/detail/' + row['slug'] + '/" type="button" title="Detalle Perfil"><i class="fa-solid fa-user-check text-info"></i></a> &nbsp';
-                    actions += '<a href="/user/update/' + row['slug'] + '/" type="button" title="Editar"><i class="fa-solid fa-user-edit text-warning"></i></a> &nbsp';
-                    actions += '<a href="/user/update-password/' + row['slug'] + '/" type="button" title="Resetear Contraseña"><i class="fa-solid fa-lock text-success"></i></a>';
+                    actions = '<a href="/company/detail/' + row['id'] + '/" type="button" title="Inactivar"><i class="fa-solid fa-power-off text-info"></i></a> &nbsp';
+                    actions += '<a href="/company/update_site/' + row['id'] + '/" type="button" title="Editar"><i class="fa-solid fa-edit text-warning"></i></a> &nbsp';
                     return actions
                 }
             },

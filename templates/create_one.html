@@ -38,26 +38,7 @@
                             {{ field }}
                         </div>
                     {% else %}
-{#                        <div class="{% if field.field.widget.input_type == 'file' %}input-group custom-file-button#}
-{#                        {% elif field.field.widget.input_type == 'date' %}input-group input-group-static my-3#}
-{#                        {% else %}input-group input-group-outline my-3{% endif %}">#}
-                        {% if field.name == 'photo' or field.name == 'companyLogo' %}
-                            <div class="fileinput fileinput-new text-center" data-provides="fileinput">
-                                <div class="fileinput-preview fileinput-exists thumbnail"></div>
-                                <div>
-                                    <span class="btn btn-rose btn-round btn-file">
-                                            <span class="fileinput-new">Seleccionar imagen</span>
-                                            <span class="fileinput-exists">Cambiar</span>
-                                            {{ field }}
-                                        </span>
-                                    {% if field.help_text %}
-                                        <sub>*{{ field.help_text }}</sub>
-                                    {% endif %}
-                                    <a href="#" class="btn btn-danger btn-round fileinput-exists"
-                                       data-dismiss="fileinput"><i class="fa fa-times"></i> Eliminar</a>
-                                </div>
-                            </div>
-                            {% elif field.field.widget.input_type == 'file' %}
+                        {% if field.field.widget.input_type == 'file' %}
                             <div class="file-input-div">
                                 <label for="id_{{ field.name }}" class="file-input-label">
                                     {{ field.label }}{% if field.field.required %}*{% endif %}
@@ -67,8 +48,7 @@
                                     <small class="form-text text-muted">{{ field.help_text }}</small>
                                 {% endif %}
                             </div>
-                            </div>
-                            {% else %}
+                        {% else %}
                             <div class="input-group input-group-outline my-3">
                                 <label for="id_{{ field.name }}" class="form-label ms-0">
                                     {{ field.label }}{% if field.field.required %}*{% endif %}
@@ -76,7 +56,7 @@
                                 {{ field }}
                             </div>
                             </div>
-                            {% endif %}
+                        {% endif %}
                     {% endif %}
                 {% if forloop.last %}
                 {% elif forloop.counter|divisibleby:3 %}
@@ -90,7 +70,6 @@
                     <a href="{{ list_url }}" class="btn btn-danger">Cancelar</a>
                 </div>
             </form>
-
         </div>
     </div>
 
@@ -106,7 +85,7 @@
                 placeholder: true,
                 placeholderValue: 'Seleccionar'
             });
-        }
+         }
 
         document.querySelector('form').addEventListener('submit', function (e) {
             e.preventDefault();
@@ -123,12 +102,43 @@
                         return false;
                     }
                     message_error(response.data.error);
-                })
+                 })
                 .catch(function (error) {
                     alert(error.response.status + ': ' + error.message);
                 });
 
-        });
+         });
+
+        {#$('form').on('submit', function (e) {#}
+        {#    e.preventDefault();#}
+        {#    var parameters = new FormData(this);#}
+        {#    $.ajax({#}
+        {#        url: window.location.pathname,#}
+        {#        type: 'POST',#}
+        {#        data: parameters,#}
+        {#        dataType: 'json',#}
+        {#        processData: false,#}
+        {#        contentType: false,#}
+        {#    }).done(function (data) {#}
+        {#        console.log(data);#}
+        {#        if (!data.hasOwnProperty('error')) {#}
+        {#            location.href = '{{ list_url }}';#}
+        {#            return false;#}
+        {#        }#}
+        {#        message_error(data.error);#}
+        {#    }).fail(function (jqXHR, textStatus, errorThrown) {#}
+        {#        alert(textStatus + ': ' + errorThrown);#}
+        {#    }).always(function (data) {#}
+        {#    });#}
+        {# });#}
+
+        $("#btnSubmit").click(function () {
+            $(this).prop("disabled", true); //deshabilitamos el botón
+            $(this).submit()
+            $(this).html(
+                `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...` //añadimos el spinner
+            );
+         });
 
     </script>
 {% endblock %}

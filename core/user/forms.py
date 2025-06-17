@@ -17,11 +17,7 @@ class UserForm(ModelForm):
     class Meta:
         model = User
         fields = [
-            'first_name',
-            'last_name', 'email',
-            'cargo', 'cellphone',
-            'cedula', 'username',
-            'password', 'groups'
+            'first_name', 'last_name', 'email', 'cargo', 'cellphone', 'cedula', 'username', 'password', 'groups', 'site'
         ]
         widgets = {
             'password': PasswordInput(render_value=True, attrs={'class': 'form-control'}),
@@ -32,7 +28,8 @@ class UserForm(ModelForm):
             'cellphone': TextInput(attrs={'class': 'form-control'}),
             'cedula': TextInput(attrs={'class': 'form-control'}),
             'username': TextInput(attrs={'class': 'form-control'}),
-            'groups': SelectMultiple(attrs={'class': 'form-control', 'required': True})
+            'groups': SelectMultiple(attrs={'class': 'form-control', 'required': True}),
+            'site': Select(attrs={'class': 'form-control', 'required': True}),
         }
         exclude = ['user_permissions', 'last_login', 'date_joined', 'is_superuser', 'is_staff', 'is_active']
         help_texts = {
@@ -76,7 +73,7 @@ class UserUpdateForm(ModelForm):
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'cargo', 'cellphone', 'cedula', 'username', 'groups']
+        fields = ['first_name', 'last_name', 'email', 'cargo', 'cellphone', 'cedula', 'username', 'site', 'groups']
         widgets = {
             'first_name': TextInput(attrs={'class': 'form-control', 'required': True}),
             'last_name': TextInput(attrs={'class': 'form-control', 'required': True}),
@@ -86,6 +83,7 @@ class UserUpdateForm(ModelForm):
             'cedula': TextInput(attrs={'class': 'form-control'}),
             'username': TextInput(attrs={'class': 'form-control', 'readonly': True}),
             'groups': SelectMultiple(attrs={'class': 'form-control', 'required': True}),
+            'site': Select(attrs={'class': 'form-control', 'required': True}),
             # 'photo': FileInput(attrs={'class': 'form-control-file'})
 
         }
@@ -93,7 +91,6 @@ class UserUpdateForm(ModelForm):
 
         help_texts = {
             'groups': 'Seleccione perfil del usuario',
-            # 'username': ''
         }
 
     def save(self, commit=True):

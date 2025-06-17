@@ -3,6 +3,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from core.company.views.company.views import *
+from core.company.views.site.views import *
 
 app_name = 'company'
 
@@ -11,10 +12,10 @@ urlpatterns = [
     path('add/', CompanyCreateView.as_view(), name='company_create'),
     path('update/<uuid:pk>/', CompanyUpdateView.as_view(), name='company_update'),
     path('detail/<uuid:pk>/', CompanyDetailView.as_view(), name='company_detail'),
-    # Areas
-    # path('add_area/', AreaCreateView.as_view(), name='area_create'),
-    # path('update_area/<uuid:pk>/', AreaUpdateView.as_view(), name='area_update'),
-    # path('list_area/', AreaListView.as_view(), name='area_list'),
+    # Plantas
+    path('add_site/', SiteCreateView.as_view(), name='create_site'),
+    path('update_site/<uuid:pk>/', SiteUpdateView.as_view(), name='update_site'),
+    path('list_site/', SiteListView.as_view(), name='list_site'),
     # # Limpieza
     # path('add_sanitizer/', SanitizerCreateView.as_view(), name='sanitizer_create'),
     # path('update_sanitizer/<uuid:pk>/', SanitizerUpdateView.as_view(), name='sanitizer_update'),

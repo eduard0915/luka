@@ -3,6 +3,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -24,6 +25,7 @@ class UserCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Create
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        self.object = None
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -38,6 +40,7 @@ class UserCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Create
                     messages.success(request, f'Usuario "{name_username}" creado satisfactoriamente!')
                 else:
                     messages.error(request, form.errors)
+                return redirect(self.get_context_data()['list_url'])
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -51,6 +54,7 @@ class UserCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Create
         context['action'] = 'add'
         context['entity'] = 'Creación de Usuario'
         context['div'] = '10'
+        context['icon'] = 'person_add'
         return context
 
 
@@ -70,7 +74,7 @@ class UserListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView
             action = request.POST['action']
             if action == 'searchdata':
                 data = []
-                usuarios = list(User.objects.values(
+                usuarios = list(User.objects.select_related('site').values(
                     'id',
                     'date_joined',
                     'last_login',
@@ -82,7 +86,8 @@ class UserListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView
                     'is_active',
                     'first_name',
                     'last_name',
-                    'slug'
+                    'slug',
+                    'site__site_name',
                 ).filter(is_superuser=False).order_by('first_name'))
                 return JsonResponse(usuarios, safe=False)
             else:
@@ -95,9 +100,8 @@ class UserListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView
         context = super().get_context_data(**kwargs)
         context['title'] = 'Usuarios'
         context['create_url'] = reverse_lazy('user:user_create')
-        context['list_url'] = reverse_lazy('user:user_list')
         context['entity'] = 'Usuarios'
-        context['div'] = '10'
+        context['div'] = '11'
         return context
 
 
@@ -127,6 +131,7 @@ class UserUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Update
                     messages.success(request, f'Usuario "{name_username}" actualizado satisfactoriamente!')
                 else:
                     messages.error(request, form.errors)
+                return redirect(self.get_context_data()['list_url'])
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -137,9 +142,10 @@ class UserUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Update
         context = super().get_context_data(**kwargs)
         context['title'] = 'Edición de Usuarios'
         context['list_url'] = self.success_url
-        context['entity'] = 'Editar Usuario'
+        context['entity'] = 'Edición Usuario'
         context['action'] = 'edit'
-        # context['users'] = User.objects.all()
+        context['div'] = '10'
+        context['icon'] = 'person_edit'
         return context
 
 

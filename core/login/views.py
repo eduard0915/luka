@@ -3,7 +3,6 @@ from datetime import timedelta
 from django.contrib import messages
 from django.contrib.auth.views import *
 from django.shortcuts import redirect
-from django.urls import reverse_lazy
 from django.utils import timezone
 
 from core.user.models import PasswordHistoryUser
