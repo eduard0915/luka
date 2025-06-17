@@ -5,10 +5,10 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import ListView, CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView, DetailView
 
 from core.company.forms import SiteForm, SiteUpdateForm
-from core.company.models import Site, Company
+from core.company.models import Site, Company, Process
 from core.mixins import ValidatePermissionRequiredMixin
 
 
@@ -28,10 +28,9 @@ class SiteListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView
             action = request.POST['action']
             if action == 'searchdata':
                 data = []
-                usuarios = list(Site.objects.values(
-                    'id', 'site_name', 'site_address', 'site_city', 'site_country').filter(
-                    site_enable=True).order_by('site_name'))
-                return JsonResponse(usuarios, safe=False)
+                list_site = list(Site.objects.values(
+                    'id', 'site_name', 'site_address', 'site_city', 'site_country', 'site_enable').order_by('site_name'))
+                return JsonResponse(list_site, safe=False)
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
@@ -51,7 +50,7 @@ class SiteListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView
 class SiteCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
     model = Site
     form_class = SiteForm
-    template_name = 'user/create_user.html'
+    template_name = 'site/create_site.html'
     success_url = reverse_lazy('company:list_site')
     permission_required = 'company.add_company'
     url_redirect = success_url
@@ -135,4 +134,25 @@ class SiteUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Update
         context['action'] = 'edit'
         context['div'] = '8'
         context['icon'] = 'factory'
+        return context
+
+
+# Detalle de Planta
+class SiteDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    model = Site
+    template_name = 'site/detail_site.html'
+    permission_required = 'company.add_company'
+
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Detalle de Planta'
+        context['entity'] = 'Detalle de Planta'
+        context['subtitle'] = 'Información de la planta'
+        context['div'] = '6'
+        context['icon'] = 'factory'
+        # Get all processes associated with this site
+        context['processes'] = Process.objects.filter(site=self.object)
         return context

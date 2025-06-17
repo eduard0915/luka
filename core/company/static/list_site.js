@@ -58,7 +58,7 @@ $(document).ready(function($) {
                 orderable: false,
                 render: function (data, type, row) {
                     let actions
-                    actions = '<a href="/company/detail/' + row['id'] + '/" type="button" title="Inactivar"><i class="fa-solid fa-power-off text-info"></i></a> &nbsp';
+                    actions = '<a href="/company/detail_site/' + row['id'] + '/" type="button" title="Ver Detalle"><i class="fa-solid fa-eye text-info"></i></a> &nbsp';
                     actions += '<a href="/company/update_site/' + row['id'] + '/" type="button" title="Editar"><i class="fa-solid fa-edit text-warning"></i></a> &nbsp';
                     return actions
                 }
