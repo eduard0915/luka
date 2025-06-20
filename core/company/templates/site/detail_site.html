@@ -3,70 +3,99 @@
 
 {% block head %}
     {% block head_list %}
+
     {% endblock %}
 {% endblock %}
 
 {% block content %}
-    <div class="container-fluid py-2">
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="mb-4">{{ entity }}</h5>
-                        <div class="row">
-                            <div class="col-xl-12 col-lg-12">
-                                <div class="card-body p-3">
-                                    <h3>Planta: {{ object.site_name }}</h3>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <p><strong>Dirección:</strong> {{ object.site_address }}</p>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <p><strong>Ciudad:</strong> {{ object.site_city }}</p>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <p><strong>País:</strong> {{ object.site_country }}</p>
-                                        </div>
+
+    <div class="row pt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-lg-flex">
+                        <div class="col-md-10">
+                            <div class="icon icon-lg icon-shape bg-gradient-dark shadow text-center border-radius-xl mt-n4 me-3 float-start">
+                                <i class="material-symbols-rounded opacity-10">factory</i>
+                            </div>
+                            <h5 class="mb-0">{{ entity }}</h5>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="ms-auto my-auto">
+                                <a href="{% url 'company:list_site' %}" class="btn btn-secondary">
+                                    <i class="fa fa-step-backward"></i> Volver
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xl-12 col-lg-12">
+                            <div class="card-body p-3">
+                                <h3>Planta: {{ object.site_name }}</h3>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Dirección:</strong> {{ object.site_address }}</p>
                                     </div>
-                                    <div class="row mt-2">
-                                        <div class="col-md-4">
-                                            <p><strong>Estado:</strong>
-                                                {% if object.site_enable %}
-                                                    <span class="badge badge-sm badge-success">Activo</span>
-                                                {% else %}
-                                                    <span class="badge badge-sm badge-danger">Inactivo</span>
-                                                {% endif %}
-                                            </p>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <a href="{% url 'company:update_site' object.id %}"
-                                               class="btn btn-primary">Editar</a>
-                                            <a href="{% url 'company:list_site' %}" class="btn btn-secondary">Volver</a>
-                                        </div>
+                                    <div class="col-md-3">
+                                        <p><strong>Ciudad:</strong> {{ object.site_city }}</p>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <p><strong>País:</strong> {{ object.site_country }}</p>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-4">
+                                        <p><strong>Estado:</strong>
+                                            {% if object.site_enable %}
+                                                <span class="badge badge-sm badge-success">Activo</span>
+                                            {% else %}
+                                                <span class="badge badge-sm badge-danger">Inactivo</span>
+                                            {% endif %}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="row mt-2">
-                            <div class="col-12">
-                                <h5 class="ms-3">Procesos</h5>
-                                <div class="table table-responsive">
-                                    <table class="table align-items-center mb-0">
-                                        <thead>
-                                        <tr>
-                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                                Nombre del Proceso
-                                            </th>
-                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                                Estado
-                                            </th>
-                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                                Acciones
-                                            </th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {% for process in processes %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-md-10">
+                                    <div class="icon icon-lg icon-shape bg-gradient-dark shadow text-center border-radius-xl mt-n4 me-3 float-start">
+                                        <i class="material-symbols-rounded opacity-10">process_chart</i>
+                                    </div>
+                                    <h5 class="ms-3">Procesos</h5>
+                                </div>
+                                <div class="col-md-2">
+                                    <a onclick="open_modal('{% url 'company:create_process' object.id %}')"
+                                       class="btn btn-primary">
+                                        <i class="fa fa-plus"></i> Nuevo
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="table table-responsive">
+                                <table class="table align-items-center mb-0">
+                                    <thead>
+                                    <tr>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Nombre del Proceso
+                                        </th>
+                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Estado
+                                        </th>
+                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Acciones
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for process in processes %}
                                         <tr>
                                             <td>
                                                 <div class="d-flex px-2 py-1">
@@ -77,27 +106,28 @@
                                             </td>
                                             <td class="align-middle text-center">
                                                 {% if process.enable_process %}
-                                                <span class="badge badge-sm badge-success">Activo</span>
+                                                    <span class="badge badge-sm badge-success">Activo</span>
                                                 {% else %}
-                                                <span class="badge badge-sm badge-danger">Inactivo</span>
+                                                    <span class="badge badge-sm badge-danger">Inactivo</span>
                                                 {% endif %}
                                             </td>
                                             <td class="align-middle text-center">
-                                                <a href="#" class="btn btn-sm btn-info">
-                                                    <i class="fa-solid fa-eye"></i> Ver
+                                                <a onclick="open_modal('{% url 'company:update_process' process.id %}')"
+                                                   class="text-secondary font-weight-normal text-xs"
+                                                   data-toggle="tooltip" data-original-title="Editar">
+                                                    <i class="fas fa-edit text-warning text-sm"></i>
                                                 </a>
                                             </td>
                                         </tr>
-                                        {% empty %}
+                                    {% empty %}
                                         <tr>
                                             <td colspan="3" class="text-center">
                                                 No hay procesos asociados a esta planta.
                                             </td>
                                         </tr>
-                                        {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -105,4 +135,227 @@
             </div>
         </div>
     </div>
+    <div class="row pt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body pb-1">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-md-10">
+                                    <div class="icon icon-lg icon-shape bg-gradient-dark shadow text-center border-radius-xl mt-n4 me-3 float-start">
+                                        <i class="material-symbols-rounded opacity-10">step</i>
+                                    </div>
+                                    <h5 class="ms-3">Etapas</h5>
+                                </div>
+                                <div class="col-md-2">
+                                    <a onclick="open_modal('{% url 'company:create_stage' %}')"
+                                       class="btn btn-primary">
+                                        <i class="fa fa-plus"></i> Nuevo
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="table table-responsive">
+                                <table class="table align-items-center mb-0">
+                                    <thead>
+                                    <tr>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Etapa
+                                        </th>
+                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Proceso
+                                        </th>
+                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Acciones
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for stg in stages %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex px-2 py-1">
+                                                    <div class="d-flex flex-column justify-content-center">
+                                                        <h6 class="mb-0 text-sm">
+                                                            {{ stg.stage_code }} {{ stg.stage_name }}
+                                                        </h6>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex px-2 py-1">
+                                                    <div class="d-flex flex-column justify-content-center">
+                                                        <h6 class="mb-0 text-sm">{{ stg.process }}</h6>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                {% if stg.enable_stage %}
+                                                    <span class="badge badge-sm badge-success">Activo</span>
+                                                {% else %}
+                                                    <span class="badge badge-sm badge-danger">Inactivo</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                <a onclick="open_modal('{% url 'company:update_stage' stg.id %}')"
+                                                   class="text-secondary font-weight-normal text-xs"
+                                                   data-toggle="tooltip" data-original-title="Editar">
+                                                    <i class="fas fa-edit text-warning text-sm"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="3" class="text-center">
+                                                No hay etapas asociadas a esta planta.
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-md-10">
+                                    <div class="icon icon-lg icon-shape bg-gradient-dark shadow text-center border-radius-xl mt-n4 me-3 float-start">
+                                        <i class="material-symbols-rounded opacity-10">dropper_eye</i>
+                                    </div>
+                                    <h5 class="ms-3">Puntos de Muestreo</h5>
+                                </div>
+                                <div class="col-md-2">
+                                    <a onclick="open_modal('{% url 'company:create_sample_point' %}')"
+                                       class="btn btn-primary">
+                                        <i class="fa fa-plus"></i> Nuevo
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="table table-responsive">
+                                <table class="table align-items-center mb-0">
+                                    <thead>
+                                    <tr>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Punto de Muestreo
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Etapa
+                                        </th>
+                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Estado
+                                        </th>
+                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Acciones
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for sample in sample_point %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex px-2 py-1">
+                                                    <div class="d-flex flex-column justify-content-center">
+                                                        <h6 class="mb-0 text-sm">
+                                                            {{ sample.sample_point_code }} {{ sample.sample_point_name }}
+                                                        </h6>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex px-2 py-1">
+                                                    <div class="d-flex flex-column justify-content-center">
+                                                        <h6 class="mb-0 text-sm">{{ sample.stage }}</h6>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                {% if sample.enable_point %}
+                                                    <span class="badge badge-sm badge-success">Activo</span>
+                                                {% else %}
+                                                    <span class="badge badge-sm badge-danger">Inactivo</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                <a onclick="open_modal('{% url 'company:update_sample_point' sample.id %}')"
+                                                   class="text-secondary font-weight-normal text-xs"
+                                                   data-toggle="tooltip" data-original-title="Editar">
+                                                    <i class="fas fa-edit text-warning text-sm"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="3" class="text-center">
+                                                No hay procesos asociados a esta planta.
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}
+
+{% block scripts_detail %}
+
+    <script>
+        // Initialize tooltips
+        document.addEventListener("DOMContentLoaded", function () {
+            // Inicializar tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
+        // Handle form submission in modal using vanilla JavaScript
+        document.addEventListener('submit', function (e) {
+            // Check if the form is inside a modal
+            if (e.target.closest('.modal') && e.target.tagName === 'FORM') {
+                e.preventDefault();
+                var form = e.target;
+                var url = form.getAttribute('action');
+                var data = new FormData(form);
+
+                // Use fetch API instead of $.ajax
+                fetch(url, {
+                    method: 'POST',
+                    body: data
+                })
+                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.hasOwnProperty('error')) {
+                            // Close modal using Bootstrap 5 syntax
+                            var modalElement = document.getElementById('modal_template');
+                            var modalInstance = bootstrap.Modal.getInstance(modalElement);
+                            modalInstance.hide();
+                            // Reload page to show new data
+                            location.reload();
+                        } else {
+                            // Show error message
+                            alert(response.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error en el envío del formulario');
+                    });
+            }
+        });
+    </script>
+
+{% endblock %}
+

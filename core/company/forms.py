@@ -1,4 +1,4 @@
-from django.forms import ModelForm, TextInput, FileInput
+from django.forms import ModelForm, TextInput, FileInput, Select
 
 from core.company.models import *
 
@@ -102,6 +102,7 @@ class SiteUpdateForm(ModelForm):
         return data
 
 
+# Creación de Procesos
 class ProcessForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.site = kwargs.pop('site')
@@ -131,6 +132,7 @@ class ProcessForm(ModelForm):
         return data
 
 
+# Edición de Procesos
 class ProcessUpdateForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -142,6 +144,64 @@ class ProcessUpdateForm(ModelForm):
         fields = ['process_name']
         widgets = {
             'process_name': TextInput(attrs={'class': 'form-control', 'required': True}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        form = super()
+        try:
+            if form.is_valid():
+                data = form.save()
+            else:
+                data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Creación de Etapas
+class StageForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = Stage
+        fields = ['stage_code', 'stage_name', 'process']
+        widgets = {
+            'stage_code': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'stage_name': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'process': Select(attrs={'class': 'form-control', 'required': True}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        form = super()
+        try:
+            if form.is_valid():
+                data = form.save()
+            else:
+                data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Creación de Puntos de Muestreo
+class SamplePointForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = SamplePoint
+        fields = ['sample_point_code', 'sample_point_name', 'stage']
+        widgets = {
+            'sample_point_code': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'sample_point_name': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'stage': Select(attrs={'class': 'form-control', 'required': True}),
         }
 
     def save(self, commit=True):

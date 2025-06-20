@@ -1,7 +1,7 @@
 <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content">
         <div class="modal-header">
-            <h6 class="modal-title font-weight-normal" id="modal">{{ title }}</h6>
+            <h6 class="modal-title font-weight-normal" id="modal">{{ entity }}</h6>
             <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">×</span>
             </button>
@@ -52,11 +52,22 @@
                 {% endfor %}
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Cerrar
-                    </button>
-                    <button type="submit" class="btn bg-gradient-primary">Guardar</button>
+                    <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn bg-gradient-primary" id="btnSubmit">Guardar</button>
                 </div>
             </form>
         </div>
     </div>
+    <script>
+
+        $("#btnSubmit").click(function () {
+            $(this).prop("disabled", true); //deshabilitamos el botón
+            $(this).submit()
+            $(this).html(
+                `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Eliminando...` //añadimos el spinner
+            );
+        });
+
+    </script>
+
 </div>

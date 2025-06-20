@@ -138,3 +138,34 @@ class TrainingForm(ModelForm):
         except Exception as e:
             data['error'] = str(e)
         return data
+
+
+# Edición de capacitación
+class TrainingUptadeForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = Training
+        fields = ['description_training', 'training_by', 'date_training', 'support_training']
+        widgets = {
+            'description_training': TextInput(attrs={'class': 'form-control', 'required': True, 'type': 'text'}),
+            'training_by': TextInput(attrs={'class': 'form-control', 'required': True, 'type': 'text'}),
+            'support_training': FileInput(attrs={'class': 'form-control', 'type': 'file'}),
+            'date_training': DateInput(attrs={'class': 'form-control', 'type': 'date'})
+
+        }
+
+    def save(self, commit=True):
+        data = {}
+        form = super()
+        try:
+            if form.is_valid():
+                data = form.save()
+            else:
+                data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data

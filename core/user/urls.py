@@ -1,7 +1,7 @@
 from django.conf.urls.static import static
 from django.urls import path
 
-from core.user.views.training.views import TrainingCreateView
+from core.user.views.training.views import *
 from luka import settings
 from core.user.views.user.views import *
 
@@ -17,6 +17,9 @@ urlpatterns = [
     # path('profile/edit/<str:slug>/', ProfileUpdateView.as_view(), name='user_profile_update'),
     # path('edit/password/', UserChangePasswordView.as_view(), name='change_password'),
     path('training/add/<uuid:pk>/', TrainingCreateView.as_view(), name='create_training'),
+    path('training/update/<uuid:pk>/', TrainingUpdateView.as_view(), name='update_training'),
+    path('training/delete/<uuid:pk>/', TrainingDeleteView.as_view(), name='delete_training'),
+    path('training/download/', TrainingDownloadView.as_view(), name='download_training'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL,
