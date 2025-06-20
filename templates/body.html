@@ -13,11 +13,11 @@
         {% include 'header.html' %}
 
         <div class="container-fluid py-2">
-            <div class="row">
-                <div class="col-{{ div }}">
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div id="message" class="alert alert-{{ message.tags }} alert-dismissible text-white fade show" role="alert">
+            <div class="col-{{ div }}">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div id="message" class="alert alert-{{ message.tags }} alert-dismissible text-white fade show"
+                             role="alert">
                                 <span class="alert-text">
                                     <strong>
                                         {% if message.tags == 'success' %}
@@ -31,25 +31,25 @@
                                         {% endif %}
                                     </strong>
                                     {{ message }}</span>
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                    {% block content %}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                {% block content %}
 
 
-                    {% endblock %}
+                {% endblock %}
 
-                    {% include 'footer.html' %}
+                {% include 'footer.html' %}
 
-                </div>
             </div>
         </div>
     </main>
 
-     <div class="modal fade" id="modal_template" tabindex="-1" role="dialog" aria-labelledby="modal_template" aria-hidden="true"></div>
+    <div class="modal fade" id="modal_template" tabindex="-1" role="dialog" aria-labelledby="modal_template"
+         aria-hidden="true"></div>
 
     <!--   Core JS Files   -->
     <script src="{% static 'lib/jquery-3.7.1/jquery-3.7.1.min.js' %}"></script>

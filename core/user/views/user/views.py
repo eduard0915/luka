@@ -167,4 +167,5 @@ class UserDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Detail
         context['entity'] = 'Perfil de Usuario'
         context['group_user'] = User.objects.values('groups__name').filter(slug=self.kwargs['slug'])
         context['training'] = Training.objects.filter(user__slug=self.kwargs['slug']).order_by('-date_training')
+        context['competence'] = Competence.objects.filter(user__slug=self.kwargs['slug']).order_by('-date_competence')
         return context

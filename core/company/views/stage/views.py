@@ -5,16 +5,16 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, UpdateView
 
-from core.company.forms import ProcessForm, ProcessUpdateForm
-from core.company.models import Process, Site
+from core.company.forms import StageForm
+from core.company.models import Stage
 from core.mixins import ValidatePermissionRequiredMixin
 
 
-# Creación de Proceso
-class ProcessCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
-    model = Process
-    form_class = ProcessForm
-    template_name = 'process/create_process.html'
+# Creación de Etapas
+class StageCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    model = Stage
+    form_class = StageForm
+    template_name = 'stage/create_stage.html'
     permission_required = 'company.add_company'
 
     @method_decorator(csrf_exempt)
@@ -30,32 +30,27 @@ class ProcessCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
                 form = self.get_form()
                 if form.is_valid():
                     form.save()
-                    messages.success(request, f'Proceso creado satisfactoriamente!')
+                    messages.success(request, f'Etapa creada satisfactoriamente!')
                 else:
-                    messages.error(request, form.errors)
+                    messages.error(request, 'Por favor corrija los errores: {}'.format(form.errors.as_json()))
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
             data['error'] = str(e)
         return JsonResponse(data)
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs.update({'site': Site.objects.get(pk=self.kwargs.get('pk'))})
-        return kwargs
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
-        context['entity'] = 'Creación de Proceso'
+        context['entity'] = 'Creación de Etapa'
         return context
 
 
-# Edición de Proceso
-class ProcessUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
-    model = Process
-    form_class = ProcessUpdateForm
-    template_name = 'process/create_process.html'
+# Edición de Etapa
+class StageUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    model = Stage
+    form_class = StageForm
+    template_name = 'stage/create_stage.html'
     permission_required = 'company.add_company'
 
     @method_decorator(csrf_exempt)
@@ -71,10 +66,9 @@ class ProcessUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
                 form = self.get_form()
                 if form.is_valid():
                     form.save()
-                    messages.success(request, f'Proceso editado satisfactoriamente!')
+                    messages.success(request, f'Etapa editada satisfactoriamente!')
                 else:
-                    messages.error(request, form.errors)
-                # return redirect(self.get_context_data()['list_url'])
+                    messages.error(request, 'Por favor corrija los errores: {}'.format(form.errors.as_json()))
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -83,6 +77,6 @@ class ProcessUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['entity'] = 'Edición de Proceso'
+        context['entity'] = 'Edición de Etapa'
         context['action'] = 'edit'
         return context

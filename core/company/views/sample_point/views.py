@@ -5,16 +5,16 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, UpdateView
 
-from core.company.forms import ProcessForm, ProcessUpdateForm
-from core.company.models import Process, Site
+from core.company.forms import SamplePointForm
+from core.company.models import SamplePoint
 from core.mixins import ValidatePermissionRequiredMixin
 
 
-# Creación de Proceso
-class ProcessCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
-    model = Process
-    form_class = ProcessForm
-    template_name = 'process/create_process.html'
+# Creación de Puntos de Muestreo
+class SamplePointCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    model = SamplePoint
+    form_class = SamplePointForm
+    template_name = 'sample_point/create_sample_point.html'
     permission_required = 'company.add_company'
 
     @method_decorator(csrf_exempt)
@@ -30,32 +30,27 @@ class ProcessCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
                 form = self.get_form()
                 if form.is_valid():
                     form.save()
-                    messages.success(request, f'Proceso creado satisfactoriamente!')
+                    messages.success(request, f'Punto de Muestreo creado satisfactoriamente!')
                 else:
-                    messages.error(request, form.errors)
+                    messages.error(request, 'Por favor corrija los errores: {}'.format(form.errors.as_json()))
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
             data['error'] = str(e)
         return JsonResponse(data)
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs.update({'site': Site.objects.get(pk=self.kwargs.get('pk'))})
-        return kwargs
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
-        context['entity'] = 'Creación de Proceso'
+        context['entity'] = 'Creación de Punto de Muestreo'
         return context
 
 
-# Edición de Proceso
-class ProcessUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
-    model = Process
-    form_class = ProcessUpdateForm
-    template_name = 'process/create_process.html'
+# Edición de Puntos de Muestreo
+class SamplePointUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    model = SamplePoint
+    form_class = SamplePointForm
+    template_name = 'sample_point/create_sample_point.html'
     permission_required = 'company.add_company'
 
     @method_decorator(csrf_exempt)
@@ -71,10 +66,9 @@ class ProcessUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
                 form = self.get_form()
                 if form.is_valid():
                     form.save()
-                    messages.success(request, f'Proceso editado satisfactoriamente!')
+                    messages.success(request, f'Punto de Muestreo editado satisfactoriamente!')
                 else:
-                    messages.error(request, form.errors)
-                # return redirect(self.get_context_data()['list_url'])
+                    messages.error(request, 'Por favor corrija los errores: {}'.format(form.errors.as_json()))
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -83,6 +77,6 @@ class ProcessUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['entity'] = 'Edición de Proceso'
+        context['entity'] = 'Edición de Punto de Muestreo'
         context['action'] = 'edit'
         return context

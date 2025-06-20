@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, CreateView, UpdateView, DetailView
 
 from core.company.forms import SiteForm, SiteUpdateForm
-from core.company.models import Site, Company, Process
+from core.company.models import Site, Company, Process, Stage, SamplePoint
 from core.mixins import ValidatePermissionRequiredMixin
 
 
@@ -151,8 +151,9 @@ class SiteDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Detail
         context['title'] = 'Detalle de Planta'
         context['entity'] = 'Detalle de Planta'
         context['subtitle'] = 'Información de la planta'
-        context['div'] = '6'
-        context['icon'] = 'factory'
+        context['div'] = '12'
         # Get all processes associated with this site
-        context['processes'] = Process.objects.filter(site=self.object)
+        context['processes'] = Process.objects.select_related('site').filter(site=self.object, enable_process=True)
+        context['stages'] = Stage.objects.filter(enable_stage=True)
+        context['sample_point'] = SamplePoint.objects.filter(enable_point=True)
         return context

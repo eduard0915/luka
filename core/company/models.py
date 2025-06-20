@@ -90,7 +90,6 @@ class SamplePoint(models.Model):
     sample_point_code = models.CharField(max_length=30, verbose_name='Codigo/Abreviación')
     stage = models.ForeignKey(Stage, on_delete=models.CASCADE, verbose_name='Etapa')
     enable_point = models.BooleanField(default=True, verbose_name='Habilitado')
-    slug = models.SlugField(unique=True, null=False, blank=False)
 
     def __str__(self):
         return str(self.sample_point_name)

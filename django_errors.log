@@ -317,3 +317,259 @@ WARNING 2025-06-16 23:17:36,931 log 25054 125598458439360 Not Found: /user/updat
 WARNING 2025-06-16 23:17:36,931 basehttp 25054 125598458439360 "GET /user/update/10/ HTTP/1.1" 404 3395
 WARNING 2025-06-16 23:17:37,015 log 25054 125598458439360 Not Found: /favicon.ico
 WARNING 2025-06-16 23:17:37,015 basehttp 25054 125598458439360 "GET /favicon.ico HTTP/1.1" 404 3298
+WARNING 2025-06-18 14:47:09,196 basehttp 32486 125670740981440 "GET /static/lib/material-dashboard-pro/assets/img/favicon.png HTTP/1.1" 404 2074
+WARNING 2025-06-18 15:33:23,235 log 35065 131264533231296 Not Found: /favicon.ico
+WARNING 2025-06-18 15:33:23,235 basehttp 35065 131264533231296 "GET /favicon.ico HTTP/1.1" 404 3298
+WARNING 2025-06-18 15:33:29,588 log 35065 131264491267776 Not Found: /favicon.ico
+WARNING 2025-06-18 15:33:29,588 basehttp 35065 131264491267776 "GET /favicon.ico HTTP/1.1" 404 3298
+ERROR 2025-06-18 15:52:33,146 log 37285 123422977816256 Internal Server Error: /user/training/download/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 132, in get
+    url = urlopen(link)
+          ^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 525, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 634, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 563, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 643, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 404: Not Found
+ERROR 2025-06-18 15:52:33,149 basehttp 37285 123422977816256 "GET /user/training/download/?id=c7a9e764-051e-4f76-90f0-4bee028d362b&type=support_training HTTP/1.1" 500 128273
+WARNING 2025-06-18 15:59:53,709 basehttp 38588 125537397765824 "GET /static/lib/material-dashboard-pro/assets/img/favicon.png HTTP/1.1" 404 2074
+ERROR 2025-06-18 16:00:20,617 log 38588 125537389373120 Internal Server Error: /user/training/download/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 136, in get
+    url = urlopen(link)
+          ^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 525, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 634, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 563, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 643, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 404: Not Found
+ERROR 2025-06-18 16:00:20,627 basehttp 38588 125537389373120 "GET /user/training/download/?id=c7a9e764-051e-4f76-90f0-4bee028d362b&type=support_training HTTP/1.1" 500 128285
+WARNING 2025-06-19 20:14:54,132 basehttp 5495 138945201436352 "GET /static/lib/material-dashboard-pro/assets/img/favicon.png HTTP/1.1" 404 2074
+WARNING 2025-06-19 20:22:08,095 log 5495 138945193043648 Not Found: /favicon.ico
+WARNING 2025-06-19 20:22:08,095 basehttp 5495 138945193043648 "GET /favicon.ico HTTP/1.1" 404 3298
+ERROR 2025-06-19 20:26:48,788 log 6204 125112573490880 Internal Server Error: /user/training/download/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 131, in get
+    url = urlopen(link)
+          ^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 525, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 634, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 563, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 643, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 404: Not Found
+ERROR 2025-06-19 20:26:48,791 basehttp 6204 125112573490880 "GET /user/training/download/?id=c7a9e764-051e-4f76-90f0-4bee028d362b&type=support_training HTTP/1.1" 500 128372
+ERROR 2025-06-19 20:27:48,285 log 6383 138430277220032 Internal Server Error: /user/training/download/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 131, in get
+    url = urlopen(link)
+          ^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 525, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 634, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 563, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 643, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 404: Not Found
+ERROR 2025-06-19 20:27:48,287 basehttp 6383 138430277220032 "GET /user/training/download/?id=c7a9e764-051e-4f76-90f0-4bee028d362b&type=support_training HTTP/1.1" 500 128509
+WARNING 2025-06-19 21:03:36,781 log 9050 133884331161280 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-19 21:03:36,783 basehttp 9050 133884331161280 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3409
+WARNING 2025-06-19 21:03:37,168 basehttp 9050 133884331161280 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-19 21:03:37,172 basehttp 9050 133884686620352 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-19 21:03:37,256 basehttp 9050 133884696061632 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-19 21:03:55,133 log 9050 133884678227648 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-19 21:03:55,133 basehttp 9050 133884678227648 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3409
+WARNING 2025-06-19 21:03:55,183 basehttp 9050 133884678227648 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-19 21:03:55,196 basehttp 9050 133884322768576 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-19 21:03:55,196 basehttp 9050 133884704454336 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-19 21:15:14,867 log 9513 140511748814528 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-19 21:15:14,868 basehttp 9513 140511748814528 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3409
+WARNING 2025-06-19 21:15:15,352 basehttp 9513 140511748814528 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-19 21:15:15,355 basehttp 9513 140511667025600 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-19 21:15:15,418 basehttp 9513 140511667025600 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-19 21:15:43,540 log 9513 140511667025600 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-19 21:15:43,541 basehttp 9513 140511667025600 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3409
+WARNING 2025-06-19 21:15:44,188 log 9513 140511667025600 Not Found: /favicon.ico
+WARNING 2025-06-19 21:15:44,189 basehttp 9513 140511667025600 "GET /favicon.ico HTTP/1.1" 404 3298
+WARNING 2025-06-19 21:15:55,553 basehttp 9513 140511667025600 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-19 21:15:55,582 log 9513 140511650240192 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-19 21:15:55,583 basehttp 9513 140511748814528 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-19 21:15:55,584 basehttp 9513 140511658632896 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-19 21:15:55,585 basehttp 9513 140511650240192 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3409
+WARNING 2025-06-19 21:15:55,652 log 9513 140511650240192 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-19 21:15:55,653 basehttp 9513 140511650240192 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3409
+WARNING 2025-06-19 21:15:55,836 basehttp 9513 140511650240192 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-19 21:57:05,721 log 12215 124869811365568 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-19 21:57:05,721 basehttp 12215 124869811365568 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3409
+WARNING 2025-06-19 21:57:05,967 basehttp 12215 124869811365568 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-19 21:57:05,971 basehttp 12215 124869572282048 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-19 21:57:06,006 basehttp 12215 124869572282048 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-19 22:03:45,329 log 13416 136268251920064 Not Found: /favicon.ico
+WARNING 2025-06-19 22:03:45,329 basehttp 13416 136268251920064 "GET /favicon.ico HTTP/1.1" 404 3298
+WARNING 2025-06-19 22:18:49,302 log 13691 133833015948992 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-19 22:18:49,302 basehttp 13691 133833015948992 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3409
+WARNING 2025-06-19 22:18:49,524 basehttp 13691 133833015948992 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-19 22:18:49,527 basehttp 13691 133833007556288 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-19 22:18:49,560 basehttp 13691 133833007556288 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-19 22:19:32,762 log 14796 140018832111296 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-19 22:19:32,762 basehttp 14796 140018832111296 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3409
+WARNING 2025-06-19 22:19:32,905 basehttp 14796 140018832111296 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-19 22:19:33,094 basehttp 14796 140018752419520 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-19 22:19:33,099 basehttp 14796 140018752419520 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-19 22:25:33,040 log 14796 140018752419520 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-19 22:25:33,041 basehttp 14796 140018752419520 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3409
+WARNING 2025-06-19 22:25:33,255 basehttp 14796 140018752419520 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-19 22:25:33,258 basehttp 14796 140018832111296 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-19 22:25:33,288 basehttp 14796 140018832111296 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-19 22:28:42,072 log 14796 140018832111296 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-19 22:28:42,073 basehttp 14796 140018832111296 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3409
+WARNING 2025-06-19 22:28:42,294 basehttp 14796 140018832111296 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-19 22:28:42,296 basehttp 14796 140018752419520 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-19 22:28:42,328 basehttp 14796 140018752419520 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-19 22:29:06,001 log 14796 140018752419520 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-19 22:29:06,002 basehttp 14796 140018752419520 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3409
+WARNING 2025-06-19 22:29:06,148 basehttp 14796 140018752419520 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-19 22:29:06,232 basehttp 14796 140018832111296 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-19 22:29:06,368 basehttp 14796 140018832111296 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-19 22:38:41,979 log 14796 140018832111296 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-19 22:38:41,979 basehttp 14796 140018832111296 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3409
+WARNING 2025-06-19 22:38:42,181 basehttp 14796 140018832111296 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-19 22:38:42,182 basehttp 14796 140018752419520 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-19 22:38:42,214 basehttp 14796 140018752419520 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-19 22:41:26,867 log 14796 140018752419520 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-19 22:41:26,868 basehttp 14796 140018752419520 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3409
+WARNING 2025-06-19 22:41:27,008 basehttp 14796 140018752419520 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-19 22:41:27,191 basehttp 14796 140018832111296 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-19 22:41:27,207 basehttp 14796 140018832111296 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-19 22:43:11,033 log 14796 140018832111296 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-19 22:43:11,033 basehttp 14796 140018832111296 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3409
+WARNING 2025-06-19 22:43:11,269 basehttp 14796 140018832111296 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-19 22:43:11,272 basehttp 14796 140018752419520 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-19 22:43:11,303 basehttp 14796 140018752419520 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104
+WARNING 2025-06-19 22:49:30,668 log 14796 140018752419520 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-06-19 22:49:30,669 basehttp 14796 140018752419520 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3409
+WARNING 2025-06-19 22:49:30,907 basehttp 14796 140018752419520 "GET /static/lib/material-dashboard-pro/assets/js/core/bootstrap.min.js.map HTTP/1.1" 404 2113
+WARNING 2025-06-19 22:49:30,907 basehttp 14796 140018832111296 "GET /static/lib/material-dashboard-pro/assets/js/_site_dashboard_pro/assets/js/dashboard-pro.js.map HTTP/1.1" 404 2188
+WARNING 2025-06-19 22:49:30,939 basehttp 14796 140018832111296 "GET /static/lib/material-dashboard-pro/assets/css/dashboard-pro.css.map HTTP/1.1" 404 2104

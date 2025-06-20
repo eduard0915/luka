@@ -1,0 +1,37 @@
+<div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h6 class="modal-title font-weight-normal" id="modal-title-notification">{{ entity }}</h6>
+            <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <form enctype="multipart/form-data" method="post" action="{{ request.path }}" class="form-horizontal"
+              id="modal_form">
+            {% csrf_token %}
+            <input type="hidden" value="delete" name="action">
+            <input type="hidden" value="{{ object.id }}" name="id">
+            <div class="modal-body">
+                <div class="py-3 text-center">
+                    <h4 class="text-gradient text-danger mt-4">{{ delete }}</h4>
+                    <p>{{ info_delete }}</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn bg-gradient-primary" id="btnDelete">Eliminar</button>
+            </div>
+        </form>
+    </div>
+    <script>
+
+        $("#btnDelete").click(function () {
+            $(this).prop("disabled", true); //deshabilitamos el botón
+            $(this).submit()
+            $(this).html(
+                `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Eliminando...` //añadimos el spinner
+            );
+        });
+
+    </script>
+</div>

@@ -96,19 +96,19 @@
                                         <table class="table align-items-center mb-0" id="data_0">
                                             <thead>
                                             <tr>
-                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width:40%">
                                                     Descripción
                                                 </th>
-                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2" style="width:5%">
                                                     Ver
                                                 </th>
-                                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width:30%">
                                                     Realizado por
                                                 </th>
-                                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width:15%">
                                                     Fecha
                                                 </th>
-                                                <th class="text-secondary opacity-7"></th>
+                                                <th class="text-secondary opacity-7" style="width:10%"></th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -123,21 +123,24 @@
                                                             </div>
                                                         </td>
                                                         <td>
-                                                            <a href="#"><i class="fa-solid fa-file-pdf text-danger"></i></a>
+                                                            <a href="{% url 'user:download_training' %}?id={{ foo.id }}&type=support_training" target="_blank">
+                                                                <i class="fa-solid fa-file-pdf text-danger"></i>
+                                                            </a>
                                                         </td>
                                                         <td class="align-middle text-center text-sm">
                                                             <p class="text-xs text-secondary mb-0">{{ foo.training_by }}</p>
                                                         </td>
                                                         <td class="align-middle text-center">
-                                                            <span class="text-secondary text-xs font-weight-normal">{{ foo.date_training | date:'Y-m-d' }}</span>
+                                                            <span class="text-secondary text-xs font-weight-normal">
+                                                                {{ foo.date_training | date:'Y-m-d' }}</span>
                                                         </td>
                                                         <td class="align-middle">
-                                                            <a href="#"
+                                                            <a onclick="open_modal('{% url 'user:delete_training' foo.id %}')"
                                                                class="text-secondary font-weight-normal text-xs"
                                                                data-toggle="tooltip" data-original-title="Eliminar">
                                                                 <i class="fas fa-trash text-danger text-sm m-2"></i>
                                                             </a>
-                                                            <a href="#"
+                                                            <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
                                                                class="text-secondary font-weight-normal text-xs"
                                                                data-toggle="tooltip" data-original-title="Editar">
                                                                 <i class="fas fa-edit text-warning text-sm"></i>
@@ -175,7 +178,7 @@
                         <div class="card-body p-1">
                             <div class="card">
                                 <div class="table-responsive">
-                                    <table class="table align-items-center mb-0">
+                                    <table class="table align-items-center mb-0" id="data_0">
                                         <thead>
                                         <tr>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
@@ -190,30 +193,38 @@
                                             <th class="text-secondary opacity-7"></th>
                                         </tr>
                                         </thead>
-                                        <tbody>
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex px-2 py-1">
-                                                    <div class="d-flex flex-column justify-content-center">
-                                                        <h6 class="mb-0 text-xs">Developer software</h6>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <a href="#"><i class="fa-solid fa-file-pdf text-danger"></i></a>
-                                            </td>
-                                            <td class="align-middle text-center text-sm">
-                                                <p class="text-xs text-secondary mb-0">John Michael Alviz</p>
-                                            </td>
-                                            <td class="align-middle">
-                                                <a href="#"
-                                                   class="text-secondary font-weight-normal text-xs"
-                                                   data-toggle="tooltip" data-original-title="Editar">
-                                                    Edit
-                                                </a>
-                                            </td>
-                                        </tr>
-                                        </tbody>
+                                        {% if competence %}
+                                            <tbody>
+                                            {% for cp in competence %}
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex px-2 py-1">
+                                                            <div class="d-flex flex-column justify-content-center">
+                                                                <h6 class="mb-0 text-xs">{{ cp.description_competence }}</h6>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <a href="#"><i class="fa-solid fa-file-pdf text-danger"></i></a>
+                                                    </td>
+                                                    <td class="align-middle text-center text-sm">
+                                                        <p class="text-xs text-secondary mb-0">{{ cp.institution }}</p>
+                                                    </td>
+                                                    <td class="align-middle">
+                                                        <a href="#"
+                                                           class="text-secondary font-weight-normal text-xs"
+                                                           data-toggle="tooltip" data-original-title="Editar">
+                                                            Edit
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="4" class="text-center">Sin competencias registradas</td>
+                                            </tr>
+                                        {% endif %}
                                     </table>
                                 </div>
                             </div>
@@ -245,6 +256,7 @@
                         autoWidth: false,
                         info: false,
                         pageLength: 5,
+                        scrollX: false,
                         lengthMenu: [5, 10, 25, 50, 75, 100],
                         order: [[3, 'desc']],
                         language: {
