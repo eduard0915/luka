@@ -167,10 +167,12 @@
                                     <h6 class="mb-0">Competencias</h6>
                                 </div>
                                 <div class="col-md-4 text-end">
-                                    <a href="#" title="Registrar Competencia">
-                                        <i class="fa fa-plus"></i> <i class="fa-solid fa-graduation-cap text-secondary text-sm"
-                                           data-bs-toggle="tooltip"
-                                           data-bs-placement="top"></i>
+                                    <a onclick="open_modal('{% url 'user:create_competence' object.slug %}')"
+                                       title="Registrar Competencia">
+                                        <i class="fa fa-plus"></i> <i
+                                            class="fa-solid fa-graduation-cap text-secondary text-sm"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top"></i>
                                     </a>
                                 </div>
                             </div>
@@ -205,16 +207,24 @@
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <a href="#"><i class="fa-solid fa-file-pdf text-danger"></i></a>
+                                                        <a href="{% url 'user:download_competence' %}?id={{ cp.id }}&type=support_competence"
+                                                           target="_blank">
+                                                            <i class="fa-solid fa-file-pdf text-danger"></i>
+                                                        </a>
                                                     </td>
                                                     <td class="align-middle text-center text-sm">
                                                         <p class="text-xs text-secondary mb-0">{{ cp.institution }}</p>
                                                     </td>
                                                     <td class="align-middle">
-                                                        <a href="#"
+                                                        <a onclick="open_modal('{% url 'user:delete_competence' cp.id %}')"
+                                                           class="text-secondary font-weight-normal text-xs"
+                                                           data-toggle="tooltip" data-original-title="Eliminar">
+                                                            <i class="fas fa-trash text-danger text-sm m-2"></i>
+                                                        </a>
+                                                        <a onclick="open_modal('{% url 'user:update_competence' cp.id %}')"
                                                            class="text-secondary font-weight-normal text-xs"
                                                            data-toggle="tooltip" data-original-title="Editar">
-                                                            Edit
+                                                            <i class="fas fa-edit text-warning text-sm"></i>
                                                         </a>
                                                     </td>
                                                 </tr>

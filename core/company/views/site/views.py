@@ -43,6 +43,7 @@ class SiteListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView
         context['create_url'] = reverse_lazy('company:create_site')
         context['entity'] = 'Plantas'
         context['div'] = '10'
+        context['icon'] = 'factory'
         return context
 
 

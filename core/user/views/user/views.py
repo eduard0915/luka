@@ -102,6 +102,7 @@ class UserListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView
         context['create_url'] = reverse_lazy('user:user_create')
         context['entity'] = 'Usuarios'
         context['div'] = '11'
+        context['icon'] = 'group'
         return context
 
 

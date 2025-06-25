@@ -169,3 +169,68 @@ class TrainingUptadeForm(ModelForm):
         except Exception as e:
             data['error'] = str(e)
         return data
+
+
+# Creación de competencia
+class CompetenceForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = Competence
+        fields = ['description_competence', 'institution', 'date_competence', 'support_competence']
+        widgets = {
+            'description_competence': TextInput(attrs={'class': 'form-control', 'required': True, 'type': 'text'}),
+            'institution': TextInput(attrs={'class': 'form-control', 'required': True, 'type': 'text'}),
+            'support_competence': FileInput(attrs={'class': 'form-control', 'type': 'file'}),
+            'date_competence': DateInput(attrs={'class': 'form-control', 'type': 'date'})
+
+        }
+
+    def save(self, commit=True):
+        data = {}
+        form = super()
+        try:
+            if form.is_valid():
+                data = form.save(commit=False)
+                data.user_id = self.user.id
+                data.save()
+            else:
+                data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Edición de competencia
+class CompetenceUptadeForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = Competence
+        fields = ['description_competence', 'institution', 'date_competence', 'support_competence']
+        widgets = {
+            'description_competence': TextInput(attrs={'class': 'form-control', 'required': True, 'type': 'text'}),
+            'institution': TextInput(attrs={'class': 'form-control', 'required': True, 'type': 'text'}),
+            'support_competence': FileInput(attrs={'class': 'form-control', 'type': 'file'}),
+            'date_competence': DateInput(attrs={'class': 'form-control', 'type': 'date'})
+
+        }
+
+    def save(self, commit=True):
+        data = {}
+        form = super()
+        try:
+            if form.is_valid():
+                data = form.save()
+            else:
+                data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
