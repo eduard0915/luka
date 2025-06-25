@@ -30,7 +30,7 @@
                         <div class="row">
                     {% endif %}
                 <div class="col-md-3">
-                    {% if field.name == 'groups' or field.name == 'is_active' or field.name == 'site' %}
+                    {% if field.name == 'groups' or field.name == 'is_active' or field.name == 'site' or field.name == 'reagent' or field.name == 'reagent_liquid' %}
                         <div class="input-group input-group-static mb-4">
                             <label for=id_{{ field.name }} class="ms-0">
                                 {{ field.label }}{% if field.field.required %}*{% endif %}
@@ -38,14 +38,24 @@
                             {{ field }}
                         </div>
                     {% else %}
-                        <div {% if field.name == 'photo' or field.name == 'company_logo' %}
-                            class="fileinput fileinput-new text-center" data-provides="fileinput"
-                            {% else %}class="input-group input-group-outline my-3" {% endif %}>
-                            <label for=id_{{ field.name }} class="form-label ms-0">
-                                {{ field.label }}{% if field.field.required %}*{% endif %}
-                            </label>
-                            {{ field }}
-                        </div>
+                        {% if field.field.widget.input_type == 'file' %}
+                            <div class="file-input-div">
+                                <label for="id_{{ field.name }}" class="file-input-label">
+                                    {{ field.label }}{% if field.field.required %}*{% endif %}
+                                </label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="input-group input-group-outline my-3">
+                                <label for="id_{{ field.name }}" class="form-label ms-0">
+                                    {{ field.label }}{% if field.field.required %}*{% endif %}
+                                </label>
+                                {{ field }}
+                            </div>
+                        {% endif %}
                     {% endif %}
                 </div>
                 {% if forloop.last %}
@@ -67,16 +77,6 @@
 {% endblock %}
 {% block scripts_detail %}
     <script type="application/javascript">
-
-        {#if (document.getElementById('id_groups')) {#}
-        {#    const element = document.getElementById('id_groups');#}
-        {#    const choices = new Choices(element, {#}
-        {#        removeItemButton: true,#}
-        {#        searchEnabled: true,#}
-        {#        placeholder: true,#}
-        {#        placeholderValue: 'Seleccionar'#}
-        {#    });#}
-        {# }#}
 
         document.querySelector('form').addEventListener('submit', function (e) {
             e.preventDefault();

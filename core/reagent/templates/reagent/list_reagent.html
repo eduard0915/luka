@@ -1,0 +1,34 @@
+{% extends 'list_one.html' %}
+{% load static %}
+
+
+{% block head_list %}
+    <script src="{% static 'list_reagent.js' %}"></script>
+{% endblock %}
+
+{% block buttons %}
+    <a href="{{ create_url }}" class="btn bg-gradient-dark mb-0"><i class="fa-solid fa-plus"></i> Nuevo</a>
+    <button type="button" class="btn btn-outline-success mb-0">
+        <i class="fa-solid fa-file-excel"></i> Descargar
+    </button>
+{% endblock %}
+
+{% block columns %}
+    <tr>
+        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:10%">Código</th>
+        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:35%">Descripción</th>
+        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:10%">Estado</th>
+        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:25%">Fabricante</th>
+        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:10%">Ficha</th>
+        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:10%">Acciones</th>
+    </tr>
+{% endblock %}
+
+{% block rows %}
+
+
+{% endblock %}
+
+{% block scripts_detail %}
+
+{% endblock %}

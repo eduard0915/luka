@@ -14,7 +14,7 @@
     <div class="card mt-5">
         <div class="card-header p-3 pt-2">
             <div class="icon icon-lg icon-shape bg-gradient-dark shadow text-center border-radius-xl mt-n4 me-3 float-start">
-                <i class="material-symbols-rounded opacity-10">event</i>
+                <i class="material-symbols-rounded opacity-10">{{ icon }}</i>
             </div>
             <h5 class="mb-0">{{ entity }}</h5>
             <p class="text-sm mb-0">
@@ -29,7 +29,9 @@
                     {% if forloop.first %}
                         <div class="row">
                     {% endif %}
-                <div class="col-md-4">
+                <div class="{% if field.name == 'code_reagent' %}col-md-2
+                    {% elif field.name == 'description_reagent' or field.name == 'manufacturer' %}col-md-5
+                    {% else %}col-md-4{% endif %}">
                     {% if field.name == 'groups' or field.name == 'is_active' %}
                         <div class="input-group input-group-static mb-4">
                             <label class="form-label mt-5 ms-0">

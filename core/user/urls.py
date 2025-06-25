@@ -2,6 +2,7 @@ from django.conf.urls.static import static
 from django.urls import path
 
 from core.user.views.training.views import *
+from core.user.views.competence.views import *
 from luka import settings
 from core.user.views.user.views import *
 
@@ -20,6 +21,10 @@ urlpatterns = [
     path('training/update/<uuid:pk>/', TrainingUpdateView.as_view(), name='update_training'),
     path('training/delete/<uuid:pk>/', TrainingDeleteView.as_view(), name='delete_training'),
     path('training/download/', TrainingDownloadView.as_view(), name='download_training'),
+    path('competence/add/<uuid:pk>/', CompetenceCreateView.as_view(), name='create_competence'),
+    path('competence/update/<uuid:pk>/', CompetenceUpdateView.as_view(), name='update_competence'),
+    path('competence/delete/<uuid:pk>/', CompetenceDeleteView.as_view(), name='delete_competence'),
+    path('competence/download/', CompetenceDownloadView.as_view(), name='download_competence'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL,
