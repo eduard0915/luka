@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, UpdateView
 
 from core.company.forms import StageForm
-from core.company.models import Stage
+from core.company.models import Stage, Site
 from core.mixins import ValidatePermissionRequiredMixin
 
 
@@ -38,6 +38,12 @@ class StageCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Creat
         except Exception as e:
             data['error'] = str(e)
         return JsonResponse(data)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        site = Site.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'site': site})
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
