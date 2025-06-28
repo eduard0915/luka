@@ -24,10 +24,10 @@ urlpatterns = [
     path('add_process/<uuid:pk>/', ProcessCreateView.as_view(), name='create_process'),
     path('update_process/<uuid:pk>/', ProcessUpdateView.as_view(), name='update_process'),
     # Etapas
-    path('add_stage/', StageCreateView.as_view(), name='create_stage'),
+    path('add_stage/<uuid:pk>/', StageCreateView.as_view(), name='create_stage'),
     path('update_stage/<uuid:pk>/', StageUpdateView.as_view(), name='update_stage'),
     # Puntos de Muestreo
-    path('add_sample_point/', SamplePointCreateView.as_view(), name='create_sample_point'),
+    path('add_sample_point/<uuid:pk>/', SamplePointCreateView.as_view(), name='create_sample_point'),
     path('update_sample_point/<uuid:pk>/', SamplePointUpdateView.as_view(), name='update_sample_point')
 ]
 

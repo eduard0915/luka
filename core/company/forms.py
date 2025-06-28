@@ -162,7 +162,9 @@ class ProcessUpdateForm(ModelForm):
 # Creación de Etapas
 class StageForm(ModelForm):
     def __init__(self, *args, **kwargs):
+        self.site = kwargs.pop('site')
         super().__init__(*args, **kwargs)
+        self.fields['process'].queryset = Process.objects.select_related('site').filter(site_id=self.site.id)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
@@ -191,7 +193,9 @@ class StageForm(ModelForm):
 # Creación de Puntos de Muestreo
 class SamplePointForm(ModelForm):
     def __init__(self, *args, **kwargs):
+        self.site = kwargs.pop('site')
         super().__init__(*args, **kwargs)
+        self.fields['stage'].queryset = Stage.objects.select_related('process').filter(process__site_id=self.site.id)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 

@@ -154,7 +154,9 @@ class SiteDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Detail
         context['subtitle'] = 'Información de la planta'
         context['div'] = '12'
         # Get all processes associated with this site
-        context['processes'] = Process.objects.select_related('site').filter(site=self.object, enable_process=True)
-        context['stages'] = Stage.objects.filter(enable_stage=True)
-        context['sample_point'] = SamplePoint.objects.filter(enable_point=True)
+        context['processes'] = Process.objects.select_related('site').filter(site_id=self.object.id, enable_process=True)
+        context['stages'] = Stage.objects.filter(
+            enable_stage=True, process__site_id=self.object.id).order_by('stage_name')
+        context['sample_point'] = SamplePoint.objects.filter(
+            enable_point=True, stage__process__site_id=self.object.id).order_by('sample_point_name')
         return context
