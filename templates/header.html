@@ -1,29 +1,107 @@
-<nav class="navbar navbar-main navbar-expand-lg position-sticky mt-2 top-1 px-0 py-1 mx-3 shadow-none border-radius-lg z-index-sticky"
-     id="navbarBlur" data-scroll="true">
-    <div class="container-fluid py-1 px-2">
-        <div class="sidenav-toggler sidenav-toggler-inner d-xl-block d-none ">
-            <a href="javascript:;" class="nav-link text-body p-0">
-                <div class="sidenav-toggler-inner">
-                    <i class="sidenav-toggler-line"></i>
-                    <i class="sidenav-toggler-line"></i>
-                    <i class="sidenav-toggler-line"></i>
+<!-- Navbar-->
+<header class="app-header"><a class="app-header__logo" href="{% url 'start:start' %}">Quality Lims</a>
+    <!-- Sidebar toggle button--><a class="app-sidebar__toggle" href="#" data-toggle="sidebar"
+                                    aria-label="Hide Sidebar"></a>
+    <!-- Navbar Right Menu-->
+    <ul class="app-nav">
+
+        <!--Notification Menu-->
+        <li class="dropdown"><a class="app-nav__item" href="#" data-bs-toggle="dropdown"
+                                aria-label="Show notifications"><i class="bi bi-bell fs-5"></i></a>
+            <ul class="app-notification dropdown-menu dropdown-menu-right">
+                <li class="app-notification__title">You have 4 new notifications.</li>
+                <div class="app-notification__content">
+                    <li><a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i
+                            class="bi bi-envelope fs-4 text-primary"></i></span>
+                        <div>
+                            <p class="app-notification__message">Lisa sent you a mail</p>
+                            <p class="app-notification__meta">2 min ago</p>
+                        </div>
+                    </a></li>
+                    <li><a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i
+                            class="bi bi-exclamation-triangle fs-4 text-warning"></i></span>
+                        <div>
+                            <p class="app-notification__message">Mail server not working</p>
+                            <p class="app-notification__meta">5 min ago</p>
+                        </div>
+                    </a></li>
+                    <li><a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i
+                            class="bi bi-cash fs-4 text-success"></i></span>
+                        <div>
+                            <p class="app-notification__message">Transaction complete</p>
+                            <p class="app-notification__meta">2 days ago</p>
+                        </div>
+                    </a></li>
+                    <li><a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i
+                            class="bi bi-envelope fs-4 text-primary"></i></span>
+                        <div>
+                            <p class="app-notification__message">Lisa sent you a mail</p>
+                            <p class="app-notification__meta">2 min ago</p>
+                        </div>
+                    </a></li>
+                    <li><a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i
+                            class="bi bi-exclamation-triangle fs-4 text-warning"></i></span>
+                        <div>
+                            <p class="app-notification__message">Mail server not working</p>
+                            <p class="app-notification__meta">5 min ago</p>
+                        </div>
+                    </a></li>
+                    <li><a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i
+                            class="bi bi-cash fs-4 text-success"></i></span>
+                        <div>
+                            <p class="app-notification__message">Transaction complete</p>
+                            <p class="app-notification__meta">2 days ago</p>
+                        </div>
+                    </a></li>
                 </div>
-            </a>
-        </div>
-        <nav aria-label="breadcrumb" class="ps-2">
-            <ol class="breadcrumb bg-transparent mb-0 p-0">
-                <li class="breadcrumb-item text-sm text-dark active font-weight-bold" aria-current="page">
-                    {% if company %}{{ company }}{% else %}Company Name{% endif %}
+                <li class="app-notification__footer"><a href="#">See all notifications.</a></li>
+            </ul>
+        </li>
+        <!-- User Menu-->
+        <li class="dropdown"><a class="app-nav__item" href="#" data-bs-toggle="dropdown" aria-label="Open Profile Menu"><i
+                class="bi bi-person fs-4"></i></a>
+            <ul class="dropdown-menu settings-menu dropdown-menu-right">
+                <li><a class="dropdown-item" href="page-user.html"><i class="bi bi-gear me-2 fs-5"></i> Settings</a>
                 </li>
-            </ol>
-        </nav>
-        <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4 justify-content-md-end" id="navbar">
-            <ul class="navbar-nav  justify-content-end">
-                <li class="breadcrumb-item text-sm text-dark active me-2" aria-current="page">
-                    {% for g in request.user.groups.all %}
-                        {{ g.name }}
-                    {% endfor %}
+                <li><a class="dropdown-item" href="page-user.html"><i class="bi bi-person me-2 fs-5"></i> Profile</a>
                 </li>
+                <li><a class="dropdown-item" href="page-login.html"><i class="bi bi-box-arrow-right me-2 fs-5"></i>
+                    Logout</a></li>
+            </ul>
+        </li>
+    </ul>
+</header>
+
+
+
+
+
+{#<nav class="navbar navbar-main navbar-expand-lg position-sticky mt-2 top-1 px-0 py-1 mx-3 shadow-none border-radius-lg z-index-sticky"#}
+{#     id="navbarBlur" data-scroll="true">#}
+{#    <div class="container-fluid py-1 px-2">#}
+{#        <div class="sidenav-toggler sidenav-toggler-inner d-xl-block d-none ">#}
+{#            <a href="javascript:;" class="nav-link text-body p-0">#}
+{#                <div class="sidenav-toggler-inner">#}
+{#                    <i class="sidenav-toggler-line"></i>#}
+{#                    <i class="sidenav-toggler-line"></i>#}
+{#                    <i class="sidenav-toggler-line"></i>#}
+{#                </div>#}
+{#            </a>#}
+{#        </div>#}
+{#        <nav aria-label="breadcrumb" class="ps-2">#}
+{#            <ol class="breadcrumb bg-transparent mb-0 p-0">#}
+{#                <li class="breadcrumb-item text-sm text-dark active font-weight-bold" aria-current="page">#}
+{#                    {% if company %}{{ company }}{% else %}Company Name{% endif %}#}
+{#                </li>#}
+{#            </ol>#}
+{#        </nav>#}
+{#        <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4 justify-content-md-end" id="navbar">#}
+{#            <ul class="navbar-nav  justify-content-end">#}
+{#                <li class="breadcrumb-item text-sm text-dark active me-2" aria-current="page">#}
+{#                    {% for g in request.user.groups.all %}#}
+{#                        {{ g.name }}#}
+{#                    {% endfor %}#}
+{#                </li>#}
 {#                <li class="nav-item">#}
 {#                    <a href="javascript:;" class="nav-link py-0 px-1 line-height-0">#}
 {#                        <i class="material-symbols-rounded fixed-plugin-button-nav">#}
@@ -31,66 +109,66 @@
 {#                        </i>#}
 {#                    </a>#}
 {#                </li>#}
-                <li class="nav-item dropdown py-0 pe-3">
-                    <a href="javascript:;" class="nav-link py-0 px-1 position-relative line-height-0"
-                       id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="material-symbols-rounded">
-                            notifications
-                        </i>
-                        <span class="position-absolute top-5 start-100 translate-middle badge rounded-pill bg-danger border border-white small py-1 px-2">
-                  <span class="small">11</span>
-                  <span class="visually-hidden">unread notifications</span>
-                </span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end p-2 me-sm-n4" aria-labelledby="dropdownMenuButton">
-                        <li class="mb-2">
-                            <a class="dropdown-item border-radius-md" href="javascript:;">
-                                <div class="d-flex align-items-center py-1">
-                                    <span class="material-symbols-rounded">email</span>
-                                    <div class="ms-2">
-                                        <h6 class="text-sm font-weight-normal my-auto">
-                                            Check new messages
-                                        </h6>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a class="dropdown-item border-radius-md" href="javascript:;">
-                                <div class="d-flex align-items-center py-1">
-                                    <span class="material-symbols-rounded">podcasts</span>
-                                    <div class="ms-2">
-                                        <h6 class="text-sm font-weight-normal my-auto">
-                                            Manage podcast session
-                                        </h6>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item border-radius-md" href="javascript:;">
-                                <div class="d-flex align-items-center py-1">
-                                    <span class="material-symbols-rounded">shopping_cart</span>
-                                    <div class="ms-2">
-                                        <h6 class="text-sm font-weight-normal my-auto">
-                                            Payment successfully completed
-                                        </h6>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
-                    <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">
-                        <div class="sidenav-toggler-inner">
-                            <i class="sidenav-toggler-line"></i>
-                            <i class="sidenav-toggler-line"></i>
-                            <i class="sidenav-toggler-line"></i>
-                        </div>
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
+{#                <li class="nav-item dropdown py-0 pe-3">#}
+{#                    <a href="javascript:;" class="nav-link py-0 px-1 position-relative line-height-0"#}
+{#                       id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">#}
+{#                        <i class="material-symbols-rounded">#}
+{#                            notifications#}
+{#                        </i>#}
+{#                        <span class="position-absolute top-5 start-100 translate-middle badge rounded-pill bg-danger border border-white small py-1 px-2">#}
+{#                  <span class="small">11</span>#}
+{#                  <span class="visually-hidden">unread notifications</span>#}
+{#                </span>#}
+{#                    </a>#}
+{#                    <ul class="dropdown-menu dropdown-menu-end p-2 me-sm-n4" aria-labelledby="dropdownMenuButton">#}
+{#                        <li class="mb-2">#}
+{#                            <a class="dropdown-item border-radius-md" href="javascript:;">#}
+{#                                <div class="d-flex align-items-center py-1">#}
+{#                                    <span class="material-symbols-rounded">email</span>#}
+{#                                    <div class="ms-2">#}
+{#                                        <h6 class="text-sm font-weight-normal my-auto">#}
+{#                                            Check new messages#}
+{#                                        </h6>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </a>#}
+{#                        </li>#}
+{#                        <li class="mb-2">#}
+{#                            <a class="dropdown-item border-radius-md" href="javascript:;">#}
+{#                                <div class="d-flex align-items-center py-1">#}
+{#                                    <span class="material-symbols-rounded">podcasts</span>#}
+{#                                    <div class="ms-2">#}
+{#                                        <h6 class="text-sm font-weight-normal my-auto">#}
+{#                                            Manage podcast session#}
+{#                                        </h6>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </a>#}
+{#                        </li>#}
+{#                        <li>#}
+{#                            <a class="dropdown-item border-radius-md" href="javascript:;">#}
+{#                                <div class="d-flex align-items-center py-1">#}
+{#                                    <span class="material-symbols-rounded">shopping_cart</span>#}
+{#                                    <div class="ms-2">#}
+{#                                        <h6 class="text-sm font-weight-normal my-auto">#}
+{#                                            Payment successfully completed#}
+{#                                        </h6>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </a>#}
+{#                        </li>#}
+{#                    </ul>#}
+{#                </li>#}
+{#                <li class="nav-item d-xl-none ps-3 d-flex align-items-center">#}
+{#                    <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">#}
+{#                        <div class="sidenav-toggler-inner">#}
+{#                            <i class="sidenav-toggler-line"></i>#}
+{#                            <i class="sidenav-toggler-line"></i>#}
+{#                            <i class="sidenav-toggler-line"></i>#}
+{#                        </div>#}
+{#                    </a>#}
+{#                </li>#}
+{#            </ul>#}
+{#        </div>#}
+{#    </div>#}
+{#</nav>#}

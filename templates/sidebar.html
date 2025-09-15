@@ -1,314 +1,391 @@
 {% load static %}
 
-<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2  bg-white my-2"
-       id="sidenav-main">
-    <div class="sidenav-header">
-        <i class="fas fa-times p-3 cursor-pointer text-dark opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
-           aria-hidden="true" id="iconSidenav"></i>
-        <a class="navbar-brand px-4 py-3 m-0"
-           href=" https://demos.creative-tim.com/material-dashboard-pro/pages/dashboards/analytics.html "
-           target="_blank">
-            <img src="{% static 'lib/material-dashboard-pro/assets/img/luka_lims_logo.jpg' %}" class="navbar-brand-img"
-                 alt="main_logo">
-        </a>
+<!-- Sidebar menu-->
+<div class="app-sidebar__overlay" data-toggle="sidebar"></div>
+<aside class="app-sidebar">
+    <div class="app-sidebar__user">
+        {% if request.user.photo %}
+        <img class="app-sidebar__user-avatar"
+             src="{{ request.user.photo.url }}" alt="user-lims">
+        {% else %}
+            <img class="app-sidebar__user-avatar"
+                 src="https://d1ocs6og0s31n5.cloudfront.net/mybatch/default-avatar.png" alt="lims">
+        {% endif %}
+        <div>
+            <p class="app-sidebar__user-name">{{ request.user.get_full_name }}</p>
+            <p class="app-sidebar__user-designation">{{ request.user.cargo }}</p>
+        </div>
     </div>
-    <hr class="horizontal dark mt-0 mb-2">
-    <div class="collapse navbar-collapse  w-auto h-auto" id="sidenav-collapse-main">
-        <ul class="navbar-nav">
-            <li class="nav-item mb-2 mt-0">
-                <a data-bs-toggle="collapse" href="#ProfileNav" class="nav-link text-dark" aria-controls="ProfileNav"
-                   role="button" aria-expanded="false">
-                    {% if request.user.photo %}
-                        <img src="{{ request.user.photo.url }}" class="avatar" alt="user"/>
-                    {% else %}
-                        <img src="https://d1ocs6og0s31n5.cloudfront.net/mybatch/default-avatar.png" class="avatar"
-                             alt="lims"/>
-                    {% endif %}
-                    <span class="nav-link-text ms-2 ps-1">{{ request.user.get_full_name }}</span>
-                </a>
-                <div class="collapse" id="ProfileNav" style="">
-                    <ul class="nav ">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" href="#">
-                                <span class="sidenav-mini-icon"> MP </span>
-                                <span class="sidenav-normal  ms-3  ps-1"> Mi Perfil </span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark " href="#">
-                                <span class="sidenav-mini-icon">RC</span>
-                                <span class="sidenav-normal  ms-3  ps-1"> Resetear Contraseña</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <form method="post" action="{% url 'logout' %}">
-                                {% csrf_token %}
-                                <button type="submit"
-                                        class="nav-link text-dark border-0 bg-transparent w-100 text-start">
-                                    <i class="material-symbols-rounded opacity-5 me-2">logout</i>
-                                    <span class="sidenav-mini-icon">CS</span>
-                                    <span class="sidenav-normal ms-3 ps-1">Cerrar Sesión</span>
-                                </button>
-                            </form>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-            <!-- Analisis -->
-            <hr class="horizontal dark mt-0">
-            <li class="nav-item">
-                <a href="{% url 'start:start' %}" class="nav-link text-dark" role="button">
-                    <i class="material-symbols-rounded opacity-5">space_dashboard</i>
-                    <span class="nav-link-text ms-1 ps-1">Dashboards</span>
-                </a>
-            </li>
-
-            <!-- Muestreo -->
-            <hr class="horizontal dark mt-0">
-            <li class="nav-item mt-3">
-                <h6 class="ps-3  ms-2 text-uppercase text-xs font-weight-bolder text-dark">Muestreo</h6>
-            </li>
-            <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#projectsExamples" class="nav-link text-dark "
-                   aria-controls="projectsExamples" role="button" aria-expanded="false">
-                    <i class="material-symbols-rounded opacity-5 me-2">hematology</i>
-                    <span class="nav-link-text ms-1 ps-1">Muestreo</span>
-                </a>
-                <div class="collapse " id="projectsExamples">
-                    <ul class="nav ">
-                        <li class="nav-item ">
-                            <a class="nav-link text-dark " href="#">
-                                <span class="sidenav-mini-icon"> MP </span>
-                                <span class="sidenav-normal  ms-1  ps-1"> Muestrear</span>
-                            </a>
-                        </li>
-                        <li class="nav-item ">
-                            <a class="nav-link text-dark " href="#">
-                                <span class="sidenav-mini-icon"> RM </span>
-                                <span class="sidenav-normal  ms-1  ps-1"> Registros Muestreo</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-
-            <!-- Laboratorio -->
-            <hr class="horizontal dark mt-0">
-            <li class="nav-item mt-3">
-                <h6 class="ps-3  ms-2 text-uppercase text-xs font-weight-bolder text-dark">Laboratorio</h6>
-            </li>
-            <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#projectsExamples" class="nav-link text-dark "
-                   aria-controls="projectsExamples" role="button" aria-expanded="false">
-                    <i class="material-symbols-rounded opacity-5 me-2">dropper_eye</i>
-                    <span class="nav-link-text ms-1 ps-1">Control de Calidad</span>
-                </a>
-                <div class="collapse " id="projectsExamples">
-                    <ul class="nav ">
-                        <li class="nav-item ">
-                            <a class="nav-link text-dark " href="#">
-                                <span class="sidenav-mini-icon"> SS </span>
-                                <span class="sidenav-normal  ms-1  ps-1"> Analisis</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-            <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#projectsExamples" class="nav-link text-dark "
-                   aria-controls="projectsExamples" role="button" aria-expanded="false">
-                    <i class="material-symbols-rounded opacity-5 me-2">science</i>
-                    <span class="nav-link-text ms-1 ps-1">Soluciones</span>
-                </a>
-                <div class="collapse " id="projectsExamples">
-                    <ul class="nav ">
-                        <li class="nav-item ">
-                            <a class="nav-link text-dark " href="#">
-                                <span class="sidenav-mini-icon"> SS </span>
-                                <span class="sidenav-normal  ms-1  ps-1"> Stock Sln</span>
-                            </a>
-                        </li>
-                        <li class="nav-item ">
-                            <a class="nav-link text-dark " href="#">
-                                <span class="sidenav-mini-icon"> PS </span>
-                                <span class="sidenav-normal  ms-1  ps-1"> Preparación</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-            <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#projectsExamples" class="nav-link text-dark "
-                   aria-controls="projectsExamples" role="button" aria-expanded="false">
-                    <i class="material-symbols-rounded opacity-5 me-2">service_toolbox</i>
-                    <span class="nav-link-text ms-1 ps-1">Gestión de Equipos</span>
-                </a>
-                <div class="collapse " id="projectsExamples">
-                    <ul class="nav ">
-                        <li class="nav-item ">
-                            <a class="nav-link text-dark " href="#">
-                                <span class="sidenav-mini-icon"> LE </span>
-                                <span class="sidenav-normal  ms-1  ps-1"> Lista Equipos</span>
-                            </a>
-                        </li>
-                        <li class="nav-item ">
-                            <a class="nav-link text-dark " href="#">
-                                <span class="sidenav-mini-icon"> CE </span>
-                                <span class="sidenav-normal  ms-1  ps-1"> Calibraciones</span>
-                            </a>
-                        </li>
-                        <li class="nav-item ">
-                            <a class="nav-link text-dark " href="#">
-                                <span class="sidenav-mini-icon"> CA </span>
-                                <span class="sidenav-normal  ms-1  ps-1"> Calificaciones</span>
-                            </a>
-                        </li>
-                        <li class="nav-item ">
-                            <a class="nav-link text-dark " href="#">
-                                <span class="sidenav-mini-icon"> ME </span>
-                                <span class="sidenav-normal  ms-1  ps-1"> Mantenimiento</span>
-                            </a>
-                        </li>
-                        <li class="nav-item ">
-                            <a class="nav-link text-dark " href="#">
-                                <span class="sidenav-mini-icon"> VE </span>
-                                <span class="sidenav-normal  ms-1  ps-1"> Verificación</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-            <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#projectsExamples" class="nav-link text-dark "
-                   aria-controls="projectsExamples" role="button" aria-expanded="false">
-                    <i class="material-symbols-rounded opacity-5 me-2">cool_to_dry</i>
-                    <span class="nav-link-text ms-1 ps-1">Cond. Ambientales</span>
-                </a>
-                <div class="collapse " id="projectsExamples">
-                    <ul class="nav ">
-                        <li class="nav-item ">
-                            <a class="nav-link text-dark " href="#">
-                                <span class="sidenav-mini-icon"> RA</span>
-                                <span class="sidenav-normal  ms-1  ps-1"> Registros</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-
-            {% url 'reagent:list_reagent' as list_reagent %}
-            {% url 'reagent:create_reagent' as create_reagent %}
-            {% url 'reagent:list_inventory_reagent' as list_inventory_reagent %}
-            {% url 'reagent:create_inventory_reagent' as create_inventory_reagent %}
-
-            <!-- Almacen -->
-            <hr class="horizontal dark mt-0">
-            <li class="nav-item mt-3">
-                <h6 class="ps-3  ms-2 text-uppercase text-xs font-weight-bolder text-dark">Almacén</h6>
-            </li>
-            <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#store"
-                   class="nav-link text-dark {% if list_reagent in request.path or create_reagent in request.path %}active{% endif %}"
-                   aria-controls="store" role="button" aria-expanded="false">
-                    <i class="material-symbols-rounded opacity-5 me-2">lab_panel</i>
-                    <span class="nav-link-text ms-1 ps-1">Reactivos</span>
-                </a>
-                <div class="collapse {% if list_reagent in request.path or create_reagent in request.path or list_inventory_reagent in request.path or create_inventory_reagent in request.path %}show{% endif %}" id="store">
-                    <ul class="nav ">
-                        <li class="nav-item {% if list_reagent in request.path or create_reagent in request.path %}active{% endif %}">
-                            <a class="nav-link text-dark {% if list_reagent in request.path or create_reagent in request.path %}active{% endif %}"
-                               href="{{ list_reagent }}">
-                                <span class="sidenav-mini-icon"> LR </span>
-                                <span class="sidenav-normal  ms-1  ps-1"> Listado Rx <b class="caret"></b></span>
-                            </a>
-                        </li>
-                        <li class="nav-item {% if list_inventory_reagent in request.path or create_inventory_reagent in request.path %}active{% endif %}">
-                            <a class="nav-link text-dark {% if list_inventory_reagent in request.path or create_inventory_reagent in request.path %}active{% endif %}" href="{{ list_inventory_reagent }}">
-                                <span class="sidenav-mini-icon"> IR </span>
-                                <span class="sidenav-normal  ms-1  ps-1"> Inventario <b class="caret"></b></span>
-                            </a>
-                        </li>
-                        <li class="nav-item ">
-                            <a class="nav-link text-dark " href="#">
-                                <span class="sidenav-mini-icon"> IV </span>
-                                <span class="sidenav-normal  ms-1  ps-1"> Ingresos <b class="caret"></b></span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-
-            <!-- Configuración -->
-            <hr class="horizontal dark mt-0">
-            <li class="nav-item mt-3">
-                <h6 class="ps-3  ms-2 text-uppercase text-xs font-weight-bolder text-dark">Configuración</h6>
-            </li>
-            {% url 'user:user_list' as list_user %}
-            {% url 'user:user_create' as create_user %}
-            {% url 'company:list_site' as list_site %}
-            {% url 'company:create_site' as create_site %}
-            {% if perms.user.add_user %}
-                <li class="nav-item">
-                    <a data-bs-toggle="collapse" href="#users"
-                       class="nav-link text-dark {% if list_user in request.path or create_user in request.path %}active{% endif %}"
-                       aria-controls="users" role="button" aria-expanded="false">
-                        <i class="material-symbols-rounded opacity-5 me-2">group</i>
-                        <span class="nav-link-text ms-1 ps-1">Usuarios</span>
-                    </a>
-                    <div class="collapse {% if list_user in request.path or create_user in request.path %}show{% endif %}"
-                         id="users">
-                        <ul class="nav">
-                            <li class="nav-item {% if list_user in request.path or create_user in request.path %}active{% endif %}">
-                                <a class="nav-link text-dark {% if list_user in request.path or create_user in request.path %}active{% endif %}"
-                                   href="{{ list_user }}">
-                                    <span class="sidenav-mini-icon"> LU </span>
-                                    <span class="sidenav-normal  ms-1  ps-1"> Lista </span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark " href="{{ create_user }}">
-                                    <span class="sidenav-mini-icon"> CU </span>
-                                    <span class="sidenav-normal  ms-1  ps-1"> Nuevo </span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
+    <ul class="app-menu">
+        <li><a class="app-menu__item" href="dashboard.html"><i class="app-menu__icon bi bi-speedometer"></i><span
+                class="app-menu__label">Dashboard</span></a></li>
+        <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i
+                class="app-menu__icon bi bi-laptop"></i><span class="app-menu__label">UI Elements</span><i
+                class="treeview-indicator bi bi-chevron-right"></i></a>
+            <ul class="treeview-menu">
+                <li><a class="treeview-item" href="bootstrap-components.html"><i class="icon bi bi-circle-fill"></i>
+                    Bootstrap Elements</a></li>
+                <li><a class="treeview-item" href="https://icons.getbootstrap.com/" target="_blank" rel="noopener"><i
+                        class="icon bi bi-circle-fill"></i> Font Icons</a></li>
+                <li><a class="treeview-item" href="ui-cards.html"><i class="icon bi bi-circle-fill"></i> Cards</a></li>
+                <li><a class="treeview-item" href="widgets.html"><i class="icon bi bi-circle-fill"></i> Widgets</a></li>
+            </ul>
+        </li>
+        <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i
+                class="app-menu__icon bi bi-ui-checks"></i><span class="app-menu__label">Forms</span><i
+                class="treeview-indicator bi bi-chevron-right"></i></a>
+            <ul class="treeview-menu">
+                <li><a class="treeview-item" href="form-components.html"><i class="icon bi bi-circle-fill"></i> Form
+                    Components</a></li>
+                <li><a class="treeview-item" href="form-samples.html"><i class="icon bi bi-circle-fill"></i> Form
+                    Samples</a></li>
+            </ul>
+        </li>
+        <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i
+                class="app-menu__icon bi bi-table"></i><span class="app-menu__label">Tables</span><i
+                class="treeview-indicator bi bi-chevron-right"></i></a>
+            <ul class="treeview-menu">
+                <li><a class="treeview-item" href="table-basic.html"><i class="icon bi bi-circle-fill"></i> Basic Tables</a>
                 </li>
-            {% endif %}
-            {% if perms.company.add_company %}
-                <li class="nav-item">
-                    <a data-bs-toggle="collapse" href="#company"
-                       class="nav-link text-dark {% if list_site in request.path or create_site in request.path %}active{% endif %}"
-                       aria-controls="company" role="button" aria-expanded="false">
-                        <i class="material-symbols-rounded opacity-5 me-2">storefront</i>
-                        <span class="nav-link-text ms-1 ps-1">Empresa</span>
-                    </a>
-                    <div class="collapse {% if list_site in request.path or create_site in request.path %}show{% endif %}"
-                         id="company">
-                        <ul class="nav ">
-                            <li class="nav-item ">
-                                {% if company %}
-                                    <a class="nav-link text-dark"
-                                       href="{% url 'company:company_detail' company.id %}">
-                                {% else %}
-                                    <a class="nav-link text-dark"
-                                       href="{% url 'company:company_create' %}">
-                                {% endif %}
-                                <span class="sidenav-mini-icon"> DT </span>
-                                <span class="sidenav-normal  ms-1  ps-1"> Datos </span>
-                                </a>
-                            </li>
-                            <li class="nav-item {% if list_site in request.path or create_site in request.path %}active{% endif %}">
-                                <a class="nav-link text-dark {% if list_site in request.path or create_site in request.path %}active{% endif %}"
-                                   href="{% url 'company:list_site' %}">
-                                    <span class="sidenav-mini-icon"> PL </span>
-                                    <span class="sidenav-normal  ms-1  ps-1"> Plantas </span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
+                <li><a class="treeview-item" href="table-data-table.html"><i class="icon bi bi-circle-fill"></i> Data
+                    Tables</a></li>
+            </ul>
+        </li>
+        <li class="treeview is-expanded"><a class="app-menu__item" href="#" data-toggle="treeview"><i
+                class="app-menu__icon bi bi-file-earmark"></i><span class="app-menu__label">Pages</span><i
+                class="treeview-indicator bi bi-chevron-right"></i></a>
+            <ul class="treeview-menu">
+                <li><a class="treeview-item active" href="blank-page.html"><i class="icon bi bi-circle-fill"></i> Blank
+                    Page</a></li>
+                <li><a class="treeview-item" href="page-login.html"><i class="icon bi bi-circle-fill"></i> Login
+                    Page</a></li>
+                <li><a class="treeview-item" href="page-lockscreen.html"><i class="icon bi bi-circle-fill"></i>
+                    Lockscreen Page</a></li>
+                <li><a class="treeview-item" href="page-user.html"><i class="icon bi bi-circle-fill"></i> User Page</a>
                 </li>
-            {% endif %}
-        </ul>
-    </div>
+                <li><a class="treeview-item" href="page-invoice.html"><i class="icon bi bi-circle-fill"></i> Invoice
+                    Page</a></li>
+                <li><a class="treeview-item" href="page-mailbox.html"><i class="icon bi bi-circle-fill"></i> Mailbox</a>
+                </li>
+                <li><a class="treeview-item" href="page-error.html"><i class="icon bi bi-circle-fill"></i> Error
+                    Page</a></li>
+            </ul>
+        </li>
+        <li><a class="app-menu__item" href="docs.html"><i class="app-menu__icon bi bi-code-square"></i><span
+                class="app-menu__label">Docs</span></a></li>
+    </ul>
 </aside>
+
+{##}
+{#<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-radius-lg fixed-start ms-2  bg-white my-2"#}
+{#       id="sidenav-main">#}
+{#    <div class="sidenav-header">#}
+{#        <i class="fas fa-times p-3 cursor-pointer text-dark opacity-5 position-absolute end-0 top-0 d-none d-xl-none"#}
+{#           aria-hidden="true" id="iconSidenav"></i>#}
+{#        <a class="navbar-brand px-4 py-3 m-0"#}
+{#           href=" https://demos.creative-tim.com/material-dashboard-pro/pages/dashboards/analytics.html "#}
+{#           target="_blank">#}
+{#            <img src="{% static 'lib/material-dashboard-pro/assets/img/luka_lims_logo.jpg' %}" class="navbar-brand-img"#}
+{#                 alt="main_logo">#}
+{#        </a>#}
+{#    </div>#}
+{#    <hr class="horizontal dark mt-0 mb-2">#}
+{#    <div class="collapse navbar-collapse  w-auto h-auto" id="sidenav-collapse-main">#}
+{#        <ul class="navbar-nav">#}
+{#            <li class="nav-item mb-2 mt-0">#}
+{#                <a data-bs-toggle="collapse" href="#ProfileNav" class="nav-link text-dark" aria-controls="ProfileNav"#}
+{#                   role="button" aria-expanded="false">#}
+{#                    {% if request.user.photo %}#}
+{#                        <img src="{{ request.user.photo.url }}" class="avatar" alt="user"/>#}
+{#                    {% else %}#}
+{#                        <img src="https://d1ocs6og0s31n5.cloudfront.net/mybatch/default-avatar.png" class="avatar"#}
+{#                             alt="lims"/>#}
+{#                    {% endif %}#}
+{#                    <span class="nav-link-text ms-2 ps-1">{{ request.user.get_full_name }}</span>#}
+{#                </a>#}
+{#                <div class="collapse" id="ProfileNav" style="">#}
+{#                    <ul class="nav ">#}
+{#                        <li class="nav-item">#}
+{#                            <a class="nav-link text-dark" href="#">#}
+{#                                <span class="sidenav-mini-icon"> MP </span>#}
+{#                                <span class="sidenav-normal  ms-3  ps-1"> Mi Perfil </span>#}
+{#                            </a>#}
+{#                        </li>#}
+{#                        <li class="nav-item">#}
+{#                            <a class="nav-link text-dark " href="#">#}
+{#                                <span class="sidenav-mini-icon">RC</span>#}
+{#                                <span class="sidenav-normal  ms-3  ps-1"> Resetear Contraseña</span>#}
+{#                            </a>#}
+{#                        </li>#}
+{#                        <li class="nav-item">#}
+{#                            <form method="post" action="{% url 'logout' %}">#}
+{#                                {% csrf_token %}#}
+{#                                <button type="submit"#}
+{#                                        class="nav-link text-dark border-0 bg-transparent w-100 text-start">#}
+{#                                    <i class="material-symbols-rounded opacity-5 me-2">logout</i>#}
+{#                                    <span class="sidenav-mini-icon">CS</span>#}
+{#                                    <span class="sidenav-normal ms-3 ps-1">Cerrar Sesión</span>#}
+{#                                </button>#}
+{#                            </form>#}
+{#                        </li>#}
+{#                    </ul>#}
+{#                </div>#}
+{#            </li>#}
+{#            <!-- Analisis -->#}
+{#            <hr class="horizontal dark mt-0">#}
+{#            <li class="nav-item">#}
+{#                <a href="{% url 'start:start' %}" class="nav-link text-dark" role="button">#}
+{#                    <i class="material-symbols-rounded opacity-5">space_dashboard</i>#}
+{#                    <span class="nav-link-text ms-1 ps-1">Dashboards</span>#}
+{#                </a>#}
+{#            </li>#}
+{##}
+{#            <!-- Muestreo -->#}
+{#            <hr class="horizontal dark mt-0">#}
+{#            <li class="nav-item mt-3">#}
+{#                <h6 class="ps-3  ms-2 text-uppercase text-xs font-weight-bolder text-dark">Muestreo</h6>#}
+{#            </li>#}
+{#            <li class="nav-item">#}
+{#                <a data-bs-toggle="collapse" href="#projectsExamples" class="nav-link text-dark "#}
+{#                   aria-controls="projectsExamples" role="button" aria-expanded="false">#}
+{#                    <i class="material-symbols-rounded opacity-5 me-2">hematology</i>#}
+{#                    <span class="nav-link-text ms-1 ps-1">Muestreo</span>#}
+{#                </a>#}
+{#                <div class="collapse " id="projectsExamples">#}
+{#                    <ul class="nav ">#}
+{#                        <li class="nav-item ">#}
+{#                            <a class="nav-link text-dark " href="#">#}
+{#                                <span class="sidenav-mini-icon"> MP </span>#}
+{#                                <span class="sidenav-normal  ms-1  ps-1"> Muestrear</span>#}
+{#                            </a>#}
+{#                        </li>#}
+{#                        <li class="nav-item ">#}
+{#                            <a class="nav-link text-dark " href="#">#}
+{#                                <span class="sidenav-mini-icon"> RM </span>#}
+{#                                <span class="sidenav-normal  ms-1  ps-1"> Registros Muestreo</span>#}
+{#                            </a>#}
+{#                        </li>#}
+{#                    </ul>#}
+{#                </div>#}
+{#            </li>#}
+{##}
+{#            <!-- Laboratorio -->#}
+{#            <hr class="horizontal dark mt-0">#}
+{#            <li class="nav-item mt-3">#}
+{#                <h6 class="ps-3  ms-2 text-uppercase text-xs font-weight-bolder text-dark">Laboratorio</h6>#}
+{#            </li>#}
+{#            <li class="nav-item">#}
+{#                <a data-bs-toggle="collapse" href="#projectsExamples" class="nav-link text-dark "#}
+{#                   aria-controls="projectsExamples" role="button" aria-expanded="false">#}
+{#                    <i class="material-symbols-rounded opacity-5 me-2">dropper_eye</i>#}
+{#                    <span class="nav-link-text ms-1 ps-1">Control de Calidad</span>#}
+{#                </a>#}
+{#                <div class="collapse " id="projectsExamples">#}
+{#                    <ul class="nav ">#}
+{#                        <li class="nav-item ">#}
+{#                            <a class="nav-link text-dark " href="#">#}
+{#                                <span class="sidenav-mini-icon"> SS </span>#}
+{#                                <span class="sidenav-normal  ms-1  ps-1"> Analisis</span>#}
+{#                            </a>#}
+{#                        </li>#}
+{#                    </ul>#}
+{#                </div>#}
+{#            </li>#}
+{#            <li class="nav-item">#}
+{#                <a data-bs-toggle="collapse" href="#projectsExamples" class="nav-link text-dark "#}
+{#                   aria-controls="projectsExamples" role="button" aria-expanded="false">#}
+{#                    <i class="material-symbols-rounded opacity-5 me-2">science</i>#}
+{#                    <span class="nav-link-text ms-1 ps-1">Soluciones</span>#}
+{#                </a>#}
+{#                <div class="collapse " id="projectsExamples">#}
+{#                    <ul class="nav ">#}
+{#                        <li class="nav-item ">#}
+{#                            <a class="nav-link text-dark " href="#">#}
+{#                                <span class="sidenav-mini-icon"> SS </span>#}
+{#                                <span class="sidenav-normal  ms-1  ps-1"> Stock Sln</span>#}
+{#                            </a>#}
+{#                        </li>#}
+{#                        <li class="nav-item ">#}
+{#                            <a class="nav-link text-dark " href="#">#}
+{#                                <span class="sidenav-mini-icon"> PS </span>#}
+{#                                <span class="sidenav-normal  ms-1  ps-1"> Preparación</span>#}
+{#                            </a>#}
+{#                        </li>#}
+{#                    </ul>#}
+{#                </div>#}
+{#            </li>#}
+{#            <li class="nav-item">#}
+{#                <a data-bs-toggle="collapse" href="#projectsExamples" class="nav-link text-dark "#}
+{#                   aria-controls="projectsExamples" role="button" aria-expanded="false">#}
+{#                    <i class="material-symbols-rounded opacity-5 me-2">service_toolbox</i>#}
+{#                    <span class="nav-link-text ms-1 ps-1">Gestión de Equipos</span>#}
+{#                </a>#}
+{#                <div class="collapse " id="projectsExamples">#}
+{#                    <ul class="nav ">#}
+{#                        <li class="nav-item ">#}
+{#                            <a class="nav-link text-dark " href="#">#}
+{#                                <span class="sidenav-mini-icon"> LE </span>#}
+{#                                <span class="sidenav-normal  ms-1  ps-1"> Lista Equipos</span>#}
+{#                            </a>#}
+{#                        </li>#}
+{#                        <li class="nav-item ">#}
+{#                            <a class="nav-link text-dark " href="#">#}
+{#                                <span class="sidenav-mini-icon"> CE </span>#}
+{#                                <span class="sidenav-normal  ms-1  ps-1"> Calibraciones</span>#}
+{#                            </a>#}
+{#                        </li>#}
+{#                        <li class="nav-item ">#}
+{#                            <a class="nav-link text-dark " href="#">#}
+{#                                <span class="sidenav-mini-icon"> CA </span>#}
+{#                                <span class="sidenav-normal  ms-1  ps-1"> Calificaciones</span>#}
+{#                            </a>#}
+{#                        </li>#}
+{#                        <li class="nav-item ">#}
+{#                            <a class="nav-link text-dark " href="#">#}
+{#                                <span class="sidenav-mini-icon"> ME </span>#}
+{#                                <span class="sidenav-normal  ms-1  ps-1"> Mantenimiento</span>#}
+{#                            </a>#}
+{#                        </li>#}
+{#                        <li class="nav-item ">#}
+{#                            <a class="nav-link text-dark " href="#">#}
+{#                                <span class="sidenav-mini-icon"> VE </span>#}
+{#                                <span class="sidenav-normal  ms-1  ps-1"> Verificación</span>#}
+{#                            </a>#}
+{#                        </li>#}
+{#                    </ul>#}
+{#                </div>#}
+{#            </li>#}
+{#            <li class="nav-item">#}
+{#                <a data-bs-toggle="collapse" href="#projectsExamples" class="nav-link text-dark "#}
+{#                   aria-controls="projectsExamples" role="button" aria-expanded="false">#}
+{#                    <i class="material-symbols-rounded opacity-5 me-2">cool_to_dry</i>#}
+{#                    <span class="nav-link-text ms-1 ps-1">Cond. Ambientales</span>#}
+{#                </a>#}
+{#                <div class="collapse " id="projectsExamples">#}
+{#                    <ul class="nav ">#}
+{#                        <li class="nav-item ">#}
+{#                            <a class="nav-link text-dark " href="#">#}
+{#                                <span class="sidenav-mini-icon"> RA</span>#}
+{#                                <span class="sidenav-normal  ms-1  ps-1"> Registros</span>#}
+{#                            </a>#}
+{#                        </li>#}
+{#                    </ul>#}
+{#                </div>#}
+{#            </li>#}
+{##}
+{#            {% url 'reagent:list_reagent' as list_reagent %}#}
+{#            {% url 'reagent:create_reagent' as create_reagent %}#}
+{#            {% url 'reagent:list_inventory_reagent' as list_inventory_reagent %}#}
+{#            {% url 'reagent:create_inventory_reagent' as create_inventory_reagent %}#}
+{##}
+{#            <!-- Almacen -->#}
+{#            <hr class="horizontal dark mt-0">#}
+{#            <li class="nav-item mt-3">#}
+{#                <h6 class="ps-3  ms-2 text-uppercase text-xs font-weight-bolder text-dark">Almacén</h6>#}
+{#            </li>#}
+{#            <li class="nav-item">#}
+{#                <a data-bs-toggle="collapse" href="#store"#}
+{#                   class="nav-link text-dark {% if list_reagent in request.path or create_reagent in request.path %}active{% endif %}"#}
+{#                   aria-controls="store" role="button" aria-expanded="false">#}
+{#                    <i class="material-symbols-rounded opacity-5 me-2">lab_panel</i>#}
+{#                    <span class="nav-link-text ms-1 ps-1">Reactivos</span>#}
+{#                </a>#}
+{#                <div class="collapse {% if list_reagent in request.path or create_reagent in request.path or list_inventory_reagent in request.path or create_inventory_reagent in request.path %}show{% endif %}" id="store">#}
+{#                    <ul class="nav ">#}
+{#                        <li class="nav-item {% if list_reagent in request.path or create_reagent in request.path %}active{% endif %}">#}
+{#                            <a class="nav-link text-dark {% if list_reagent in request.path or create_reagent in request.path %}active{% endif %}"#}
+{#                               href="{{ list_reagent }}">#}
+{#                                <span class="sidenav-mini-icon"> LR </span>#}
+{#                                <span class="sidenav-normal  ms-1  ps-1"> Listado Rx <b class="caret"></b></span>#}
+{#                            </a>#}
+{#                        </li>#}
+{#                        <li class="nav-item {% if list_inventory_reagent in request.path or create_inventory_reagent in request.path %}active{% endif %}">#}
+{#                            <a class="nav-link text-dark {% if list_inventory_reagent in request.path or create_inventory_reagent in request.path %}active{% endif %}" href="{{ list_inventory_reagent }}">#}
+{#                                <span class="sidenav-mini-icon"> IR </span>#}
+{#                                <span class="sidenav-normal  ms-1  ps-1"> Inventario <b class="caret"></b></span>#}
+{#                            </a>#}
+{#                        </li>#}
+{#                        <li class="nav-item ">#}
+{#                            <a class="nav-link text-dark " href="#">#}
+{#                                <span class="sidenav-mini-icon"> IV </span>#}
+{#                                <span class="sidenav-normal  ms-1  ps-1"> Ingresos <b class="caret"></b></span>#}
+{#                            </a>#}
+{#                        </li>#}
+{#                    </ul>#}
+{#                </div>#}
+{#            </li>#}
+{##}
+{#            <!-- Configuración -->#}
+{#            <hr class="horizontal dark mt-0">#}
+{#            <li class="nav-item mt-3">#}
+{#                <h6 class="ps-3  ms-2 text-uppercase text-xs font-weight-bolder text-dark">Configuración</h6>#}
+{#            </li>#}
+{#            {% url 'user:user_list' as list_user %}#}
+{#            {% url 'user:user_create' as create_user %}#}
+{#            {% url 'company:list_site' as list_site %}#}
+{#            {% url 'company:create_site' as create_site %}#}
+{#            {% if perms.user.add_user %}#}
+{#                <li class="nav-item">#}
+{#                    <a data-bs-toggle="collapse" href="#users"#}
+{#                       class="nav-link text-dark {% if list_user in request.path or create_user in request.path %}active{% endif %}"#}
+{#                       aria-controls="users" role="button" aria-expanded="false">#}
+{#                        <i class="material-symbols-rounded opacity-5 me-2">group</i>#}
+{#                        <span class="nav-link-text ms-1 ps-1">Usuarios</span>#}
+{#                    </a>#}
+{#                    <div class="collapse {% if list_user in request.path or create_user in request.path %}show{% endif %}"#}
+{#                         id="users">#}
+{#                        <ul class="nav">#}
+{#                            <li class="nav-item {% if list_user in request.path or create_user in request.path %}active{% endif %}">#}
+{#                                <a class="nav-link text-dark {% if list_user in request.path or create_user in request.path %}active{% endif %}"#}
+{#                                   href="{{ list_user }}">#}
+{#                                    <span class="sidenav-mini-icon"> LU </span>#}
+{#                                    <span class="sidenav-normal  ms-1  ps-1"> Lista </span>#}
+{#                                </a>#}
+{#                            </li>#}
+{#                            <li class="nav-item">#}
+{#                                <a class="nav-link text-dark " href="{{ create_user }}">#}
+{#                                    <span class="sidenav-mini-icon"> CU </span>#}
+{#                                    <span class="sidenav-normal  ms-1  ps-1"> Nuevo </span>#}
+{#                                </a>#}
+{#                            </li>#}
+{#                        </ul>#}
+{#                    </div>#}
+{#                </li>#}
+{#            {% endif %}#}
+{#            {% if perms.company.add_company %}#}
+{#                <li class="nav-item">#}
+{#                    <a data-bs-toggle="collapse" href="#company"#}
+{#                       class="nav-link text-dark {% if list_site in request.path or create_site in request.path %}active{% endif %}"#}
+{#                       aria-controls="company" role="button" aria-expanded="false">#}
+{#                        <i class="material-symbols-rounded opacity-5 me-2">storefront</i>#}
+{#                        <span class="nav-link-text ms-1 ps-1">Empresa</span>#}
+{#                    </a>#}
+{#                    <div class="collapse {% if list_site in request.path or create_site in request.path %}show{% endif %}"#}
+{#                         id="company">#}
+{#                        <ul class="nav ">#}
+{#                            <li class="nav-item ">#}
+{#                                {% if company %}#}
+{#                                    <a class="nav-link text-dark"#}
+{#                                       href="{% url 'company:company_detail' company.id %}">#}
+{#                                {% else %}#}
+{#                                    <a class="nav-link text-dark"#}
+{#                                       href="{% url 'company:company_create' %}">#}
+{#                                {% endif %}#}
+{#                                <span class="sidenav-mini-icon"> DT </span>#}
+{#                                <span class="sidenav-normal  ms-1  ps-1"> Datos </span>#}
+{#                                </a>#}
+{#                            </li>#}
+{#                            <li class="nav-item {% if list_site in request.path or create_site in request.path %}active{% endif %}">#}
+{#                                <a class="nav-link text-dark {% if list_site in request.path or create_site in request.path %}active{% endif %}"#}
+{#                                   href="{% url 'company:list_site' %}">#}
+{#                                    <span class="sidenav-mini-icon"> PL </span>#}
+{#                                    <span class="sidenav-normal  ms-1  ps-1"> Plantas </span>#}
+{#                                </a>#}
+{#                            </li>#}
+{#                        </ul>#}
+{#                    </div>#}
+{#                </li>#}
+{#            {% endif %}#}
+{#        </ul>#}
+{#    </div>#}
+{#</aside>#}
