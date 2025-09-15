@@ -1,0 +1,53 @@
+WARNING 2025-08-31 16:35:17,630 log 33083 130949108987584 Not Found: /favicon.ico
+WARNING 2025-08-31 16:35:17,631 basehttp 33083 130949108987584 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-08-31 16:50:55,902 basehttp 34865 131676717971136 "GET /static/lib/material-dashboard-pro/assets/img/favicon.png HTTP/1.1" 404 2074
+ERROR 2025-08-31 16:52:15,252 log 34865 131676684400320 Internal Server Error: /reagent/technical_sheet/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/reagent/views/reagent/views.py", line 182, in get
+    url = urlopen(link)
+          ^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 525, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 634, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 563, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 643, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 404: Not Found
+WARNING 2025-09-15 15:40:59,647 basehttp 5477 128872986179264 "GET /static/lib/material-dashboard-pro/assets/img/favicon.png HTTP/1.1" 404 2074
+WARNING 2025-09-15 15:44:31,164 log 6208 135279976380096 Not Found: /favicon.ico
+WARNING 2025-09-15 15:44:31,164 basehttp 6208 135279976380096 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-09-15 15:48:34,255 log 6208 135279976380096 Not Found: /start/form-components.html
+WARNING 2025-09-15 15:48:34,256 basehttp 6208 135279976380096 "GET /start/form-components.html HTTP/1.1" 404 3863
+WARNING 2025-09-15 15:48:37,544 log 6208 135279976380096 Not Found: /start/form-samples.html
+WARNING 2025-09-15 15:48:37,545 basehttp 6208 135279976380096 "GET /start/form-samples.html HTTP/1.1" 404 3854
+WARNING 2025-09-15 15:48:43,797 log 6208 135279976380096 Not Found: /start/docs.html
+WARNING 2025-09-15 15:48:43,798 basehttp 6208 135279976380096 "GET /start/docs.html HTTP/1.1" 404 3830

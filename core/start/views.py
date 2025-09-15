@@ -9,6 +9,7 @@ class StartView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Inicio'
+        context['entity'] = 'Inicio'
         return context
 
 
