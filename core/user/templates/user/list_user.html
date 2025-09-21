@@ -1,28 +1,25 @@
 {% extends 'list_one.html' %}
 {% load static %}
 
-
 {% block head_list %}
     <script src="{% static 'list_user.js' %}"></script>
 {% endblock %}
 
 {% block buttons %}
-    <a href="{{ create_url }}" class="btn bg-gradient-dark mb-0"><i class="fa-solid fa-plus"></i> Nuevo</a>
-{#    <button type="button" class="btn btn-outline-success mb-0">#}
-{#        <i class="fa-solid fa-file-excel"></i> Descargar#}
-{#    </button>#}
+    <a href="{{ create_url }}" class="btn btn-primary me-2" type="button"> Nuevo</a>
+    <a href="{{ download_url }}" class="btn btn-outline-primary me-2" type="button"> Descargar</a>
 {% endblock %}
 
 {% block columns %}
     <tr>
-        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:20%">Nombre Completo</th>
-        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:10%">Usuario</th>
-        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:16%">Cargo</th>
-        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:10%">Roles</th>
-        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:20%">Email</th>
-        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:9%">Planta</th>
-        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:5%">Estado</th>
-        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:10%">Acciones</th>
+        <th>Nombre Completo</th>
+        <th>Usuario</th>
+        <th>Cargo</th>
+        <th>Roles</th>
+        <th>Email</th>
+        <th>Planta</th>
+        <th>Estado</th>
+        <th>Acciones</th>
     </tr>
 {% endblock %}
 
@@ -32,5 +29,5 @@
 {% endblock %}
 
 {% block scripts_detail %}
-
+    {{ block.super }}
 {% endblock %}
