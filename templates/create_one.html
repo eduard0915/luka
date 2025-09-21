@@ -11,136 +11,91 @@
 {% endblock %}
 
 {% block content %}
-    <div class="card mt-5">
-        <div class="card-header p-3 pt-2">
-            <div class="icon icon-lg icon-shape bg-gradient-dark shadow text-center border-radius-xl mt-n4 me-3 float-start">
-                <i class="material-symbols-rounded opacity-10">{{ icon }}</i>
-            </div>
-            <h5 class="mb-0">{{ entity }}</h5>
-            <p class="text-sm mb-0">
-                {{ subtitle }}
-            </p>
-        </div>
-        <div class="card-body">
-            <form enctype="multipart/form-data" method="post" action="" class="form-horizontal">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="{{ action }}">
-                {% for field in form.visible_fields %}
-                    {% if forloop.first %}
-                        <div class="row">
-                    {% endif %}
-                <div class="{% if field.name == 'code_reagent' %}col-md-2
-                    {% elif field.name == 'description_reagent' or field.name == 'manufacturer' %}col-md-5
-                    {% else %}col-md-4{% endif %}">
-                    {% if field.name == 'groups' or field.name == 'is_active' %}
-                        <div class="input-group input-group-static mb-4">
-                            <label class="form-label mt-5 ms-0">
-                                {{ field.label }}{% if field.field.required %}*{% endif %}
-                            </label>
-                            {{ field }}
-                        </div>
-                    {% else %}
-                        {% if field.field.widget.input_type == 'file' %}
-                            <div class="file-input-div">
-                                <label for="id_{{ field.name }}" class="file-input-label">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <h3 class="tile-title">{{ subtitle }}</h3>
+                <div class="tile-body">
+                    <form enctype="multipart/form-data" method="post" action="" class="">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="{{ action }}">
+
+                        {% for field in form.visible_fields %}
+                            <div class="mb-3">
+                                <label for="id_{{ field.name }}" class="form-label">
                                     {{ field.label }}{% if field.field.required %}*{% endif %}
                                 </label>
                                 {{ field }}
                                 {% if field.help_text %}
                                     <small class="form-text text-muted">{{ field.help_text }}</small>
                                 {% endif %}
+                                {% if field.errors %}
+                                    {% for error in field.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
                             </div>
-                        {% else %}
-                            <div class="input-group input-group-outline my-3">
-                                <label for="id_{{ field.name }}" class="form-label ms-0">
-                                    {{ field.label }}{% if field.field.required %}*{% endif %}
-                                </label>
-                                {{ field }}
-                            </div>
-                            </div>
-                        {% endif %}
-                    {% endif %}
-                {% if forloop.last %}
-                {% elif forloop.counter|divisibleby:3 %}
-                    </div>
-                    <div class="row">
-                {% endif %}
-                {% endfor %}
+                        {% endfor %}
+
+                        <div class="tile-footer text-end">
+                            <button type="submit" class="btn btn-primary me-2" id="btnSubmit">Guardar</button>
+                            <a href="{{ list_url }}" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
                 </div>
-                <div class="card-footer text-center">
-                    <button type="submit" class="btn btn-success me-2" id="btnSubmit">Guardar</button>
-                    <a href="{{ list_url }}" class="btn btn-danger">Cancelar</a>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 
 {% endblock %}
 {% block scripts_detail %}
     <script type="application/javascript">
+        // Enhance multi-select with Choices.js only if available
+        (function() {
+            var el = document.getElementById('id_groups');
+            if (el && window.Choices) {
+                new Choices(el, {
+                    removeItemButton: true,
+                    searchEnabled: true,
+                    placeholder: true,
+                    placeholderValue: 'Seleccionar'
+                });
+            }
+        })();
 
-        if (document.getElementById('id_groups')) {
-            const element = document.getElementById('id_groups');
-            const choices = new Choices(element, {
-                removeItemButton: true,
-                searchEnabled: true,
-                placeholder: true,
-                placeholderValue: 'Seleccionar'
-            });
-         }
-
+        // Submit form via Fetch API (works without axios)
         document.querySelector('form').addEventListener('submit', function (e) {
             e.preventDefault();
-            const parameters = new FormData(this);
-            axios.post(window.location.pathname, parameters, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+            var formEl = this;
+            var parameters = new FormData(formEl);
+
+            fetch(window.location.pathname, {
+                method: 'POST',
+                body: parameters
             })
-                .then(function (response) {
-                    console.log(response.data);
-                    if (!response.data.hasOwnProperty('error')) {
-                        location.href = '{{ list_url }}';
-                        return false;
+                .then(function (resp) { return resp.json(); })
+                .then(function (data) {
+                    if (!data.hasOwnProperty('error')) {
+                        window.location.href = '{{ list_url }}';
+                        return;
                     }
-                    message_error(response.data.error);
-                 })
+                    if (typeof message_error === 'function') {
+                        message_error(data.error);
+                    } else {
+                        alert(data.error);
+                    }
+                })
                 .catch(function (error) {
-                    alert(error.response.status + ': ' + error.message);
+                    alert('Error: ' + error.message);
                 });
+        });
 
-         });
-
-        {#$('form').on('submit', function (e) {#}
-        {#    e.preventDefault();#}
-        {#    var parameters = new FormData(this);#}
-        {#    $.ajax({#}
-        {#        url: window.location.pathname,#}
-        {#        type: 'POST',#}
-        {#        data: parameters,#}
-        {#        dataType: 'json',#}
-        {#        processData: false,#}
-        {#        contentType: false,#}
-        {#    }).done(function (data) {#}
-        {#        console.log(data);#}
-        {#        if (!data.hasOwnProperty('error')) {#}
-        {#            location.href = '{{ list_url }}';#}
-        {#            return false;#}
-        {#        }#}
-        {#        message_error(data.error);#}
-        {#    }).fail(function (jqXHR, textStatus, errorThrown) {#}
-        {#        alert(textStatus + ': ' + errorThrown);#}
-        {#    }).always(function (data) {#}
-        {#    });#}
-        {# });#}
-
+        // Button spinner feedback
         $("#btnSubmit").click(function () {
-            $(this).prop("disabled", true); //deshabilitamos el botón
-            $(this).submit()
+            $(this).prop("disabled", true);
             $(this).html(
-                `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...` //añadimos el spinner
+                '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...'
             );
-         });
-
+        });
     </script>
 {% endblock %}

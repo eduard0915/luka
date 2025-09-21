@@ -13,7 +13,7 @@
         {% endif %}
         <div>
             <p class="app-sidebar__user-name">{{ request.user.get_full_name }}</p>
-            <p class="app-sidebar__user-designation">{{ request.user.cargo }}</p>
+            <p class="app-sidebar__user-designation" style="white-space: normal">{{ request.user.cargo }}</p>
         </div>
     </div>
     <ul class="app-menu">
@@ -52,23 +52,11 @@
             </ul>
         </li>
         <li class="treeview is-expanded"><a class="app-menu__item" href="#" data-toggle="treeview"><i
-                class="app-menu__icon bi bi-file-earmark"></i><span class="app-menu__label">Pages</span><i
+                class="app-menu__icon bi bi-people"></i><span class="app-menu__label">Users</span><i
                 class="treeview-indicator bi bi-chevron-right"></i></a>
             <ul class="treeview-menu">
-                <li><a class="treeview-item active" href="blank-page.html"><i class="icon bi bi-circle-fill"></i> Blank
-                    Page</a></li>
-                <li><a class="treeview-item" href="page-login.html"><i class="icon bi bi-circle-fill"></i> Login
-                    Page</a></li>
-                <li><a class="treeview-item" href="page-lockscreen.html"><i class="icon bi bi-circle-fill"></i>
-                    Lockscreen Page</a></li>
-                <li><a class="treeview-item" href="page-user.html"><i class="icon bi bi-circle-fill"></i> User Page</a>
-                </li>
-                <li><a class="treeview-item" href="page-invoice.html"><i class="icon bi bi-circle-fill"></i> Invoice
-                    Page</a></li>
-                <li><a class="treeview-item" href="page-mailbox.html"><i class="icon bi bi-circle-fill"></i> Mailbox</a>
-                </li>
-                <li><a class="treeview-item" href="page-error.html"><i class="icon bi bi-circle-fill"></i> Error
-                    Page</a></li>
+                <li><a class="treeview-item active" href="{{ list_user }}">
+                    <i class="icon bi bi-circle-fill"></i> Usuarios</a></li>
             </ul>
         </li>
         <li><a class="app-menu__item" href="docs.html"><i class="app-menu__icon bi bi-code-square"></i><span
