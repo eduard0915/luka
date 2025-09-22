@@ -121,5 +121,6 @@ class CompanyDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Det
         context = super().get_context_data(**kwargs)
         context['title'] = 'Empresa'
         context['entity'] = 'Empresa'
+        context['icon'] = 'bi bi-buildings-fill'
         context['company_logo'] = self.logo()
         return context

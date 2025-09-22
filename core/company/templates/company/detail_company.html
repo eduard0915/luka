@@ -10,40 +10,89 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
     <div class="row">
-        <div class="col-6">
-            <div class="card my-4">
-                <div class="card-header p-3 pt-2">
-                    <div class="icon icon-lg icon-shape bg-gradient-dark shadow text-center border-radius-xl mt-n4 me-3 float-start">
-                        <i class="material-symbols-rounded opacity-10">factory</i>
-                    </div>
-                    <h5 class="mb-0">{{ entity }}</h5>
-                    <p class="text-sm mb-0">
-                        {{ subtitle }}
-                    </p>
-                </div>
-                <div class="card-body px-0 pb-2">
-                    <div class="table-responsive p-0">
-                        <div class="container">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <img src="{{ company_logo }}" alt="Company Logo" class="img-fluid">
-                                </div>
-                                <div class="col-md-8">
-                                    <h3>{{ object.company_name }}</h3>
-                                    <p><strong>NIT:</strong> {{ object.company_nit }}</p>
-                                    <p><strong>Dirección:</strong> {{ object.company_address }}</p>
-                                    <p><strong>Ciudad:</strong> {{ object.company_city }}</p>
-                                    <p><strong>País:</strong> {{ object.company_country }}</p>
-                                    <a href="{% url 'company:company_update' object.id %}" class="btn btn-primary">Editar</a>
-                                </div>
-                            </div>
+        <div class="col-md-8">
+            <div class="tile">
+                <section class="invoice">
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <h2 class="page-header">{{ object.company_name }}</h2>
                         </div>
                     </div>
-                </div>
+                    <div class="row invoice-info">
+                        <div class="col-4">
+                            <img src="{{ company_logo }}" alt="Company Logo" class="img-fluid">
+                        </div>
+                        <div class="col-8">
+                            <address>
+                                <strong>NIT</strong>
+                                {{ object.company_nit }}
+                                <br>
+                                <strong>Dirección</strong>
+                                {{ object.company_address }}
+                                <br>
+                                {{ object.company_city }}, {{ object.company_country }}
+                                <br>
+                            </address>
+                        </div>
+                    </div>
+                    <br>
+                    <h3 class="tile-title">Sites</h3>
+                    <div class="row">
+                        <div class="col-12 table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Qty</th>
+                                    <th>Product</th>
+                                    <th>Serial #</th>
+                                    <th>Description</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>The Hunger Games</td>
+                                    <td>455-981-221</td>
+                                    <td>El snort testosterone trophy driving gloves handsome</td>
+                                    <td>$41.32</td>
+                                </tr>
+                                <tr>
+                                    <td>1</td>
+                                    <td>City of Bones</td>
+                                    <td>247-925-726</td>
+                                    <td>Wes Anderson umami biodiesel</td>
+                                    <td>$75.52</td>
+                                </tr>
+                                <tr>
+                                    <td>1</td>
+                                    <td>The Maze Runner</td>
+                                    <td>545-457-47</td>
+                                    <td>Terry Richardson helvetica tousled street art master</td>
+                                    <td>$15.25</td>
+                                </tr>
+                                <tr>
+                                    <td>1</td>
+                                    <td>The Fault in Our Stars</td>
+                                    <td>757-855-857</td>
+                                    <td>Tousled lomo letterpress</td>
+                                    <td>$03.44</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row d-print-none mt-2">
+                        <div class="col-12 text-end">
+                            <a class="btn btn-primary" href="{% url 'company:company_update' object.id %}"><i
+                                class="bi bi-plus-circle me-2"></i> Nuevo Site</a>
+                            <a class="btn btn-outline-primary" href="{% url 'company:company_update' object.id %}"><i
+                                class="bi bi-pencil-square me-2"></i> Editar</a>
+                        </div>
+                    </div>
+                </section>
             </div>
         </div>
     </div>
-</div>
 {% endblock %}

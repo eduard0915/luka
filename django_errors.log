@@ -91,3 +91,12 @@ WARNING 2025-09-21 16:48:33,664 log 39390 129993818498752 Not Found: /favicon.ic
 WARNING 2025-09-21 16:48:33,664 basehttp 39390 129993818498752 "GET /favicon.ico HTTP/1.1" 404 3449
 WARNING 2025-09-21 17:02:53,405 log 39390 129993818498752 Not Found: /favicon.ico
 WARNING 2025-09-21 17:02:53,405 basehttp 39390 129993818498752 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-09-21 21:26:14,726 basehttp 6138 137496236127936 "GET /static/lib/material-dashboard-pro/assets/img/favicon.png HTTP/1.1" 404 2074
+WARNING 2025-09-21 21:26:29,644 log 6138 137496227735232 Not Found: /favicon.ico
+WARNING 2025-09-21 21:26:29,645 basehttp 6138 137496227735232 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-09-21 21:27:07,556 log 6138 137496227735232 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-21 21:27:07,556 basehttp 6138 137496227735232 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-09-21 21:28:20,256 log 6138 137496227735232 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-21 21:28:20,256 basehttp 6138 137496227735232 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-09-21 21:33:12,297 log 6138 137496227735232 Not Found: /user/list/docs.html
+WARNING 2025-09-21 21:33:12,298 basehttp 6138 137496227735232 "GET /user/list/docs.html HTTP/1.1" 404 7014
