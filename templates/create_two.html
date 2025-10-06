@@ -65,26 +65,51 @@
 {% block scripts_detail %}
     <script type="application/javascript">
 
+        {#document.querySelector('form').addEventListener('submit', function (e) {#}
+        {#    e.preventDefault();#}
+        {#    const parameters = new FormData(this);#}
+        {#    axios.post(window.location.pathname, parameters, {#}
+        {#        headers: {#}
+        {#            'Content-Type': 'multipart/form-data'#}
+        {#        }#}
+        {#    })#}
+        {#        .then(function (response) {#}
+        {#            console.log(response.data);#}
+        {#            if (!response.data.hasOwnProperty('error')) {#}
+        {#                location.href = '{{ list_url }}';#}
+        {#                return false;#}
+        {#            }#}
+        {#            message_error(response.data.error);#}
+        {#        })#}
+        {#        .catch(function (error) {#}
+        {#            alert(error.response.status + ': ' + error.message);#}
+        {#        });#}
+        {##}
+        {# });#}
         document.querySelector('form').addEventListener('submit', function (e) {
             e.preventDefault();
-            const parameters = new FormData(this);
-            axios.post(window.location.pathname, parameters, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+            var formEl = this;
+            var parameters = new FormData(formEl);
+
+            fetch(window.location.pathname, {
+                method: 'POST',
+                body: parameters
             })
-                .then(function (response) {
-                    console.log(response.data);
-                    if (!response.data.hasOwnProperty('error')) {
-                        location.href = '{{ list_url }}';
-                        return false;
+                .then(function (resp) { return resp.json(); })
+                .then(function (data) {
+                    if (!data.hasOwnProperty('error')) {
+                        window.location.href = '{{ list_url }}';
+                        return;
                     }
-                    message_error(response.data.error);
+                    if (typeof message_error === 'function') {
+                        message_error(data.error);
+                    } else {
+                        alert(data.error);
+                    }
                 })
                 .catch(function (error) {
-                    alert(error.response.status + ': ' + error.message);
+                    alert('Error: ' + error.message);
                 });
-
         });
 
         $("#btnSubmit").click(function () {
