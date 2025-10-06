@@ -52,9 +52,7 @@ class SiteCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Create
     model = Site
     form_class = SiteForm
     template_name = 'site/create_site.html'
-    success_url = reverse_lazy('company:list_site')
     permission_required = 'company.add_company'
-    url_redirect = success_url
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -72,7 +70,6 @@ class SiteCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Create
                     messages.success(request, f'Planta creada satisfactoriamente!')
                 else:
                     messages.error(request, form.errors)
-                return redirect(self.get_context_data()['list_url'])
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -86,12 +83,13 @@ class SiteCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Create
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        company = Company.objects.first()
         context['title'] = 'Creación de Planta'
-        context['list_url'] = self.success_url
+        context['list_url'] = reverse_lazy('company:company_detail', kwargs={'pk': company.id})
         context['action'] = 'add'
         context['entity'] = 'Creación de Planta'
         context['div'] = '8'
-        context['icon'] = 'factory'
+        context['icon'] = 'bi bi-building-fill-add'
         return context
 
 

@@ -11,69 +11,56 @@
 {% endblock %}
 
 {% block content %}
-    <div class="card mt-5">
-        <div class="card-header p-3 pt-2">
-            <div class="icon icon-lg icon-shape bg-gradient-dark shadow text-center border-radius-xl mt-n4 me-3 float-start">
-                <i class="material-symbols-rounded opacity-10">{{ icon }}</i>
-            </div>
-            <h5 class="mb-0">{{ entity }}</h5>
-            <p class="text-sm mb-0">
-                {{ subtitle }}
-            </p>
-        </div>
-        <div class="card-body">
-            <form enctype="multipart/form-data" method="post" action="" class="form-horizontal">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="{{ action }}">
-                {% for field in form.visible_fields %}
-                    {% if forloop.first %}
+    <div class="row">
+        <div class="col-md-{{ div }}">
+            <div class="tile">
+                <h3 class="tile-title">{{ subtitle }}</h3>
+                <div class="tile-body">
+                    <form enctype="multipart/form-data" method="post" action="" class="form-horizontal">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="{{ action }}">
                         <div class="row">
-                    {% endif %}
-                <div class="col-md-3">
-                    {% if field.name == 'groups' or field.name == 'is_active' or field.name == 'site' or field.name == 'reagent' or field.name == 'reagent_liquid' %}
-                        <div class="input-group input-group-static mb-4">
-                            <label for=id_{{ field.name }} class="ms-0">
-                                {{ field.label }}{% if field.field.required %}*{% endif %}
-                            </label>
-                            {{ field }}
+                            {% for field in form.visible_fields %}
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        {% if field.name == 'groups' or field.name == 'is_active' or field.name == 'site' or field.name == 'reagent' or field.name == 'reagent_liquid' %}
+                                            <label class="control-label">
+                                                {{ field.label }}{% if field.field.required %}*{% endif %}
+                                            </label>
+                                            {{ field }}
+                                        {% else %}
+                                            {% if field.field.widget.input_type == 'file' %}
+                                                <label class="control-label">
+                                                    {{ field.label }}{% if field.field.required %}*{% endif %}
+                                                </label>
+                                                {{ field }}
+                                                {% if field.help_text %}
+                                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                                {% endif %}
+                                            {% else %}
+                                                <label class="control-label">
+                                                    {{ field.label }}{% if field.field.required %}*{% endif %}
+                                                </label>
+                                                {{ field }}
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
                         </div>
-                    {% else %}
-                        {% if field.field.widget.input_type == 'file' %}
-                            <div class="file-input-div">
-                                <label for="id_{{ field.name }}" class="file-input-label">
-                                    {{ field.label }}{% if field.field.required %}*{% endif %}
-                                </label>
-                                {{ field }}
-                                {% if field.help_text %}
-                                    <small class="form-text text-muted">{{ field.help_text }}</small>
-                                {% endif %}
-                            </div>
-                        {% else %}
-                            <div class="input-group input-group-outline my-3">
-                                <label for="id_{{ field.name }}" class="form-label ms-0">
-                                    {{ field.label }}{% if field.field.required %}*{% endif %}
-                                </label>
-                                {{ field }}
-                            </div>
-                        {% endif %}
-                    {% endif %}
+                        <div class="tile-footer">
+                            <button type="submit" class="btn btn-primary" id="btnSubmit">
+                                <i class="fa fa-fw fa-lg fa-check-circle"></i>Guardar
+                            </button>
+                            <a href="{{ list_url }}" class="btn btn-secondary">
+                                <i class="fa fa-fw fa-lg fa-times-circle"></i>Cancelar
+                            </a>
+                        </div>
+                    </form>
                 </div>
-                {% if forloop.last %}
-                {% elif forloop.counter|divisibleby:4 %}
-                    </div>
-                    <div class="row">
-                {% endif %}
-                {% endfor %}
-                </div>
-                <div class="card-footer text-center">
-                    <button type="submit" class="btn btn-success me-2" id="btnSubmit">Guardar</button>
-                    <a href="{{ list_url }}" class="btn btn-danger">Cancelar</a>
-                </div>
-            </form>
-
+            </div>
         </div>
     </div>
-
 {% endblock %}
 {% block scripts_detail %}
     <script type="application/javascript">
@@ -106,7 +93,7 @@
             $(this).html(
                 `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...` //añadimos el spinner
             );
-         });
+        });
 
     </script>
 {% endblock %}
