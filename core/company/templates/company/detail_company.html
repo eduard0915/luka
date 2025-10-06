@@ -43,49 +43,50 @@
                             <table class="table table-striped">
                                 <thead>
                                 <tr>
-                                    <th>Qty</th>
-                                    <th>Product</th>
-                                    <th>Serial #</th>
-                                    <th>Description</th>
-                                    <th>Subtotal</th>
+                                    <th>Planta</th>
+                                    <th>Dirección</th>
+                                    <th>Ciudad</th>
+                                    <th>País</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>The Hunger Games</td>
-                                    <td>455-981-221</td>
-                                    <td>El snort testosterone trophy driving gloves handsome</td>
-                                    <td>$41.32</td>
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>City of Bones</td>
-                                    <td>247-925-726</td>
-                                    <td>Wes Anderson umami biodiesel</td>
-                                    <td>$75.52</td>
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>The Maze Runner</td>
-                                    <td>545-457-47</td>
-                                    <td>Terry Richardson helvetica tousled street art master</td>
-                                    <td>$15.25</td>
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>The Fault in Our Stars</td>
-                                    <td>757-855-857</td>
-                                    <td>Tousled lomo letterpress</td>
-                                    <td>$03.44</td>
-                                </tr>
+                                {% for site in sites %}
+                                    <tr>
+                                        <td>{{ site.site_name }}</td>
+                                        <td>{{ site.site_address }}</td>
+                                        <td>{{ site.site_city }}</td>
+                                        <td>{{ site.site_country }}</td>
+                                        <td>
+                                            {% if site.site_enable %}
+                                                <span class="badge bg-success">Activo</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Inactivo</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'company:update_site' site.id %}" type="button">
+                                                <i class="bi bi-pencil-square text-warning me-2"></i>
+                                            </a>
+                                            <a href="{% url 'company:detail_site' site.id %}" type="button">
+                                                <i class="bi bi-info-square text-info"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No hay sites disponibles.</td>
+                                    </tr>
+                                {% endfor %}
+
                                 </tbody>
                             </table>
                         </div>
                     </div>
                     <div class="row d-print-none mt-2">
                         <div class="col-12 text-end">
-                            <a class="btn btn-primary" href="{% url 'company:company_update' object.id %}"><i
+                            <a class="btn btn-primary" href="{% url 'company:create_site' %}"><i
                                 class="bi bi-plus-circle me-2"></i> Nuevo Site</a>
                             <a class="btn btn-outline-primary" href="{% url 'company:company_update' object.id %}"><i
                                 class="bi bi-pencil-square me-2"></i> Editar</a>

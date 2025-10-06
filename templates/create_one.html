@@ -12,14 +12,13 @@
 
 {% block content %}
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-{{ div }}">
             <div class="tile">
                 <h3 class="tile-title">{{ subtitle }}</h3>
                 <div class="tile-body">
                     <form enctype="multipart/form-data" method="post" action="" class="">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="{{ action }}">
-
                         {% for field in form.visible_fields %}
                             <div class="mb-3">
                                 <label for="id_{{ field.name }}" class="form-label">
