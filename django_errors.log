@@ -331,3 +331,7 @@ WARNING 2025-10-05 21:00:45,741 log 20201 135912152364736 Not Found: /.well-know
 WARNING 2025-10-05 21:00:45,741 basehttp 20201 135912152364736 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
 WARNING 2025-10-05 21:22:32,006 log 22862 131085542356672 Not Found: /.well-known/appspecific/com.chrome.devtools.json
 WARNING 2025-10-05 21:22:32,007 basehttp 22862 131085542356672 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-05 21:26:37,180 log 23666 135878377731776 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-05 21:26:37,184 basehttp 23666 135878377731776 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-05 21:28:23,972 log 23666 135878377731776 Not Found: /favicon.ico
+WARNING 2025-10-05 21:28:23,972 basehttp 23666 135878377731776 "GET /favicon.ico HTTP/1.1" 404 3449
