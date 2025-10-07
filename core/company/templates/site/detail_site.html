@@ -1,5 +1,7 @@
 {% extends 'body.html' %}
+
 {% load static %}
+
 
 {% block head %}
     {% block head_list %}
@@ -7,9 +9,28 @@
     {% endblock %}
 {% endblock %}
 
-{% block content %}
 
-    <div class="row pt-4">
+{% block notifications %}
+
+{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="tile mb-4">
+            <div class="col-lg-6">
+                <div class="page-header">
+                    <h2 class="mb-3 line-head" id="dialogs">Procesos</h2>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="page-header">
+                    <h2 class="mb-3 line-head" id="dialogs">Procesos</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
         <div class="col-md-6">
             <div class="card">
                 <div class="card-body">
@@ -22,7 +43,7 @@
                         </div>
                         <div class="col-md-2">
                             <div class="ms-auto my-auto">
-                                <a href="{% url 'company:list_site' %}" class="btn btn-secondary">
+                                <a href="#" class="btn btn-secondary">
                                     <i class="fa fa-step-backward"></i> Volver
                                 </a>
                             </div>

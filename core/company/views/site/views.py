@@ -12,41 +12,6 @@ from core.company.models import Site, Company, Process, Stage, SamplePoint
 from core.mixins import ValidatePermissionRequiredMixin
 
 
-# Listado de Plantas
-class SiteListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
-    model = Site
-    template_name = 'site/list_site.html'
-    permission_required = 'company.add_company'
-
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        data = {}
-        try:
-            action = request.POST['action']
-            if action == 'searchdata':
-                data = []
-                list_site = list(Site.objects.values(
-                    'id', 'site_name', 'site_address', 'site_city', 'site_country', 'site_enable').order_by('site_name'))
-                return JsonResponse(list_site, safe=False)
-            else:
-                data['error'] = 'Ha ocurrido un error'
-        except Exception as e:
-            data['error'] = str(e)
-        return JsonResponse(data, safe=False)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Plantas'
-        context['create_url'] = reverse_lazy('company:create_site')
-        context['entity'] = 'Plantas'
-        context['div'] = '10'
-        context['icon'] = 'factory'
-        return context
-
-
 # Creación de Planta
 class SiteCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
     model = Site
@@ -98,9 +63,7 @@ class SiteUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Update
     model = Site
     form_class = SiteUpdateForm
     template_name = 'site/create_site.html'
-    success_url = reverse_lazy('company:list_site')
     permission_required = 'company.add_company'
-    url_redirect = success_url
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -127,12 +90,13 @@ class SiteUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Update
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        company = Company.objects.first()
         context['title'] = 'Edición de Planta'
-        context['list_url'] = self.success_url
+        context['list_url'] = reverse_lazy('company:company_detail', kwargs={'pk': company.id})
         context['entity'] = 'Edición de Planta'
         context['action'] = 'edit'
         context['div'] = '8'
-        context['icon'] = 'factory'
+        context['icon'] = 'bi bi-building-fill'
         return context
 
 
@@ -148,7 +112,7 @@ class SiteDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Detail
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Detalle de Planta'
-        context['entity'] = 'Detalle de Planta'
+        context['entity'] = 'Planta: ' + self.object.site_name
         context['subtitle'] = 'Información de la planta'
         context['div'] = '12'
         # Get all processes associated with this site
