@@ -25,6 +25,23 @@
             </ul>
         </div>
 
+
+        {% block notifications %}
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="bs-component">
+                            <div id="message" class="alert alert-dismissible alert-{{ message.tags }}">
+                                <button class="btn-close" type="button" data-bs-dismiss="alert"
+                                        data-dashlane-label="true"
+                                        data-dashlane-rid="35c47206400a9024"></button>
+                                <strong>Exito!</strong> {{ message }}.
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endblock %}
+
         {% block content %}
 
 

@@ -49,52 +49,39 @@
 {% endblock %}
 {% block scripts_detail %}
     <script type="application/javascript">
-        // Enhance multi-select with Choices.js only if available
-        (function() {
-            var el = document.getElementById('id_groups');
-            if (el && window.Choices) {
-                new Choices(el, {
-                    removeItemButton: true,
-                    searchEnabled: true,
-                    placeholder: true,
-                    placeholderValue: 'Seleccionar'
-                });
-            }
-        })();
 
-        // Submit form via Fetch API (works without axios)
         document.querySelector('form').addEventListener('submit', function (e) {
             e.preventDefault();
-            var formEl = this;
-            var parameters = new FormData(formEl);
 
-            fetch(window.location.pathname, {
-                method: 'POST',
-                body: parameters
+            // Deshabilitar el botón y mostrar spinner
+            const btnSubmit = document.getElementById('btnSubmit');
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
+
+            const parameters = new FormData(this);
+            axios.post(window.location.pathname, parameters, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
             })
-                .then(function (resp) { return resp.json(); })
-                .then(function (data) {
-                    if (!data.hasOwnProperty('error')) {
-                        window.location.href = '{{ list_url }}';
-                        return;
+                .then(function (response) {
+                    console.log(response.data);
+                    if (!response.data.hasOwnProperty('error')) {
+                        location.href = '{{ list_url }}';
+                        return false;
                     }
-                    if (typeof message_error === 'function') {
-                        message_error(data.error);
-                    } else {
-                        alert(data.error);
-                    }
+                    message_error(response.data.error);
+                    // Re-habilitar el botón en caso de error
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = '<i class="fa fa-fw fa-lg fa-check-circle"></i>Guardar';
                 })
                 .catch(function (error) {
-                    alert('Error: ' + error.message);
+                    alert(error.response.status + ': ' + error.message);
+                    // Re-habilitar el botón en caso de error
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = '<i class="fa fa-fw fa-lg fa-check-circle"></i>Guardar';
                 });
         });
 
-        // Button spinner feedback
-        $("#btnSubmit").click(function () {
-            $(this).prop("disabled", true);
-            $(this).html(
-                '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...'
-            );
-        });
     </script>
 {% endblock %}

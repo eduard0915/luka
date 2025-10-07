@@ -39,7 +39,6 @@ class CompanyCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
                     messages.success(request, f'Empresa configurada satisfactoriamente!')
                 else:
                     messages.error(request, form.errors)
-                return redirect(self.get_context_data()['list_url'])
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -53,7 +52,7 @@ class CompanyCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
         context['action'] = 'add'
         context['div'] = '10'
         context['list_url'] = reverse_lazy('start:start')
-        context['icon'] = 'factory'
+        context['icon'] = 'bi bi-building-fill-add'
         return context
 
 
@@ -95,7 +94,7 @@ class CompanyUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
         context['action'] = 'edit'
         context['div'] = '10'
         context['list_url'] = reverse_lazy('company:company_detail', kwargs={'pk': self.kwargs['pk']})
-        context['icon'] = 'factory'
+        context['icon'] = 'bi bi-buildings-fill'
         return context
 
 

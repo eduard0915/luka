@@ -19,7 +19,6 @@ urlpatterns = [
     path('add_site/', SiteCreateView.as_view(), name='create_site'),
     path('update_site/<uuid:pk>/', SiteUpdateView.as_view(), name='update_site'),
     path('detail_site/<uuid:pk>/', SiteDetailView.as_view(), name='detail_site'),
-    path('list_site/', SiteListView.as_view(), name='list_site'),
     # Procesos
     path('add_process/<uuid:pk>/', ProcessCreateView.as_view(), name='create_process'),
     path('update_process/<uuid:pk>/', ProcessUpdateView.as_view(), name='update_process'),

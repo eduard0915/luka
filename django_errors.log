@@ -1,2 +1,133 @@
 WARNING 2025-10-05 22:10:14,817 log 26666 138158821861056 Not Found: /.well-known/appspecific/com.chrome.devtools.json
 WARNING 2025-10-05 22:10:14,818 basehttp 26666 138158821861056 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-05 22:41:43,560 log 29875 125229519075008 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-05 22:41:43,561 basehttp 29875 125229519075008 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-05 22:44:46,822 log 30149 139150420342464 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-05 22:44:46,823 basehttp 30149 139150420342464 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-05 22:47:08,333 log 30149 139150420342464 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-05 22:47:08,333 basehttp 30149 139150420342464 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-05 22:48:03,467 log 30149 139150420342464 Not Found: /favicon.ico
+WARNING 2025-10-05 22:48:03,467 basehttp 30149 139150420342464 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-05 22:48:19,192 log 30149 139150420342464 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-05 22:48:19,193 basehttp 30149 139150420342464 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-05 22:48:25,599 log 30149 139150420342464 Not Found: /favicon.ico
+WARNING 2025-10-05 22:48:25,599 basehttp 30149 139150420342464 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-05 22:54:52,746 log 31257 125356723922624 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-05 22:54:52,746 basehttp 31257 125356723922624 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-06 21:18:56,763 basehttp 10535 140072116549312 "GET /static/lib/material-dashboard-pro/assets/img/favicon.png HTTP/1.1" 404 2074
+WARNING 2025-10-06 21:19:17,934 log 10535 140072036857536 Not Found: /favicon.ico
+WARNING 2025-10-06 21:19:17,935 basehttp 10535 140072036857536 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-06 21:26:53,408 log 10535 140072036857536 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 21:26:53,408 basehttp 10535 140072036857536 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+ERROR 2025-10-06 21:42:30,367 log 12674 130056757180096 Internal Server Error: /company/detail_site/93660c76-05d5-4528-8fbe-55633e75018a/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 220, in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 171, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/urls/base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/urls/resolvers.py", line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'list_site' not found. 'list_site' is not a valid view function or pattern name.
+ERROR 2025-10-06 21:42:30,370 basehttp 12674 130056757180096 "GET /company/detail_site/93660c76-05d5-4528-8fbe-55633e75018a/ HTTP/1.1" 500 233948
+WARNING 2025-10-06 22:08:56,498 log 12970 131234413934272 Not Found: /company/detail/e1d4be7a-df94-4bc8-8b42-262b4dbd7619/dashboard.html
+WARNING 2025-10-06 22:08:56,498 basehttp 12970 131234413934272 "GET /company/detail/e1d4be7a-df94-4bc8-8b42-262b4dbd7619/dashboard.html HTTP/1.1" 404 7193
+WARNING 2025-10-06 22:12:21,044 log 12970 131234413934272 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 22:12:21,045 basehttp 12970 131234413934272 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-06 22:12:53,271 log 12970 131234413934272 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 22:12:53,271 basehttp 12970 131234413934272 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-06 22:14:27,148 log 12970 131234413934272 Not Found: /company/detail/e1d4be7a-df94-4bc8-8b42-262b4dbd7619/dashboard.html
+WARNING 2025-10-06 22:14:27,148 basehttp 12970 131234413934272 "GET /company/detail/e1d4be7a-df94-4bc8-8b42-262b4dbd7619/dashboard.html HTTP/1.1" 404 7193
+WARNING 2025-10-06 22:32:02,234 log 15955 129629353408192 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 22:32:02,234 basehttp 15955 129629353408192 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-06 22:34:37,161 log 15955 129629353408192 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 22:34:37,162 basehttp 15955 129629353408192 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-06 22:35:41,571 log 15955 129629353408192 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 22:35:41,572 basehttp 15955 129629353408192 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-06 22:35:45,108 log 15955 129629353408192 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 22:35:45,108 basehttp 15955 129629353408192 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
