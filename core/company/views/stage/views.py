@@ -5,7 +5,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, UpdateView
 
-from core.company.forms import StageForm
+from core.company.forms import StageForm, StageUpdateForm
 from core.company.models import Stage, Site
 from core.mixins import ValidatePermissionRequiredMixin
 
@@ -55,7 +55,7 @@ class StageCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Creat
 # Edición de Etapa
 class StageUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
     model = Stage
-    form_class = StageForm
+    form_class = StageUpdateForm
     template_name = 'stage/create_stage.html'
     permission_required = 'company.add_company'
 
@@ -80,6 +80,12 @@ class StageUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Updat
         except Exception as e:
             data['error'] = str(e)
         return JsonResponse(data)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        stage = Stage.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'stage': stage})
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

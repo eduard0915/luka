@@ -42,7 +42,7 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a onclick="open_modal('{% url 'company:update_process' process.id %}')" type="button">
+                                    <a onclick="open_modal('{% url 'company:update_process' process.id %}')" type="button" title="Editar">
                                         <i class="bi bi-pencil-square text-warning me-2"></i>
                                     </a>
                                 </td>
@@ -88,16 +88,14 @@
                                 <td>{{ sample.stage }}</td>
                                 <td>
                                     {% if sample.enable_point %}
-                                        <span class="badge badge-sm badge-success">Activo</span>
+                                        <span class="me-1 badge bg-primary">Activo</span>
                                     {% else %}
-                                        <span class="badge badge-sm badge-danger">Inactivo</span>
+                                        <span class="me-1 badge bg-danger">Inactivo</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a onclick="open_modal('{% url 'company:update_sample_point' sample.id %}')"
-                                       class="text-secondary font-weight-normal text-xs" data-toggle="tooltip"
-                                       data-original-title="Editar">
-                                        <i class="fas fa-edit text-warning text-sm"></i>
+                                    <a onclick="open_modal('{% url 'company:update_sample_point' sample.id %}')" title="Editar">
+                                        <i class="bi bi-pencil-square text-warning me-2"></i>
                                     </a>
                                 </td>
                             </tr>
@@ -144,16 +142,14 @@
                                 <td>{{ stg.process }}</td>
                                 <td>
                                     {% if stg.enable_stage %}
-                                        <span class="badge badge-sm badge-success">Activo</span>
+                                        <span class="me-1 badge bg-primary">Activo</span>
                                     {% else %}
-                                        <span class="badge badge-sm badge-danger">Inactivo</span>
+                                        <span class="me-1 badge bg-danger">Inactivo</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a onclick="open_modal('{% url 'company:update_stage' stg.id %}')"
-                                       class="text-secondary font-weight-normal text-xs" data-toggle="tooltip"
-                                       data-original-title="Editar">
-                                        <i class="fas fa-edit text-warning text-sm"></i>
+                                    <a onclick="open_modal('{% url 'company:update_stage' stg.id %}')" title="Editar">
+                                        <i class="bi bi-pencil-square text-warning me-2"></i>
                                     </a>
                                 </td>
                             </tr>
