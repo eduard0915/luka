@@ -114,6 +114,7 @@ class SiteDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Detail
         context['title'] = 'Detalle de Planta'
         context['entity'] = 'Planta: ' + self.object.site_name
         context['subtitle'] = 'Información de la planta'
+        context['back'] = reverse_lazy('company:company_detail', kwargs={'pk': self.object.company.id})
         context['div'] = '12'
         # Get all processes associated with this site
         context['processes'] = Process.objects.select_related('site').filter(site_id=self.object.id, enable_process=True)

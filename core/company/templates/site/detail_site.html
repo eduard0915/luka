@@ -17,316 +17,163 @@
 
 {% block content %}
     <div class="row">
-        <div class="tile mb-4">
-            <div class="col-lg-6">
-                <div class="page-header">
-                    <h2 class="mb-3 line-head" id="dialogs">Procesos</h2>
+        <div class="col-md-6">
+            <div class="tile">
+                <div class="tile-title-w-btn">
+                    <h3 class="title">Procesos</h3>
+                    <p>
+                        <a class="btn btn-primary icon-btn"
+                           onclick="open_modal('{% url 'company:create_process' object.id %}')"><i
+                                class="bi bi-plus-square me-2"></i>Nuevo</a>
+                    </p>
+                </div>
+                <div class="tile-body">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Descripción</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for process in processes %}
+                            <tr>
+                                <td>{{ process.process_name }}</td>
+                                <td>
+                                    {% if process.enable_process %}
+                                        <span class="badge badge-sm badge-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge badge-sm badge-danger">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a onclick="open_modal('{% url 'company:update_process' process.id %}')"
+                                       class="text-secondary font-weight-normal text-xs"
+                                       data-toggle="tooltip" data-original-title="Editar">
+                                        <i class="fas fa-edit text-warning text-sm"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center">
+                                    No hay procesos asociados a esta planta.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <div class="col-lg-6">
-                <div class="page-header">
-                    <h2 class="mb-3 line-head" id="dialogs">Procesos</h2>
+        </div>
+        <div class="col-md-6">
+            <div class="tile">
+                <div class="tile-title-w-btn">
+                    <h3 class="title">Puntos de Muestreo</h3>
+                    <p>
+                        {% if stages %}
+                            <a class="btn btn-primary icon-btn"
+                               onclick="open_modal('{% url 'company:create_sample_point' object.id %}')"><i
+                                    class="bi bi-plus-square me-2"></i>Nuevo</a>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="tile-body">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Punto de Muestreo</th>
+                            <th>Etapa</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for sample in sample_point %}
+                            <tr>
+                                <td>{{ sample.sample_point_code }} {{ sample.sample_point_name }}</td>
+                                <td>{{ sample.stage }}</td>
+                                <td>
+                                    {% if sample.enable_point %}
+                                        <span class="badge badge-sm badge-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge badge-sm badge-danger">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a onclick="open_modal('{% url 'company:update_sample_point' sample.id %}')"
+                                       class="text-secondary font-weight-normal text-xs" data-toggle="tooltip"
+                                       data-original-title="Editar">
+                                        <i class="fas fa-edit text-warning text-sm"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">
+                                    No hay puntos de muestreo asociados a esta planta.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
     <div class="row">
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-lg-flex">
-                        <div class="col-md-10">
-                            <div class="icon icon-lg icon-shape bg-gradient-dark shadow text-center border-radius-xl mt-n4 me-3 float-start">
-                                <i class="material-symbols-rounded opacity-10">factory</i>
-                            </div>
-                            <h5 class="mb-0">{{ entity }}</h5>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="ms-auto my-auto">
-                                <a href="#" class="btn btn-secondary">
-                                    <i class="fa fa-step-backward"></i> Volver
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xl-12 col-lg-12">
-                            <div class="card-body p-3">
-                                <h3>Planta: {{ object.site_name }}</h3>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <p><strong>Dirección:</strong> {{ object.site_address }}</p>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <p><strong>Ciudad:</strong> {{ object.site_city }}</p>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <p><strong>País:</strong> {{ object.site_country }}</p>
-                                    </div>
-                                </div>
-                                <div class="row mt-2">
-                                    <div class="col-md-4">
-                                        <p><strong>Estado:</strong>
-                                            {% if object.site_enable %}
-                                                <span class="badge badge-sm badge-success">Activo</span>
-                                            {% else %}
-                                                <span class="badge badge-sm badge-danger">Inactivo</span>
-                                            {% endif %}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div class="tile">
+                <div class="tile-title-w-btn">
+                    <h3 class="title">Etapas</h3>
+                    <p>
+                        {% if processes %}
+                            <a class="btn btn-primary icon-btn"
+                               onclick="open_modal('{% url 'company:create_stage' object.id %}')"><i
+                                    class="bi bi-plus-square me-2"></i>Nuevo</a>
+                        {% endif %}
+                    </p>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body p-3">
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="row">
-                                <div class="col-md-10">
-                                    <div class="icon icon-lg icon-shape bg-gradient-dark shadow text-center border-radius-xl mt-n4 me-3 float-start">
-                                        <i class="material-symbols-rounded opacity-10">process_chart</i>
-                                    </div>
-                                    <h5 class="ms-3">Procesos</h5>
-                                </div>
-                                <div class="col-md-2">
-                                    <a onclick="open_modal('{% url 'company:create_process' object.id %}')"
-                                       class="btn btn-primary">
-                                        <i class="fa fa-plus"></i> Nuevo
+                <div class="tile-body">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Etapa</th>
+                            <th>Proceso</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for stg in stages %}
+                            <tr>
+                                <td>{{ stg.stage_code }} {{ stg.stage_name }}</td>
+                                <td>{{ stg.process }}</td>
+                                <td>
+                                    {% if stg.enable_stage %}
+                                        <span class="badge badge-sm badge-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge badge-sm badge-danger">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a onclick="open_modal('{% url 'company:update_stage' stg.id %}')"
+                                       class="text-secondary font-weight-normal text-xs" data-toggle="tooltip"
+                                       data-original-title="Editar">
+                                        <i class="fas fa-edit text-warning text-sm"></i>
                                     </a>
-                                </div>
-                            </div>
-                            <div class="table table-responsive">
-                                <table class="table align-items-center mb-0">
-                                    <thead>
-                                    <tr>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                            Nombre del Proceso
-                                        </th>
-                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                            Estado
-                                        </th>
-                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                            Acciones
-                                        </th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for process in processes %}
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex px-2 py-1">
-                                                    <div class="d-flex flex-column justify-content-center">
-                                                        <h6 class="mb-0 text-sm">{{ process.process_name }}</h6>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="align-middle text-center">
-                                                {% if process.enable_process %}
-                                                    <span class="badge badge-sm badge-success">Activo</span>
-                                                {% else %}
-                                                    <span class="badge badge-sm badge-danger">Inactivo</span>
-                                                {% endif %}
-                                            </td>
-                                            <td class="align-middle text-center">
-                                                <a onclick="open_modal('{% url 'company:update_process' process.id %}')"
-                                                   class="text-secondary font-weight-normal text-xs"
-                                                   data-toggle="tooltip" data-original-title="Editar">
-                                                    <i class="fas fa-edit text-warning text-sm"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    {% empty %}
-                                        <tr>
-                                            <td colspan="3" class="text-center">
-                                                No hay procesos asociados a esta planta.
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row pt-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body pb-1">
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="row">
-                                <div class="col-md-10">
-                                    <div class="icon icon-lg icon-shape bg-gradient-dark shadow text-center border-radius-xl mt-n4 me-3 float-start">
-                                        <i class="material-symbols-rounded opacity-10">step</i>
-                                    </div>
-                                    <h5 class="ms-3">Etapas</h5>
-                                </div>
-                                <div class="col-md-2">
-                                    {% if processes %}
-                                        <a onclick="open_modal('{% url 'company:create_stage' object.id %}')"
-                                           class="btn btn-primary">
-                                            <i class="fa fa-plus"></i> Nuevo
-                                        </a>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="table table-responsive">
-                                <table class="table align-items-center mb-0">
-                                    <thead>
-                                    <tr>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                            Etapa
-                                        </th>
-                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                            Proceso
-                                        </th>
-                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                            Acciones
-                                        </th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for stg in stages %}
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex px-2 py-1">
-                                                    <div class="d-flex flex-column justify-content-center">
-                                                        <h6 class="mb-0 text-sm">
-                                                            {{ stg.stage_code }} {{ stg.stage_name }}
-                                                        </h6>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex px-2 py-1">
-                                                    <div class="d-flex flex-column justify-content-center">
-                                                        <h6 class="mb-0 text-sm">{{ stg.process }}</h6>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="align-middle text-center">
-                                                {% if stg.enable_stage %}
-                                                    <span class="badge badge-sm badge-success">Activo</span>
-                                                {% else %}
-                                                    <span class="badge badge-sm badge-danger">Inactivo</span>
-                                                {% endif %}
-                                            </td>
-                                            <td class="align-middle text-center">
-                                                <a onclick="open_modal('{% url 'company:update_stage' stg.id %}')"
-                                                   class="text-secondary font-weight-normal text-xs"
-                                                   data-toggle="tooltip" data-original-title="Editar">
-                                                    <i class="fas fa-edit text-warning text-sm"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    {% empty %}
-                                        <tr>
-                                            <td colspan="3" class="text-center">
-                                                No hay etapas asociadas a esta planta.
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="row">
-                                <div class="col-md-10">
-                                    <div class="icon icon-lg icon-shape bg-gradient-dark shadow text-center border-radius-xl mt-n4 me-3 float-start">
-                                        <i class="material-symbols-rounded opacity-10">dropper_eye</i>
-                                    </div>
-                                    <h5 class="ms-3">Puntos de Muestreo</h5>
-                                </div>
-                                <div class="col-md-2">
-                                    {% if stages %}
-                                        <a onclick="open_modal('{% url 'company:create_sample_point' object.id %}')"
-                                           class="btn btn-primary">
-                                            <i class="fa fa-plus"></i> Nuevo
-                                        </a>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="table table-responsive">
-                                <table class="table align-items-center mb-0">
-                                    <thead>
-                                    <tr>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                            Punto de Muestreo
-                                        </th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                            Etapa
-                                        </th>
-                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                            Estado
-                                        </th>
-                                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                            Acciones
-                                        </th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for sample in sample_point %}
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex px-2 py-1">
-                                                    <div class="d-flex flex-column justify-content-center">
-                                                        <h6 class="mb-0 text-sm">
-                                                            {{ sample.sample_point_code }} {{ sample.sample_point_name }}
-                                                        </h6>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex px-2 py-1">
-                                                    <div class="d-flex flex-column justify-content-center">
-                                                        <h6 class="mb-0 text-sm">{{ sample.stage }}</h6>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="align-middle text-center">
-                                                {% if sample.enable_point %}
-                                                    <span class="badge badge-sm badge-success">Activo</span>
-                                                {% else %}
-                                                    <span class="badge badge-sm badge-danger">Inactivo</span>
-                                                {% endif %}
-                                            </td>
-                                            <td class="align-middle text-center">
-                                                <a onclick="open_modal('{% url 'company:update_sample_point' sample.id %}')"
-                                                   class="text-secondary font-weight-normal text-xs"
-                                                   data-toggle="tooltip" data-original-title="Editar">
-                                                    <i class="fas fa-edit text-warning text-sm"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    {% empty %}
-                                        <tr>
-                                            <td colspan="3" class="text-center">
-                                                No hay procesos asociados a esta planta.
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">
+                                    No hay etapas asociadas a esta planta.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
