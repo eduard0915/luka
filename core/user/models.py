@@ -96,6 +96,7 @@ class Training(models.Model):
     description_training = models.CharField(max_length=120, verbose_name='Capacitación')
     training_by = models.CharField(max_length=200, verbose_name='Realizado por')
     date_training = models.DateField(verbose_name='Fecha')
+    date_training_expire = models.DateField(verbose_name='Fecha de Vencimiento')
     support_training = models.FileField(upload_to='support_training/%Y%m%d', verbose_name='Soporte')
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='')
 
