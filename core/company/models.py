@@ -75,7 +75,7 @@ class Stage(models.Model):
     enable_stage = models.BooleanField(default=True, verbose_name='Habilitado')
 
     def __str__(self):
-        return str(self.stage_name)
+        return str(self.stage_name) + ' - ' + str(self.process.process_name)
 
     class Meta:
         verbose_name = 'Stage'
@@ -92,7 +92,7 @@ class SamplePoint(models.Model):
     enable_point = models.BooleanField(default=True, verbose_name='Habilitado')
 
     def __str__(self):
-        return str(self.sample_point_name)
+        return str(self.sample_point_name) + ' - ' + str(self.stage.stage_name) + ' - ' + str(self.stage.process.process_name)
 
     class Meta:
         verbose_name = 'SamplePoint'

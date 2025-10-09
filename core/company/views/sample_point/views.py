@@ -5,7 +5,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, UpdateView
 
-from core.company.forms import SamplePointForm
+from core.company.forms import SamplePointForm, SamplePointUpdateForm
 from core.company.models import SamplePoint, Site
 from core.mixins import ValidatePermissionRequiredMixin
 
@@ -55,7 +55,7 @@ class SamplePointCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
 # Edición de Puntos de Muestreo
 class SamplePointUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
     model = SamplePoint
-    form_class = SamplePointForm
+    form_class = SamplePointUpdateForm
     template_name = 'sample_point/create_sample_point.html'
     permission_required = 'company.add_company'
 
@@ -80,6 +80,12 @@ class SamplePointUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         except Exception as e:
             data['error'] = str(e)
         return JsonResponse(data)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        sample = SamplePoint.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'sample': sample})
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
