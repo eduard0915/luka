@@ -10,9 +10,9 @@
 {% endblock %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-md-6">
-            <div class="tile">
+    <div class="row" style="margin-bottom: 0;">
+        <div class="col-md-4">
+            <div class="tile" style="margin-bottom: 15px;">
                 <div class="tile-title-w-btn">
                     <h3 class="title">Procesos</h3>
                     <p>
@@ -59,7 +59,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-8">
             <div class="tile">
                 <div class="tile-title-w-btn">
                     <h3 class="title">Puntos de Muestreo</h3>
@@ -77,6 +77,8 @@
                         <tr>
                             <th>Punto de Muestreo</th>
                             <th>Etapa</th>
+                            <th>Matriz</th>
+                            <th>Versión</th>
                             <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
@@ -86,6 +88,8 @@
                             <tr>
                                 <td>{{ sample.sample_point_code }} {{ sample.sample_point_name }}</td>
                                 <td>{{ sample.stage }}</td>
+                                <td>{{ sample.sample_type }}</td>
+                                <td>{{ sample.sample_point_version }}</td>
                                 <td>
                                     {% if sample.enable_point %}
                                         <span class="me-1 badge bg-primary">Activo</span>

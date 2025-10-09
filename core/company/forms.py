@@ -233,10 +233,11 @@ class SamplePointForm(ModelForm):
 
     class Meta:
         model = SamplePoint
-        fields = ['sample_point_code', 'sample_point_name', 'stage']
+        fields = ['sample_point_code', 'sample_point_name', 'stage', 'sample_type']
         widgets = {
             'sample_point_code': TextInput(attrs={'class': 'form-control', 'required': True}),
             'sample_point_name': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'sample_type': TextInput(attrs={'class': 'form-control', 'required': True}),
             'stage': Select(attrs={'class': 'form-control', 'required': True}),
         }
 
@@ -265,10 +266,11 @@ class SamplePointUpdateForm(ModelForm):
 
     class Meta:
         model = SamplePoint
-        fields = ['sample_point_code', 'sample_point_name', 'stage']
+        fields = ['sample_point_code', 'sample_point_name', 'stage', 'sample_type']
         widgets = {
             'sample_point_code': TextInput(attrs={'class': 'form-control', 'required': True}),
             'sample_point_name': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'sample_type': TextInput(attrs={'class': 'form-control', 'required': True}),
             'stage': Select(attrs={'class': 'form-control', 'required': True}),
         }
 

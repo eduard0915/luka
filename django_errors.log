@@ -400,3 +400,7 @@ Traceback (most recent call last):
                 ^^^^^^^^^^^^^^^^^^
 KeyError: 'site'
 ERROR 2025-10-09 07:20:01,520 basehttp 9182 139093832890048 "GET /company/update_stage/5e801282-f614-4c65-a985-7bd28bac2ee4/ HTTP/1.1" 500 129933
+WARNING 2025-10-09 07:54:23,664 log 12236 137997687191232 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-09 07:54:23,664 basehttp 12236 137997687191232 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-09 08:16:25,147 log 18093 136440541345472 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-09 08:16:25,148 basehttp 18093 136440541345472 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560

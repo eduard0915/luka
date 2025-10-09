@@ -70,7 +70,7 @@ class Process(models.Model):
 class Stage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     stage_name = models.CharField(max_length=100, verbose_name='Etapa')
-    stage_code = models.CharField(max_length=20, verbose_name='Codigo/Abreviación')
+    stage_code = models.CharField(max_length=20, verbose_name='Código')
     process = models.ForeignKey(Process, on_delete=models.CASCADE, verbose_name='Proceso')
     enable_stage = models.BooleanField(default=True, verbose_name='Habilitado')
 
@@ -87,7 +87,9 @@ class Stage(models.Model):
 class SamplePoint(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     sample_point_name = models.CharField(max_length=100, verbose_name='Punto de Muestreo')
-    sample_point_code = models.CharField(max_length=30, verbose_name='Codigo/Abreviación')
+    sample_point_code = models.CharField(max_length=30, verbose_name='Código')
+    sample_point_version = models.SmallIntegerField(verbose_name='', default=1)
+    sample_type = models.CharField(max_length=30, verbose_name='Tipo de Muestra (Matriz)')
     stage = models.ForeignKey(Stage, on_delete=models.CASCADE, verbose_name='Etapa')
     enable_point = models.BooleanField(default=True, verbose_name='Habilitado')
 

@@ -43,6 +43,8 @@
                                     Exito!
                                 {% elif message.tags == 'danger' %}
                                     Error!
+                                {% elif message.tags == 'warning' %}
+                                    Precaución!
                                 {% endif %}
                             </strong>
                             {{ message }}.
