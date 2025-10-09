@@ -404,3 +404,47 @@ WARNING 2025-10-09 07:54:23,664 log 12236 137997687191232 Not Found: /.well-know
 WARNING 2025-10-09 07:54:23,664 basehttp 12236 137997687191232 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
 WARNING 2025-10-09 08:16:25,147 log 18093 136440541345472 Not Found: /.well-known/appspecific/com.chrome.devtools.json
 WARNING 2025-10-09 08:16:25,148 basehttp 18093 136440541345472 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-09 08:25:48,767 log 18093 136440541345472 Not Found: /user/update-password/5b040378-73b0-43a2-a90e-5cc75dc115a7/
+WARNING 2025-10-09 08:25:48,767 basehttp 18093 136440541345472 "GET /user/update-password/5b040378-73b0-43a2-a90e-5cc75dc115a7/ HTTP/1.1" 404 7131
+ERROR 2025-10-09 09:43:43,750 log 18093 136440541345472 Internal Server Error: /user/training/download/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 144, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/user/views/training/views.py", line 131, in get
+    url = urlopen(link)
+          ^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 525, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 634, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 563, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/lib/python3.11/urllib/request.py", line 643, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 404: Not Found
+ERROR 2025-10-09 09:43:43,753 basehttp 18093 136440541345472 "GET /user/training/download/?id=b0302388-97e4-4303-9a61-69bd79f631b0&type=support_training HTTP/1.1" 500 128680

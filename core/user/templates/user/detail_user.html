@@ -13,231 +13,162 @@
 {% block content %}
 
     <div class="container-fluid">
-        <div class="page-header min-height-300 border-radius-xl mt-4"
-             style="background-image: url('https://images.unsplash.com/photo-1531512073830-ba890ca4eba2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');">
-            <span class="mask  bg-gradient-dark  opacity-6"></span>
-        </div>
         <div class="card card-body mx-2 mx-md-2 mt-n6">
             <div class="row gx-4 mb-2">
-                <div class="col-auto">
+                <div class="col-md-2">
                     <div class="avatar avatar-xl">
                         <img src="{% static 'img/default-avatar.png' %}" alt="profile_image"
                              class="w-100 border-radius-lg shadow-sm">
                     </div>
                 </div>
-                <div class="col-auto my-auto">
-                    <div class="h-100">
-                        <h5 class="mb-1">
-                            {{ object.get_full_name }}
-                        </h5>
-                        <p class="mb-0 font-weight-normal text-sm">
-                            {{ object.cargo }}
-                        </p>
+                <div class="col-md-10">
+                    <div class="tile">
+                        <div class="tile-title-w-btn">
+                            <h3 class="title">{{ object.get_full_name }}, {{ object.cargo }}</h3>
+                        </div>
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <b>Cedula </b><br>
+                                    <p>{{ object.cedula }}</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <b>Usuario </b><br>
+                                    <p>{{ object.username }}</p>
+                                </div>
+                                <div class="col-md-2">
+                                    <b>Cedula </b><br>
+                                    <p>{{ object.cedula }}</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <b>Celular </b><br>
+                                    <p>{{ object.cellphone }}</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <b>Email </b><br>
+                                    <p>{{ object.email }}</p>
+                                </div>
+                                <div class="col-md-5">
+                                    <b>Dirección</b><br>
+                                    <p>{{ object.address_user }}</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="row mt-3">
-                <div class="col-12 col-md-6 col-xl-3 pe-0">
-                    <div class="card card-plain h-100">
-                        <div class="card-header pb-0 p-3">
-                            <div class="row">
-                                <div class="col-md-8 d-flex align-items-center">
-                                    <h6 class="mb-0">Información de Usuario</h6>
-                                </div>
-                                <div class="col-md-4 text-end">
-                                    <a href="{% url 'user:user_update' object.slug %}">
-                                        <i class="fas fa-user-edit text-secondary text-sm" data-bs-toggle="tooltip"
-                                           data-bs-placement="top" title="Editar Perfil"></i>
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="card-body p-3">
-                                <ul class="list-group">
-                                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">
-                                        Usuario:</strong> &nbsp; {{ object.username }}
-                                    </li>
-                                    <li class="list-group-item border-0 ps-0 pt-0 text-sm"><strong class="text-dark">
-                                        Email:</strong> &nbsp; {{ object.email }}
-                                    </li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong
-                                            class="text-dark">Celular:</strong> &nbsp; {{ object.cellphone }}
-                                    </li>
-                                    <li class="list-group-item border-0 ps-0 text-sm"><strong
-                                            class="text-dark">Cedula:</strong>&nbsp; {{ object.cedula }}
-                                    </li>
-                                    {% if object.address_user %}
-                                        <li class="list-group-item border-0 ps-0 text-sm"><strong
-                                                class="text-dark">Dirección:</strong> &nbsp; {{ object.address_user }}
-                                        </li>
-                                    {% endif %}
-                                </ul>
-                            </div>
+                <div class="col-md-6">
+                    <div class="tile">
+                        <div class="tile-title-w-btn">
+                            <h3 class="title">Capacitaciones</h3>
+                            <p>
+                                <a class="btn btn-primary icon-btn"
+                                   onclick="open_modal('{% url 'user:create_training' object.slug %}')"><i
+                                        class="bi bi-plus-square me-2"></i>Nuevo</a>
+
+                            </p>
+                        </div>
+                        <div class="tile-body">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th>Descripción</th>
+                                    <th>Ver</th>
+                                    <th>Realizada por</th>
+                                    <th>Fecha</th>
+                                    <th>Acciones</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for foo in training %}
+                                    <tr>
+                                        <td>{{ foo.description_training }}</td>
+                                        <td>
+                                            <a href="{% url 'user:download_training' %}?id={{ foo.id }}&type=support_training"
+                                               target="_blank">
+                                                <i class="bi bi-file-earmark-pdf text-danger"></i>
+                                            </a>
+                                        </td>
+                                        <td>{{ foo.training_by }}</td>
+                                        <td>{{ foo.date_training | date:'Y-m-d' }}</td>
+                                        <td>
+                                            <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
+                                               title="Editar">
+                                                <i class="bi bi-pencil-square text-warning me-2"></i>
+                                            </a>
+                                            <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
+                                               title="Eliminar">
+                                                <i class="bi bi-trash text-danger me-2"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center">
+                                            No hay competencias asociadas.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-6 col-xl-5 pe-0">
-                    <div class="card card-plain h-100">
-                        <div class="card-header pb-0 p-3">
-                            <div class="row">
-                                <div class="col-md-8 d-flex align-items-center">
-                                    <h6 class="mb-0">Capacitaciones</h6>
-                                </div>
-                                <div class="col-md-4 text-end">
-                                    <a onclick="open_modal('{% url 'user:create_training' object.slug %}')">
-                                        <i class="fa fa-plus"></i> <i class="fa-solid fa-user-graduate text-secondary text-sm"
-                                           data-bs-toggle="tooltip"
-                                           data-bs-placement="top" title="Registrar Capacitación"></i>
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="card-body p-1">
-                                <div class="card">
-                                    <div class="table-responsive">
-                                        <table class="table align-items-center mb-0" id="data_0">
-                                            <thead>
-                                            <tr>
-                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width:40%">
-                                                    Descripción
-                                                </th>
-                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2" style="width:5%">
-                                                    Ver
-                                                </th>
-                                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width:30%">
-                                                    Realizado por
-                                                </th>
-                                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width:15%">
-                                                    Fecha
-                                                </th>
-                                                <th class="text-secondary opacity-7" style="width:10%"></th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            {% if training %}
-                                                {% for foo in training %}
-                                                    <tr>
-                                                        <td>
-                                                            <div class="d-flex px-2 py-1">
-                                                                <div class="d-flex flex-column justify-content-center">
-                                                                    <h6 class="mb-0 text-xs">{{ foo.description_training }}</h6>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <a href="{% url 'user:download_training' %}?id={{ foo.id }}&type=support_training" target="_blank">
-                                                                <i class="fa-solid fa-file-pdf text-danger"></i>
-                                                            </a>
-                                                        </td>
-                                                        <td class="align-middle text-center text-sm">
-                                                            <p class="text-xs text-secondary mb-0">{{ foo.training_by }}</p>
-                                                        </td>
-                                                        <td class="align-middle text-center">
-                                                            <span class="text-secondary text-xs font-weight-normal">
-                                                                {{ foo.date_training | date:'Y-m-d' }}</span>
-                                                        </td>
-                                                        <td class="align-middle">
-                                                            <a onclick="open_modal('{% url 'user:delete_training' foo.id %}')"
-                                                               class="text-secondary font-weight-normal text-xs"
-                                                               data-toggle="tooltip" data-original-title="Eliminar">
-                                                                <i class="fas fa-trash text-danger text-sm m-2"></i>
-                                                            </a>
-                                                            <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
-                                                               class="text-secondary font-weight-normal text-xs"
-                                                               data-toggle="tooltip" data-original-title="Editar">
-                                                                <i class="fas fa-edit text-warning text-sm"></i>
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                {% endfor %}
-                                            {% else %}
-                                                Sin capacitaciones registradas
-                                            {% endif %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="col-md-6">
+                    <div class="tile">
+                        <div class="tile-title-w-btn">
+                            <h3 class="title">Competencias</h3>
+                            <p>
+                                <a class="btn btn-primary icon-btn"
+                                   onclick="open_modal('{% url 'user:create_competence' object.slug %}')"><i
+                                        class="bi bi-plus-square me-2"></i>Nuevo</a>
+
+                            </p>
                         </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6 col-xl-4 pe-0">
-                    <div class="card card-plain h-100">
-                        <div class="card-header pb-0 p-3">
-                            <div class="row">
-                                <div class="col-md-8 d-flex align-items-center">
-                                    <h6 class="mb-0">Competencias</h6>
-                                </div>
-                                <div class="col-md-4 text-end">
-                                    <a onclick="open_modal('{% url 'user:create_competence' object.slug %}')"
-                                       title="Registrar Competencia">
-                                        <i class="fa fa-plus"></i> <i
-                                            class="fa-solid fa-graduation-cap text-secondary text-sm"
-                                            data-bs-toggle="tooltip"
-                                            data-bs-placement="top"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-body p-1">
-                            <div class="card">
-                                <div class="table-responsive">
-                                    <table class="table align-items-center mb-0" id="data_0">
-                                        <thead>
-                                        <tr>
-                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                                Descripción
-                                            </th>
-                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
-                                                Ver
-                                            </th>
-                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                                Institución
-                                            </th>
-                                            <th class="text-secondary opacity-7"></th>
-                                        </tr>
-                                        </thead>
-                                        {% if competence %}
-                                            <tbody>
-                                            {% for cp in competence %}
-                                                <tr>
-                                                    <td>
-                                                        <div class="d-flex px-2 py-1">
-                                                            <div class="d-flex flex-column justify-content-center">
-                                                                <h6 class="mb-0 text-xs">{{ cp.description_competence }}</h6>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <a href="{% url 'user:download_competence' %}?id={{ cp.id }}&type=support_competence"
-                                                           target="_blank">
-                                                            <i class="fa-solid fa-file-pdf text-danger"></i>
-                                                        </a>
-                                                    </td>
-                                                    <td class="align-middle text-center text-sm">
-                                                        <p class="text-xs text-secondary mb-0">{{ cp.institution }}</p>
-                                                    </td>
-                                                    <td class="align-middle">
-                                                        <a onclick="open_modal('{% url 'user:delete_competence' cp.id %}')"
-                                                           class="text-secondary font-weight-normal text-xs"
-                                                           data-toggle="tooltip" data-original-title="Eliminar">
-                                                            <i class="fas fa-trash text-danger text-sm m-2"></i>
-                                                        </a>
-                                                        <a onclick="open_modal('{% url 'user:update_competence' cp.id %}')"
-                                                           class="text-secondary font-weight-normal text-xs"
-                                                           data-toggle="tooltip" data-original-title="Editar">
-                                                            <i class="fas fa-edit text-warning text-sm"></i>
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                            </tbody>
-                                        {% else %}
-                                            <tr>
-                                                <td colspan="4" class="text-center">Sin competencias registradas</td>
-                                            </tr>
-                                        {% endif %}
-                                    </table>
-                                </div>
-                            </div>
+                        <div class="tile-body">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th>Descripción</th>
+                                    <th>Ver</th>
+                                    <th>Institución</th>
+                                    <th>Acciones</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for cp in competence %}
+                                    <tr>
+                                        <td>{{ cp.description_competence }}</td>
+                                        <td>
+                                            <a href="{% url 'user:download_competence' %}?id={{ cp.id }}&type=support_competence"
+                                               target="_blank">
+                                                <i class="bi bi-file-earmark-pdf text-danger"></i>
+                                            </a>
+                                        </td>
+                                        <td>{{ cp.institution }}</td>
+                                        <td>
+                                            <a onclick="open_modal('{% url 'user:update_competence' cp.id %}')"
+                                               title="Editar">
+                                                <i class="bi bi-pencil-square text-warning me-2"></i>
+                                            </a>
+                                            <a onclick="open_modal('{% url 'user:delete_competence' cp.id %}')"
+                                               title="Eliminar">
+                                                <i class="bi bi-trash text-danger me-2"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center">
+                                            No hay competencias asociadas.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
