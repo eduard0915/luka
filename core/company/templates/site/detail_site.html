@@ -9,12 +9,6 @@
     {% endblock %}
 {% endblock %}
 
-
-{% block notifications %}
-
-{% endblock %}
-
-
 {% block content %}
     <div class="row">
         <div class="col-md-6">
@@ -42,16 +36,14 @@
                                 <td>{{ process.process_name }}</td>
                                 <td>
                                     {% if process.enable_process %}
-                                        <span class="badge badge-sm badge-success">Activo</span>
+                                        <span class="me-1 badge bg-primary">Activo</span>
                                     {% else %}
-                                        <span class="badge badge-sm badge-danger">Inactivo</span>
+                                        <span class="me-1 badge bg-danger">Inactivo</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a onclick="open_modal('{% url 'company:update_process' process.id %}')"
-                                       class="text-secondary font-weight-normal text-xs"
-                                       data-toggle="tooltip" data-original-title="Editar">
-                                        <i class="fas fa-edit text-warning text-sm"></i>
+                                    <a onclick="open_modal('{% url 'company:update_process' process.id %}')" type="button">
+                                        <i class="bi bi-pencil-square text-warning me-2"></i>
                                     </a>
                                 </td>
                             </tr>

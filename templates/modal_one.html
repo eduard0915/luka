@@ -5,7 +5,7 @@
             <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"><span
                     aria-hidden="true"></span></button>
         </div>
-        <form enctype="multipart/form-data" method="post" action="{{ request.path }}" class="form-horizontal"
+        <form enctype="multipart/form-data" method="post" action="{{ action_url|default:request.path }}" class="form-horizontal"
               id="modal_form">
             <div class="modal-body">
                 {% csrf_token %}
@@ -27,37 +27,39 @@
     {% block scripts_detail %}
         <script type="application/javascript">
 
-            document.getElementById('modal_form').addEventListener('submit', function (e) {
+            $('form').on('submit', function (e) {
                 e.preventDefault();
-
-                // Deshabilitar el botón y mostrar spinner
-                const btnSubmit = document.getElementById('btnSubmit');
-                btnSubmit.disabled = true;
-                btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
-
-                const parameters = new FormData(this);
-                axios.post(this.action, parameters, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                })
-                    .then(function (response) {
-                        console.log(response.data);
-                        if (!response.data.hasOwnProperty('error')) {
+                var parameters = new FormData(this);
+                const form_action = $(this).attr('action');
+                $.ajax({
+                    url: form_action,
+                    type: 'POST',
+                    data: parameters,
+                    dataType: 'json',
+                    processData: false,
+                    contentType: false,
+                }).done(function (data) {
+                    console.log(data);
+                    if (!data.hasOwnProperty('error')) {
+                        if (data.hasOwnProperty('redirect_url')) {
+                            window.location.href = data.redirect_url;
+                        } else {
                             location.href = window.location.pathname;
-                            return false;
                         }
-                        message_error(response.data.error);
-                        // Re-habilitar el botón en caso de error
-                        btnSubmit.disabled = false;
-                        btnSubmit.innerHTML = '<i class="fa fa-fw fa-lg fa-check-circle"></i>Guardar';
-                    })
-                    .catch(function (error) {
-                        alert(error.response.status + ': ' + error.message);
-                        // Re-habilitar el botón en caso de error
-                        btnSubmit.disabled = false;
-                        btnSubmit.innerHTML = '<i class="fa fa-fw fa-lg fa-check-circle"></i>Guardar';
-                    });
+                        return false;
+                    }
+                    message_error(data.error);
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    alert(textStatus + ': ' + errorThrown);
+                });
+            });
+
+            $("#btnSubmit").click(function () {
+                $(this).prop("disabled", true); //deshabilitamos el botón
+                $(this).submit()
+                $(this).html(
+                    `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...` //añadimos el spinner
+                );
             });
 
         </script>
