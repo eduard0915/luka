@@ -37,7 +37,7 @@
                         {% endfor %}
 
                         <div class="tile-footer text-end">
-                            <button type="submit" class="btn btn-primary me-2" id="btnSubmit">Guardar</button>
+                            <button type="submit" class="btn btn-primary me-2" id="btnSend">Guardar</button>
                             <a href="{{ list_url }}" class="btn btn-secondary">Cancelar</a>
                         </div>
                     </form>
@@ -50,38 +50,94 @@
 {% block scripts_detail %}
     <script type="application/javascript">
 
-        document.querySelector('form').addEventListener('submit', function (e) {
+        $('form').on('submit', function (e) {
             e.preventDefault();
-
-            // Deshabilitar el botón y mostrar spinner
-            const btnSubmit = document.getElementById('btnSubmit');
-            btnSubmit.disabled = true;
-            btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
-
-            const parameters = new FormData(this);
-            axios.post(window.location.pathname, parameters, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            })
-                .then(function (response) {
-                    console.log(response.data);
-                    if (!response.data.hasOwnProperty('error')) {
-                        location.href = '{{ list_url }}';
-                        return false;
+            var parameters = new FormData(this);
+            const form_action = $(this).attr('action');
+            $.ajax({
+                url: form_action,
+                type: 'POST',
+                data: parameters,
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+            }).done(function (data) {
+                console.log(data);
+                if (!data.hasOwnProperty('error')) {
+                    if (data.hasOwnProperty('redirect_url')) {
+                        window.location.href = data.redirect_url;
+                    } else {
+                        location.href = window.location.pathname;
                     }
-                    message_error(response.data.error);
-                    // Re-habilitar el botón en caso de error
-                    btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = '<i class="fa fa-fw fa-lg fa-check-circle"></i>Guardar';
-                })
-                .catch(function (error) {
-                    alert(error.response.status + ': ' + error.message);
-                    // Re-habilitar el botón en caso de error
-                    btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = '<i class="fa fa-fw fa-lg fa-check-circle"></i>Guardar';
-                });
+                    return false;
+                }
+                message_error(data.error);
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                alert(textStatus + ': ' + errorThrown);
+            });
         });
+
+        $("#btnSend").click(function () {
+            $(this).prop("disabled", true); //deshabilitamos el botón
+            $(this).submit()
+            $(this).html(
+                `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...` //añadimos el spinner
+            );
+        });
+
+        {#document.querySelector('form').addEventListener('submit', function (e) {#}
+        {#    e.preventDefault();#}
+        {#    const parameters = new FormData(this);#}
+        {#    axios.post(window.location.pathname, parameters, {#}
+        {#        headers: {#}
+        {#            'Content-Type': 'multipart/form-data'#}
+        {#        }#}
+        {#    })#}
+        {#        .then(function (response) {#}
+        {#            console.log(response.data);#}
+        {#            if (!response.data.hasOwnProperty('error')) {#}
+        {#                location.href = window.location.pathname;#}
+        {#                return false;#}
+        {#            }#}
+        {#            message_error(response.data.error);#}
+        {#        })#}
+        {#        .catch(function (error) {#}
+        {#            alert(error.response.status + ': ' + error.message);#}
+        {#        });#}
+        {# });#}
+
+        {#document.querySelector('form').addEventListener('submit', function (e) {#}
+        {#    e.preventDefault();#}
+        {##}
+        {#    // Deshabilitar el botón y mostrar spinner#}
+        {#    const btnSubmit = document.getElementById('btnSubmit');#}
+        {#    btnSubmit.disabled = true;#}
+        {#    btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';#}
+        {##}
+        {#    const parameters = new FormData(this);#}
+        {#    axios.post(window.location.pathname, parameters, {#}
+        {#        headers: {#}
+        {#            'Content-Type': 'multipart/form-data'#}
+        {#        }#}
+        {#    })#}
+        {#        .then(function (response) {#}
+        {#            console.log(response.data);#}
+        {#            if (!response.data.hasOwnProperty('error')) {#}
+        {#                location.href = '{{ list_url }}';#}
+        {#                return false;#}
+        {#            }#}
+        {#            message_error(response.data.error);#}
+        {#            // Re-habilitar el botón en caso de error#}
+        {#            btnSubmit.disabled = false;#}
+        {#            btnSubmit.innerHTML = '<i class="fa fa-fw fa-lg fa-check-circle"></i>Guardar';#}
+        {#        })#}
+        {#        .catch(function (error) {#}
+        {#            alert(error.response.status + ': ' + error.message);#}
+        {#            // Re-habilitar el botón en caso de error#}
+        {#            btnSubmit.disabled = false;#}
+        {#            btnSubmit.innerHTML = '<i class="fa fa-fw fa-lg fa-check-circle"></i>Guardar';#}
+        {#        });#}
+        {# });#}
 
     </script>
 {% endblock %}
