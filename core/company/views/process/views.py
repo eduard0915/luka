@@ -48,6 +48,7 @@ class ProcessCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Creación de Proceso'
+        context['class'] = 'col-md-8'
         return context
 
 
