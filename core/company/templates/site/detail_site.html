@@ -42,7 +42,8 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a onclick="open_modal('{% url 'company:update_process' process.id %}')" type="button" title="Editar">
+                                    <a onclick="open_modal('{% url 'company:update_process' process.id %}')"
+                                       type="button" title="Editar">
                                         <i class="bi bi-pencil-square text-warning me-2"></i>
                                     </a>
                                 </td>
@@ -60,64 +61,6 @@
             </div>
         </div>
         <div class="col-md-8">
-            <div class="tile">
-                <div class="tile-title-w-btn">
-                    <h3 class="title">Puntos de Muestreo</h3>
-                    <p>
-                        {% if stages %}
-                            <a class="btn btn-primary icon-btn"
-                               onclick="open_modal('{% url 'company:create_sample_point' object.id %}')"><i
-                                    class="bi bi-plus-square me-2"></i>Nuevo</a>
-                        {% endif %}
-                    </p>
-                </div>
-                <div class="tile-body">
-                    <table class="table">
-                        <thead>
-                        <tr>
-                            <th>Punto de Muestreo</th>
-                            <th>Etapa</th>
-                            <th>Matriz</th>
-                            <th>Versión</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for sample in sample_point %}
-                            <tr>
-                                <td>{{ sample.sample_point_code }} {{ sample.sample_point_name }}</td>
-                                <td>{{ sample.stage }}</td>
-                                <td>{{ sample.sample_type }}</td>
-                                <td>{{ sample.sample_point_version }}</td>
-                                <td>
-                                    {% if sample.enable_point %}
-                                        <span class="me-1 badge bg-primary">Activo</span>
-                                    {% else %}
-                                        <span class="me-1 badge bg-danger">Inactivo</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <a onclick="open_modal('{% url 'company:update_sample_point' sample.id %}')" title="Editar">
-                                        <i class="bi bi-pencil-square text-warning me-2"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center">
-                                    No hay puntos de muestreo asociados a esta planta.
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6">
             <div class="tile">
                 <div class="tile-title-w-btn">
                     <h3 class="title">Etapas</h3>
@@ -170,7 +113,65 @@
             </div>
         </div>
     </div>
-
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <div class="tile-title-w-btn">
+                    <h3 class="title">Puntos de Muestreo</h3>
+                    <p>
+                        {% if stages %}
+                            <a class="btn btn-primary icon-btn"
+                               onclick="open_modal('{% url 'company:create_sample_point' object.id %}')"><i
+                                    class="bi bi-plus-square me-2"></i>Nuevo</a>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="tile-body">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Punto de Muestreo</th>
+                            <th>Etapa</th>
+                            <th>Matriz</th>
+                            <th>Versión</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for sample in sample_point %}
+                            <tr>
+                                <td>{{ sample.sample_point_code }} {{ sample.sample_point_name }}</td>
+                                <td>{{ sample.stage }}</td>
+                                <td>{{ sample.sample_type }}</td>
+                                <td>{{ sample.sample_point_version }}</td>
+                                <td>
+                                    {% if sample.enable_point %}
+                                        <span class="me-1 badge bg-primary">Activo</span>
+                                    {% else %}
+                                        <span class="me-1 badge bg-danger">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a onclick="open_modal('{% url 'company:update_sample_point' sample.id %}')"
+                                       title="Editar">
+                                        <i class="bi bi-pencil-square text-warning me-2"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">
+                                    No hay puntos de muestreo asociados a esta planta.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block scripts_detail %}

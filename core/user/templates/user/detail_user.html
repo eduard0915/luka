@@ -12,164 +12,162 @@
 
 {% block content %}
 
-    <div class="container-fluid">
-        <div class="card card-body mx-2 mx-md-2 mt-n6">
-            <div class="row gx-4 mb-2">
-                <div class="col-md-2">
-                    <div class="avatar avatar-xl">
-                        <img src="{% static 'img/default-avatar.png' %}" alt="profile_image"
-                             class="w-100 border-radius-lg shadow-sm">
-                    </div>
+    <div class="tile">
+        <div class="row">
+            <div class="col-md-2">
+                <div class="avatar avatar-xl">
+                    <img src="{% static 'img/default-avatar.png' %}" alt="profile_image"
+                         class="w-100 border-radius-lg shadow-sm">
                 </div>
-                <div class="col-md-10">
-                    <div class="tile">
-                        <div class="tile-title-w-btn">
-                            <h3 class="title">{{ object.get_full_name }}, {{ object.cargo }}</h3>
-                        </div>
-                        <div class="tile-body">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <b>Cedula </b><br>
-                                    <p>{{ object.cedula }}</p>
-                                </div>
-                                <div class="col-md-3">
-                                    <b>Usuario </b><br>
-                                    <p>{{ object.username }}</p>
-                                </div>
-                                <div class="col-md-2">
-                                    <b>Cedula </b><br>
-                                    <p>{{ object.cedula }}</p>
-                                </div>
-                                <div class="col-md-3">
-                                    <b>Celular </b><br>
-                                    <p>{{ object.cellphone }}</p>
-                                </div>
+            </div>
+            <div class="col-md-10">
+                <div class="tile">
+                    <div class="tile-title-w-btn">
+                        <h3 class="title">{{ object.get_full_name }}, {{ object.cargo }}</h3>
+                    </div>
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <b>Cedula </b><br>
+                                <p>{{ object.cedula }}</p>
                             </div>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <b>Email </b><br>
-                                    <p>{{ object.email }}</p>
-                                </div>
-                                <div class="col-md-5">
-                                    <b>Dirección</b><br>
-                                    <p>{{ object.address_user }}</p>
-                                </div>
+                            <div class="col-md-3">
+                                <b>Usuario </b><br>
+                                <p>{{ object.username }}</p>
+                            </div>
+                            <div class="col-md-2">
+                                <b>Cedula </b><br>
+                                <p>{{ object.cedula }}</p>
+                            </div>
+                            <div class="col-md-3">
+                                <b>Celular </b><br>
+                                <p>{{ object.cellphone }}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <b>Email </b><br>
+                                <p>{{ object.email }}</p>
+                            </div>
+                            <div class="col-md-5">
+                                <b>Dirección</b><br>
+                                <p>{{ object.address_user }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row mt-3">
-                <div class="col-md-6">
-                    <div class="tile">
-                        <div class="tile-title-w-btn">
-                            <h3 class="title">Capacitaciones</h3>
-                            <p>
-                                <a class="btn btn-primary icon-btn"
-                                   onclick="open_modal('{% url 'user:create_training' object.slug %}')"><i
-                                        class="bi bi-plus-square me-2"></i>Nuevo</a>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="tile">
+                    <div class="tile-title-w-btn">
+                        <h3 class="title">Capacitaciones</h3>
+                        <p>
+                            <a class="btn btn-primary icon-btn"
+                               onclick="open_modal('{% url 'user:create_training' object.slug %}')"><i
+                                    class="bi bi-plus-square me-2"></i>Nuevo</a>
 
-                            </p>
-                        </div>
-                        <div class="tile-body">
-                            <table class="table">
-                                <thead>
+                        </p>
+                    </div>
+                    <div class="tile-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>Descripción</th>
+                                <th>Ver</th>
+                                <th>Realizada por</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for foo in training %}
                                 <tr>
-                                    <th>Descripción</th>
-                                    <th>Ver</th>
-                                    <th>Realizada por</th>
-                                    <th>Fecha</th>
-                                    <th>Acciones</th>
+                                    <td>{{ foo.description_training }}</td>
+                                    <td>
+                                        <a href="{% url 'user:download_training' %}?id={{ foo.id }}&type=support_training"
+                                           target="_blank">
+                                            <i class="bi bi-file-earmark-pdf text-danger"></i>
+                                        </a>
+                                    </td>
+                                    <td>{{ foo.training_by }}</td>
+                                    <td>{{ foo.date_training | date:'Y-m-d' }}</td>
+                                    <td>
+                                        <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
+                                           title="Editar">
+                                            <i class="bi bi-pencil-square text-warning me-2"></i>
+                                        </a>
+                                        <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
+                                           title="Eliminar">
+                                            <i class="bi bi-trash text-danger me-2"></i>
+                                        </a>
+                                    </td>
                                 </tr>
-                                </thead>
-                                <tbody>
-                                {% for foo in training %}
-                                    <tr>
-                                        <td>{{ foo.description_training }}</td>
-                                        <td>
-                                            <a href="{% url 'user:download_training' %}?id={{ foo.id }}&type=support_training"
-                                               target="_blank">
-                                                <i class="bi bi-file-earmark-pdf text-danger"></i>
-                                            </a>
-                                        </td>
-                                        <td>{{ foo.training_by }}</td>
-                                        <td>{{ foo.date_training | date:'Y-m-d' }}</td>
-                                        <td>
-                                            <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
-                                               title="Editar">
-                                                <i class="bi bi-pencil-square text-warning me-2"></i>
-                                            </a>
-                                            <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
-                                               title="Eliminar">
-                                                <i class="bi bi-trash text-danger me-2"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                {% empty %}
-                                    <tr>
-                                        <td colspan="4" class="text-center">
-                                            No hay competencias asociadas.
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">
+                                        No hay competencias asociadas.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="tile">
-                        <div class="tile-title-w-btn">
-                            <h3 class="title">Competencias</h3>
-                            <p>
-                                <a class="btn btn-primary icon-btn"
-                                   onclick="open_modal('{% url 'user:create_competence' object.slug %}')"><i
-                                        class="bi bi-plus-square me-2"></i>Nuevo</a>
+            </div>
+            <div class="col-md-6">
+                <div class="tile">
+                    <div class="tile-title-w-btn">
+                        <h3 class="title">Competencias</h3>
+                        <p>
+                            <a class="btn btn-primary icon-btn"
+                               onclick="open_modal('{% url 'user:create_competence' object.slug %}')"><i
+                                    class="bi bi-plus-square me-2"></i>Nuevo</a>
 
-                            </p>
-                        </div>
-                        <div class="tile-body">
-                            <table class="table">
-                                <thead>
+                        </p>
+                    </div>
+                    <div class="tile-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>Descripción</th>
+                                <th>Ver</th>
+                                <th>Institución</th>
+                                <th>Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for cp in competence %}
                                 <tr>
-                                    <th>Descripción</th>
-                                    <th>Ver</th>
-                                    <th>Institución</th>
-                                    <th>Acciones</th>
+                                    <td>{{ cp.description_competence }}</td>
+                                    <td>
+                                        <a href="{% url 'user:download_competence' %}?id={{ cp.id }}&type=support_competence"
+                                           target="_blank">
+                                            <i class="bi bi-file-earmark-pdf text-danger"></i>
+                                        </a>
+                                    </td>
+                                    <td>{{ cp.institution }}</td>
+                                    <td>
+                                        <a onclick="open_modal('{% url 'user:update_competence' cp.id %}')"
+                                           title="Editar">
+                                            <i class="bi bi-pencil-square text-warning me-2"></i>
+                                        </a>
+                                        <a onclick="open_modal('{% url 'user:delete_competence' cp.id %}')"
+                                           title="Eliminar">
+                                            <i class="bi bi-trash text-danger me-2"></i>
+                                        </a>
+                                    </td>
                                 </tr>
-                                </thead>
-                                <tbody>
-                                {% for cp in competence %}
-                                    <tr>
-                                        <td>{{ cp.description_competence }}</td>
-                                        <td>
-                                            <a href="{% url 'user:download_competence' %}?id={{ cp.id }}&type=support_competence"
-                                               target="_blank">
-                                                <i class="bi bi-file-earmark-pdf text-danger"></i>
-                                            </a>
-                                        </td>
-                                        <td>{{ cp.institution }}</td>
-                                        <td>
-                                            <a onclick="open_modal('{% url 'user:update_competence' cp.id %}')"
-                                               title="Editar">
-                                                <i class="bi bi-pencil-square text-warning me-2"></i>
-                                            </a>
-                                            <a onclick="open_modal('{% url 'user:delete_competence' cp.id %}')"
-                                               title="Eliminar">
-                                                <i class="bi bi-trash text-danger me-2"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                {% empty %}
-                                    <tr>
-                                        <td colspan="4" class="text-center">
-                                            No hay competencias asociadas.
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">
+                                        No hay competencias asociadas.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
