@@ -116,13 +116,13 @@ class TrainingForm(ModelForm):
 
     class Meta:
         model = Training
-        fields = ['description_training', 'training_by', 'date_training', 'support_training']
+        fields = ['description_training', 'training_by', 'date_training', 'date_training_expire', 'support_training']
         widgets = {
             'description_training': TextInput(attrs={'class': 'form-control', 'required': True, 'type': 'text'}),
             'training_by': TextInput(attrs={'class': 'form-control', 'required': True, 'type': 'text'}),
-            'support_training': FileInput(attrs={'class': 'form-control', 'type': 'file'}),
-            'date_training': DateInput(attrs={'class': 'form-control', 'type': 'date'})
-
+            'support_training': FileInput(attrs={'class': 'form-control', 'type': 'file', 'required': True}),
+            'date_training': DateInput(attrs={'class': 'form-control', 'type': 'date', 'required': True}),
+            'date_training_expire': DateInput(attrs={'class': 'form-control', 'type': 'date'})
         }
 
     def save(self, commit=True):

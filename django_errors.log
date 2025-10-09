@@ -448,3 +448,6 @@ Traceback (most recent call last):
     raise HTTPError(req.full_url, code, msg, hdrs, fp)
 urllib.error.HTTPError: HTTP Error 404: Not Found
 ERROR 2025-10-09 09:43:43,753 basehttp 18093 136440541345472 "GET /user/training/download/?id=b0302388-97e4-4303-9a61-69bd79f631b0&type=support_training HTTP/1.1" 500 128680
+WARNING 2025-10-09 10:24:44,731 basehttp 6348 129096864495296 "GET /static/lib/material-dashboard-pro/assets/img/favicon.png HTTP/1.1" 404 2074
+WARNING 2025-10-09 10:24:56,097 log 6348 129096864495296 Not Found: /favicon.ico
+WARNING 2025-10-09 10:24:56,097 basehttp 6348 129096864495296 "GET /favicon.ico HTTP/1.1" 404 3449
