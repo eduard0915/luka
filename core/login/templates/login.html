@@ -86,11 +86,6 @@
                         <div class="card-body">
                             {% if form.errors %}
                                 <div class="alert alert-danger alert-dismissible text-white fade show" role="alert">
-{#                                    {% for field in form %}#}
-{#                                        {% for error in form.errors %}#}
-{#                                            {{ error }}#}
-{#                                        {% endfor %}#}
-{#                                    {% endfor %}#}
                                     {% for error in form.non_field_errors %}
                                         <span class="alert-text">{{ error }}</span>
                                         <button type="button" class="btn-close" data-bs-dismiss="alert"
