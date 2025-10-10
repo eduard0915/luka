@@ -169,4 +169,5 @@ class UserDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Detail
         context['group_user'] = User.objects.values('groups__name').filter(slug=self.kwargs['slug'])
         context['training'] = Training.objects.filter(user__slug=self.kwargs['slug']).order_by('-date_training')
         context['competence'] = Competence.objects.filter(user__slug=self.kwargs['slug']).order_by('-date_competence')
+        context['back'] = reverse_lazy('user:user_list')
         return context

@@ -13,10 +13,6 @@
                         text-align: center;
                         vertical-align: middle;
                     }
-                    {##data_0 tbody td {#}
-                    {#    text-align: center;#}
-                    {#    vertical-align: middle;#}
-                    {# }#}
                 </style>
     {% endblock %}
 {% endblock %}
@@ -87,10 +83,10 @@
                             <tr>
                                 <th style="width:35%">Descripción</th>
                                 <th style="width:5%">Ver</th>
-                                <th style="width:30%">Realizada por</th>
+                                <th style="width:25%">Realizada por</th>
                                 <th style="width:13%">Fecha</th>
                                 <th style="width:10%">Estado</th>
-                                <th style="width:7%">Acciones</th>
+                                <th style="width:12%">Acciones</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -105,7 +101,13 @@
                                     </td>
                                     <td>{{ foo.training_by }}</td>
                                     <td>{{ foo.date_training | date:'Y-m-d' }}</td>
-                                    <td>{{ foo.training_status }}</td>
+                                    <td>
+                                        {% if foo.training_status == 'Vencido' %}
+                                        	<span class="badge bg-danger">{{ foo.training_status }}</span>
+                                        {% else %}
+                                            {{ foo.training_status }}
+                                        {% endif %}
+                                    </td>
                                     <td>
                                         <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
                                            title="Editar">
@@ -115,12 +117,16 @@
                                            title="Eliminar">
                                             <i class="bi bi-trash text-danger me-2"></i>
                                         </a>
+                                        <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
+                                           title="Actualizar">
+                                            <i class="bi bi-arrow-clockwise text-info me-2"></i>
+                                        </a>
                                     </td>
                                 </tr>
                             {% empty %}
                                 <tr>
-                                    <td colspan="4" class="text-center">
-                                        No hay competencias asociadas.
+                                    <td colspan="6" class="text-center">
+                                        No hay capacitaciones asociadas.
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -197,81 +203,41 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-1.13.4/datatables.min.css">
 
     <script>
-        // Initialize tooltips
-        {#document.addEventListener("DOMContentLoaded", function () {#}
-        {#    // Inicializar tooltips#}
-        {#    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));#}
-        {#    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {#}
-        {#        return new bootstrap.Tooltip(tooltipTriggerEl);#}
-        {#    });#}
-        {##}
-        {#    // Inicializar DataTable con la variable global#}
-        {#    try {#}
-        {#        if (typeof DataTable === 'function') {#}
-        {#            new DataTable('#data_0', {#}
-        {#                responsive: true,#}
-        {#                autoWidth: false,#}
-        {#                info: false,#}
-        {#                pageLength: 5,#}
-        {#                scrollX: false,#}
-        {#                lengthMenu: [5, 10, 25, 50, 75, 100],#}
-        {#                order: [[3, 'desc']],#}
-        {#                language: {#}
-        {#                    "emptyTable": "No hay información",#}
-        {#                    "info": "Mostrando _START_ a _END_ de _TOTAL_ Registros",#}
-        {#                    "infoEmpty": "Mostrando 0 to 0 of 0 Registros",#}
-        {#                    "infoFiltered": "(Filtrado de _MAX_ total Registros)",#}
-        {#                    "lengthMenu": "Mostrar _MENU_ Registros",#}
-        {#                    "loadingRecords": "Cargando...",#}
-        {#                    "processing": "Procesando...",#}
-        {#                    "search": "Buscar:",#}
-        {#                    "zeroRecords": "Sin resultados encontrados",#}
-        {#                }#}
-        {#            });#}
-        {#        } else {#}
-        {#            console.error('La función DataTable no está disponible');#}
-        {#        }#}
-        {#    } catch (error) {#}
-        {#        console.error('Error al inicializar DataTable:', error);#}
-        {#    }#}
-        {# });#}
-        $(function () {
-            $('#data_0').DataTable({
-                responsive: true,
-                autoWidth: false,
-                searching: false,
-                orderable: ['3', 'desc'],
-                info: false,
-                language: {
-                    url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
-                },
-                columnDefs: [
-                    {
-                        targets: [2, 3, 4],
-                        className: 'td-actions text-center',
-                    },
-                    {
-                        targets: [1, 5],
-                        className: 'td-actions text-center',
-                        orderable: false,
-                    },
-                ]
-            });
 
-            $('.btnTest').on('click', function () {
-                $.ajax({
-                    url: window.location.pathname,
-                    type: 'POST',
-                    data: {id: 1},
-                    dataType: 'json'
-                }).done(function (data) {
-                    console.log(data);
-                }).fail(function (jqXHR, textStatus, errorThrown) {
-                    alert(textStatus + ': ' + errorThrown);
-                }).always(function (data) {
-                });
-            });
-        });
+        try {
+            $(function () {
+                // Solo inicializar DataTable si hay filas de datos
+                const hasData = $('#data_0 tbody tr').length > 0 && !$('#data_0 tbody tr td[colspan]').length;
+
+                if (hasData) {
+                    $('#data_0').DataTable({
+                        responsive: true,
+                        autoWidth: false,
+                        searching: false,
+                        info: false,
+                        order: [[3, 'desc']],
+                        language: {
+                            url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
+                        },
+                        columnDefs: [
+                            {
+                                targets: [1, 5],
+                                className: 'td-actions text-center',
+                                orderable: false,
+                            },
+                            {
+                                targets: [2, 3, 4],
+                                className: 'td-actions text-center',
+                            }
+                        ]
+                    });
+                } else {
+                    console.info('DataTable no inicializado: tabla vacía o sin datos válidos');
+                }
+            })
+        } catch (error) {
+            console.error('Error al inicializar DataTable:', error);
+        }
 
         // Handle form submission in modal using vanilla JavaScript
         document.addEventListener('submit', function (e) {
