@@ -23,8 +23,11 @@
         <div class="row">
             <div class="col-md-2">
                 <div class="avatar avatar-xl">
-                    <img src="{% static 'img/default-avatar.png' %}" alt="profile_image"
-                         class="w-100 border-radius-lg shadow-sm">
+                    {% if object.photo %}
+                        <img src="{{ object.photo.url }}" alt="perfil-lims" class="w-100 img-radius-10">
+                    {% else %}
+                        <img src="{% static 'img/default-avatar.png' %}" alt="perfil-lims" class="w-100 img-radius-10">
+                    {% endif %}
                 </div>
             </div>
             <div class="col-md-10">
@@ -45,20 +48,65 @@
                                 <b>Cedula </b><br>
                                 <p>{{ object.cedula }}</p>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <b>Celular </b><br>
-                                <p>{{ object.cellphone }}</p>
+                                <p>
+                                    {% if object.cellphone %}
+                                        {{ object.cellphone }}
+                                    {% else %}
+                                        Pendiente
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="col-md-2">
+                                {% if perms.user.add_user %}
+                                    <a href="{% url 'user:user_update_admin' object.slug %}"
+                                       class="btn btn-warning icon-btn">
+                                        <i class="bi bi-pencil-square me-2"></i>Editar</a>
+                                {% else %}
+                                    <a href="{% url 'user:user_update_user' object.slug %}"
+                                       class="btn btn-warning icon-btn">
+                                        <i class="bi bi-pencil-square me-2"></i>Editar</a>
+                                {% endif %}
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <b>Email </b><br>
                                 <p>{{ object.email }}</p>
                             </div>
-                            <div class="col-md-5">
+                            <div class="col-md-3">
                                 <b>Dirección</b><br>
-                                <p>{{ object.address_user }}</p>
+                                <p>
+                                    {% if object.address_user %}
+                                        {{ object.address_user }}
+                                    {% else %}
+                                        Pendiente
+                                    {% endif %}
+                                </p>
                             </div>
+                            <div class="col-md-3">
+                                <b>Fecha de Nacimiento</b><br>
+                                <p>
+                                    {% if object.date_birth %}
+                                        {{ object.date_birth | date:'Y-m-d' }}
+                                    {% else %}
+                                        Pendiente
+                                    {% endif %}
+                                </p>
+                            </div>
+                            {% if perms.user.add_user %}
+                            <div class="col-md-3">
+                                <b>Ultima Sesión</b><br>
+                                <p>
+                                    {% if object.last_login %}
+                                        {{ object.last_login | date:'Y-m-d' }}
+                                    {% else %}
+                                        Usuario sin inicio de sesión
+                                    {% endif %}
+                                </p>
+                            </div>
+                            {% endif%}
                         </div>
                     </div>
                 </div>
@@ -113,14 +161,16 @@
                                            title="Editar">
                                             <i class="bi bi-pencil-square text-warning me-2"></i>
                                         </a>
-                                        <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
+                                        <a onclick="open_modal('{% url 'user:delete_training' foo.id %}')"
                                            title="Eliminar">
                                             <i class="bi bi-trash text-danger me-2"></i>
                                         </a>
-                                        <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
-                                           title="Actualizar">
-                                            <i class="bi bi-arrow-clockwise text-info me-2"></i>
-                                        </a>
+                                        {% if foo.training_status == 'Vencido' %}
+                                            <a onclick="open_modal('{% url 'user:create_update_training' foo.id %}')"
+                                               title="Actualizar">
+                                                <i class="bi bi-arrow-clockwise text-info me-2"></i>
+                                            </a>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% empty %}
@@ -240,39 +290,39 @@
         }
 
         // Handle form submission in modal using vanilla JavaScript
-        document.addEventListener('submit', function (e) {
-            // Check if the form is inside a modal
-            if (e.target.closest('.modal') && e.target.tagName === 'FORM') {
-                e.preventDefault();
-                var form = e.target;
-                var url = form.getAttribute('action');
-                var data = new FormData(form);
-
-                // Use fetch API instead of $.ajax
-                fetch(url, {
-                    method: 'POST',
-                    body: data
-                })
-                    .then(response => response.json())
-                    .then(response => {
-                        if (!response.hasOwnProperty('error')) {
-                            // Close modal using Bootstrap 5 syntax
-                            var modalElement = document.getElementById('modal_template');
-                            var modalInstance = bootstrap.Modal.getInstance(modalElement);
-                            modalInstance.hide();
-                            // Reload page to show new data
-                            location.reload();
-                        } else {
-                            // Show error message
-                            alert(response.error);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Error en el envío del formulario');
-                    });
-            }
-        });
+        {#document.addEventListener('submit', function (e) {#}
+        {#    // Check if the form is inside a modal#}
+        {#    if (e.target.closest('.modal') && e.target.tagName === 'FORM') {#}
+        {#        e.preventDefault();#}
+        {#        var form = e.target;#}
+        {#        var url = form.getAttribute('action');#}
+        {#        var data = new FormData(form);#}
+        {##}
+        {#        // Use fetch API instead of $.ajax#}
+        {#        fetch(url, {#}
+        {#            method: 'POST',#}
+        {#            body: data#}
+        {#        })#}
+        {#            .then(response => response.json())#}
+        {#            .then(response => {#}
+        {#                if (!response.hasOwnProperty('error')) {#}
+        {#                    // Close modal using Bootstrap 5 syntax#}
+        {#                    var modalElement = document.getElementById('modal_template');#}
+        {#                    var modalInstance = bootstrap.Modal.getInstance(modalElement);#}
+        {#                    modalInstance.hide();#}
+        {#                    // Reload page to show new data#}
+        {#                    location.reload();#}
+        {#                } else {#}
+        {#                    // Show error message#}
+        {#                    alert(response.error);#}
+        {#                }#}
+        {#            })#}
+        {#            .catch(error => {#}
+        {#                console.error('Error:', error);#}
+        {#                alert('Error en el envío del formulario');#}
+        {#            });#}
+        {#    }#}
+        {# });#}
     </script>
 
 {% endblock %}

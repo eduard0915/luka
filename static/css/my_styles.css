@@ -53,3 +53,35 @@
 .file-input-div input[type=file]:hover:not(:disabled):not([readonly])::file-selector-button {
     background-color: #dde0e3;
 }
+
+/* Image helpers */
+.img-radius-10 {
+    border-radius: 10%;
+}
+
+/* Minimal Bootstrap-like spinner styles to support spinner-border used in templates */
+.spinner-border {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    vertical-align: text-bottom;
+    border: 0.25em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    -webkit-animation: spinner-border .75s linear infinite;
+    animation: spinner-border .75s linear infinite;
+}
+
+.spinner-border-sm {
+    width: 0.9rem;
+    height: 0.9rem;
+    border-width: 0.2em;
+}
+
+@-webkit-keyframes spinner-border {
+    to { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spinner-border {
+    to { transform: rotate(360deg); }
+}

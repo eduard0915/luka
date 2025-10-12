@@ -16,13 +16,13 @@
             <div class="tile">
                 <h3 class="tile-title">{{ subtitle }}</h3>
                 <div class="tile-body">
-                    <form enctype="multipart/form-data" method="post" action="" class="form-horizontal">
+                    <form id="mainForm" enctype="multipart/form-data" method="post" action="" class="form-horizontal">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="{{ action }}">
                         <div class="row">
                             {% for field in form.visible_fields %}
                                 <div class="col-md-3">
-                                    <div class="form-group">
+                                    <div class="form-group mb-2">
                                         {% if field.name == 'groups' or field.name == 'is_active' or field.name == 'site' or field.name == 'reagent' or field.name == 'reagent_liquid' %}
                                             <label class="control-label">
                                                 {{ field.label }}{% if field.field.required %}*{% endif %}
@@ -66,7 +66,7 @@
 
     <script type="application/javascript">
 
-        document.querySelector('form').addEventListener('submit', function (e) {
+        document.getElementById('mainForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
             // Deshabilitar el botón y mostrar spinner

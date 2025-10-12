@@ -11,7 +11,7 @@
                 {% csrf_token %}
                 <input type="hidden" name="action" value="{{ action }}">
                 <div class="row">
-                    <h5>{{ info_form }}</h5>
+                    <h5 class="text-danger">{{ info_form }}</h5>
                     <div class="{{ class }}">
                         {{ form.as_p }}
                     </div>
@@ -26,42 +26,110 @@
 
     {% block scripts_detail %}
         <script type="application/javascript">
-
-            $('form').on('submit', function (e) {
-                e.preventDefault();
-                var parameters = new FormData(this);
-                const form_action = $(this).attr('action');
-                $.ajax({
-                    url: form_action,
-                    type: 'POST',
-                    data: parameters,
-                    dataType: 'json',
-                    processData: false,
-                    contentType: false,
-                }).done(function (data) {
-                    console.log(data);
-                    if (!data.hasOwnProperty('error')) {
-                        if (data.hasOwnProperty('redirect_url')) {
-                            window.location.href = data.redirect_url;
-                        } else {
-                            location.href = window.location.pathname;
+            (function () {
+                // Submit the modal form via AJAX
+                $('#modal_form').off('submit.modal').on('submit.modal', function (e) {
+                    e.preventDefault();
+                    var parameters = new FormData(this);
+                    const form_action = $(this).attr('action');
+                    $.ajax({
+                        url: form_action,
+                        type: 'POST',
+                        data: parameters,
+                        dataType: 'json',
+                        processData: false,
+                        contentType: false,
+                    }).done(function (data) {
+                        console.log(data);
+                        if (!data.hasOwnProperty('error')) {
+                            if (data.hasOwnProperty('redirect_url')) {
+                                window.location.href = data.redirect_url;
+                            } else {
+                                location.href = window.location.pathname;
+                            }
+                            return false;
                         }
-                        return false;
-                    }
-                    message_error(data.error);
-                }).fail(function (jqXHR, textStatus, errorThrown) {
-                    alert(textStatus + ': ' + errorThrown);
+                        message_error(data.error);
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        alert(textStatus + ': ' + errorThrown);
+                    });
                 });
-            });
 
-            $("#btnSubmit").click(function () {
-                $(this).prop("disabled", true); //deshabilitamos el botón
-                $(this).submit()
-                $(this).html(
-                    `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...` //añadimos el spinner
-                );
-            });
+                // Initialize Datepicker for any datepicker-enabled input found in the modal (Bootstrap 5 enhanced)
+                const dateInputs = document.querySelectorAll('[data-datepicker="1"], .js-datepicker');
+                if (dateInputs.length) {
+                    dateInputs.forEach(function (input) {
+                        if (!input || input.dataset.datepickerInitialized) return;
 
+                        // Ensure BS5 form-control styling
+                        input.classList.add('form-control');
+
+                        // Wrap in input-group with calendar button (only once)
+                        if (!input.dataset.datepickerEnhanced) {
+                            const group = document.createElement('div');
+                            group.className = 'input-group';
+                            const parent = input.parentNode;
+                            parent.insertBefore(group, input);
+                            group.appendChild(input);
+
+                            const btn = document.createElement('button');
+                            btn.type = 'button';
+                            btn.className = 'btn btn-outline-secondary';
+                            btn.setAttribute('aria-label', 'Abrir calendario');
+                            btn.innerHTML = '<i class="bi bi-calendar-date"></i>';
+                            const span = document.createElement('span');
+                            span.className = 'input-group-text p-0';
+                            // Use a button after to match BS5 demo aesthetics
+                            group.appendChild(btn);
+                            input.dataset.datepickerEnhanced = '1';
+
+                            // Initialize Datepicker with BS5-friendly options
+                            const dp = new Datepicker(input, {
+                                autohide: true,
+                                language: 'es',
+                                {#format: 'yyyy-mm-dd',#}
+                                todayHighlight: true,
+                                clearBtn: true,
+                                // ensure the picker attaches within the modal to handle z-index correctly
+                                container: input.closest('.modal') || document.body,
+                                // Use Bootstrap icons for navigation arrows
+                                prevArrow: '<i class="bi bi-chevron-left"></i>',
+                                nextArrow: '<i class="bi bi-chevron-right"></i>',
+                                buttonClass: 'btn btn-outline-secondary'
+                            });
+
+                            // Toggle/show the datepicker on button click
+                            btn.addEventListener('click', function () {
+                                dp.show();
+                            });
+                        } else {
+                            // If already enhanced, just init the picker
+                            new Datepicker(input, {
+                                autohide: true,
+                                language: 'es',
+                                format: 'yyyy-mm-dd',
+                                todayHighlight: true,
+                                clearBtn: true,
+                                container: input.closest('.modal') || document.body,
+                                prevArrow: '<i class="bi bi-chevron-left"></i>',
+                                nextArrow: '<i class="bi bi-chevron-right"></i>',
+                                buttonClass: 'btn btn-outline-secondary'
+                            });
+                        }
+
+                        input.dataset.datepickerInitialized = '1';
+                    });
+                }
+
+                // Improve submit button UX
+                $("#btnSubmit").off('click.modal').on('click.modal', function () {
+                    $(this).prop("disabled", true); // disable button
+                    $(this).html(
+                        `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...`
+                    );
+                    $('#modal_form').trigger('submit');
+                });
+            })();
         </script>
     {% endblock %}
 </div>
