@@ -1682,3 +1682,4 @@ WARNING 2025-10-11 19:35:08,051 basehttp 57180 138440852100800 "GET /.well-known
 WARNING 2025-10-11 19:35:14,243 basehttp 57180 138440852100800 "GET /static/lib/material-dashboard-pro/assets/img/favicon.png HTTP/1.1" 404 2074
 WARNING 2025-10-11 20:15:01,016 log 60699 135728340133568 Not Found: /favicon.ico
 WARNING 2025-10-11 20:15:01,016 basehttp 60699 135728340133568 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-11 20:41:43,646 basehttp 64538 132465408603840 "GET /static/lib/material-dashboard-pro/assets/img/favicon.png HTTP/1.1" 404 2074
