@@ -57,23 +57,25 @@
         {% block content %}
 
         {% endblock %}
+
         <div class="modal" id="modal_template" role="dialog" aria-labelledby="modal" aria-hidden="true"></div>
+
     </main>
 
     <!-- Essential javascripts for application to work-->
     <script src="{% static 'lib/vali-admin/js/jquery-3.7.0.min.js' %}"></script>
     <script src="{% static 'lib/vali-admin/js/bootstrap.min.js' %}"></script>
     <script src="{% static 'lib/vali-admin/js/main.js' %}"></script>
-        <script type="application/javascript">
+    <script type="application/javascript">
         function open_modal(url) {
             $('#modal_template').load(url, function () {
                 $(this).modal('show');
             });
         }
     </script>
+
     <!-- Page specific javascripts-->
     {% block scripts_detail %}
-
 
     {% endblock %}
 

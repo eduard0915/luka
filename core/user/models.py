@@ -8,6 +8,7 @@ from django.utils.text import slugify
 from django.utils.timezone import localtime
 
 from core.company.models import Site
+from core.validators import validator_file_image_user
 from luka.settings import MEDIA_URL, STATIC_URL
 
 
@@ -16,7 +17,7 @@ def validator_file_image(value):
     ext = os.path.splitext(value.name)[1]
     valid_extensions = ['.jpeg', '.jpg', '.png', '.svg']
     if not ext.lower() in valid_extensions:
-        raise ValidationError('Subir imagenes solamente con extensión .jpg, .png o .svg y tamaño máximo de 256Kb')
+        raise ValidationError('Subir imágenes solamente con extensión .jpg, .png o .svg y tamaño máximo de 256Kb')
     if value.size > limit:
         raise ValidationError('Archivo demasiado grande. El tamaño no debe exceder los 256Kb.')
 
@@ -30,7 +31,7 @@ class User(AbstractUser):
     address_user = models.CharField(max_length=50, null=True, blank=True, verbose_name='Dirección')
     date_birth = models.DateField(null=True, blank=True, verbose_name='Fecha de Nacimiento')
     photo = models.ImageField(
-        upload_to='user/%Y%m%d', null=True, blank=True, verbose_name='Foto', validators=[validator_file_image])
+        upload_to='user/%Y%m%d', null=True, blank=True, verbose_name='Foto', validators=[validator_file_image_user])
     slug = models.SlugField(unique=True, null=False, blank=False)
     site = models.ForeignKey(Site, on_delete=models.CASCADE, verbose_name='Planta', null=True, blank=True)
 

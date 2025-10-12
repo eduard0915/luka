@@ -13,7 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, UpdateView, DeleteView
 
 from core.mixins import ValidatePermissionRequiredMixin
-from core.user.forms import TrainingForm, TrainingUptadeForm
+from core.user.forms import TrainingForm, TrainingUpdateForm, TrainingCreateForm
 from core.user.models import Training, User
 
 
@@ -55,15 +55,60 @@ class TrainingCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cr
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Registro de Capacitación'
-        user = User.objects.get(slug=self.kwargs.get('pk'))
-        context['user'] = user
+        # user = User.objects.get(slug=self.kwargs.get('pk'))
+        # context['user'] = user
+        return context
+
+
+# Registro de actualización de capacitación
+class TrainingCreateUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    model = Training
+    form_class = TrainingCreateForm
+    template_name = 'training/create_training.html'
+    permission_required = 'user.view_user'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'add':
+                form = self.get_form()
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, f'Capacitación Registrada Satisfactoriamente!')
+                else:
+                    messages.error(request, form.errors)
+            else:
+                data['error'] = 'No ha ingresado datos en los campos'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        training = Training.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'training': training})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        training = Training.objects.get(pk=self.kwargs.get('pk'))
+        context['action'] = 'add'
+        context['entity'] = 'Registro de Actualización de Capacitación'
+        context['info_form'] = str(training)
+        # user = User.objects.get(slug=self.kwargs.get('pk'))
+        # context['user'] = user
         return context
 
 
 # Edición de capacitación
 class TrainingUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
     model = Training
-    form_class = TrainingUptadeForm
+    form_class = TrainingUpdateForm
     template_name = 'training/create_training.html'
     permission_required = 'user.view_user'
 
@@ -97,7 +142,7 @@ class TrainingUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Up
         return context
 
 
-# Descarga de soporte de capacitacion
+# Descarga de soporte de capacitación
 class TrainingDownloadView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
     permission_required = 'user.view_user'
 
@@ -161,6 +206,7 @@ class TrainingDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, De
         data = {}
         try:
             self.object.delete()
+            messages.success(request, 'Registro de Capacitación Eliminado Satisfactoriamente!')
         except Exception as e:
             data['error'] = str(e)
         return JsonResponse(data)
@@ -168,7 +214,7 @@ class TrainingDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, De
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         t = Training.objects.get(pk=self.kwargs.get('pk'))
-        context['entity'] = 'Eliminar de Capacitación'
+        context['entity'] = 'Eliminar de Registro'
         context['delete'] = 'Está seguro de eliminar capacitación?'
         context['info_delete'] = f'{t.description_training}?'
         return context

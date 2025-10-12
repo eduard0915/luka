@@ -13,7 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, UpdateView, DeleteView
 
 from core.mixins import ValidatePermissionRequiredMixin
-from core.user.forms import CompetenceForm,CompetenceUptadeForm
+from core.user.forms import CompetenceForm, CompetenceUpdateForm
 from core.user.models import Competence, User
 
 
@@ -55,15 +55,15 @@ class CompetenceCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Registro de Competencia'
-        user = User.objects.get(slug=self.kwargs.get('pk'))
-        context['user'] = user
+        # user = User.objects.get(slug=self.kwargs.get('pk'))
+        # context['user'] = user
         return context
 
 
 # Edición de competencia
 class CompetenceUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
     model = Competence
-    form_class = CompetenceUptadeForm
+    form_class = CompetenceUpdateForm
     template_name = 'competence/create_competence.html'
     permission_required = 'user.view_user'
 

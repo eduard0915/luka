@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     render: function (data, type, row) {
                         let actions
                         actions = '<a href="/user/detail/' + row['slug'] + '/" type="button" title="Detalle Perfil"><i class="bi bi-info-square text-info"></i></a> &nbsp';
-                        actions += '<a href="/user/update/' + row['slug'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a> &nbsp';
+                        actions += '<a href="/user/update-admin/' + row['slug'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a> &nbsp';
                         actions += '<a href="/user/update-password/' + row['slug'] + '/" type="button" title="Resetear Contraseña"><i class="bi bi-lock text-success"></i></a>';
                         return actions
                     }
