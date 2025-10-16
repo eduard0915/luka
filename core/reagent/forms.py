@@ -4,6 +4,7 @@ from core.reagent.models import Reagent, TransactionReagent, InventoryReagent
 
 
 TYPE_REAGENT = [(True, 'Liquido'), (False, 'Sólido')]
+UMB = [('', '-----'), ('Mililitro', 'Mililitro'), ('Gramo', 'Gramo')]
 
 
 # Creación Reactivo
@@ -15,12 +16,14 @@ class ReagentForm(ModelForm):
 
     class Meta:
         model = Reagent
-        fields = ['code_reagent', 'description_reagent', 'manufacturer', 'technical_sheet']
+        fields = ['code_reagent', 'description_reagent', 'umb', 'manufacturer', 'site', 'technical_sheet']
         widgets = {
             'description_reagent': TextInput(attrs={'class': 'form-control', 'required': True}),
             'code_reagent': TextInput(attrs={'class': 'form-control', 'required': True}),
             'manufacturer': TextInput(attrs={'class': 'form-control', 'required': True}),
             'technical_sheet': FileInput(attrs={'class': 'form-control', 'type': 'file'}),
+            'site': Select(attrs={'class': 'form-control', 'required': True}),
+            'umb': Select(attrs={'class': 'form-control', 'required': True}, choices=UMB),
         }
 
     def save(self, commit=True):
