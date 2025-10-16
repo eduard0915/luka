@@ -1,6 +1,6 @@
 asgiref==3.8.1
 dj-database-url==2.3.0
-Django==5.2
+Django==5.2.7
 django-crum==0.7.9
 django-decouple==2.1
 django-model-utils==4.2.0
