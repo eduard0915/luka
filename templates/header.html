@@ -7,54 +7,74 @@
 
         <!--Notification Menu-->
         <li class="dropdown"><a class="app-nav__item" href="#" data-bs-toggle="dropdown"
-                                aria-label="Show notifications"><i class="bi bi-bell fs-5"></i></a>
+                                aria-label="Show notifications"><i class="bi bi-bell fs-5"></i>
+            {% if count_total_alarm > 0 %}
+                <span class="badge bg-danger" title="Tienes {{ count_total_alarm }} nuevas notificaciones">{{ count_total_alarm }}</span>
+            {% endif %}
+        </a>
             <ul class="app-notification dropdown-menu dropdown-menu-right">
-                <li class="app-notification__title">You have 4 new notifications.</li>
+                {% if count_total_alarm > 0 %}
+                <li class="app-notification__title">Tienes {{ count_total_alarm }} nuevas notificaciones.</li>
                 <div class="app-notification__content">
-                    <li><a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i
-                            class="bi bi-envelope fs-4 text-primary"></i></span>
-                        <div>
-                            <p class="app-notification__message">Lisa sent you a mail</p>
-                            <p class="app-notification__meta">2 min ago</p>
-                        </div>
-                    </a></li>
-                    <li><a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i
-                            class="bi bi-exclamation-triangle fs-4 text-warning"></i></span>
-                        <div>
-                            <p class="app-notification__message">Mail server not working</p>
-                            <p class="app-notification__meta">5 min ago</p>
-                        </div>
-                    </a></li>
-                    <li><a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i
-                            class="bi bi-cash fs-4 text-success"></i></span>
-                        <div>
-                            <p class="app-notification__message">Transaction complete</p>
-                            <p class="app-notification__meta">2 days ago</p>
-                        </div>
-                    </a></li>
-                    <li><a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i
-                            class="bi bi-envelope fs-4 text-primary"></i></span>
-                        <div>
-                            <p class="app-notification__message">Lisa sent you a mail</p>
-                            <p class="app-notification__meta">2 min ago</p>
-                        </div>
-                    </a></li>
-                    <li><a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i
-                            class="bi bi-exclamation-triangle fs-4 text-warning"></i></span>
-                        <div>
-                            <p class="app-notification__message">Mail server not working</p>
-                            <p class="app-notification__meta">5 min ago</p>
-                        </div>
-                    </a></li>
-                    <li><a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i
-                            class="bi bi-cash fs-4 text-success"></i></span>
-                        <div>
-                            <p class="app-notification__message">Transaction complete</p>
-                            <p class="app-notification__meta">2 days ago</p>
-                        </div>
-                    </a></li>
+                    <li>
+                        <a class="app-notification__item" href="{% url 'user:user_detail' request.user.slug %}">
+                            <span class="app-notification__icon">
+                                <i class="fa-solid fa-chalkboard-user text-danger"></i>
+                            </span>
+                            <div>
+                                <p class="app-notification__message">Entrenamientos Vencidos</p>
+                            </div>
+                        </a>
+                    </li>
+{#                    <li>#}
+{#                        <a class="app-notification__item" href="#"><span class="app-notification__icon"><i#}
+{#                                class="bi bi-exclamation-triangle fs-4 text-warning"></i></span>#}
+{#                            <div>#}
+{#                                <p class="app-notification__message">Mail server not working</p>#}
+{#                                <p class="app-notification__meta">5 min ago</p>#}
+{#                            </div>#}
+{#                        </a>#}
+{#                    </li>#}
+{#                    <li>#}
+{#                        <a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i#}
+{#                                class="bi bi-cash fs-4 text-success"></i></span>#}
+{#                            <div>#}
+{#                                <p class="app-notification__message">Transaction complete</p>#}
+{#                                <p class="app-notification__meta">2 days ago</p>#}
+{#                            </div>#}
+{#                        </a>#}
+{#                    </li>#}
+{#                    <li>#}
+{#                        <a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i#}
+{#                                class="bi bi-envelope fs-4 text-primary"></i></span>#}
+{#                            <div>#}
+{#                                <p class="app-notification__message">Lisa sent you a mail</p>#}
+{#                                <p class="app-notification__meta">2 min ago</p>#}
+{#                            </div>#}
+{#                        </a>#}
+{#                    </li>#}
+{#                    <li>#}
+{#                        <a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i#}
+{#                                class="bi bi-exclamation-triangle fs-4 text-warning"></i></span>#}
+{#                            <div>#}
+{#                                <p class="app-notification__message">Mail server not working</p>#}
+{#                                <p class="app-notification__meta">5 min ago</p>#}
+{#                            </div>#}
+{#                        </a>#}
+{#                    </li>#}
+{#                    <li>#}
+{#                        <a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i#}
+{#                                class="bi bi-cash fs-4 text-success"></i></span>#}
+{#                            <div>#}
+{#                                <p class="app-notification__message">Transaction complete</p>#}
+{#                                <p class="app-notification__meta">2 days ago</p>#}
+{#                            </div>#}
+{#                        </a>#}
+{#                    </li>#}
                 </div>
-                <li class="app-notification__footer"><a href="#">See all notifications.</a></li>
+                {% else %}
+                <li class="app-notification__footer"><a href="#">Sin Notificaciones.</a></li>
+                {% endif %}
             </ul>
         </li>
         <!-- User Menu-->

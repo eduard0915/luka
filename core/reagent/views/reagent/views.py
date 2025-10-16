@@ -58,8 +58,8 @@ class ReagentCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
         context['list_url'] = self.success_url
         context['action'] = 'add'
         context['entity'] = 'Creación de Reactivo'
-        context['div'] = '8'
-        context['icon'] = 'science'
+        context['div'] = '10'
+        context['icon'] = 'fa-solid fa-flask-vial'
         return context
 
 
@@ -85,7 +85,9 @@ class ReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
                     'code_reagent',
                     'technical_sheet',
                     'enable_reagent',
-                    'manufacturer'
+                    'site__site_name',
+                    'manufacturer',
+                    'umb'
                 ).order_by('code_reagent'))
                 return JsonResponse(reagents, safe=False)
             else:
@@ -99,8 +101,8 @@ class ReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
         context['title'] = 'Reactivos'
         context['create_url'] = reverse_lazy('reagent:create_reagent')
         context['entity'] = 'Reactivos'
-        context['div'] = '7'
-        context['icon'] = 'science'
+        context['div'] = '10'
+        context['icon'] = 'fa-solid fa-flask-vial'
         return context
 
 
@@ -143,8 +145,8 @@ class ReagentUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
         context['list_url'] = self.success_url
         context['entity'] = 'Editar Reactivo'
         context['action'] = 'edit'
-        context['div'] = '8'
-        context['icon'] = 'edit'
+        context['div'] = '10'
+        context['icon'] = 'fa-solid fa-flask-vial'
         return context
 
 
@@ -182,7 +184,7 @@ class ReagentDownloadView(LoginRequiredMixin, ValidatePermissionRequiredMixin, V
                         url = urlopen(link)
                         doc = url.read()
                         disposition = 'attachment'
-                        filename = 'ficha_tecnica_' + document.code_reagent + '.' + ext
+                        filename = 'sheet_' + document.description_reagent + '.' + ext
                         filename = filename.replace(" ", "_")
                         if ext == 'pdf':
                             disposition = 'inline'

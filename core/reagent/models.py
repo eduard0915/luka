@@ -3,6 +3,7 @@ import uuid
 from crum import get_current_user
 from django.db import models
 
+from core.company.models import Site
 from core.models import BaseModel
 
 
@@ -11,9 +12,12 @@ class Reagent(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     description_reagent = models.CharField(max_length=200, verbose_name='Descripción')
     code_reagent = models.CharField(max_length=20, verbose_name='Código')
-    technical_sheet = models.FileField(upload_to='technical_sheet/%Y%m%d', verbose_name='Ficha Técnica')
+    technical_sheet = models.FileField(
+        upload_to='technical_sheet/%Y%m%d', verbose_name='Ficha Técnica', null=True, blank=True)
     enable_reagent = models.BooleanField(default=True, verbose_name='Habilitado')
     manufacturer = models.CharField(max_length=100, verbose_name='Fabricante', null=True, blank=True)
+    site = models.ForeignKey(Site, verbose_name='Planta', on_delete=models.CASCADE)
+    umb = models.CharField(max_length=15, verbose_name='UMB')
 
     def __str__(self):
         return str(self.description_reagent)
