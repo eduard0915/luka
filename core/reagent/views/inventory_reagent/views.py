@@ -1,9 +1,16 @@
+from urllib.request import urlopen
+
+import boto3
+from botocore.config import Config
+from botocore.exceptions import ClientError
+from decouple import config
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 
@@ -174,3 +181,53 @@ class InventoryReagentDeleteView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['delete'] = 'Está seguro de eliminar la entrada de inventario de reactivo?'
         context['info_delete'] = f'Lote: {ir.batch_number} - {ir.reagent.code_reagent} {ir.reagent.description_reagent}?'
         return context
+
+
+# Descarga de certificado de calidad de reactivo
+class CertificateQualityDownloadView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    permission_required = 'reagent.view_reagent'
+
+    @staticmethod
+    def get(request):
+        s3 = boto3.client(
+            's3',
+            aws_access_key_id=config('AWS_ACCESS_KEY_ID'),
+            aws_secret_access_key=config('AWS_SECRET_ACCESS_KEY'),
+            config=Config(signature_version='s3v4', region_name=config('REGION_NAME')))
+        doc_id = request.GET.get('id')
+        doc_type = request.GET.get('type')
+        if doc_id and doc_type:
+            try:
+                document = InventoryReagent.objects.get(id=doc_id)
+            except InventoryReagent.DoesNotExist:
+                return HttpResponse('El documento solicitado no existe')
+            if document is not None:
+                if doc_type:
+                    if doc_type == 'certificate_quality':
+                        object_name = 'media/' + str(document.certificate_quality)
+                    else:
+                        return HttpResponse('El documento solicitado no existe para el tipo de archivo')
+                    try:
+                        link = s3.generate_presigned_url(
+                            'get_object',
+                            Params={'Bucket': config('BUCKET'), 'Key': object_name},
+                            ExpiresIn=8000
+                        )
+                        ext = object_name.split(".")[-1]  # Use -1 to get the last element in case of multiple dots
+                        url = urlopen(link)
+                        doc = url.read()
+                        disposition = 'attachment'
+                        filename = 'coa_' + document.batch_number + '.' + ext
+                        filename = filename.replace(" ", "_")
+                        if ext == 'pdf':
+                            disposition = 'inline'
+                        response = HttpResponse(doc, content_type="application/" + str(ext))
+                        response['Content-Disposition'] = str(disposition) + '; filename=' + filename
+                        return response
+                    except ClientError as e:
+                        return HttpResponse(e)
+                return None
+            else:
+                return HttpResponse('El documento solicitado no existe')
+        else:
+            return HttpResponse('La solicitud es incorrecta, faltan parámetros')

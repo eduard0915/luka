@@ -11,7 +11,8 @@ def update_training(sender, instance, **kwargs):
     if instance.training_status == 'Vencido':
         return
 
-    training_last = Training.objects.filter(description_training=instance.description_training).last()
+    training_last = Training.objects.filter(
+        description_training=instance.description_training, user__slug=instance.user.slug).last()
     training_count = Training.objects.filter(description_training=instance.description_training).count()
     if training_count > 1:
         Training.objects.filter(description_training=instance.description_training, pk=training_last.id).update(training_status='Actualizado')

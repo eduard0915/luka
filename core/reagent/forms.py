@@ -3,7 +3,7 @@ from django.forms import ModelForm, TextInput, FileInput, Select, DateInput, Num
 from core.reagent.models import Reagent, TransactionReagent, InventoryReagent
 
 
-UMB = [('', '-----'), ('mL', 'Mililitro'), ('Gr', 'Gramo')]
+UMB = [('', '-----'), ('mL', 'Mililitro'), ('g', 'Gramo')]
 UNIT_PURITY = [('', '-----'), ('%', '%'), ('mg/L', 'mg/L')]
 REGISTRY_TYPE = [('', '-----'), ('Uso', 'Uso'), ('Ajuste de Salida', 'Ajuste de Salida'), ('Ajuste de Entrada', 'Ajuste de Entrada')]
 

@@ -11,16 +11,13 @@ def extras_processor(request):
     """
     context = {'count_total_alarm': 0}
     if request.user.is_authenticated:
-        context['training_expire_count'] = Training.objects.filter(user=request.user, training_status='Vencido').count()
+        context['training_expire_count'] = Training.objects.filter(user__slug=request.user.slug, training_status='Vencido').count()
         context['count_total_alarm'] = context['training_expire_count']
         try:
             # Get the first company (assuming there's only one company in the system)
             company = Company.objects.first()
-            return {
-                'company': company,
-            }
-        except Exception as e:
-            # Return an empty dict if there's an error or no company exists
-            print(e)
+            context['company'] = company
+        except Exception:
+            # If there's an error or no company exists, continue without company
             pass
     return context
