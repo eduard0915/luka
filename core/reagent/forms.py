@@ -3,8 +3,9 @@ from django.forms import ModelForm, TextInput, FileInput, Select, DateInput, Num
 from core.reagent.models import Reagent, TransactionReagent, InventoryReagent
 
 
-TYPE_REAGENT = [(True, 'Liquido'), (False, 'Sólido')]
-UMB = [('', '-----'), ('Mililitro', 'Mililitro'), ('Gramo', 'Gramo')]
+UMB = [('', '-----'), ('mL', 'Mililitro'), ('Gr', 'Gramo')]
+UNIT_PURITY = [('', '-----'), ('%', '%'), ('mg/L', 'mg/L')]
+REGISTRY_TYPE = [('', '-----'), ('Uso', 'Uso'), ('Ajuste de Salida', 'Ajuste de Salida'), ('Ajuste de Entrada', 'Ajuste de Entrada')]
 
 
 # Creación Reactivo
@@ -16,7 +17,7 @@ class ReagentForm(ModelForm):
 
     class Meta:
         model = Reagent
-        fields = ['code_reagent', 'description_reagent', 'umb', 'manufacturer', 'site', 'technical_sheet']
+        fields = ['code_reagent', 'description_reagent', 'umb', 'manufacturer', 'site', 'technical_sheet', 'purity_unit']
         widgets = {
             'description_reagent': TextInput(attrs={'class': 'form-control', 'required': True}),
             'code_reagent': TextInput(attrs={'class': 'form-control', 'required': True}),
@@ -24,6 +25,7 @@ class ReagentForm(ModelForm):
             'technical_sheet': FileInput(attrs={'class': 'form-control', 'type': 'file'}),
             'site': Select(attrs={'class': 'form-control', 'required': True}),
             'umb': Select(attrs={'class': 'form-control', 'required': True}, choices=UMB),
+            'purity_unit': Select(attrs={'class': 'form-control', 'required': True}, choices=UNIT_PURITY),
         }
 
     def save(self, commit=True):
@@ -38,7 +40,8 @@ class ReagentForm(ModelForm):
             data['error'] = str(e)
         return data
 
-# Creación Inventario de Reactivo
+
+# Registro de Entrada Inventario de Reactivo
 class InventoryReagentForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -47,13 +50,14 @@ class InventoryReagentForm(ModelForm):
 
     class Meta:
         model = InventoryReagent
-        fields = ['reagent', 'batch_number', 'date_expire', 'quantity_lt', 'reagent_liquid']
+        fields = ['reagent', 'quantity_stock', 'batch_number', 'date_expire', 'purity', 'certificate_quality']
         widgets = {
+            'quantity_stock': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'purity': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'certificate_quality': FileInput(attrs={'class': 'form-control', 'required': True}),
             'reagent': Select(attrs={'class': 'form-control', 'required': True}),
             'batch_number': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'date_expire': DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'quantity_lt': NumberInput(attrs={'class': 'form-control', 'required': True, 'min': '0'}),
-            'reagent_liquid': Select(attrs={'class': 'form-control'}, choices=TYPE_REAGENT),
+            'date_expire': DateInput(attrs={'class': 'form-control', 'required': True, 'type': 'text', 'data-datepicker': '1', 'placeholder': 'yyyy-mm-dd'}),
         }
 
     def save(self, commit=True):
@@ -62,7 +66,6 @@ class InventoryReagentForm(ModelForm):
         try:
             if form.is_valid():
                 data = form.save(commit=False)
-                data.quantity_ml = data.quantity_lt * 1000
                 data.save()
             else:
                 data['error'] = form.errors
@@ -71,7 +74,7 @@ class InventoryReagentForm(ModelForm):
         return data
 
 
-# Actualización Inventario de Reactivo
+# Edición de Registro de Entrada Inventario de Reactivo
 class InventoryReagentUpdateForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -80,13 +83,12 @@ class InventoryReagentUpdateForm(ModelForm):
 
     class Meta:
         model = InventoryReagent
-        fields = ['reagent', 'batch_number', 'date_expire', 'quantity_lt',  'reagent_liquid']
+        fields = ['reagent', 'quantity_stock','batch_number', 'date_expire']
         widgets = {
             'reagent': Select(attrs={'class': 'form-control', 'required': True}),
+            'quantity_stock': TextInput(attrs={'class': 'form-control', 'required': True}),
             'batch_number': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'date_expire': DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'quantity_lt': NumberInput(attrs={'class': 'form-control', 'required': True, 'min': '0'}),
-            'reagent_liquid': Select(attrs={'class': 'form-control'}, choices=TYPE_REAGENT),
+            'date_expire': DateInput(attrs={'class': 'form-control', 'required': True, 'type': 'text', 'data-datepicker': '1', 'placeholder': 'yyyy-mm-dd'}),
         }
 
     def save(self, commit=True):
@@ -95,7 +97,6 @@ class InventoryReagentUpdateForm(ModelForm):
         try:
             if form.is_valid():
                 data = form.save(commit=False)
-                data.quantity_ml = data.quantity_lt * 1000
                 data.save()
             else:
                 data['error'] = form.errors
@@ -107,18 +108,20 @@ class InventoryReagentUpdateForm(ModelForm):
 # Creación Transacción de Reactivo
 class TransactionReagentForm(ModelForm):
     def __init__(self, *args, **kwargs):
+        self.invent = kwargs.pop('invent')
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
     class Meta:
         model = TransactionReagent
-        fields = ['reagent_inventory', 'date_transaction', 'use_register', 'quantity']
+        fields = ['reagent_inventory', 'date_transaction', 'quantity', 'type_transaction', 'detail_transaction']
         widgets = {
             'reagent_inventory': Select(attrs={'class': 'form-control', 'required': True}),
+            'type_transaction': Select(attrs={'class': 'form-control', 'required': True}, choices=REGISTRY_TYPE),
             'date_transaction': DateInput(attrs={'class': 'form-control', 'required': True, 'type': 'date'}),
-            'use_register': TextInput(attrs={'class': 'form-control', 'required': True, 'type': 'text'}),
             'quantity': NumberInput(attrs={'class': 'form-control', 'required': True, 'min': '0'}),
+            'detail_transaction': TextInput(attrs={'class': 'form-control', 'required': True}),
         }
 
     def save(self, commit=True):
@@ -126,7 +129,9 @@ class TransactionReagentForm(ModelForm):
         form = super()
         try:
             if form.is_valid():
-                data = form.save()
+                data = form.save(commit=False)
+                data.reagent_inventory_id = self.invent.id
+                data.save()
             else:
                 data['error'] = form.errors
         except Exception as e:
@@ -143,12 +148,10 @@ class TransactionReagentUpdateForm(ModelForm):
 
     class Meta:
         model = TransactionReagent
-        fields = ['reagent_inventory', 'date_transaction', 'use_register', 'quantity']
+        fields = ['reagent_inventory', 'date_transaction']
         widgets = {
             'reagent_inventory': Select(attrs={'class': 'form-control', 'required': True}),
             'date_transaction': DateInput(attrs={'class': 'form-control', 'required': True, 'type': 'date'}),
-            'use_register': TextInput(attrs={'class': 'form-control', 'required': True, 'type': 'text'}),
-            'quantity': NumberInput(attrs={'class': 'form-control', 'required': True, 'min': '0'}),
         }
 
     def save(self, commit=True):

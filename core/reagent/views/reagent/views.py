@@ -87,7 +87,8 @@ class ReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
                     'enable_reagent',
                     'site__site_name',
                     'manufacturer',
-                    'umb'
+                    'umb',
+                    'purity_unit'
                 ).order_by('code_reagent'))
                 return JsonResponse(reagents, safe=False)
             else:
@@ -101,7 +102,7 @@ class ReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
         context['title'] = 'Reactivos'
         context['create_url'] = reverse_lazy('reagent:create_reagent')
         context['entity'] = 'Reactivos'
-        context['div'] = '10'
+        context['div'] = '11'
         context['icon'] = 'fa-solid fa-flask-vial'
         return context
 

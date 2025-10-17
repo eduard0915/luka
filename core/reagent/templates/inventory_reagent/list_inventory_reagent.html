@@ -1,26 +1,27 @@
 {% extends 'list_one.html' %}
 {% load static %}
 
-
 {% block head_list %}
     <script src="{% static 'list_inventory_reagent.js' %}"></script>
 {% endblock %}
 
 {% block buttons %}
-    <a href="{{ create_url }}" class="btn bg-gradient-dark mb-0"><i class="fa-solid fa-plus"></i> Nuevo</a>
-    <button type="button" class="btn btn-outline-success mb-0">
-        <i class="fa-solid fa-file-excel"></i> Descargar
-    </button>
+    <a href="{{ create_url }}" class="btn btn-primary me-2" type="button">
+        <i class="bi bi-plus-square me-2"></i> Nuevo
+    </a>
+{#    <a href="{{ download_url }}" class="btn btn-outline-primary me-2" type="button"> Descargar</a>#}
 {% endblock %}
 
 {% block columns %}
     <tr>
-        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:15%">Código</th>
-        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:30%">Descripción</th>
-        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:15%">N° de Lote</th>
-        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:15%">Fecha Expira</th>
-        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:15%">Cantidad</th>
-        <th class="text-uppercase text-secondary text-center text-xs font-weight-bolder opacity-10" style="width:10%">Acciones</th>
+        <th>Código</th>
+        <th>Descripción</th>
+        <th>Pureza</th>
+        <th>N° de Lote</th>
+        <th>CoA</th>
+        <th>Vence</th>
+        <th>Stock</th>
+        <th>Acciones</th>
     </tr>
 {% endblock %}
 
@@ -30,5 +31,6 @@
 {% endblock %}
 
 {% block scripts_detail %}
-
+    {{ block.super }}
 {% endblock %}
+

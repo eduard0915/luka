@@ -15,12 +15,13 @@ class Reagent(BaseModel):
     technical_sheet = models.FileField(
         upload_to='technical_sheet/%Y%m%d', verbose_name='Ficha Técnica', null=True, blank=True)
     enable_reagent = models.BooleanField(default=True, verbose_name='Habilitado')
-    manufacturer = models.CharField(max_length=100, verbose_name='Fabricante', null=True, blank=True)
+    manufacturer = models.CharField(max_length=100, verbose_name='Fabricante/Marca', null=True, blank=True)
     site = models.ForeignKey(Site, verbose_name='Planta', on_delete=models.CASCADE)
     umb = models.CharField(max_length=15, verbose_name='UMB')
+    purity_unit = models.CharField(max_length=10, verbose_name='Unidad de Pureza')
 
     def __str__(self):
-        return str(self.description_reagent)
+        return str(self.code_reagent) + ' '  + str(self.description_reagent) + ' (' + str(self.umb) + ') - ' + 'Pureza: ' + str(self.purity_unit) + ''
 
     class Meta:
         verbose_name = 'Reagent'
@@ -43,13 +44,13 @@ class InventoryReagent(BaseModel):
     reagent = models.ForeignKey(Reagent, verbose_name='Reactivo', on_delete=models.CASCADE)
     batch_number = models.CharField(max_length=50, verbose_name='N° Lote')
     date_expire = models.DateField(verbose_name='Fecha de Vencimiento', null=True, blank=True)
-    quantity_lt = models.FloatField(verbose_name='Cantidad (L o Kg)')
-    quantity_ml = models.FloatField(verbose_name='Cantidad (mL)')
-    unit_measurement = models.CharField(max_length=4, verbose_name='Unidad de Medida', default='mL')
-    reagent_liquid = models.BooleanField(default=True, verbose_name='Estado del Reactivo')
+    quantity_stock = models.FloatField(verbose_name='Cantidad')
+    unit_measurement = models.CharField(max_length=4, verbose_name='Unidad de Medida')
+    purity = models.PositiveSmallIntegerField(verbose_name='Pureza')
+    certificate_quality = models.FileField(upload_to='certificate_quality/%Y%m%d', verbose_name='Certificado de Calidad')
 
     def __str__(self):
-        return str(self.batch_number)
+        return str(self.reagent.description_reagent) + ' ' + str(self.batch_number) + ' (' + str(self.purity) + str(self.reagent.purity_unit) +')'
 
     class Meta:
         verbose_name = 'InventoryReagent'
@@ -58,10 +59,6 @@ class InventoryReagent(BaseModel):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
         user = get_current_user()
-        if self.reagent_liquid:
-            self.unit_measurement = 'mL'
-        else:
-            self.unit_measurement = 'Gr'
         if user:
             if not self.user_creation:
                 self.user_creation = user
@@ -74,8 +71,10 @@ class InventoryReagent(BaseModel):
 class TransactionReagent(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     reagent_inventory = models.ForeignKey(InventoryReagent, verbose_name='Reactivo', on_delete=models.CASCADE)
+    # reagent_solution = models.ForeignKey(InventoryReagent, verbose_name='Solución', on_delete=models.CASCADE, null=True, blank=True)
     date_transaction = models.DateField(verbose_name='Fecha')
-    use_register = models.CharField(default=True)
+    type_transaction = models.CharField(max_length=50, verbose_name='Tipo de Registro')
+    detail_transaction = models.CharField(max_length=250, verbose_name='Detalle de Registro')
     quantity = models.IntegerField(verbose_name='Cantidad')
 
     def __str__(self):
@@ -94,4 +93,3 @@ class TransactionReagent(BaseModel):
             else:
                 self.user_updated = user
         return super(TransactionReagent, self).save(*args, **kwargs)
-

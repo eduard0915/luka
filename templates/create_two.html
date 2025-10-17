@@ -21,7 +21,10 @@
                         <input type="hidden" name="action" value="{{ action }}">
                         <div class="row">
                             {% for field in form.visible_fields %}
-                                <div class="col-md-3">
+                                <div class="{% if field.name == 'reagent' %}col-md-5
+                                {% elif field.name == 'quantity_stock' or field.name == 'batch_number' or field.name == 'purity' %}col-md-2
+                                {% elif field.name == 'certificate_quality' %}col-md-4
+                                {% else %}col-md-3{% endif %}">
                                     <div class="form-group mb-2">
                                         {% if field.name == 'groups' or field.name == 'is_active' or field.name == 'site' or field.name == 'reagent' or field.name == 'reagent_liquid' %}
                                             <label class="control-label">
@@ -65,6 +68,70 @@
 {% block scripts_detail %}
 
     <script type="application/javascript">
+
+        const dateInputs = document.querySelectorAll('[data-datepicker="1"], .js-datepicker');
+        if (dateInputs.length) {
+            dateInputs.forEach(function (input) {
+                if (!input || input.dataset.datepickerInitialized) return;
+
+                // Ensure BS5 form-control styling
+                input.classList.add('form-control');
+
+                // Wrap in input-group with calendar button (only once)
+                if (!input.dataset.datepickerEnhanced) {
+                    const group = document.createElement('div');
+                    group.className = 'input-group';
+                    const parent = input.parentNode;
+                    parent.insertBefore(group, input);
+                    group.appendChild(input);
+
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'btn btn-outline-secondary';
+                    btn.setAttribute('aria-label', 'Abrir calendario');
+                    btn.innerHTML = '<i class="bi bi-calendar-date"></i>';
+                    const span = document.createElement('span');
+                    span.className = 'input-group-text p-0';
+                    // Use a button after to match BS5 demo aesthetics
+                    group.appendChild(btn);
+                    input.dataset.datepickerEnhanced = '1';
+
+                    // Initialize Datepicker with BS5-friendly options
+                    const dp = new Datepicker(input, {
+                        autohide: true,
+                        language: 'es',
+                        {#format: 'yyyy-mm-dd',#}
+                        todayHighlight: true,
+                        clearBtn: true,
+                        // ensure the picker attaches within the modal to handle z-index correctly
+                        container: input.closest('.modal') || document.body,
+                        // Use Bootstrap icons for navigation arrows
+                        prevArrow: '<i class="bi bi-chevron-left"></i>',
+                        nextArrow: '<i class="bi bi-chevron-right"></i>',
+                        buttonClass: 'btn btn-outline-secondary'
+                    });
+
+                    // Toggle/show the datepicker on button click
+                    btn.addEventListener('click', function () {
+                        dp.show();
+                    });
+                } else {
+                    // If already enhanced, just init the picker
+                    new Datepicker(input, {
+                        autohide: true,
+                        language: 'es',
+                        format: 'yyyy-mm-dd',
+                        todayHighlight: true,
+                        clearBtn: true,
+                        container: input.closest('.modal') || document.body,
+                        prevArrow: '<i class="bi bi-chevron-left"></i>',
+                        nextArrow: '<i class="bi bi-chevron-right"></i>',
+                        buttonClass: 'btn btn-outline-secondary'
+                    });
+                }
+                input.dataset.datepickerInitialized = '1';
+            });
+        }
 
         document.getElementById('mainForm').addEventListener('submit', function (e) {
             e.preventDefault();
