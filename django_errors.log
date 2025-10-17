@@ -2404,3 +2404,123 @@ Traceback (most recent call last):
     raise NoReverseMatch(msg)
 django.urls.exceptions.NoReverseMatch: Reverse for 'user_detail' with arguments '('',)' not found. 1 pattern(s) tried: ['user/detail/(?P<slug>[^/]+)/\\Z']
 ERROR 2025-10-15 22:22:09,457 basehttp 20708 133238895933120 "GET /user/detail/ba551f61-2ecd-4370-8f62-9451f3fdf10f/ HTTP/1.1" 500 288399
+WARNING 2025-10-16 21:13:26,153 log 5779 129016087443136 Not Found: /favicon.ico
+WARNING 2025-10-16 21:13:26,154 basehttp 5779 129016087443136 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-16 21:31:45,615 log 7540 129210558445248 Not Found: /favicon.ico
+WARNING 2025-10-16 21:31:45,615 basehttp 7540 129210558445248 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-16 21:55:02,237 log 9271 130118421837504 Not Found: /reagent/inventory/register/8d75e6f3-72d4-4045-b280-aeacee41466e/
+WARNING 2025-10-16 21:55:02,238 basehttp 9271 130118421837504 "GET /reagent/inventory/register/8d75e6f3-72d4-4045-b280-aeacee41466e/ HTTP/1.1" 404 6032
+WARNING 2025-10-17 06:24:11,615 log 6378 126611107083968 Not Found: /favicon.ico
+WARNING 2025-10-17 06:24:11,615 basehttp 6378 126611107083968 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-17 06:34:52,926 log 6378 126610871154368 Not Found: /favicon.ico
+WARNING 2025-10-17 06:34:52,926 basehttp 6378 126610871154368 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-17 06:41:30,762 log 6378 126610871154368 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-17 06:41:30,762 basehttp 6378 126610871154368 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-17 06:43:03,119 log 6378 126610871154368 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-17 06:43:03,120 basehttp 6378 126610871154368 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-17 06:43:43,638 log 6378 126610871154368 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-17 06:43:43,639 basehttp 6378 126610871154368 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-17 06:59:22,240 log 6378 126611098691264 Not Found: /favicon.ico
+WARNING 2025-10-17 06:59:22,241 basehttp 6378 126611098691264 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-17 07:02:07,251 log 12225 125888427448000 Not Found: /favicon.ico
+WARNING 2025-10-17 07:02:07,251 basehttp 12225 125888427448000 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-17 07:06:00,537 log 12225 125888675968704 Not Found: /favicon.ico
+WARNING 2025-10-17 07:06:00,537 basehttp 12225 125888675968704 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-17 07:06:15,766 log 12225 125888675968704 Not Found: /favicon.ico
+WARNING 2025-10-17 07:06:15,766 basehttp 12225 125888675968704 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-17 07:06:45,613 log 12225 125888675968704 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-17 07:06:45,614 basehttp 12225 125888675968704 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-17 07:07:39,310 log 12225 125888675968704 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-17 07:07:39,310 basehttp 12225 125888675968704 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-17 07:07:58,645 log 12225 125888675968704 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-17 07:07:58,646 basehttp 12225 125888675968704 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-17 07:52:56,591 log 16066 128753153857216 Not Found: /favicon.ico
+WARNING 2025-10-17 07:52:56,592 basehttp 16066 128753153857216 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-17 07:53:03,068 log 16066 128753163298496 Not Found: /favicon.ico
+WARNING 2025-10-17 07:53:03,068 basehttp 16066 128753163298496 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-17 07:53:37,075 log 16066 128753153857216 Not Found: /favicon.ico
+WARNING 2025-10-17 07:53:37,076 basehttp 16066 128753153857216 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-17 07:53:38,525 log 16066 128753153857216 Not Found: /reagent/inventory/register/8d75e6f3-72d4-4045-b280-aeacee41466e/
+WARNING 2025-10-17 07:53:38,526 basehttp 16066 128753153857216 "GET /reagent/inventory/register/8d75e6f3-72d4-4045-b280-aeacee41466e/ HTTP/1.1" 404 6332
+WARNING 2025-10-17 07:53:57,671 log 16297 126106498758336 Not Found: /favicon.ico
+WARNING 2025-10-17 07:53:57,672 basehttp 16297 126106498758336 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-17 07:53:59,771 log 16297 126106260723392 Not Found: /reagent/inventory/detail/8d75e6f3-72d4-4045-b280-aeacee41466e/
+WARNING 2025-10-17 07:53:59,772 basehttp 16297 126106260723392 "GET /reagent/inventory/detail/8d75e6f3-72d4-4045-b280-aeacee41466e/ HTTP/1.1" 404 6326
+ERROR 2025-10-17 08:12:49,768 log 18541 127866539865792 Internal Server Error: /reagent/inventory/delete/8d75e6f3-72d4-4045-b280-aeacee41466e/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column InventoryReagent.purity does not exist
+LINE 1: ...ty_stock", "InventoryReagent"."unit_measurement", "Inventory...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/reagent/views/inventory_reagent/views.py", line 155, in dispatch
+    self.object = self.get_object()
+                  ^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/detail.py", line 53, in get_object
+    obj = queryset.get()
+          ^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 629, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 366, in __len__
+    self._fetch_all()
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column InventoryReagent.purity does not exist
+LINE 1: ...ty_stock", "InventoryReagent"."unit_measurement", "Inventory...
+                                                             ^
+
+ERROR 2025-10-17 08:12:49,779 basehttp 18541 127866539865792 "GET /reagent/inventory/delete/8d75e6f3-72d4-4045-b280-aeacee41466e/ HTTP/1.1" 500 149865
+WARNING 2025-10-17 08:51:14,583 log 21862 134988515231424 Not Found: /favicon.ico
+WARNING 2025-10-17 08:51:14,583 basehttp 21862 134988515231424 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-17 09:13:16,223 log 23391 129591821715136 Not Found: /favicon.ico
+WARNING 2025-10-17 09:13:16,223 basehttp 23391 129591821715136 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-17 09:13:22,501 log 23391 129591821715136 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-17 09:13:22,501 basehttp 23391 129591821715136 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3560
+WARNING 2025-10-17 09:16:58,785 log 23391 129591846893248 Not Found: /favicon.ico
+WARNING 2025-10-17 09:16:58,785 basehttp 23391 129591846893248 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-17 09:24:51,715 log 24587 128616300009152 Not Found: /favicon.ico
+WARNING 2025-10-17 09:24:51,715 basehttp 24587 128616300009152 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-17 09:25:29,789 log 24587 128616300009152 Not Found: /reagent/transaction_reagent/add/dcf02b4f-85eb-4130-b90a-3631775bcf61/
+WARNING 2025-10-17 09:25:29,790 basehttp 24587 128616300009152 "GET /reagent/transaction_reagent/add/dcf02b4f-85eb-4130-b90a-3631775bcf61/ HTTP/1.1" 404 6347
+WARNING 2025-10-17 09:28:19,298 log 24783 130531864852160 Not Found: /favicon.ico
+WARNING 2025-10-17 09:28:19,298 basehttp 24783 130531864852160 "GET /favicon.ico HTTP/1.1" 404 3449
+WARNING 2025-10-17 09:28:46,205 log 24783 130531864852160 Not Found: /reagent/transaction_reagent/add/dcf02b4f-85eb-4130-b90a-3631775bcf61/
+WARNING 2025-10-17 09:28:46,206 basehttp 24783 130531864852160 "GET /reagent/transaction_reagent/add/dcf02b4f-85eb-4130-b90a-3631775bcf61/ HTTP/1.1" 404 6347

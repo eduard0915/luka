@@ -9,15 +9,15 @@ from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 
 from core.mixins import ValidatePermissionRequiredMixin
 from core.reagent.forms import TransactionReagentForm, TransactionReagentUpdateForm
-from core.reagent.models import TransactionReagent
+from core.reagent.models import TransactionReagent, InventoryReagent
 
 
-# Creación de transacción de reactivo
+# Registrar de transacción de uso de reactivo
 class TransactionReagentCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
     model = TransactionReagent
     form_class = TransactionReagentForm
     template_name = 'transaction_reagent/create_transaction_reagent.html'
-    success_url = reverse_lazy('transaction_reagent:transaction_reagent_list')
+    success_url = reverse_lazy('reagent:list_inventory_reagent')
     permission_required = 'reagent.add_transactionreagent'
     url_redirect = success_url
 
@@ -45,13 +45,19 @@ class TransactionReagentCreateView(LoginRequiredMixin, ValidatePermissionRequire
             data['error'] = str(e)
         return JsonResponse(data)
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        invent = InventoryReagent.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'invent': invent})
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Creación de Transacción de Reactivos'
+        context['title'] = 'Registro de Transacción de Reactivos'
         context['list_url'] = self.success_url
         context['action'] = 'add'
-        context['entity'] = 'Creación de Transacción de Reactivo'
-        context['div'] = '10'
+        context['entity'] = 'Registro de Transacción de Reactivo'
+        context['div'] = '8'
         context['icon'] = 'swap_horiz'
         return context
 

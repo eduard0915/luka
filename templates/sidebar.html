@@ -33,13 +33,23 @@
         </li>
 
         {% url 'reagent:create_reagent' as create_reagent %}
-        {% url 'reagent:create_list' as list_reagent %}
-        <li class="treeview {% if list_reagent in request.path or create_reagent in request.path %}is-expanded{% endif %}"><a class="app-menu__item" href="#" data-toggle="treeview">
-            <i class="app-menu__icon fa-solid fa-flask-vial me-2"></i><span class="app-menu__label"> Materiales</span><i
-                class="treeview-indicator bi bi-chevron-right"></i></a>
+        {% url 'reagent:list_reagent' as create_reagent %}
+        {% url 'reagent:list_inventory_reagent' as list_inventory_reagent %}
+
+        <li class="treeview {% if list_reagent in request.path or create_reagent in request.path or list_inventory_reagent in request.path %}is-expanded{% endif %}">
+            <a class="app-menu__item" href="#" data-toggle="treeview">
+            <i class="app-menu__icon fa-solid fa-flask-vial me-2"></i>
+                <span class="app-menu__label"> Materiales</span><i
+                class="treeview-indicator bi bi-chevron-right"></i>
+            </a>
             <ul class="treeview-menu">
-                <li><a class="treeview-item" href="#"><i class="icon bi bi-circle-fill"></i> Soluciones</a></li>
-                <li><a class="treeview-item" href="#"><i class="icon bi bi-circle-fill"></i> Inv. Reactivos</a></li>
+                <li>
+                    <a class="treeview-item" href="#"><i class="icon bi bi-circle-fill"></i> Soluciones</a></li>
+                <li>
+                    <a class="treeview-item {% if list_inventory_reagent in request.path %}active{% endif %}" href="{% url 'reagent:list_inventory_reagent' %}">
+                    <i class="icon bi bi-circle-fill"></i> Inv. Reactivos
+                    </a>
+                </li>
                 <li><a class="treeview-item {% if list_reagent in request.path or create_reagent in request.path %}active{% endif %}" href="{% url 'reagent:list_reagent' %}">
                     <i class="icon bi bi-circle-fill"></i> Reactivos</a></li>
             </ul>
@@ -60,18 +70,22 @@
         {% url 'company:create_site' as create_site %}
 
         {% if perms.user.add_user %}
-            <li class="treeview {% if list_user in request.path or create_user in request.path %}is-expanded{% endif %}"><a class="app-menu__item" href="#" data-toggle="treeview">
+            <li class="treeview {% if list_user in request.path or create_user in request.path %}is-expanded{% endif %}">
+                <a class="app-menu__item" href="#" data-toggle="treeview">
                 <i class="app-menu__icon bi bi-people"></i><span class="app-menu__label">Usuarios</span><i
                     class="treeview-indicator bi bi-chevron-right"></i></a>
                 <ul class="treeview-menu">
-                    <li><a class="treeview-item {% if list_user in request.path or create_user in request.path %}active{% endif %}" href="{{ list_user }}">
-                        <i class="icon bi bi-circle-fill"></i> Lista Usuarios</a></li>
+                    <li>
+                        <a class="treeview-item {% if list_user in request.path or create_user in request.path %}active{% endif %}" href="{% url 'user:user_list' %}">
+                        <i class="icon bi bi-circle-fill"></i> Lista Usuarios
+                        </a>
+                    </li>
                 </ul>
             </li>
         {% endif %}
 
         {% if perms.company.add_company %}
-            <li class="treeview {% if list_site in request.path or create_site in request.path %}is-expanded{% endif %}">
+            <li class="treeview ">
                 <a class="app-menu__item" href="#" data-toggle="treeview">
                     <i class="bi bi-gear me-2"></i><span
                         class="app-menu__label">Configuración</span><i
@@ -83,15 +97,11 @@
                         <li><a class="treeview-item" href="{% url 'company:company_create' %}">
                     {% endif %}
                     <i class="icon bi bi-circle-fill"></i> Empresa</a></li>
-                    <li><a class="treeview-item" href="{{ list_user }}">
-                        <i class="icon bi bi-circle-fill"></i> Reactivos</a></li>
-                    <li><a class="treeview-item " href="{{ list_user }}">
-                        <i class="icon bi bi-circle-fill"></i> Soluciones</a></li>
-                    <li><a class="treeview-item" href="{{ list_user }}">
+                    <li><a class="treeview-item" href="#">
                         <i class="icon bi bi-circle-fill"></i> Laboratorios</a></li>
-                    <li><a class="treeview-item" href="{{ list_user }}">
+                    <li><a class="treeview-item" href="#">
                         <i class="icon bi bi-circle-fill"></i> Equipo Instrumental</a></li>
-                    <li><a class="treeview-item" href="{{ list_user }}">
+                    <li><a class="treeview-item" href="#">
                         <i class="icon bi bi-circle-fill"></i> Matrizes</a></li>
                 </ul>
             </li>

@@ -5,7 +5,7 @@ from core.user.models import Training
 def extras_processor(request):
     """
     Context processor that adds company information to the context of all templates.
-
+    
     Returns:
         dict: A dictionary containing company information.
     """
@@ -16,8 +16,11 @@ def extras_processor(request):
         try:
             # Get the first company (assuming there's only one company in the system)
             company = Company.objects.first()
-            context['company'] = company
-        except Exception:
+            return {
+                'company': company,
+            }
+        except Exception as e:
             # Return an empty dict if there's an error or no company exists
+            print(e)
             pass
     return context

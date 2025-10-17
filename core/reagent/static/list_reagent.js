@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 {'data': 'code_reagent'},
                 {'data': 'description_reagent'},
                 {'data': 'umb'},
+                {'data': 'purity_unit'},
                 {'data': 'manufacturer'},
                 {'data': 'site__site_name'},
                 {'data': 'enable_reagent'},
@@ -29,11 +30,11 @@ document.addEventListener('DOMContentLoaded', function () {
             ],
             columnDefs: [
                 {
-                    targets: [0, 1, 2, 3, 4],
+                    targets: [0, 1, 2, 3, 4, 5],
                     class: 'td-actions text-center'
                 },
                 {
-                    targets: [5],
+                    targets: [6],
                     className: 'td-actions text-center',
                     render: function (data, type, row) {
                         let estado = null;
@@ -49,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 {
-                    targets: [6],
+                    targets: [7],
                     className: 'td-actions text-center',
                     orderable: false,
                     render: function (data, type, row) {
@@ -57,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 {
-                    targets: [7],
+                    targets: [8],
                     class: 'td-actions text-center',
                     orderable: false,
                     render: function (data, type, row) {
@@ -69,7 +70,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
             ],
             initComplete: function (settings, json) {
-                console.log("DataTable inicializada correctamente");
             }
         });
     } else {

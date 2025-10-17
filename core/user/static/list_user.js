@@ -76,7 +76,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
             ],
             initComplete: function (settings, json) {
-                console.log("DataTable inicializada correctamente");
             }
         });
     } else {

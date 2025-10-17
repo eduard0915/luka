@@ -1,62 +1,69 @@
-$(document).ready(function($) {
-    $('#data').DataTable({
-        responsive: true,
-        autoWidth: false,
-        destroy: true,
-        deferRender: true,
-        language: {
-            "emptyTable": "No hay información",
-            "info": "Mostrando _START_ a _END_ de _TOTAL_ Registros",
-            "infoEmpty": "Mostrando 0 to 0 of 0 Registros",
-            "infoFiltered": "(Filtrado de _MAX_ total Registros)",
-            "lengthMenu": "Mostrar _MENU_ Registros",
-            "loadingRecords": "Cargando...",
-            "processing": "Procesando...",
-            "search": "Buscar:",
-            "zeroRecords": "Sin resultados encontrados",
-        },
-        ajax: {
-            url: window.location.pathname,
-            type: 'POST',
-            data: {
-                'action': 'searchdata'
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof $ !== 'undefined') {
+        $('#data').DataTable({
+            responsive: true,
+            autoWidth: false,
+            destroy: true,
+            deferRender: true,
+            language: {
+                url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
             },
-            dataSrc: ""
-        },
-        columns: [
-            {'data': 'reagent__code_reagent'},
-            {'data': 'reagent__description_reagent'},
-            {'data': 'batch_number'},
-            {'data': 'date_expire'},
-            {'data': 'quantity_ml'},
-            {'data': 'id'}
-        ],
-        columnDefs: [
-            {
-                targets: [0, 1, 2, 3],
-                class: 'td-actions text-center'
+            ajax: {
+                url: window.location.pathname,
+                type: 'POST',
+                data: {
+                    'action': 'searchdata'
+                },
+                dataSrc: ""
             },
-            {
-                targets: [4],
-                class: 'td-actions text-center',
-                orderable: false,
-                render: function (data, type, row) {
-                    return row['quantity_ml'] + ' ' + row['unit_measurement'];
-                }
-            },
-            {
-                targets: [5],
-                class: 'td-actions text-center',
-                orderable: false,
-                render: function (data, type, row) {
-                    let actions
-                    actions = '<a href="/reagent/inventory/update/' + row['id'] + '/" type="button" title="Editar"><i class="fa-solid fa-edit text-warning"></i></a> &nbsp&nbsp';
-                    // actions += '<a href="/reagent/detail/' + row['id'] + '/" type="button" title="Detalle Perfil"><i class="fa-solid fa-power-off text-info ml-2"></i></a> &nbsp';
-                    return actions
-                }
-            },
-        ],
-        initComplete: function (settings, json) {
-        }
-    });
+            columns: [
+                {'data': 'reagent__code_reagent'},
+                {'data': 'reagent__description_reagent'},
+                {'data': 'purity'},
+                {'data': 'batch_number'},
+                {'data': 'certificate_quality'},
+                {'data': 'date_expire'},
+                {'data': 'quantity_stock'},
+                {'data': 'id'}
+            ],
+            columnDefs: [
+                {
+                    targets: [0, 1, 2, 3, 5],
+                    class: 'td-actions text-center'
+                },
+                {
+                    targets: [4],
+                    className: 'td-actions text-center',
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return '<a title="Descargar" target="_blank" class="bi bi-file-earmark-pdf text-danger" href="/reagent/technical_sheet/?id=' + row.id + '&type=technical_sheet">';
+                    }
+                },
+                {
+                    targets: [6],
+                    className: 'td-actions text-center',
+                    render: function (data, type, row) {
+                        return row['quantity_stock'] + ' ' + row['reagent__umb'];
+                    }
+                },
+                {
+                    targets: [7],
+                    class: 'td-actions text-center',
+                    orderable: false,
+                    render: function (data, type, row) {
+                        let actions
+                        actions = '<a href="/reagent/inventory/detail/' + row['id'] + '/" type="button" title="Detalle de Movimientos"><i class="bi bi-info-square text-info"></i></a>&nbsp';
+                        actions += '<a href="/reagent/inventory/update/' + row['id'] + '/" type="button" title="Editar Entrada"><i class="bi bi-pencil-square text-warning"></i></a>&nbsp';
+                        actions += '<a onclick=open_modal("/reagent/inventory/delete/' + row['id'] + '/") type="button" title="Eliminar Entrada"><i class="bi bi-trash text-danger"></i></a>&nbsp';
+                        actions += '<a href="/reagent/transaction_reagent/add/' + row['id'] + '/" type="button" title="Registrar Movimiento"><i class="bi bi-bag-plus text-primary"></i></a>';
+                        return actions
+                    }
+                },
+            ],
+            initComplete: function (settings, json) {
+            }
+        });
+    } else {
+        console.error("jQuery ($ variable) no está definido. Verifica que jQuery se haya cargado correctamente.");
+    }
 });

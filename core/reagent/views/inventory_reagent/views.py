@@ -12,7 +12,7 @@ from core.reagent.forms import InventoryReagentForm, InventoryReagentUpdateForm
 from core.reagent.models import InventoryReagent
 
 
-# Creación de inventario de reactivo
+# Registro de Entrada Inventario de Reactivo
 class InventoryReagentCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
     model = InventoryReagent
     form_class = InventoryReagentForm
@@ -48,16 +48,16 @@ class InventoryReagentCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Registro de Reactivos'
+        context['title'] = 'Registro de Entrada de Reactivos'
         context['list_url'] = self.success_url
         context['action'] = 'add'
-        context['entity'] = 'Registro de Reactivos'
+        context['entity'] = 'Registro de Entrada de Reactivos'
         context['div'] = '10'
-        context['icon'] = 'inventory'
+        context['icon'] = 'fa-solid fa-vial-virus'
         return context
 
 
-# Listado de inventario de reactivos
+# Inventario de reactivos
 class InventoryReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
     model = InventoryReagent
     template_name = 'inventory_reagent/list_inventory_reagent.html'
@@ -77,13 +77,14 @@ class InventoryReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMix
                     'id',
                     'reagent__description_reagent',
                     'reagent__code_reagent',
+                    'reagent__umb',
                     'batch_number',
                     'date_expire',
-                    'quantity_lt',
-                    'quantity_ml',
-                    'reagent_liquid',
+                    'quantity_stock',
+                    'unit_measurement',
                     'date_creation',
-                    'unit_measurement'
+                    'purity',
+                    'certificate_quality'
                 ).order_by('-date_creation'))
                 return JsonResponse(inventory_reagents, safe=False)
             else:
@@ -95,14 +96,14 @@ class InventoryReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMix
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Inventario de Reactivos'
-        context['create_url'] = reverse_lazy('reagent:create_inventory_reagent')
+        context['create_url'] = reverse_lazy('reagent:register_inventory_reagent')
         context['entity'] = 'Inventario de Reactivos'
-        context['div'] = '8'
-        context['icon'] = 'lab_panel'
+        context['div'] = '11'
+        context['icon'] = 'fa-solid fa-vial-virus'
         return context
 
 
-# Edición de inventario de reactivo
+# Edición de Registro de Entrada Inventario de Reactivo
 class InventoryReagentUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
     model = InventoryReagent
     form_class = InventoryReagentUpdateForm
@@ -142,7 +143,7 @@ class InventoryReagentUpdateView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['entity'] = 'Edición Inventario de Reactivo'
         context['action'] = 'edit'
         context['div'] = '10'
-        context['icon'] = 'edit'
+        context['icon'] = 'fa-solid fa-vial-virus'
         return context
 
 
@@ -150,7 +151,6 @@ class InventoryReagentUpdateView(LoginRequiredMixin, ValidatePermissionRequiredM
 class InventoryReagentDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DeleteView):
     model = InventoryReagent
     template_name = 'inventory_reagent/delete_inventory_reagent.html'
-    success_url = reverse_lazy('inventory_reagent:inventory_reagent_list')
     permission_required = 'reagent.delete_inventoryreagent'
 
     def dispatch(self, request, *args, **kwargs):
@@ -161,7 +161,7 @@ class InventoryReagentDeleteView(LoginRequiredMixin, ValidatePermissionRequiredM
         data = {}
         try:
             self.object.delete()
-            messages.success(self.request, 'Inventario de reactivo eliminado satisfactoriamente!')
+            messages.success(self.request, 'Entrada de Inventario de reactivo eliminada satisfactoriamente!')
         except Exception as e:
             data['error'] = str(e)
         return JsonResponse(data)
@@ -171,7 +171,6 @@ class InventoryReagentDeleteView(LoginRequiredMixin, ValidatePermissionRequiredM
         ir = InventoryReagent.objects.get(pk=self.kwargs.get('pk'))
         context['title'] = 'Eliminar Inventario de Reactivo'
         context['entity'] = 'Eliminar Inventario de Reactivo'
-        context['delete'] = 'Está seguro de eliminar el inventario de reactivo?'
-        context['info_delete'] = f'Lote: {ir.batch_number} - {ir.reagent.description_reagent}?'
-        context['list_url'] = self.success_url
+        context['delete'] = 'Está seguro de eliminar la entrada de inventario de reactivo?'
+        context['info_delete'] = f'Lote: {ir.batch_number} - {ir.reagent.code_reagent} {ir.reagent.description_reagent}?'
         return context
