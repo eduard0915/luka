@@ -22,8 +22,8 @@
                         <div class="row">
                             {% for field in form.visible_fields %}
                                 <div class="{% if field.name == 'reagent' %}col-md-5
-                                {% elif field.name == 'quantity_stock' or field.name == 'batch_number' or field.name == 'purity' %}col-md-2
-                                {% elif field.name == 'certificate_quality' %}col-md-4
+                                {% elif field.name == 'code_solution' or field.name == 'concentration' or field.name == 'concentration_unit' %}col-md-2
+                                {% elif field.name == 'solute_reagent' or field.name == 'solvent_reagent' %}col-md-6
                                 {% else %}col-md-3{% endif %}">
                                     <div class="form-group mb-2">
                                         {% if field.name == 'groups' or field.name == 'is_active' or field.name == 'site' or field.name == 'reagent' or field.name == 'reagent_liquid' %}
@@ -151,14 +151,20 @@
             })
                 .then(function (response) {
                     console.log(response.data);
-                    if (!response.data.hasOwnProperty('error')) {
-                        location.href = '{{ list_url }}';
-                        return false;
+                    if (response.data && response.data.redirect_url) {
+                        // Redirigir a la url redirect_url
+                        window.location.href = response.data.redirect_url;
+                        return;
                     }
-                    message_error(response.data.error);
-                    // Re-habilitar el botón en caso de error
-                    btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = '<i class="fa fa-fw fa-lg fa-check-circle"></i>Guardar';
+                    if (!response.data || response.data.error) {
+                        message_error(response.data && response.data.error ? response.data.error : 'Ha ocurrido un error');
+                        // Re-habilitar el botón en caso de error
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerHTML = '<i class="fa fa-fw fa-lg fa-check-circle"></i>Guardar';
+                        return;
+                    }
+                    // Fallback: si no viene redirect_url pero no hay error
+                    window.location.href = '{{ list_url }}';
                 })
                 .catch(function (error) {
                     alert(error.response.status + ': ' + error.message);

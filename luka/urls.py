@@ -13,7 +13,7 @@ urlpatterns = [
     path('login/', include('core.login.urls')),
     path('company/', include('core.company.urls')),
     path('reagent/', include('core.reagent.urls')),
-    # path('solution/', include('core.solution.urls')),
+    path('solution/', include('core.solution.urls')),
     # path("__debug__/", include("debug_toolbar.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

@@ -16,6 +16,7 @@ class Company(models.Model):
     company_address = models.CharField(default='Direccion', max_length=60, verbose_name='Dirección')
     company_city = models.CharField(default='Ciudad', max_length=60, verbose_name='Ciudad')
     company_country = models.CharField(default='Pais', max_length=60, verbose_name='Pais')
+    sig_figs_solution = models.PositiveSmallIntegerField(default=2, verbose_name='Cifras Sign Sln')
 
     def __str__(self):
         return str(self.company_name)

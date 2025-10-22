@@ -4,6 +4,7 @@ from core.reagent.models import Reagent, TransactionReagent, InventoryReagent
 
 
 UMB = [('', '-----'), ('mL', 'Mililitro'), ('g', 'Gramo')]
+BOOLEAN = [('', '-----'), (True, 'Si'), (False, 'No')]
 UNIT_PURITY = [('', '-----'), ('%', '%'), ('mg/L', 'mg/L')]
 REGISTRY_TYPE = [('', '-----'), ('Uso', 'Uso'), ('Ajuste de Salida', 'Ajuste de Salida'), ('Ajuste de Entrada', 'Ajuste de Entrada')]
 
@@ -17,15 +18,22 @@ class ReagentForm(ModelForm):
 
     class Meta:
         model = Reagent
-        fields = ['code_reagent', 'description_reagent', 'umb', 'manufacturer', 'site', 'technical_sheet', 'purity_unit']
+        fields = [
+            'code_reagent', 'description_reagent', 'umb', 'manufacturer', 'site', 'technical_sheet', 'purity_unit',
+            'molecular_weight', 'gram_equivalent', 'stability_solution', 'volumetric', 'solvent']
         widgets = {
             'description_reagent': TextInput(attrs={'class': 'form-control', 'required': True}),
             'code_reagent': TextInput(attrs={'class': 'form-control', 'required': True}),
             'manufacturer': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'molecular_weight': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'gram_equivalent': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'stability_solution': TextInput(attrs={'class': 'form-control', 'required': True}),
             'technical_sheet': FileInput(attrs={'class': 'form-control', 'type': 'file'}),
             'site': Select(attrs={'class': 'form-control', 'required': True}),
             'umb': Select(attrs={'class': 'form-control', 'required': True}, choices=UMB),
             'purity_unit': Select(attrs={'class': 'form-control', 'required': True}, choices=UNIT_PURITY),
+            'volumetric': Select(attrs={'class': 'form-control', 'required': True}, choices=BOOLEAN),
+            'solvent': Select(attrs={'class': 'form-control', 'required': True}, choices=BOOLEAN),
         }
 
     def save(self, commit=True):

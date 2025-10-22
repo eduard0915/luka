@@ -4,16 +4,17 @@
 
 {% block head %}
     {% block head_list %}
-                <style>
-                    /* Ajustes para la tabla con id data_0 */
-                    #data_0, #data_0 th, #data_0 td {
-                        font-size: 0.85rem;
-                    }
-                    #data_0 thead th {
-                        text-align: center;
-                        vertical-align: middle;
-                    }
-                </style>
+        <style>
+            /* Ajustes para la tabla con id data_0 */
+            #data_0, #data_0 th, #data_0 td {
+                font-size: 0.85rem;
+            }
+
+            #data_0 thead th {
+                text-align: center;
+                vertical-align: middle;
+            }
+        </style>
     {% endblock %}
 {% endblock %}
 
@@ -31,71 +32,72 @@
                 </div>
             </div>
             <div class="col-md-10">
-                    <div class="tile-title-w-btn m-3">
-                        <h3 class="title">{{ object.get_full_name }}, {{ object.cargo }}</h3>
-                    </div>
-                    <div class="tile-body m-3">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <b>Cedula </b><br>
-                                <p>{{ object.cedula }}</p>
-                            </div>
-                            <div class="col-md-3">
-                                <b>Usuario </b><br>
-                                <p>{{ object.username }}</p>
-                            </div>
-                            <div class="col-md-2">
-                                <b>Cedula </b><br>
-                                <p>{{ object.cedula }}</p>
-                            </div>
-                            <div class="col-md-2">
-                                <b>Celular </b><br>
-                                <p>
-                                    {% if object.cellphone %}
-                                        {{ object.cellphone }}
-                                    {% else %}
-                                        Pendiente
-                                    {% endif %}
-                                </p>
-                            </div>
-                            <div class="col-md-2">
-                                {% if perms.user.add_user %}
-                                    <a href="{% url 'user:user_update_admin' object.slug %}"
-                                       class="btn btn-warning icon-btn">
-                                        <i class="bi bi-pencil-square me-2"></i>Editar</a>
-                                {% else %}
-                                    <a href="{% url 'user:user_update_user' object.slug %}"
-                                       class="btn btn-warning icon-btn">
-                                        <i class="bi bi-pencil-square me-2"></i>Editar</a>
-                                {% endif %}
-                            </div>
+                <div class="tile-title-w-btn m-3">
+                    <h3 class="title">{{ object.get_full_name }}, {{ object.cargo }}</h3>
+                </div>
+                <div class="tile-body m-3">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <b>Cedula </b><br>
+                            <p>{{ object.cedula }}</p>
                         </div>
-                        <div class="row">
-                            <div class="col-md-3">
-                                <b>Email </b><br>
-                                <p>{{ object.email }}</p>
-                            </div>
-                            <div class="col-md-3">
-                                <b>Dirección</b><br>
-                                <p>
-                                    {% if object.address_user %}
-                                        {{ object.address_user }}
-                                    {% else %}
-                                        Pendiente
-                                    {% endif %}
-                                </p>
-                            </div>
-                            <div class="col-md-3">
-                                <b>Fecha de Nacimiento</b><br>
-                                <p>
-                                    {% if object.date_birth %}
-                                        {{ object.date_birth | date:'Y-m-d' }}
-                                    {% else %}
-                                        Pendiente
-                                    {% endif %}
-                                </p>
-                            </div>
+                        <div class="col-md-3">
+                            <b>Usuario </b><br>
+                            <p>{{ object.username }}</p>
+                        </div>
+                        <div class="col-md-2">
+                            <b>Cedula </b><br>
+                            <p>{{ object.cedula }}</p>
+                        </div>
+                        <div class="col-md-2">
+                            <b>Celular </b><br>
+                            <p>
+                                {% if object.cellphone %}
+                                    {{ object.cellphone }}
+                                {% else %}
+                                    Pendiente
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-2">
                             {% if perms.user.add_user %}
+                                <a href="{% url 'user:user_update_admin' object.slug %}"
+                                   class="btn btn-warning icon-btn">
+                                    <i class="bi bi-pencil-square me-2"></i>Editar
+                                </a>
+                            {% else %}
+                                <a href="{% url 'user:user_update_user' object.slug %}"
+                                   class="btn btn-warning icon-btn">
+                                    <i class="bi bi-pencil-square me-2"></i>Editar</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <b>Email </b><br>
+                            <p>{{ object.email }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <b>Dirección</b><br>
+                            <p>
+                                {% if object.address_user %}
+                                    {{ object.address_user }}
+                                {% else %}
+                                    Pendiente
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-3">
+                            <b>Fecha de Nacimiento</b><br>
+                            <p>
+                                {% if object.date_birth %}
+                                    {{ object.date_birth | date:'Y-m-d' }}
+                                {% else %}
+                                    Pendiente
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% if perms.user.add_user %}
                             <div class="col-md-3">
                                 <b>Ultima Sesión</b><br>
                                 <p>
@@ -106,10 +108,10 @@
                                     {% endif %}
                                 </p>
                             </div>
-                            {% endif%}
-                        </div>
+                        {% endif %}
                     </div>
                 </div>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -151,7 +153,7 @@
                                     <td>{{ foo.date_training | date:'Y-m-d' }}</td>
                                     <td>
                                         {% if foo.training_status == 'Vencido' %}
-                                        	<span class="badge bg-danger">{{ foo.training_status }}</span>
+                                            <span class="badge bg-danger">{{ foo.training_status }}</span>
                                         {% else %}
                                             {{ foo.training_status }}
                                         {% endif %}

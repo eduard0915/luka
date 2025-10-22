@@ -36,7 +36,9 @@
         {% url 'reagent:list_reagent' as create_reagent %}
         {% url 'reagent:list_inventory_reagent' as list_inventory_reagent %}
 
-        <li class="treeview {% if list_reagent in request.path or create_reagent in request.path or list_inventory_reagent in request.path %}is-expanded{% endif %}">
+        {% url 'solution:list_solution' as list_solution %}
+
+        <li class="treeview {% if list_reagent in request.path or create_reagent in request.path or list_inventory_reagent in request.path or list_solution in request.path %}is-expanded{% endif %}">
             <a class="app-menu__item" href="#" data-toggle="treeview">
             <i class="app-menu__icon fa-solid fa-flask-vial me-2"></i>
                 <span class="app-menu__label"> Materiales</span><i
@@ -44,7 +46,7 @@
             </a>
             <ul class="treeview-menu">
                 <li>
-                    <a class="treeview-item" href="#"><i class="icon bi bi-circle-fill"></i> Soluciones</a></li>
+                    <a class="treeview-item {% if list_solution in request.path %}active{% endif %}" href="{% url 'solution:list_solution' %}"><i class="icon bi bi-circle-fill"></i> Soluciones</a></li>
                 <li>
                     <a class="treeview-item {% if list_inventory_reagent in request.path %}active{% endif %}" href="{% url 'reagent:list_inventory_reagent' %}">
                     <i class="icon bi bi-circle-fill"></i> Inv. Reactivos

@@ -19,6 +19,11 @@ class Reagent(BaseModel):
     site = models.ForeignKey(Site, verbose_name='Planta', on_delete=models.CASCADE)
     umb = models.CharField(max_length=15, verbose_name='UMB')
     purity_unit = models.CharField(max_length=10, verbose_name='Unidad de Pureza')
+    molecular_weight = models.FloatField(verbose_name='Gramos/mol')
+    gram_equivalent = models.FloatField(verbose_name='Eq-gramo')
+    stability_solution = models.PositiveSmallIntegerField(verbose_name='Días Estabilidad en Solución', null=True, blank=True)
+    volumetric = models.BooleanField(default=False, verbose_name='Volumétrico')
+    solvent = models.BooleanField(default=False, verbose_name='Solvente')
 
     def __str__(self):
         return str(self.code_reagent) + ' '  + str(self.description_reagent) + ' (' + str(self.umb) + ') - ' + 'Pureza: ' + str(self.purity_unit) + ''
@@ -45,12 +50,14 @@ class InventoryReagent(BaseModel):
     batch_number = models.CharField(max_length=50, verbose_name='N° Lote')
     date_expire = models.DateField(verbose_name='Fecha de Vencimiento', null=True, blank=True)
     quantity_stock = models.FloatField(verbose_name='Cantidad')
-    unit_measurement = models.CharField(max_length=4, verbose_name='Unidad de Medida')
     purity = models.PositiveSmallIntegerField(verbose_name='Pureza')
     certificate_quality = models.FileField(upload_to='certificate_quality/%Y%m%d', verbose_name='Certificado de Calidad')
+    density = models.FloatField(verbose_name='Densidad (g/mL)', default=1)
 
     def __str__(self):
-        return str(self.reagent.description_reagent) + ' ' + str(self.batch_number) + ' (' + str(self.purity) + str(self.reagent.purity_unit) +')'
+        return str(self.reagent.description_reagent) + ' Lote N°: ' + str(self.batch_number) + ' (' + str(
+            self.purity) + str(self.reagent.purity_unit) + '). Disponible: ' + str(
+            self.quantity_stock) + self.reagent.umb
 
     class Meta:
         verbose_name = 'InventoryReagent'
