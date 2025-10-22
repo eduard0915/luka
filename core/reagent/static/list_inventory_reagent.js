@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     className: 'td-actions text-center',
                     orderable: false,
                     render: function (data, type, row) {
-                        return '<a title="Descargar" target="_blank" class="bi bi-file-earmark-pdf text-danger" href="transaction_reagent/coa/?id=' + row.id + '&type=certificate_quality">';
+                        return '<a title="Descargar Certificado de Calidad" target="_blank" class="bi bi-file-earmark-pdf text-danger" href="transaction_reagent/coa/?id=' + row.id + '&type=certificate_quality">';
                     }
                 },
                 {
