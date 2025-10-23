@@ -476,3 +476,696 @@ TypeError: list indices must be integers or slices, not str
 ERROR 2025-10-21 21:25:06,314 basehttp 5959 138225865717440 "POST /reagent/inventory/list/ HTTP/1.1" 500 158258
 WARNING 2025-10-21 22:21:47,436 log 9904 128126726174400 Not Found: /reagent/detail/5ba6b454-6818-47ce-8829-d2f09d210b71/
 WARNING 2025-10-21 22:21:47,436 basehttp 9904 128126726174400 "GET /reagent/detail/5ba6b454-6818-47ce-8829-d2f09d210b71/ HTTP/1.1" 404 6758
+WARNING 2025-10-22 06:29:41,043 log 9223 139154776127168 Not Found: /favicon.ico
+WARNING 2025-10-22 06:29:41,045 basehttp 9223 139154776127168 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-10-22 06:33:06,507 log 9553 124187788179136 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 06:33:06,508 basehttp 9553 124187788179136 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 06:36:41,595 log 9553 124187788179136 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 06:36:41,595 basehttp 9553 124187788179136 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 06:37:44,496 log 9553 124187788179136 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 06:37:44,496 basehttp 9553 124187788179136 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 06:39:18,983 log 9553 124187788179136 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 06:39:18,984 basehttp 9553 124187788179136 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 06:39:47,138 log 9553 124187788179136 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 06:39:47,138 basehttp 9553 124187788179136 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 06:40:12,237 log 9553 124187788179136 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 06:40:12,238 basehttp 9553 124187788179136 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 06:40:33,339 log 9553 124187788179136 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 06:40:33,340 basehttp 9553 124187788179136 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+ERROR 2025-10-22 06:50:26,496 log 9553 124187788179136 Internal Server Error: /solution/detail/ff355dea-d1ad-4b60-a1b6-71ef1fc66737/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 220, in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 171, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1075, in render
+    output = self.filter_expression.resolve(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 749, in resolve
+    new_obj = func(obj, *arg_vals)
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/defaultfilters.py", line 784, in date
+    return formats.date_format(value, arg)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/utils/formats.py", line 155, in date_format
+    return dateformat.format(
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/utils/dateformat.py", line 325, in format
+    return df.format(format_string)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/utils/dateformat.py", line 45, in format
+    raise TypeError(
+TypeError: The format for date objects may not contain time-related format specifiers (found 'H').
+ERROR 2025-10-22 06:50:26,501 basehttp 9553 124187788179136 "GET /solution/detail/ff355dea-d1ad-4b60-a1b6-71ef1fc66737/ HTTP/1.1" 500 257990
+WARNING 2025-10-22 07:13:04,574 log 14758 139456245921472 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 07:13:04,575 basehttp 14758 139456245921472 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+ERROR 2025-10-22 07:15:20,409 log 15082 140108812515008 Internal Server Error: /solution/detail/ff355dea-d1ad-4b60-a1b6-71ef1fc66737/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 220, in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 171, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 1016, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/template/defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/urls/base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/urls/resolvers.py", line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'add_solvent_solution' with arguments '('',)' not found. 1 pattern(s) tried: ['solution/add_solvent/\\Z']
+ERROR 2025-10-22 07:15:20,413 basehttp 15082 140108812515008 "GET /solution/detail/ff355dea-d1ad-4b60-a1b6-71ef1fc66737/ HTTP/1.1" 500 250690
+ERROR 2025-10-22 07:22:19,777 log 15769 134926548596416 Internal Server Error: /solution/add_solvent/ff355dea-d1ad-4b60-a1b6-71ef1fc66737/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/utils/decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/solution/views.py", line 180, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 144, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 202, in get
+    return super().get(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 142, in get
+    return self.render_to_response(self.get_context_data())
+                                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/solution/views.py", line 204, in get_context_data
+    context['info_form'] = self.object.solvent_reagent.reagent.description_reagent + ' al ' + self.object.solvent_reagent.purity + self.object.solvent_reagent.purity_unit
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TypeError: can only concatenate str (not "int") to str
+ERROR 2025-10-22 07:22:19,780 basehttp 15769 134926548596416 "GET /solution/add_solvent/ff355dea-d1ad-4b60-a1b6-71ef1fc66737/ HTTP/1.1" 500 119352
+ERROR 2025-10-22 07:22:49,150 log 15844 139574013589184 Internal Server Error: /solution/add_solvent/ff355dea-d1ad-4b60-a1b6-71ef1fc66737/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/utils/decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/solution/views.py", line 180, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 144, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 202, in get
+    return super().get(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/edit.py", line 142, in get
+    return self.render_to_response(self.get_context_data())
+                                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/solution/views.py", line 204, in get_context_data
+    context['info_form'] = self.object.solvent_reagent.reagent.description_reagent + ' al ' + str(self.object.solvent_reagent.purity) + self.object.solvent_reagent.purity_unit
+                                                                                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'InventoryReagent' object has no attribute 'purity_unit'
+ERROR 2025-10-22 07:22:49,152 basehttp 15844 139574013589184 "GET /solution/add_solvent/ff355dea-d1ad-4b60-a1b6-71ef1fc66737/ HTTP/1.1" 500 119578
+WARNING 2025-10-22 14:43:34,510 log 8502 127362186344128 Not Found: /favicon.ico
+WARNING 2025-10-22 14:43:34,511 basehttp 8502 127362186344128 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-10-22 15:05:12,257 log 10460 136179917780672 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 15:05:12,257 basehttp 10460 136179917780672 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 15:08:52,202 log 10460 136179917780672 Not Found: /reagent/update/1553e398-a953-4185-aca4-ee3bbc7c0b77/
+WARNING 2025-10-22 15:08:52,203 basehttp 10460 136179917780672 "GET /reagent/update/1553e398-a953-4185-aca4-ee3bbc7c0b77/ HTTP/1.1" 404 4129
+WARNING 2025-10-22 15:09:01,294 log 10460 136179917780672 Not Found: /reagent/update/1553e398-a953-4185-aca4-ee3bbc7c0b77/
+WARNING 2025-10-22 15:09:01,294 basehttp 10460 136179917780672 "GET /reagent/update/1553e398-a953-4185-aca4-ee3bbc7c0b77/ HTTP/1.1" 404 4129
+WARNING 2025-10-22 15:09:42,962 log 10811 134490230867648 Not Found: /favicon.ico
+WARNING 2025-10-22 15:09:42,962 basehttp 10811 134490230867648 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-10-22 15:10:02,686 log 10811 134490248701632 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 15:10:02,687 basehttp 10811 134490248701632 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 15:27:40,107 log 13233 137844400060096 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 15:27:40,108 basehttp 13233 137844400060096 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 15:27:41,903 log 13233 137844391667392 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 15:27:41,903 basehttp 13233 137844391667392 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 15:28:13,874 log 13233 137844391667392 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 15:28:13,874 basehttp 13233 137844391667392 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 15:28:19,165 log 13233 137844391667392 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 15:28:19,166 basehttp 13233 137844391667392 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 15:28:27,437 log 13233 137844391667392 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 15:28:27,438 basehttp 13233 137844391667392 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 15:28:29,858 log 13233 137844391667392 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 15:28:29,859 basehttp 13233 137844391667392 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 15:28:29,924 log 13233 137844391667392 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 15:28:29,925 basehttp 13233 137844391667392 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 15:29:18,151 log 13233 137844391667392 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 15:29:18,151 basehttp 13233 137844391667392 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+ERROR 2025-10-22 15:29:24,569 log 13233 137844391667392 Internal Server Error: /reagent/inventory/list/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2238, in add_fields
+    join_info = self.setup_joins(
+                ^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1901, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1806, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'unit_measurement' into field. Choices are: batch_number, certificate_quality, date_creation, date_expire, date_updated, density, id, purity, quantity_stock, reagent, reagent_id, solute, solvent, transactionreagent, user_creation, user_creation_id, user_updated, user_updated_id
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/luka/core/reagent/views/inventory_reagent/views.py", line 83, in post
+    inventory_reagents = list(InventoryReagent.objects.select_related('reagent').values(
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 1368, in values
+    clone = self._values(*fields, **expressions)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 1363, in _values
+    clone.query.set_values(fields)
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2577, in set_values
+    self.add_fields(field_names, True)
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2279, in add_fields
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'unit_measurement' into field. Choices are: batch_number, certificate_quality, date_creation, date_expire, date_updated, density, id, purity, quantity_stock, reagent, reagent_id, solute, solvent, transactionreagent, user_creation, user_creation_id, user_updated, user_updated_id
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/utils/decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/reagent/views/inventory_reagent/views.py", line 75, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 144, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/reagent/views/inventory_reagent/views.py", line 100, in post
+    data['error'] = str(e)
+    ~~~~^^^^^^^^^
+TypeError: list indices must be integers or slices, not str
+ERROR 2025-10-22 15:29:24,572 basehttp 13233 137844391667392 "POST /reagent/inventory/list/ HTTP/1.1" 500 158044
+WARNING 2025-10-22 15:29:30,346 log 13233 137844022572736 Not Found: /favicon.ico
+WARNING 2025-10-22 15:29:30,347 basehttp 13233 137844022572736 "GET /favicon.ico HTTP/1.1" 404 3601
+ERROR 2025-10-22 15:29:30,588 log 13233 137844022572736 Internal Server Error: /reagent/inventory/list/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2238, in add_fields
+    join_info = self.setup_joins(
+                ^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1901, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1806, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'unit_measurement' into field. Choices are: batch_number, certificate_quality, date_creation, date_expire, date_updated, density, id, purity, quantity_stock, reagent, reagent_id, solute, solvent, transactionreagent, user_creation, user_creation_id, user_updated, user_updated_id
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/luka/core/reagent/views/inventory_reagent/views.py", line 83, in post
+    inventory_reagents = list(InventoryReagent.objects.select_related('reagent').values(
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 1368, in values
+    clone = self._values(*fields, **expressions)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 1363, in _values
+    clone.query.set_values(fields)
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2577, in set_values
+    self.add_fields(field_names, True)
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2279, in add_fields
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'unit_measurement' into field. Choices are: batch_number, certificate_quality, date_creation, date_expire, date_updated, density, id, purity, quantity_stock, reagent, reagent_id, solute, solvent, transactionreagent, user_creation, user_creation_id, user_updated, user_updated_id
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/utils/decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/reagent/views/inventory_reagent/views.py", line 75, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 144, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/reagent/views/inventory_reagent/views.py", line 100, in post
+    data['error'] = str(e)
+    ~~~~^^^^^^^^^
+TypeError: list indices must be integers or slices, not str
+ERROR 2025-10-22 15:29:30,590 basehttp 13233 137844022572736 "POST /reagent/inventory/list/ HTTP/1.1" 500 158044
+WARNING 2025-10-22 15:31:19,731 log 13233 137844380128960 Not Found: /favicon.ico
+WARNING 2025-10-22 15:31:19,731 basehttp 13233 137844380128960 "GET /favicon.ico HTTP/1.1" 404 3601
+ERROR 2025-10-22 15:31:19,763 log 13233 137844014180032 Internal Server Error: /reagent/inventory/list/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2238, in add_fields
+    join_info = self.setup_joins(
+                ^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1901, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1806, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'unit_measurement' into field. Choices are: batch_number, certificate_quality, date_creation, date_expire, date_updated, density, id, purity, quantity_stock, reagent, reagent_id, solute, solvent, transactionreagent, user_creation, user_creation_id, user_updated, user_updated_id
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/luka/core/reagent/views/inventory_reagent/views.py", line 83, in post
+    inventory_reagents = list(InventoryReagent.objects.select_related('reagent').values(
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 1368, in values
+    clone = self._values(*fields, **expressions)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 1363, in _values
+    clone.query.set_values(fields)
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2577, in set_values
+    self.add_fields(field_names, True)
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2279, in add_fields
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'unit_measurement' into field. Choices are: batch_number, certificate_quality, date_creation, date_expire, date_updated, density, id, purity, quantity_stock, reagent, reagent_id, solute, solvent, transactionreagent, user_creation, user_creation_id, user_updated, user_updated_id
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/utils/decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/reagent/views/inventory_reagent/views.py", line 75, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 144, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/reagent/views/inventory_reagent/views.py", line 100, in post
+    data['error'] = str(e)
+    ~~~~^^^^^^^^^
+TypeError: list indices must be integers or slices, not str
+ERROR 2025-10-22 15:31:19,765 basehttp 13233 137844014180032 "POST /reagent/inventory/list/ HTTP/1.1" 500 158309
+WARNING 2025-10-22 15:31:23,850 log 13233 137844014180032 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 15:31:23,850 basehttp 13233 137844014180032 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 15:50:12,120 log 15500 128943006938816 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 15:50:12,121 basehttp 15500 128943006938816 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+ERROR 2025-10-22 15:52:40,808 log 15687 131053276624576 Internal Server Error: /reagent/inventory/list/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2238, in add_fields
+    join_info = self.setup_joins(
+                ^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1901, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1806, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'unit_measurement' into field. Choices are: batch_number, certificate_quality, date_creation, date_expire, date_updated, density, id, purity, quantity_stock, reagent, reagent_id, solute, solvent, transactionreagent, user_creation, user_creation_id, user_updated, user_updated_id
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/luka/core/reagent/views/inventory_reagent/views.py", line 83, in post
+    inventory_reagents = list(InventoryReagent.objects.select_related('reagent').values(
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 1368, in values
+    clone = self._values(*fields, **expressions)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/query.py", line 1363, in _values
+    clone.query.set_values(fields)
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2577, in set_values
+    self.add_fields(field_names, True)
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2279, in add_fields
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'unit_measurement' into field. Choices are: batch_number, certificate_quality, date_creation, date_expire, date_updated, density, id, purity, quantity_stock, reagent, reagent_id, solute, solvent, transactionreagent, user_creation, user_creation_id, user_updated, user_updated_id
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/utils/decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/reagent/views/inventory_reagent/views.py", line 75, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_luka/lib/python3.11/site-packages/django/views/generic/base.py", line 144, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/reagent/views/inventory_reagent/views.py", line 100, in post
+    data['error'] = str(e)
+    ~~~~^^^^^^^^^
+TypeError: list indices must be integers or slices, not str
+ERROR 2025-10-22 15:52:40,811 basehttp 15687 131053276624576 "POST /reagent/inventory/list/ HTTP/1.1" 500 158044
+WARNING 2025-10-22 20:06:25,670 log 6172 134791768827584 Not Found: /favicon.ico
+WARNING 2025-10-22 20:06:25,670 basehttp 6172 134791768827584 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-10-22 20:06:58,155 log 6172 134791768827584 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 20:06:58,155 basehttp 6172 134791768827584 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 20:14:52,846 log 7411 127485316429504 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 20:14:52,846 basehttp 7411 127485316429504 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 20:19:23,210 log 7704 131109092325056 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 20:19:23,211 basehttp 7704 131109092325056 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 20:26:11,204 log 8424 137112535955136 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 20:26:11,205 basehttp 8424 137112535955136 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 20:26:11,896 log 8424 137112535955136 Not Found: /favicon.ico
+WARNING 2025-10-22 20:26:11,896 basehttp 8424 137112535955136 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-10-22 20:26:25,491 log 8424 137112749856448 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 20:26:25,492 basehttp 8424 137112749856448 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 20:26:26,088 log 8424 137112749856448 Not Found: /favicon.ico
+WARNING 2025-10-22 20:26:26,089 basehttp 8424 137112749856448 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-10-22 20:26:36,159 log 8424 137112749856448 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 20:26:36,160 basehttp 8424 137112749856448 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 20:27:11,867 log 8424 137112749856448 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 20:27:11,868 basehttp 8424 137112749856448 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 20:30:39,929 log 8739 128278991992512 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 20:30:39,929 basehttp 8739 128278991992512 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 20:30:41,600 log 8739 128278991992512 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 20:30:41,600 basehttp 8739 128278991992512 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 20:31:49,392 log 8739 128278991992512 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 20:31:49,392 basehttp 8739 128278991992512 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 20:32:44,124 log 9189 140033717696192 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 20:32:44,125 basehttp 9189 140033717696192 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 20:32:45,926 log 9189 140033717696192 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 20:32:45,927 basehttp 9189 140033717696192 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 20:32:47,714 log 9189 140033717696192 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 20:32:47,715 basehttp 9189 140033717696192 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 20:34:38,367 log 9430 133389732542144 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 20:34:38,368 basehttp 9430 133389732542144 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 20:34:56,252 log 9497 124776135784128 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 20:34:56,253 basehttp 9497 124776135784128 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 20:34:59,996 log 9497 124776135784128 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 20:34:59,997 basehttp 9497 124776135784128 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 20:49:35,635 log 10681 125571598108352 Not Found: /favicon.ico
+WARNING 2025-10-22 20:49:35,635 basehttp 10681 125571598108352 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-10-22 20:59:05,693 log 11133 123581639947968 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 20:59:05,693 basehttp 11133 123581639947968 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 21:00:27,460 log 11584 140091289761472 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 21:00:27,461 basehttp 11584 140091289761472 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 21:05:13,519 log 12414 132558782199488 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 21:05:13,519 basehttp 12414 132558782199488 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 21:10:02,371 log 13034 125932423608000 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 21:10:02,371 basehttp 13034 125932423608000 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 21:19:17,450 log 14011 124953454171840 Not Found: /favicon.ico
+WARNING 2025-10-22 21:19:17,451 basehttp 14011 124953454171840 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-10-22 21:39:55,383 log 14939 133626960275136 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 21:39:55,384 basehttp 14939 133626960275136 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 21:40:18,654 log 14939 133626960275136 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 21:40:18,654 basehttp 14939 133626960275136 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 21:54:22,944 log 16516 131699964901056 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 21:54:22,945 basehttp 16516 131699964901056 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 21:56:40,296 log 16516 131699964901056 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 21:56:40,296 basehttp 16516 131699964901056 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 21:56:55,100 log 16516 131699964901056 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 21:56:55,100 basehttp 16516 131699964901056 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 22:25:27,395 log 17524 123444169537216 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 22:25:27,395 basehttp 17524 123444169537216 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 22:26:25,390 log 17524 123444169537216 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 22:26:25,391 basehttp 17524 123444169537216 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 22:27:26,156 log 17524 123444169537216 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 22:27:26,157 basehttp 17524 123444169537216 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 22:55:40,663 log 22459 137811713840832 Not Found: /favicon.ico
+WARNING 2025-10-22 22:55:40,664 basehttp 22459 137811713840832 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-10-22 22:55:45,363 log 22459 137811713840832 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 22:55:45,363 basehttp 22459 137811713840832 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 22:59:14,271 log 22459 137811705448128 Not Found: /favicon.ico
+WARNING 2025-10-22 22:59:14,271 basehttp 22459 137811705448128 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-10-22 22:59:39,235 log 22459 137811697055424 Not Found: /favicon.ico
+WARNING 2025-10-22 22:59:39,235 basehttp 22459 137811697055424 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-10-22 23:04:01,323 log 22459 137811724330688 Not Found: /favicon.ico
+WARNING 2025-10-22 23:04:01,323 basehttp 22459 137811724330688 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-10-22 23:04:02,365 log 22459 137811688662720 Not Found: /favicon.ico
+WARNING 2025-10-22 23:04:02,365 basehttp 22459 137811688662720 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-10-22 23:05:00,748 log 22459 137811713840832 Not Found: /favicon.ico
+WARNING 2025-10-22 23:05:00,748 basehttp 22459 137811713840832 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-10-22 23:07:16,698 log 22459 137811697055424 Not Found: /favicon.ico
+WARNING 2025-10-22 23:07:16,699 basehttp 22459 137811697055424 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-10-22 23:07:24,113 log 22459 137811705448128 Not Found: /favicon.ico
+WARNING 2025-10-22 23:07:24,113 basehttp 22459 137811705448128 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-10-22 23:08:04,360 log 25200 133584153212608 Not Found: /favicon.ico
+WARNING 2025-10-22 23:08:04,361 basehttp 25200 133584153212608 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-10-22 23:08:08,211 log 25200 133584153212608 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 23:08:08,212 basehttp 25200 133584153212608 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 23:09:01,491 log 25381 135071803635392 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 23:09:01,491 basehttp 25381 135071803635392 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 23:09:18,875 log 25448 126678248453824 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 23:09:18,875 basehttp 25448 126678248453824 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 23:09:22,133 log 25448 126678248453824 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 23:09:22,133 basehttp 25448 126678248453824 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 23:09:22,716 log 25448 126678206490304 Not Found: /favicon.ico
+WARNING 2025-10-22 23:09:22,716 basehttp 25448 126678206490304 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-10-22 23:10:37,917 log 25448 126678206490304 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 23:10:37,917 basehttp 25448 126678206490304 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 23:11:15,686 log 25448 126678206490304 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-22 23:11:15,687 basehttp 25448 126678206490304 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-10-22 23:11:16,330 log 25448 126678248453824 Not Found: /favicon.ico
+WARNING 2025-10-22 23:11:16,331 basehttp 25448 126678248453824 "GET /favicon.ico HTTP/1.1" 404 3601

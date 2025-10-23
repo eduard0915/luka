@@ -5,7 +5,6 @@ from core.user.models import Training
 def extras_processor(request):
     """
     Context processor that adds company information to the context of all templates.
-    
     Returns:
         dict: A dictionary containing company information.
     """

@@ -44,6 +44,7 @@ class SolutionCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cr
                     # Provide redirect URL to detail view for AJAX to use
                     data['redirect_url'] = self.get_success_url()
                 else:
+                    messages.error(request, form.errors)
                     data['error'] = str(form.errors)
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
@@ -124,47 +125,91 @@ class SolutionListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, List
 
 
 # Edición de Soluciones
-# class ReagentUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
-#     model = Reagent
-#     form_class = ReagentForm
-#     template_name = 'reagent/create_reagent.html'
-#     success_url = reverse_lazy('reagent:list_reagent')
-#     permission_required = 'reagent.change_reagent'
-#     url_redirect = success_url
-#
-#     @method_decorator(csrf_exempt)
-#     def dispatch(self, request, *args, **kwargs):
-#         self.object = self.get_object()
-#         return super().dispatch(request, *args, **kwargs)
-#
-#     def post(self, request, *args, **kwargs):
-#         data = {}
-#         try:
-#             action = request.POST['action']
-#             if action == 'edit':
-#                 form = self.get_form()
-#                 if form.is_valid():
-#                     form.save()
-#                     description_reagent = form.cleaned_data.get('description_reagent')
-#                     messages.success(request, f'Reactivo "{description_reagent}" actualizado satisfactoriamente!')
-#                 else:
-#                     messages.error(request, form.errors)
-#                 return redirect(self.get_context_data()['list_url'])
-#             else:
-#                 data['error'] = 'No ha ingresado datos en los campos'
-#         except Exception as e:
-#             data['error'] = str(e)
-#         return JsonResponse(data)
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['title'] = 'Editar de Reactivos'
-#         context['list_url'] = self.success_url
-#         context['entity'] = 'Editar Reactivo'
-#         context['action'] = 'edit'
-#         context['div'] = '10'
-#         context['icon'] = 'fa-solid fa-flask-vial'
-#         return context
+class SolutionUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    model = Solution
+    form_class = SolutionForm
+    template_name = 'update_solution.html'
+    permission_required = 'reagent.change_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'edit':
+                form = self.get_form()
+                if form.is_valid():
+                    self.object = form.save()
+                    code_solution = form.cleaned_data.get('code_solution')
+                    messages.success(request, f'Solución "{code_solution}" editada satisfactoriamente!')
+                else:
+                    messages.error(request, form.errors)
+                return redirect(self.get_context_data()['list_url'])
+            else:
+                data['error'] = 'No ha ingresado datos en los campos'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    # def get_success_url(self):
+    #     return reverse('solution:detail_solution', kwargs={'pk': self.object.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Editar Solución a Preparar'
+        context['entity'] = 'Editar Solución a Preparar'
+        context['action'] = 'edit'
+        context['div'] = '10'
+        context['icon'] = 'fa-solid fa-flask-vial'
+        # Fallback cancel/back link to the solutions list
+        # try:
+        #     context['list_url'] = reverse_lazy('solution:list_solution')
+        # except Exception:
+        #     pass
+        context['list_url'] = reverse_lazy('solution:detail_solution', kwargs={'pk': self.object.pk})
+        return context
+
+
+# Adición de Solvente
+class SolutionAddSolventUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    model = Solution
+    form_class = SolutionAddSolventForm
+    template_name = 'create_solvent.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'edit':
+                form = self.get_form()
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, f'Solvente Añadido satisfactoriamente!')
+                else:
+                    messages.error(request, form.errors)
+            else:
+                data['error'] = 'No ha ingresado datos en los campos'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Adición de Solvente'
+        context['action'] = 'edit'
+        context['class'] = 'col-md-6'
+        context['info_form'] = self.object.solvent_reagent.reagent.description_reagent + ' al ' + str(self.object.solvent_reagent.purity) + self.object.solvent_reagent.reagent.purity_unit
+        return context
 
 
 # Detalle de Soluciones
@@ -195,4 +240,5 @@ class SolutionDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, De
         #     context['back'] = reverse_lazy('user:user_list')
         context['icon'] = 'fa-solid fa-flask-vial'
         context['list_url'] = reverse_lazy('solution:list_solution')
+        context['update_solution'] = reverse_lazy('solution:update_solution', kwargs={'pk': self.object.pk})
         return context

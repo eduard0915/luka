@@ -3,6 +3,9 @@
 
 {% block head_list %}
     <script src="{% static 'list_inventory_reagent.js' %}"></script>
+    <script>
+        let toDay = '{{ today | date:'Y-m-d' }}';
+    </script>
 {% endblock %}
 
 {% block buttons %}

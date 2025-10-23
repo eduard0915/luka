@@ -24,6 +24,7 @@ class Reagent(BaseModel):
     stability_solution = models.PositiveSmallIntegerField(verbose_name='Días Estabilidad en Solución', null=True, blank=True)
     volumetric = models.BooleanField(default=False, verbose_name='Volumétrico')
     solvent = models.BooleanField(default=False, verbose_name='Solvente')
+    density_enable = models.BooleanField(default=False, verbose_name='Densidad')
 
     def __str__(self):
         return str(self.code_reagent) + ' '  + str(self.description_reagent) + ' (' + str(self.umb) + ') - ' + 'Pureza: ' + str(self.purity_unit) + ''

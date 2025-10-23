@@ -30,9 +30,9 @@ class SolutionForm(ModelForm):
             'code_solution': TextInput(attrs={'class': 'form-control', 'readonly': True}),
             'solute_reagent': Select(attrs={'class': 'form-control', 'required': True}),
             'solvent_reagent': Select(attrs={'class': 'form-control', 'required': True}),
-            'concentration': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'concentration': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
             'concentration_unit': Select(attrs={'class': 'form-control', 'required': True}, choices=CONC),
-            'quantity_solution': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'quantity_solution': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
         }
 
     def save(self, commit=True):
@@ -40,13 +40,12 @@ class SolutionForm(ModelForm):
         user = get_current_user()
 
         instance.preparated_by_id = user.id
-        instance.preparation_date = timezone.now()
 
-        if instance.solute_reagent.reagent.stability_solution:
-            instance.expire_date_solution = instance.preparation_date + timedelta(
-                days=instance.solute_reagent.reagent.stability_solution)
-        else:
-            raise ValidationError('El Reactivo no tiene un Días Estabilidad definido')
+        # Validar que los campos necesarios no sean None
+        if not instance.solute_reagent.purity:
+            raise ValidationError('El reactivo seleccionado no tiene pureza definida')
+        if not instance.solute_reagent.density:
+            raise ValidationError('El reactivo seleccionado no tiene densidad definida')
 
         if instance.concentration_unit == '%':
             instance.quantity_reagent = float(instance.quantity_solution * (
@@ -55,10 +54,14 @@ class SolutionForm(ModelForm):
             instance.quantity_reagent = float(instance.quantity_solution * (
                         instance.concentration / 10000 * instance.solute_reagent.purity) * instance.solute_reagent.density)
         elif instance.concentration_unit == 'M':
+            if not instance.solute_reagent.reagent.molecular_weight:
+                raise ValidationError('El reactivo seleccionado no tiene peso molecular definido')
             instance.quantity_reagent = float(instance.quantity_solution * (
                         (instance.concentration * instance.solute_reagent.reagent.molecular_weight) / (
                             10 * instance.solute_reagent.purity)) * instance.solute_reagent.density)
         elif instance.concentration_unit == 'N':
+            if not instance.solute_reagent.reagent.gram_equivalent:
+                raise ValidationError('El reactivo seleccionado no tiene equivalente gramo definido')
             instance.quantity_reagent = float(instance.quantity_solution * (
                         (instance.concentration * instance.solute_reagent.reagent.gram_equivalent) / (
                             10 * instance.solute_reagent.purity)) * instance.solute_reagent.density)
@@ -67,3 +70,36 @@ class SolutionForm(ModelForm):
             instance.save()
 
         return instance
+
+
+# Adición de Solvente
+class SolutionAddSolventForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = Solution
+        fields = ['quantity_solvent']
+        widgets = {'quantity_solvent': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),}
+
+    def save(self, commit=True):
+        data = {}
+        form = super()
+        try:
+            if form.is_valid():
+                data = form.save(commit=False)
+                data.preparation_date = timezone.now()
+
+                if data.solute_reagent.reagent.stability_solution:
+                    data.expire_date_solution = data.preparation_date + timedelta(
+                        days=data.solute_reagent.reagent.stability_solution)
+                else:
+                    raise ValidationError('El Reactivo no tiene un Días Estabilidad definido')
+                data.save()
+            else:
+                data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data

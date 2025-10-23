@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     render: function (data, type, row) {
                         let actions
                         actions = '<a href="/solution/detail/' + row['id'] + '/" type="button" title="Detalle de Preparación"><i class="bi bi-info-square text-info"></i></a> &nbsp';
-                        actions += '<a href="/reagent/update/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a>';
+                        actions += '<a href="/solution/update/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a>';
                         return actions
                     }
                 },
