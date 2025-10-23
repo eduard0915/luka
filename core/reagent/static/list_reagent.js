@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
             responsive: true,
             autoWidth: false,
             destroy: true,
+            order: [[ 0, "desc" ]],
             deferRender: true,
             language: {
                 url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
@@ -26,11 +27,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 {'data': 'site__site_name'},
                 {'data': 'enable_reagent'},
                 {'data': 'technical_sheet'},
+                {'data': 'stability_solution'},
+                {'data': 'volumetric'},
+                {'data': 'solvent'},
+                {'data': 'density_enable'},
                 {'data': 'id'}
             ],
             columnDefs: [
                 {
-                    targets: [0, 1, 2, 3, 4, 5],
+                    targets: [0, 1, 2, 3, 4, 5, 8],
                     class: 'td-actions text-center'
                 },
                 {
@@ -58,7 +63,55 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 {
-                    targets: [8],
+                    targets: [9],
+                    className: 'td-actions text-center',
+                    render: function (data, type, row) {
+                        let estado = null;
+                        switch (row['volumetric']) {
+                            case true:
+                                return 'Si';
+                                break;
+                            case false:
+                                return 'No';
+                                break;
+                        }
+                        return estado;
+                    }
+                },
+                {
+                    targets: [10],
+                    className: 'td-actions text-center',
+                    render: function (data, type, row) {
+                        let estado = null;
+                        switch (row['solvent']) {
+                            case true:
+                                return 'Si';
+                                break;
+                            case false:
+                                return 'No';
+                                break;
+                        }
+                        return estado;
+                    }
+                },
+                {
+                    targets: [11],
+                    className: 'td-actions text-center',
+                    render: function (data, type, row) {
+                        let estado = null;
+                        switch (row['density_enable']) {
+                            case true:
+                                return 'Si';
+                                break;
+                            case false:
+                                return 'No';
+                                break;
+                        }
+                        return estado;
+                    }
+                },
+                {
+                    targets: [12],
                     class: 'td-actions text-center',
                     orderable: false,
                     render: function (data, type, row) {

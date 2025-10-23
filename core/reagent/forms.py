@@ -1,3 +1,4 @@
+from crum import get_current_user
 from django.forms import ModelForm, TextInput, FileInput, Select, DateInput, NumberInput, CheckboxInput
 
 from core.reagent.models import Reagent, TransactionReagent, InventoryReagent
@@ -54,6 +55,8 @@ class ReagentForm(ModelForm):
 class InventoryReagentForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        user = get_current_user()
+        self.fields['reagent'].queryset = Reagent.objects.filter(enable_reagent=True, site_id=user.site.id)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
