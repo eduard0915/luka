@@ -17,9 +17,9 @@ class SolutionForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['solute_reagent'].queryset = InventoryReagent.objects.select_related('reagent').filter(
-            date_expire__gte=timezone.now(), reagent__solvent=False)
+            date_expire__gte=timezone.now(), reagent__solvent=False, quantity_stock__gt=0)
         self.fields['solvent_reagent'].queryset = InventoryReagent.objects.select_related('reagent').filter(
-            date_expire__gte=timezone.now(), reagent__solvent=True)
+            date_expire__gte=timezone.now(), reagent__solvent=True, quantity_stock__gt=0)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 

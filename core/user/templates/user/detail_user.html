@@ -87,8 +87,12 @@
                                 {% endif %}
                             </p>
                         </div>
-                        <div class="col-md-3">
-                            <b>Fecha de Nacimiento</b><br>
+                        <div class="col-md-2">
+                            <b>Planta</b>
+                            <p class="text-danger">{{ object.site }}</p>
+                        </div>
+                        <div class="col-md-2">
+                            <b>Fecha Nacimiento</b><br>
                             <p>
                                 {% if object.date_birth %}
                                     {{ object.date_birth | date:'Y-m-d' }}
@@ -98,7 +102,7 @@
                             </p>
                         </div>
                         {% if perms.user.add_user %}
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <b>Ultima Sesión</b><br>
                                 <p>
                                     {% if object.last_login %}
@@ -190,7 +194,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-9">
             <div class="tile">
                 <div class="tile-title-w-btn">
                     <h3 class="title">Competencias</h3>
@@ -208,6 +212,7 @@
                             <th>Descripción</th>
                             <th>Ver</th>
                             <th>Institución</th>
+                            <th>Fecha</th>
                             <th>Acciones</th>
                         </tr>
                         </thead>
@@ -222,6 +227,7 @@
                                     </a>
                                 </td>
                                 <td>{{ cp.institution }}</td>
+                                <td>{{ cp.date_competence | date:'Y-m-d' }}</td>
                                 <td>
                                     <a onclick="open_modal('{% url 'user:update_competence' cp.id %}')"
                                        title="Editar">
