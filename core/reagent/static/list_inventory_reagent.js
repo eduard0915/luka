@@ -28,15 +28,22 @@ document.addEventListener('DOMContentLoaded', function () {
             ],
             columnDefs: [
                 {
-                    targets: [0, 1, 2, 3, 5],
+                    targets: [0, 1, 3, 5],
                     class: 'td-actions text-center'
+                },
+                {
+                    targets: [2],
+                    className: 'td-actions text-center',
+                    render: function (data, type, row) {
+                        return row['purity'] + ' ' + row['reagent__purity_unit'];
+                    }
                 },
                 {
                     targets: [4],
                     className: 'td-actions text-center',
                     orderable: false,
                     render: function (data, type, row) {
-                        return '<a title="Descargar Certificado de Calidad" target="_blank" class="bi bi-file-earmark-pdf text-danger" href="transaction_reagent/coa/?id=' + row.id + '&type=certificate_quality">';
+                        return '<a title="Descargar Certificado de Calidad" target="_blank" class="bi bi-file-earmark-pdf text-danger" href="transaction_reagent/coa/?id=' + row.id + '&type=certificate_quality"></a>';
                     }
                 },
                 {
@@ -60,8 +67,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
             ],
+            "createdRow": function (row, data, dataIndex) {
+                if (data.date_expire < toDay) {
+                    $('td:eq(5)', row).css('background-color', '#FF0000').css('color', 'white').css('width', '10%');
+                }
+            },
             initComplete: function (settings, json) {
-            }
+            },
         });
     } else {
         console.error("jQuery ($ variable) no está definido. Verifica que jQuery se haya cargado correctamente.");

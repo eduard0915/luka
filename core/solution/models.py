@@ -9,8 +9,8 @@ from core.reagent.models import Reagent, InventoryReagent
 from core.user.models import User
 
 
+# Generador de códigos de soluciones
 def code_solution_generator():
-    # year = date.today().strftime('%Y')
     today = timezone.now().strftime('%Y%m%d')
     last_sln = Solution.objects.order_by('date_creation').last()
     if not last_sln or last_sln.date_creation.strftime('%Y%m%d') != timezone.now().strftime('%Y%m%d'):
@@ -30,8 +30,8 @@ class Solution(BaseModel):
     code_solution = models.CharField(max_length=20, verbose_name='Código', default=code_solution_generator)
     concentration = models.FloatField(verbose_name='Concentración')
     concentration_unit = models.CharField(max_length=4, verbose_name='Unidad Conc.')
-    preparation_date = models.DateField(verbose_name='Fecha de Preparación')
-    expire_date_solution = models.DateField(verbose_name='Fecha de Vencimiento')
+    preparation_date = models.DateField(verbose_name='Fecha de Preparación', null=True, blank=True)
+    expire_date_solution = models.DateField(verbose_name='Fecha de Vencimiento', null=True, blank=True)
     quantity_solution = models.FloatField(verbose_name='Cant. a Preparar (mL)')
     quantity_reagent = models.FloatField(verbose_name='Cant. Reactivo (mL)')
     quantity_solvent = models.FloatField(verbose_name='Solvente (mL)', null=True, blank=True)
@@ -48,13 +48,15 @@ class Solution(BaseModel):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
         user = get_current_user()
 
-        significant_figures = self.solute_reagent.reagent.site.company.sig_figs_solution
-        print(significant_figures)
+        significant_figures = None
+        if (self.solute_reagent and self.solute_reagent.reagent and
+            self.solute_reagent.reagent.site and self.solute_reagent.reagent.site.company):
+            significant_figures = self.solute_reagent.reagent.site.company.sig_figs_solution
 
-        if self.quantity_reagent:
+        if self.quantity_reagent and significant_figures is not None:
             self.quantity_reagent = round(self.quantity_reagent, significant_figures)
 
-        if self.quantity_solvent:
+        if self.quantity_solvent and significant_figures is not None:
             self.quantity_solvent = round(self.quantity_solvent, significant_figures)
 
         if user:

@@ -22,10 +22,10 @@
 {% endblock %}
 
 {% block content %}
-         <div class="row">
-            <div class="col-md-10">
-    <div class="tile">
-                <div class="tile-title-w-btn">
+    <div class="row">
+        <div class="col-md-11">
+            <div class="tile">
+                <div class="tile-title">
                     <h3 class="title">
                         Solución {{ object.solute_reagent.reagent.description_reagent }} {{ object.concentration | unlocalize }}
                         {{ object.concentration_unit }} <span class="m-4">{{ object.code_solution }}</span>
@@ -33,15 +33,15 @@
                 </div>
                 <div class="tile-body">
                     <div class="row">
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <b>Cantidad a Preparar </b><br>
                             <p>{{ object.quantity_solution | intcomma:False }} mL</p>
                         </div>
-                        <div class="col-md-3">
-                            <b>Concentración Deseada </b><br>
+                        <div class="col-md-2">
+                            <b>Concentración</b><br>
                             <p>{{ object.concentration | unlocalize }} {{ object.concentration_unit }}</p>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <b>Reactivo </b><br>
                             <p>{{ object.quantity_reagent | unlocalize }}
                                 {{ object.solute_reagent.reagent.umb }}
@@ -50,17 +50,60 @@
                                 N°: {{ object.solute_reagent.batch_number }}
                             </p>
                         </div>
+                        <div class="col-md-4">
+                            <b>Solvente</b><br>
+                            <p>
+                                {{ object.solvent_reagent.reagent.description_reagent }}
+                                {% if not object.solvent_reagent.purity == 100 %}
+                                    {{ object.solvent_reagent.purity }}{{ object.solvent_reagent.reagent.purity_unit }},
+                                {% endif %}
+                                Lote N°: {{ object.solvent_reagent.batch_number }}
+                                {% if object.quantity_solvent %}
+                                    {{ object.quantity_solvent | unlocalize }} {{ object.solvent_reagent.reagent.umb }}
+                                {% endif %}
+                            </p>
+                        </div>
                     </div>
-                    <div class="tile-footer">
-                        <button type="submit" class="btn btn-primary me-2">
-                            <i class="fa fa-fw fa-lg fa-check-circle me-2"></i> Cantidad de Solvente
-                        </button>
-                        {% if list_url %}
-                            <a href="{{ list_url }}" class="btn btn-secondary">
-                                <i class="fa fa-fw fa-lg fa-list me-2"></i>Soluciones
-                            </a>
+                    {% if object.quantity_solvent %}
+                        <div class="row mt-1">
+                            <div class="col-md-4">
+                                <b>Preparado por </b><br>
+                                <p>{{ object.preparated_by }}</p>
+                            </div>
+                            <div class="col-md-3">
+                                <b>Fecha de Preparación</b><br>
+                                <p>{{ object.preparation_date | date:'Y-m-d' }}</p>
+                            </div>
+                            <div class="col-md-3">
+                                <b>Vencimiento</b><br>
+                                <p>{{ object.expire_date_solution | date:'Y-m-d' }}</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="tile-footer">
+                    {% if not object.quantity_solvent %}
+                        {% if object.quantity_reagent < object.solute_reagent.quantity_stock %}
+                            <button onclick="open_modal('{% url 'solution:add_solvent_solution' object.id %}')"
+                                    class="btn btn-primary me-2">
+                                <i class="bi bi-moisture me-2"></i> Añadir de Solvente
+                            </button>
+                        {% else %}
+                                <p class="text-danger p-2">Cantidad de Reactivo requerida mayor que la
+                                    disponible {{ object.solute_reagent.quantity_stock | unlocalize }} {{ object.solute_reagent.reagent.umb }}</p>
                         {% endif %}
-                    </div>
+                        <a href="{{ update_solution }}" type="button" class="btn btn-warning me-2">
+                            <i class="fa fa-fw fa-lg fa-pencil me-2"></i> Editar
+                        </a>
+                    {% endif %}
+                    <a href="#" type="button" class="btn btn-danger me-2">
+                        <i class="fa fa-fw fa-lg fa-ticket me-2"></i> Etiqueta
+                    </a>
+                    {% if list_url %}
+                        <a href="{{ list_url }}" class="btn btn-secondary">
+                            <i class="fa fa-fw fa-lg fa-list me-2"></i>Soluciones
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>

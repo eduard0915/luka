@@ -291,40 +291,6 @@
             console.error('Error al inicializar DataTable:', error);
         }
 
-        // Handle form submission in modal using vanilla JavaScript
-        {#document.addEventListener('submit', function (e) {#}
-        {#    // Check if the form is inside a modal#}
-        {#    if (e.target.closest('.modal') && e.target.tagName === 'FORM') {#}
-        {#        e.preventDefault();#}
-        {#        var form = e.target;#}
-        {#        var url = form.getAttribute('action');#}
-        {#        var data = new FormData(form);#}
-        {##}
-        {#        // Use fetch API instead of $.ajax#}
-        {#        fetch(url, {#}
-        {#            method: 'POST',#}
-        {#            body: data#}
-        {#        })#}
-        {#            .then(response => response.json())#}
-        {#            .then(response => {#}
-        {#                if (!response.hasOwnProperty('error')) {#}
-        {#                    // Close modal using Bootstrap 5 syntax#}
-        {#                    var modalElement = document.getElementById('modal_template');#}
-        {#                    var modalInstance = bootstrap.Modal.getInstance(modalElement);#}
-        {#                    modalInstance.hide();#}
-        {#                    // Reload page to show new data#}
-        {#                    location.reload();#}
-        {#                } else {#}
-        {#                    // Show error message#}
-        {#                    alert(response.error);#}
-        {#                }#}
-        {#            })#}
-        {#            .catch(error => {#}
-        {#                console.error('Error:', error);#}
-        {#                alert('Error en el envío del formulario');#}
-        {#            });#}
-        {#    }#}
-        {# });#}
     </script>
 
 {% endblock %}

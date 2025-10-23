@@ -9,6 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -84,11 +85,11 @@ class InventoryReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMix
                     'id',
                     'reagent__description_reagent',
                     'reagent__code_reagent',
+                    'reagent__purity_unit',
                     'reagent__umb',
                     'batch_number',
                     'date_expire',
                     'quantity_stock',
-                    'unit_measurement',
                     'date_creation',
                     'purity',
                     'certificate_quality'
@@ -107,6 +108,7 @@ class InventoryReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMix
         context['entity'] = 'Inventario de Reactivos'
         context['div'] = '11'
         context['icon'] = 'fa-solid fa-vial-virus'
+        context['today'] = timezone.now()
         return context
 
 

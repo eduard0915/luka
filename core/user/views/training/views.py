@@ -55,8 +55,6 @@ class TrainingCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cr
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Registro de Capacitación'
-        # user = User.objects.get(slug=self.kwargs.get('pk'))
-        # context['user'] = user
         return context
 
 
@@ -100,8 +98,6 @@ class TrainingCreateUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMix
         context['action'] = 'add'
         context['entity'] = 'Registro de Actualización de Capacitación'
         context['info_form'] = str(training)
-        # user = User.objects.get(slug=self.kwargs.get('pk'))
-        # context['user'] = user
         return context
 
 
@@ -128,7 +124,6 @@ class TrainingUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Up
                     messages.success(request, f'Capacitación editada satisfactoriamente!')
                 else:
                     messages.error(request, form.errors)
-                # return redirect(self.get_context_data()['list_url'])
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
