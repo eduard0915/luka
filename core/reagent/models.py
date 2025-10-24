@@ -51,8 +51,9 @@ class InventoryReagent(BaseModel):
     batch_number = models.CharField(max_length=50, verbose_name='N° Lote')
     date_expire = models.DateField(verbose_name='Fecha de Vencimiento', null=True, blank=True)
     quantity_stock = models.FloatField(verbose_name='Cantidad')
-    purity = models.PositiveSmallIntegerField(verbose_name='Pureza')
-    certificate_quality = models.FileField(upload_to='certificate_quality/%Y%m%d', verbose_name='Certificado de Calidad')
+    purity = models.FloatField(verbose_name='Pureza')
+    certificate_quality = models.FileField(
+        upload_to='certificate_quality/%Y%m%d', verbose_name='Certificado de Calidad', null=True, blank=True)
     density = models.FloatField(verbose_name='Densidad (g/mL)', default=1)
 
     def __str__(self):
@@ -79,7 +80,6 @@ class InventoryReagent(BaseModel):
 class TransactionReagent(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     reagent_inventory = models.ForeignKey(InventoryReagent, verbose_name='Reactivo', on_delete=models.CASCADE)
-    # reagent_solution = models.ForeignKey(InventoryReagent, verbose_name='Solución', on_delete=models.CASCADE, null=True, blank=True)
     date_transaction = models.DateField(verbose_name='Fecha')
     type_transaction = models.CharField(max_length=50, verbose_name='Tipo de Registro')
     detail_transaction = models.CharField(max_length=250, verbose_name='Detalle de Registro')

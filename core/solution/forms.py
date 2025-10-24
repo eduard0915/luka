@@ -55,13 +55,13 @@ class SolutionForm(ModelForm):
                         instance.concentration / 10000 * instance.solute_reagent.purity) * instance.solute_reagent.density)
         elif instance.concentration_unit == 'M':
             if not instance.solute_reagent.reagent.molecular_weight:
-                raise ValidationError('El reactivo seleccionado no tiene peso molecular definido')
+                raise ValidationError('El reactivo seleccionado no tiene peso molecular registrado')
             instance.quantity_reagent = float(instance.quantity_solution * (
                         (instance.concentration * instance.solute_reagent.reagent.molecular_weight) / (
                             10 * instance.solute_reagent.purity)) * instance.solute_reagent.density)
         elif instance.concentration_unit == 'N':
             if not instance.solute_reagent.reagent.gram_equivalent:
-                raise ValidationError('El reactivo seleccionado no tiene equivalente gramo definido')
+                raise ValidationError('El reactivo seleccionado no tiene equivalente gramo registrado')
             instance.quantity_reagent = float(instance.quantity_solution * (
                         (instance.concentration * instance.solute_reagent.reagent.gram_equivalent) / (
                             10 * instance.solute_reagent.purity)) * instance.solute_reagent.density)

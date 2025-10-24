@@ -16,7 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 
 from core.mixins import ValidatePermissionRequiredMixin
-from core.reagent.forms import InventoryReagentForm, InventoryReagentUpdateForm
+from core.reagent.forms import InventoryReagentForm
 from core.reagent.models import InventoryReagent
 
 
@@ -26,7 +26,7 @@ class InventoryReagentCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
     form_class = InventoryReagentForm
     template_name = 'inventory_reagent/create_inventory_reagent.html'
     success_url = reverse_lazy('reagent:list_inventory_reagent')
-    permission_required = 'reagent.add_inventoryreagent'
+    permission_required = 'reagent.add_reagent'
     url_redirect = success_url
 
     @method_decorator(csrf_exempt)
@@ -86,13 +86,15 @@ class InventoryReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMix
                     'reagent__description_reagent',
                     'reagent__code_reagent',
                     'reagent__purity_unit',
+                    'reagent__density_enable',
                     'reagent__umb',
                     'batch_number',
                     'date_expire',
                     'quantity_stock',
                     'date_creation',
                     'purity',
-                    'certificate_quality'
+                    'certificate_quality',
+                    'density'
                 ).order_by('-date_creation'))
                 return JsonResponse(inventory_reagents, safe=False)
             else:
@@ -106,7 +108,7 @@ class InventoryReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMix
         context['title'] = 'Inventario de Reactivos'
         context['create_url'] = reverse_lazy('reagent:register_inventory_reagent')
         context['entity'] = 'Inventario de Reactivos'
-        context['div'] = '11'
+        context['div'] = '12'
         context['icon'] = 'fa-solid fa-vial-virus'
         context['today'] = timezone.now()
         return context
@@ -115,7 +117,7 @@ class InventoryReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMix
 # Edición de Registro de Entrada Inventario de Reactivo
 class InventoryReagentUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
     model = InventoryReagent
-    form_class = InventoryReagentUpdateForm
+    form_class = InventoryReagentForm
     template_name = 'inventory_reagent/create_inventory_reagent.html'
     success_url = reverse_lazy('reagent:list_inventory_reagent')
     permission_required = 'reagent.change_inventoryreagent'

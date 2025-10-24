@@ -5,13 +5,19 @@
     <!-- Navbar Right Menu-->
     <ul class="app-nav">
 
+        <li class="dropdown-item-text mt-3">
+            <span class="text-white">Planta: {{ request.user.site }}</span>
+        </li>
+
         <!--Notification Menu-->
-        <li class="dropdown"><a class="app-nav__item" href="#" data-bs-toggle="dropdown"
-                                aria-label="Show notifications"><i class="bi bi-bell fs-5"></i>
-            {% if count_total_alarm > 0 %}
-                <span class="badge bg-danger" title="Tienes {{ count_total_alarm }} nuevas notificaciones">{{ count_total_alarm }}</span>
-            {% endif %}
-        </a>
+        <li class="dropdown">
+            <a class="app-nav__item" href="#" data-bs-toggle="dropdown" aria-label="Show notifications"><i class="bi bi-bell fs-5"></i>
+                {% if count_total_alarm > 0 %}
+                    <span class="badge bg-danger" title="Tienes {{ count_total_alarm }} nuevas notificaciones">
+                        {{ count_total_alarm }}
+                    </span>
+                {% endif %}
+            </a>
             <ul class="app-notification dropdown-menu dropdown-menu-right">
                 {% if count_total_alarm > 0 %}
                 <li class="app-notification__title">Tienes {{ count_total_alarm }} nuevas notificaciones.</li>

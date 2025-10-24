@@ -1,3 +1,4 @@
+import os
 from urllib.request import urlopen
 
 import boto3
@@ -6,17 +7,21 @@ from botocore.exceptions import ClientError
 from decouple import config
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
+from django.template.loader import get_template
 from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, ListView, UpdateView, DetailView
+from xhtml2pdf import pisa
 
+from core.company.models import Company
 from core.mixins import ValidatePermissionRequiredMixin
 from core.solution.forms import *
 from core.solution.models import Solution
+from luka import settings
 
 
 # Creación de Soluciones
@@ -155,9 +160,6 @@ class SolutionUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Up
             data['error'] = str(e)
         return JsonResponse(data)
 
-    # def get_success_url(self):
-    #     return reverse('solution:detail_solution', kwargs={'pk': self.object.pk})
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Editar Solución a Preparar'
@@ -165,11 +167,6 @@ class SolutionUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Up
         context['action'] = 'edit'
         context['div'] = '10'
         context['icon'] = 'fa-solid fa-flask-vial'
-        # Fallback cancel/back link to the solutions list
-        # try:
-        #     context['list_url'] = reverse_lazy('solution:list_solution')
-        # except Exception:
-        #     pass
         context['list_url'] = reverse_lazy('solution:detail_solution', kwargs={'pk': self.object.pk})
         return context
 
@@ -233,12 +230,59 @@ class SolutionDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, De
         context = super().get_context_data(**kwargs)
         context['title'] = 'Preparación de Solución'
         context['entity'] = 'Preparación de Solución'
-        # context['group_user'] = User.objects.values('groups__name').filter(slug=self.kwargs['slug'])
-        # context['training'] = Training.objects.filter(user__slug=self.kwargs['slug']).order_by('-date_training')
-        # context['competence'] = Competence.objects.filter(user__slug=self.kwargs['slug']).order_by('-date_competence')
+        context['label_url'] = reverse_lazy('solution:solution_label_pdf', kwargs={'pk': self.object.pk})
         # if self.request.user.has_perm('user.add_user'):
         #     context['back'] = reverse_lazy('user:user_list')
         context['icon'] = 'fa-solid fa-flask-vial'
         context['list_url'] = reverse_lazy('solution:list_solution')
         context['update_solution'] = reverse_lazy('solution:update_solution', kwargs={'pk': self.object.pk})
         return context
+
+
+# Etiqueta de Identificación de Solución
+class SolutionLabelPDFDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    permission_required = 'reagent.add_reagent'
+
+    @staticmethod
+    def link_callback(uri, rel):
+
+        # use short variable names
+        sUrl = settings.STATIC_URL  # Typically /static/
+        sRoot = settings.STATIC_ROOT  # Typically /home/userX/project_static/
+        mUrl = settings.MEDIA_URL  # Typically /static/media/
+
+        # convert URIs to absolute system paths
+        if uri.startswith(mUrl):
+            return uri
+        elif uri.startswith(sUrl):
+            path = os.path.join(sRoot, uri.replace(sUrl, ""))
+            if not os.path.isfile(path):
+                raise Exception(
+                    'Logo provided do not exists on path given: %s' % path
+                )
+            return path
+
+    def get(self, request, *args, **kwargs):
+        try:
+            template = get_template('label_solution.html')
+            sln = Solution.objects.get(pk=self.kwargs['pk'])
+            context = {
+                'sln': Solution.objects.get(pk=self.kwargs['pk']),
+                'company': Company.objects.first(),
+                'title': 'Etiqueta Sln: ' + sln.code_solution,
+                # 'page_size': '101.6mm 101.6mm',
+                'page_size': '101.6mm 50.8mm',
+            }
+            html = template.render(context)
+            response = HttpResponse(content_type='application/pdf')
+            pisa.CreatePDF(
+                html, dest=response,
+                link_callback=self.link_callback
+            )
+            return response
+        except ValueError as error:
+            print(f'Tiene un valor errado: {error}')
+        except TypeError as error:
+            print(f'Tiene un error de tipo: {error}')
+            pass
+        return HttpResponseRedirect(reverse_lazy('solution:list_solution'))
