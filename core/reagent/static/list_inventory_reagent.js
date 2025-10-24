@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
             responsive: true,
             autoWidth: false,
             destroy: true,
+            order: [[ 0, "desc" ]],
             deferRender: true,
             language: {
                 url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
@@ -55,6 +56,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 {
                     targets: [7],
+                    className: 'td-actions text-center',
+                    render: function (data, type, row) {
+                        let estado = null;
+                        switch (row['reagent__density_enable']) {
+                            case true:
+                                return row['density'];
+                                break;
+                            case false:
+                                return 'NA';
+                                break;
+                        }
+                        return estado;
+                    }
+                },
+                {
+                    targets: [8],
                     class: 'td-actions text-center',
                     orderable: false,
                     render: function (data, type, row) {

@@ -62,13 +62,14 @@ class InventoryReagentForm(ModelForm):
 
     class Meta:
         model = InventoryReagent
-        fields = ['reagent', 'quantity_stock', 'batch_number', 'date_expire', 'purity', 'certificate_quality']
+        fields = ['reagent', 'quantity_stock', 'batch_number', 'date_expire', 'purity', 'certificate_quality', 'density']
         widgets = {
             'quantity_stock': TextInput(attrs={'class': 'form-control', 'required': True}),
             'purity': TextInput(attrs={'class': 'form-control', 'required': True}),
             'certificate_quality': FileInput(attrs={'class': 'form-control', 'required': True}),
             'reagent': Select(attrs={'class': 'form-control', 'required': True}),
             'batch_number': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'density': TextInput(attrs={'class': 'form-control', 'required': True}),
             'date_expire': DateInput(attrs={'class': 'form-control', 'required': True, 'type': 'text', 'data-datepicker': '1', 'placeholder': 'yyyy-mm-dd'}),
         }
 
@@ -77,8 +78,7 @@ class InventoryReagentForm(ModelForm):
         form = super()
         try:
             if form.is_valid():
-                data = form.save(commit=False)
-                data.save()
+                data = form.save()
             else:
                 data['error'] = form.errors
         except Exception as e:
@@ -87,34 +87,33 @@ class InventoryReagentForm(ModelForm):
 
 
 # Edición de Registro de Entrada Inventario de Reactivo
-class InventoryReagentUpdateForm(ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for form in self.visible_fields():
-            form.field.widget.attrs['autocomplete'] = 'off'
-
-    class Meta:
-        model = InventoryReagent
-        fields = ['reagent', 'quantity_stock','batch_number', 'date_expire']
-        widgets = {
-            'reagent': Select(attrs={'class': 'form-control', 'required': True}),
-            'quantity_stock': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'batch_number': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'date_expire': DateInput(attrs={'class': 'form-control', 'required': True, 'type': 'text', 'data-datepicker': '1', 'placeholder': 'yyyy-mm-dd'}),
-        }
-
-    def save(self, commit=True):
-        data = {}
-        form = super()
-        try:
-            if form.is_valid():
-                data = form.save(commit=False)
-                data.save()
-            else:
-                data['error'] = form.errors
-        except Exception as e:
-            data['error'] = str(e)
-        return data
+# class InventoryReagentUpdateForm(ModelForm):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         for form in self.visible_fields():
+#             form.field.widget.attrs['autocomplete'] = 'off'
+#
+#     class Meta:
+#         model = InventoryReagent
+#         fields = ['reagent', 'quantity_stock','batch_number', 'date_expire']
+#         widgets = {
+#             'reagent': Select(attrs={'class': 'form-control', 'required': True}),
+#             'quantity_stock': TextInput(attrs={'class': 'form-control', 'required': True}),
+#             'batch_number': TextInput(attrs={'class': 'form-control', 'required': True}),
+#             'date_expire': DateInput(attrs={'class': 'form-control', 'required': True, 'type': 'text', 'data-datepicker': '1', 'placeholder': 'yyyy-mm-dd'}),
+#         }
+#
+#     def save(self, commit=True):
+#         data = {}
+#         form = super()
+#         try:
+#             if form.is_valid():
+#                 data = form.save()
+#             else:
+#                 data['error'] = form.errors
+#         except Exception as e:
+#             data['error'] = str(e)
+#         return data
 
 
 # Creación Transacción de Reactivo

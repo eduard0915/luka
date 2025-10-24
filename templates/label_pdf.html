@@ -1,0 +1,131 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ES">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<title>{{ title }}</title>
+<style>
+
+    @page {
+        size: {{ page_size }};
+        margin: 2mm 2mm 0;
+
+        {#@frame footer_frame {#}
+        {#    -pdf-frame-content:footer_content;#}
+        {#    bottom: 0.5cm;#}
+        {#    margin-left: 1.5cm;#}
+        {#    margin-bottom: 0;#}
+        {#    height: 0.5cm;#}
+        {# };#}
+        {#@frame footer_frame {#}
+        {#    -pdf-frame-content:footer_content_two;#}
+        {#    bottom: 0.5cm;#}
+        {#    margin-left: 24cm;#}
+        {#    margin-bottom: 0;#}
+        {#    height: 0.5cm;#}
+        {# };#}
+    }
+
+    td {
+        padding: 4px 7px 0;
+        vertical-align: middle;
+        text-align: left;
+        font-size: 10pt;
+    }
+
+    th {
+        padding-left: 7px;
+        padding-top: 7px;
+        vertical-align: bottom;
+        text-align: justify;
+        font-size: 10pt;
+        width: 50%;
+    }
+
+    .logo-cell {
+        width: 20px;
+    }
+
+    .logo-cell-label {
+        width: 130px;
+    }
+
+    .card {
+        font-size: 8pt;
+        padding-top: 10px;
+    }
+
+    .table td {
+        border: black 0.1px solid;
+        max-height: 65px;
+        vertical-align: middle;
+        text-align: center;
+        font-size: 10pt;
+        padding-top: 4px;
+        padding-bottom: 0;
+    }
+
+    .tabContent tr {
+        border: black 0.1px solid;
+        {#border: 0.05px solid #ABB2B9;#}
+    }
+
+    .tabContent td {
+        font-size: 8pt;
+        padding-bottom: 0;
+        margin-bottom: 0;
+    }
+
+    .tabContent th {
+        font-size: 8pt;
+        vertical-align: center;
+        padding-bottom: 0;
+        margin-bottom: 0;
+    }
+
+    .plans th {
+        border: 0.1px solid black;
+        text-align: center;
+        font-size: 8pt;
+        padding-top: 4px;
+        padding-left: 2px;
+        border-top: none;
+        border-bottom: none;
+    }
+
+    .plans td {
+        border: 0.1px solid black;
+        vertical-align: middle;
+        font-size: 8pt;
+        border-top: none;
+    }
+
+    .plans tr {
+        border-bottom: 0.1px solid black;
+        border-top: none;
+     }
+
+    .footer-label {
+        font-size: 5px;
+        margin-top: 2px;
+    }
+
+    .qr-cell-label {
+        width: 55px;
+        text-align: center;
+    }
+
+</style>
+<body>
+
+{% block content_pdf %}
+
+
+{% endblock %}
+
+{% block footer_pdf %}
+
+{% endblock %}
+
+</body>
+
+</html>

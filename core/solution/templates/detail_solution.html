@@ -53,14 +53,14 @@
                         <div class="col-md-4">
                             <b>Solvente</b><br>
                             <p>
+                                {% if object.quantity_solvent %}
+                                    {{ object.quantity_solvent | unlocalize }} {{ object.solvent_reagent.reagent.umb }} de
+                                {% endif %}
                                 {{ object.solvent_reagent.reagent.description_reagent }}
                                 {% if not object.solvent_reagent.purity == 100 %}
                                     {{ object.solvent_reagent.purity }}{{ object.solvent_reagent.reagent.purity_unit }},
                                 {% endif %}
                                 Lote N°: {{ object.solvent_reagent.batch_number }}
-                                {% if object.quantity_solvent %}
-                                    {{ object.quantity_solvent | unlocalize }} {{ object.solvent_reagent.reagent.umb }}
-                                {% endif %}
                             </p>
                         </div>
                     </div>
@@ -96,14 +96,17 @@
                             <i class="fa fa-fw fa-lg fa-pencil me-2"></i> Editar
                         </a>
                     {% endif %}
-                    <a href="#" type="button" class="btn btn-danger me-2">
+                    <a href="{{ label_url }}" type="button" class="btn btn-danger me-2">
                         <i class="fa fa-fw fa-lg fa-ticket me-2"></i> Etiqueta
                     </a>
                     {% if list_url %}
-                        <a href="{{ list_url }}" class="btn btn-secondary">
+                        <a href="{{ list_url }}" class="btn btn-secondary me-2">
                             <i class="fa fa-fw fa-lg fa-list me-2"></i>Soluciones
                         </a>
                     {% endif %}
+                    <a href="{{ list_url }}" class="btn btn-success">
+                        <i class="fa fa-fw fa-lg fa-check-double me-2"></i> Estandarizar
+                    </a>
                 </div>
             </div>
         </div>
