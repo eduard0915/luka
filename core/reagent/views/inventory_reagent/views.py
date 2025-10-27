@@ -13,11 +13,11 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import CreateView, ListView, UpdateView, DeleteView
+from django.views.generic import CreateView, ListView, UpdateView, DeleteView, DetailView
 
 from core.mixins import ValidatePermissionRequiredMixin
 from core.reagent.forms import InventoryReagentForm
-from core.reagent.models import InventoryReagent
+from core.reagent.models import InventoryReagent, TransactionReagent
 
 
 # Registro de Entrada Inventario de Reactivo
@@ -111,6 +111,36 @@ class InventoryReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMix
         context['div'] = '12'
         context['icon'] = 'fa-solid fa-vial-virus'
         context['today'] = timezone.now()
+        return context
+
+
+# Detalle de Reactivos
+class InventoryReagentDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    model = InventoryReagent
+    template_name = 'inventory_reagent/detail_inventory_reagent.html'
+    permission_required = 'reagent.view_reagent'
+
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    # def get_queryset(self):
+    #     now = timezone.now()
+    #     Training.objects.filter(
+    #         training_status='Vigente',
+    #         date_training_expire__lte=now
+    #     ).update(training_status='Vencido')
+    #     return super(UserDetailView, self).get_queryset()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Detalle Movimiento de Reactivo'
+        context['entity'] = 'Detalle Movimiento de Reactivo'
+        context['label_url'] = reverse_lazy('solution:solution_label_pdf', kwargs={'pk': self.object.pk})
+        # if self.request.user.has_perm('user.add_user'):
+        #     context['back'] = reverse_lazy('user:user_list')
+        context['icon'] = 'fa-solid fa-flask-vial'
+        context['back'] = reverse_lazy('reagent:list_inventory_reagent')
+        context['transactions'] = TransactionReagent.objects.filter(reagent_inventory_id=self.object.pk)
         return context
 
 

@@ -5,6 +5,7 @@ from django.db import models
 
 from core.company.models import Site
 from core.models import BaseModel
+from core.user.models import User
 
 
 # Reactivos
@@ -84,6 +85,7 @@ class TransactionReagent(BaseModel):
     type_transaction = models.CharField(max_length=50, verbose_name='Tipo de Registro')
     detail_transaction = models.CharField(max_length=250, verbose_name='Detalle de Registro')
     quantity = models.IntegerField(verbose_name='Cantidad')
+    user_transaction = models.ForeignKey(User, verbose_name='', on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.quantity)
