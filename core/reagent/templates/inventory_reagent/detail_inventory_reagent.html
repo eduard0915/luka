@@ -1,0 +1,169 @@
+{% extends 'body.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% load humanize %}
+{% load l10n %}
+
+
+{% block head %}
+    {% block head_list %}
+        <style>
+            /* Ajustes para la tabla con id data_0 */
+            #data_0, #data_0 th, #data_0 td {
+                font-size: 0.85rem;
+            }
+
+            #data_0 thead th {
+                text-align: center;
+                vertical-align: middle;
+            }
+        </style>
+    {% endblock %}
+{% endblock %}
+
+{% block content %}
+    <div class="row mb-0">
+        <div class="col-md-10">
+            <div class="tile">
+                <div class="tile-title">
+                    <h3 class="title">
+{#                        Solución {{ object.solute_reagent.reagent.description_reagent }} {{ object.concentration | unlocalize }}#}
+{#                        {{ object.concentration_unit }} <span class="m-4">{{ object.code_solution }}</span>#}
+                        {{ object.reagent }}
+                    </h3>
+                </div>
+                <div class="tile-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <b>Cantidad Disponible </b><br>
+                            <p>{{ object.quantity_stock | intcomma:False }} {{ object.reagent.umb }}</p>
+                        </div>
+                        <div class="col-md-2">
+                            <b>N° de Lote</b><br>
+                            <p>{{ object.batch_number }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <b>Vence </b><br>
+                            <p>{{ object.date_expire }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <b>Pureza</b><br>
+                            <p>{{ object.purity }} {{ object.reagent.purity_unit }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        <div class="row">
+            <div class="col-md-10">
+                <div class="tile mb-3">
+{#                    <div class="tile-title-w-btn">#}
+{#                        <h3 class="title">Capacitaciones</h3>#}
+{#                        <p>#}
+{#                            <a class="btn btn-primary icon-btn"#}
+{#                               onclick="open_modal('{% url 'user:create_training' object.slug %}')"><i#}
+{#                                    class="bi bi-plus-square me-2"></i>Nuevo</a>#}
+{##}
+{#                        </p>#}
+{#                    </div>#}
+                    <div class="tile-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered" id="data_0">
+                                <thead>
+                                <tr>
+                                    <th style="width:10%">Fecha</th>
+                                    <th style="width:15%">Tipo</th>
+                                    <th style="width:10%">Cantidad</th>
+                                    <th style="width:25%">Realizada por</th>
+                                    <th style="width:30%">Detalle</th>
+                                    <th style="width:10%">Acciones</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for foo in transactions %}
+                                    <tr>
+                                        <td>{{ foo.date_transaction | date:'Y-m-d' }}</td>
+                                        <td>{{ foo.type_transaction }}</td>
+                                        <td>{{ foo.quantity }}</td>
+                                        <td>{{ foo.user_transaction }}</td>
+                                        <td>{{ foo.detail_transaction}}</td>
+                                        <td>
+                                            <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
+                                               title="Editar">
+                                                <i class="bi bi-pencil-square text-warning me-2"></i>
+                                            </a>
+                                            <a onclick="open_modal('{% url 'user:delete_training' foo.id %}')"
+                                               title="Eliminar">
+                                                <i class="bi bi-trash text-danger me-2"></i>
+                                            </a>
+                                            {% if foo.training_status == 'Vencido' %}
+                                                <a onclick="open_modal('{% url 'user:create_update_training' foo.id %}')"
+                                                   title="Actualizar">
+                                                    <i class="bi bi-arrow-clockwise text-info me-2"></i>
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center">
+                                            No hay capacitaciones asociadas.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+{% endblock %}
+
+{% block scripts_detail %}
+    <!-- Data table plugin-->
+    <script src="{% static 'lib/vali-admin/js/plugins/jquery.dataTables.min.js' %}"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-1.13.4/datatables.min.css">
+
+    <script>
+
+        try {
+            $(function () {
+                // Solo inicializar DataTable si hay filas de datos
+                const hasData = $('#data_0 tbody tr').length > 0 && !$('#data_0 tbody tr td[colspan]').length;
+
+                if (hasData) {
+                    $('#data_0').DataTable({
+                        responsive: true,
+                        autoWidth: false,
+                        searching: false,
+                        info: false,
+                        order: [[3, 'desc']],
+                        language: {
+                            url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
+                        },
+                        columnDefs: [
+                            {
+                                targets: [1, 5],
+                                className: 'td-actions text-center',
+                                orderable: false,
+                            },
+                            {
+                                targets: [2, 3, 4],
+                                className: 'td-actions text-center',
+                            }
+                        ]
+                    });
+                } else {
+                    console.info('DataTable no inicializado: tabla vacía o sin datos válidos');
+                }
+            })
+        } catch (error) {
+            console.error('Error al inicializar DataTable:', error);
+        }
+
+    </script>
+
+{% endblock %}
