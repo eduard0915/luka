@@ -21,6 +21,48 @@ def update_training(sender, instance, **kwargs):
         Training.objects.filter(description_training=instance.description_training, pk=training_last.id).update(training_status='Actualizado')
 
 
+# Descuento de inventario de reactivos soluto
+@receiver(post_save, sender=Solution)
+def discount_inventory_reagent_solute(sender, instance, created, **kwargs):
+
+    if created:
+
+        InventoryReagent.objects.filter(pk=instance.solute_reagent.id).update(
+            quantity_stock=float(instance.solute_reagent.quantity_stock - instance.quantity_reagent))
+
+        TransactionReagent.objects.create(
+            reagent_inventory_id=instance.solute_reagent.id,
+            type_transaction='Uso',
+            date_transaction=timezone.now(),
+            detail_transaction='Solución ' + instance.code_solution + ' al ' + str(instance.concentration) + instance.concentration_unit ,
+            quantity=instance.quantity_reagent,
+            user_transaction_id=instance.preparated_by.id,
+        )
+
+        return
+
+
+# Descuento de inventario de reactivos solvente
+@receiver(post_save, sender=Solution)
+def discount_inventory_reagent_solvent(sender, instance, **kwargs):
+
+    if instance.quantity_solvent and instance.solvent_reagent:
+
+        InventoryReagent.objects.filter(pk=instance.solvent_reagent.id).update(
+            quantity_stock=float(instance.solvent_reagent.quantity_stock - instance.quantity_solvent))
+
+        TransactionReagent.objects.create(
+            reagent_inventory_id=instance.solvent_reagent.id,
+            type_transaction='Uso',
+            date_transaction=timezone.now(),
+            detail_transaction='Solución ' + instance.code_solution + ' al ' + str(instance.concentration) + instance.concentration_unit ,
+            quantity=instance.quantity_solvent,
+            user_transaction_id=instance.preparated_by.id,
+        )
+
+        return
+
+
 # Registro de Transacción de ingreso de reactivo en inventario
 @receiver(post_save, sender=InventoryReagent)
 def register_inventory_reagent(sender, instance, created, **kwargs):
@@ -31,21 +73,6 @@ def register_inventory_reagent(sender, instance, created, **kwargs):
             date_transaction=timezone.now(),
             detail_transaction='Ingreso de Reactivo a Inventario',
             quantity=instance.quantity_stock,
+            user_transaction_id=instance.user_creation.id,
         )
         return
-
-
-# Descuento de inventario de reactivos solvente
-@receiver(post_save, sender=Solution)
-def discount_inventory_reagent_solvent(sender, instance, **kwargs):
-    if instance.quantity_solvent:
-        InventoryReagent.objects.filter(pk=instance.solvent_reagent.id).update(
-            quantity_stock=float(instance.solvent_reagent.quantity_stock - instance.quantity_solvent))
-
-
-# Descuento de inventario de reactivos soluto
-@receiver(post_save, sender=Solution)
-def discount_inventory_reagent_solute(sender, instance, **kwargs):
-    if instance.quantity_solvent:
-        InventoryReagent.objects.filter(pk=instance.solute_reagent.id).update(
-            quantity_stock=float(instance.solute_reagent.quantity_stock - instance.quantity_reagent))

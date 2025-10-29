@@ -22,14 +22,14 @@
 {% endblock %}
 
 {% block content %}
-    <div class="row mb-0">
+    <div class="row">
         <div class="col-md-10">
-            <div class="tile">
+            <div class="tile mb-3">
                 <div class="tile-title">
                     <h3 class="title">
 {#                        Solución {{ object.solute_reagent.reagent.description_reagent }} {{ object.concentration | unlocalize }}#}
 {#                        {{ object.concentration_unit }} <span class="m-4">{{ object.code_solution }}</span>#}
-                        {{ object.reagent }}
+                        {{ object.reagent.code_reagent }} {{ object.reagent.description_reagent }}
                     </h3>
                 </div>
                 <div class="tile-body">
@@ -44,7 +44,7 @@
                         </div>
                         <div class="col-md-4">
                             <b>Vence </b><br>
-                            <p>{{ object.date_expire }}</p>
+                            <p>{{ object.date_expire | date:'Y-m-d' }}</p>
                         </div>
                         <div class="col-md-4">
                             <b>Pureza</b><br>
@@ -74,7 +74,7 @@
                                 <tr>
                                     <th style="width:10%">Fecha</th>
                                     <th style="width:15%">Tipo</th>
-                                    <th style="width:10%">Cantidad</th>
+                                    <th style="width:10%">Cant. ({{ object.reagent.umb }})</th>
                                     <th style="width:25%">Realizada por</th>
                                     <th style="width:30%">Detalle</th>
                                     <th style="width:10%">Acciones</th>
@@ -85,7 +85,7 @@
                                     <tr>
                                         <td>{{ foo.date_transaction | date:'Y-m-d' }}</td>
                                         <td>{{ foo.type_transaction }}</td>
-                                        <td>{{ foo.quantity }}</td>
+                                        <td>{{ foo.quantity | intcomma:False }}</td>
                                         <td>{{ foo.user_transaction }}</td>
                                         <td>{{ foo.detail_transaction}}</td>
                                         <td>
