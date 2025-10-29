@@ -43,8 +43,7 @@
                         </div>
                         <div class="col-md-4">
                             <b>Reactivo </b><br>
-                            <p>{{ object.quantity_reagent | unlocalize }}
-                                {{ object.solute_reagent.reagent.umb }}
+                            <p><b class="text-danger">{{ object.quantity_reagent | unlocalize }} {{ object.solute_reagent.reagent.umb }}</b>
                                 de {{ object.solute_reagent.reagent.description_reagent }} al
                                 {{ object.solute_reagent.purity }}{{ object.solute_reagent.reagent.purity_unit }}, Lote
                                 N°: {{ object.solute_reagent.batch_number }}
@@ -104,9 +103,11 @@
                             <i class="fa fa-fw fa-lg fa-list me-2"></i>Soluciones
                         </a>
                     {% endif %}
-                    <a href="{{ list_url }}" class="btn btn-success">
-                        <i class="fa fa-fw fa-lg fa-check-double me-2"></i> Estandarizar
-                    </a>
+                    {% if object.standardizable %}
+                        <a href="{{ list_url }}" class="btn btn-success">
+                            <i class="fa fa-fw fa-lg fa-check-double me-2"></i> Estandarizar
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>

@@ -10,6 +10,7 @@ from core.solution.models import Solution
 
 
 CONC = [('', '-----'), ('%', '%'), ('mg/L', 'mg/L'), ('M', 'M'), ('N', 'N')]
+BOOLEAN = [(True, 'Si'), (False, 'No')]
 
 
 # Creación de Soluciones
@@ -25,11 +26,13 @@ class SolutionForm(ModelForm):
 
     class Meta:
         model = Solution
-        fields = ['code_solution', 'solute_reagent', 'concentration', 'concentration_unit', 'quantity_solution', 'solvent_reagent']
+        fields = [
+            'code_solution', 'solute_reagent', 'concentration', 'concentration_unit', 'quantity_solution', 'solvent_reagent', 'standardizable']
         widgets = {
             'code_solution': TextInput(attrs={'class': 'form-control', 'readonly': True}),
             'solute_reagent': Select(attrs={'class': 'form-control', 'required': True}),
             'solvent_reagent': Select(attrs={'class': 'form-control', 'required': True}),
+            'standardizable': Select(attrs={'class': 'form-control', 'required': True}, choices=BOOLEAN),
             'concentration': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
             'concentration_unit': Select(attrs={'class': 'form-control', 'required': True}, choices=CONC),
             'quantity_solution': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
