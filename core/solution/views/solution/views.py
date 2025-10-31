@@ -78,7 +78,7 @@ class SolutionCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cr
 # Listado de Soluciones
 class SolutionListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
     model = Solution
-    template_name = 'list_solution.html'
+    template_name = 'solution/list_solution.html'
     permission_required = 'reagent.view_reagent'
 
     @method_decorator(csrf_exempt)
@@ -126,6 +126,7 @@ class SolutionListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, List
         context['entity'] = 'Soluciones'
         context['div'] = '12'
         context['icon'] = 'fa-solid fa-flask-vial'
+        context['today'] = timezone.now()
         return context
 
 
@@ -133,7 +134,7 @@ class SolutionListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, List
 class SolutionUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
     model = Solution
     form_class = SolutionForm
-    template_name = 'update_solution.html'
+    template_name = 'solution/update_solution.html'
     permission_required = 'reagent.change_reagent'
 
     @method_decorator(csrf_exempt)
@@ -175,7 +176,7 @@ class SolutionUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Up
 class SolutionAddSolventUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
     model = Solution
     form_class = SolutionAddSolventForm
-    template_name = 'create_solvent.html'
+    template_name = 'solution/create_solvent.html'
     permission_required = 'reagent.add_reagent'
 
     @method_decorator(csrf_exempt)
@@ -212,7 +213,7 @@ class SolutionAddSolventUpdateView(LoginRequiredMixin, ValidatePermissionRequire
 # Detalle de Soluciones
 class SolutionDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
     model = Solution
-    template_name = 'detail_solution.html'
+    template_name = 'solution/detail_solution.html'
     permission_required = 'reagent.add_reagent'
 
     def dispatch(self, request, *args, **kwargs):
@@ -236,6 +237,7 @@ class SolutionDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, De
         context['icon'] = 'fa-solid fa-flask-vial'
         context['list_url'] = reverse_lazy('solution:list_solution')
         context['update_solution'] = reverse_lazy('solution:update_solution', kwargs={'pk': self.object.pk})
+        context['std'] = reverse_lazy('solution:create_solution_std', kwargs={'pk': self.object.pk})
         return context
 
 
@@ -264,7 +266,7 @@ class SolutionLabelPDFDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
 
     def get(self, request, *args, **kwargs):
         try:
-            template = get_template('label_solution.html')
+            template = get_template('solution/label_solution.html')
             sln = Solution.objects.get(pk=self.kwargs['pk'])
             context = {
                 'sln': Solution.objects.get(pk=self.kwargs['pk']),

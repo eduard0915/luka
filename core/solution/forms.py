@@ -6,8 +6,7 @@ from django.forms import ModelForm, TextInput, FileInput, Select, DateInput, Num
 from django.utils import timezone
 
 from core.reagent.models import InventoryReagent
-from core.solution.models import Solution
-
+from core.solution.models import Solution, StandarizationSolution
 
 CONC = [('', '-----'), ('%', '%'), ('mg/L', 'mg/L'), ('M', 'M'), ('N', 'N')]
 BOOLEAN = [(True, 'Si'), (False, 'No')]
@@ -100,6 +99,44 @@ class SolutionAddSolventForm(ModelForm):
                         days=data.solute_reagent.reagent.stability_solution)
                 else:
                     raise ValidationError('El Reactivo no tiene un Días Estabilidad definido')
+                data.save()
+            else:
+                data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Registro de Estandarización
+class StandarizationSolutionForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.sln = kwargs.pop('sln')
+        super().__init__(*args, **kwargs)
+        self.fields['standard_sln'].queryset = InventoryReagent.objects.select_related('reagent').filter(
+            reagent__standard=True)
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = StandarizationSolution
+        fields = ['standard_sln', 'quantity_solution', 'quantity_standard']
+        widgets = {
+            'quantity_solution': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
+            'quantity_standard': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
+            'standard_sln': Select(attrs={'class': 'form-control', 'required': True}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        form = super()
+        user = get_current_user()
+        try:
+            if form.is_valid():
+                data = form.save(commit=False)
+                data.standarization_date = timezone.now()
+                data.standardized_by_id = user.id
+                data.concentration_sln = round(((data.quantity_standard * data.standard_sln.purity) / data.quantity_solution), data.standard_sln.reagent.sig_figs_solution)
+                data.solution_id = self.sln.id
                 data.save()
             else:
                 data['error'] = form.errors
