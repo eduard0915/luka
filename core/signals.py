@@ -16,9 +16,12 @@ def update_training(sender, instance, **kwargs):
 
     training_last = Training.objects.filter(
         description_training=instance.description_training, user__slug=instance.user.slug).last()
-    training_count = Training.objects.filter(description_training=instance.description_training).count()
+    training_count = Training.objects.filter(
+        description_training=instance.description_training, user__slug=instance.user.slug).count()
     if training_count > 1:
-        Training.objects.filter(description_training=instance.description_training, pk=training_last.id).update(training_status='Actualizado')
+        Training.objects.filter(
+            description_training=instance.description_training,
+            pk=training_last.id, user__slug=instance.user.slug).update(training_status='Actualizado')
 
 
 # Descuento de inventario de reactivos soluto

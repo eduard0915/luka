@@ -1,5 +1,8 @@
+from datetime import timedelta
+
 from django.forms import *
 
+from core.company.models import Company
 from core.user.models import *
 
 SELECT = [(True, 'Si'), (False, 'No')]
@@ -209,10 +212,12 @@ class TrainingForm(ModelForm):
     def save(self, commit=True):
         data = {}
         form = super()
+        company = Company.objects.first()
         try:
             if form.is_valid():
                 data = form.save(commit=False)
                 data.user_id = self.user.id
+                data.date_training_alert = (data.date_training_expire - timedelta(days=company.training_alert))
                 data.save()
             else:
                 data['error'] = form.errors
@@ -242,11 +247,13 @@ class TrainingCreateForm(ModelForm):
     def save(self, commit=True):
         data = {}
         form = super()
+        company = Company.objects.first()
         try:
             if form.is_valid():
                 data = form.save(commit=False)
                 data.description_training = str(self.training.description_training)
                 data.user_id = self.training.user.id
+                data.date_training_alert = (data.date_training_expire - timedelta(days=company.training_alert))
                 data.save()
             else:
                 data['error'] = form.errors
@@ -277,9 +284,12 @@ class TrainingUpdateForm(ModelForm):
     def save(self, commit=True):
         data = {}
         form = super()
+        company = Company.objects.first()
         try:
             if form.is_valid():
-                data = form.save()
+                data = form.save(commit=False)
+                data.date_training_alert = (data.date_training_expire - timedelta(days=company.training_alert))
+                data.save()
             else:
                 data['error'] = form.errors
         except Exception as e:

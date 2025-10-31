@@ -13,13 +13,16 @@ class CompanyForm(ModelForm):
 
     class Meta:
         model = Company
-        fields = ['company_name', 'company_nit', 'company_address', 'company_city', 'company_country', 'company_logo']
+        fields = [
+            'company_name', 'company_nit', 'company_address', 'company_city', 'company_country', 'training_alert',
+            'company_logo']
         widgets = {
             'company_name': TextInput(attrs={'class': 'form-control', 'required': True}),
             'company_nit': TextInput(attrs={'class': 'form-control', 'required': True}),
             'company_address': TextInput(attrs={'class': 'form-control', 'required': True}),
             'company_city': TextInput(attrs={'class': 'form-control', 'required': True}),
             'company_country': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'training_alert': TextInput(attrs={'class': 'form-control', 'required': True}),
             'company_logo': FileInput(attrs={'class': 'form-control'}),
         }
         help_texts = {
