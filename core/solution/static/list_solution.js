@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
             ],
             columnDefs: [
                 {
-                    targets: [0, 1, 2, 3, 4, 5, 6],
+                    targets: [0, 1, 3, 5, 6],
                     class: 'td-actions text-center'
                 },
                 {
@@ -39,22 +39,22 @@ document.addEventListener('DOMContentLoaded', function () {
                         return row['concentration'] + ' ' + row['concentration_unit'];
                     }
                 },
-                // {
-                //     targets: [6],
-                //     className: 'td-actions text-center',
-                //     render: function (data, type, row) {
-                //         let estado = null;
-                //         switch (row['enable_reagent']) {
-                //             case true:
-                //                 return '<span class="badge bg-primary rounded-pill">' + 'Activo' + '</span>';
-                //                 break;
-                //             case false:
-                //                 return '<span class="badge badge-sm badge-danger">' + 'Inactivo' + '</span>';
-                //                 break;
-                //         }
-                //         return estado;
-                //     }
-                // },
+                {
+                    targets: [4],
+                    className: 'td-actions text-center',
+                    render: function (data, type, row) {
+                        let expire = null;
+                        switch (row['expire_date_solution'] < toDay) {
+                            case true:
+                                return '<span class="badge bg-danger">' + row['expire_date_solution'] + '</span>';
+                                break;
+                            case false:
+                                return row['expire_date_solution'] ;
+                                break;
+                        }
+                        return expire;
+                    }
+                },
                 {
                     targets: [7],
                     class: 'td-actions text-center',

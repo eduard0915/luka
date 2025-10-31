@@ -5,7 +5,7 @@ from core.reagent.models import Reagent, TransactionReagent, InventoryReagent
 
 
 UMB = [('', '-----'), ('mL', 'Mililitro'), ('g', 'Gramo')]
-BOOLEAN = [(True, 'Si'), (False, 'No')]
+BOOLEAN = [(False, 'No'), (True, 'Si')]
 UNIT_PURITY = [('', '-----'), ('%', '%'), ('mg/L', 'mg/L')]
 REGISTRY_TYPE = [('', '-----'), ('Uso', 'Uso'), ('Ajuste de Salida', 'Ajuste de Salida'), ('Ajuste de Entrada', 'Ajuste de Entrada')]
 
@@ -21,7 +21,8 @@ class ReagentForm(ModelForm):
         model = Reagent
         fields = [
             'code_reagent', 'description_reagent', 'umb', 'manufacturer', 'site', 'technical_sheet', 'purity_unit',
-            'molecular_weight', 'gram_equivalent', 'stability_solution', 'volumetric', 'solvent', 'density_enable']
+            'molecular_weight', 'gram_equivalent', 'stability_solution', 'volumetric', 'solvent', 'density_enable',
+            'standard']
         widgets = {
             'description_reagent': TextInput(attrs={'class': 'form-control', 'required': True}),
             'code_reagent': TextInput(attrs={'class': 'form-control', 'required': True}),
@@ -36,6 +37,7 @@ class ReagentForm(ModelForm):
             'volumetric': Select(attrs={'class': 'form-control', 'required': True}, choices=BOOLEAN),
             'solvent': Select(attrs={'class': 'form-control', 'required': True}, choices=BOOLEAN),
             'density_enable': Select(attrs={'class': 'form-control', 'required': True}, choices=BOOLEAN),
+            'standard': Select(attrs={'class': 'form-control', 'required': True}, choices=BOOLEAN),
         }
 
     def save(self, commit=True):

@@ -3,6 +3,7 @@
 
 {% block head_list %}
     <script src="{% static 'list_solution.js' %}"></script>
+    <script>let toDay = {{ today | date:'Y-m-d' }}</script>
 {% endblock %}
 
 {% block buttons %}
