@@ -52,7 +52,7 @@ class Solution(BaseModel):
         significant_figures = None
         if (self.solute_reagent and self.solute_reagent.reagent and
             self.solute_reagent.reagent.site and self.solute_reagent.reagent.site.company):
-            significant_figures = self.solute_reagent.reagent.site.company.sig_figs_solution
+            significant_figures = 2
 
         if self.quantity_reagent and significant_figures is not None:
             self.quantity_reagent = round(self.quantity_reagent, significant_figures)

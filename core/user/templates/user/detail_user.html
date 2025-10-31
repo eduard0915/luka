@@ -135,12 +135,13 @@
                         <table class="table table-hover table-bordered" id="data_0">
                             <thead>
                             <tr>
-                                <th style="width:35%">Descripción</th>
+                                <th style="width:30%">Descripción</th>
                                 <th style="width:5%">Ver</th>
-                                <th style="width:25%">Realizada por</th>
-                                <th style="width:13%">Fecha</th>
+                                <th style="width:21%">Realizada por</th>
+                                <th style="width:12%">Fecha</th>
+                                <th style="width:12%">Vence</th>
                                 <th style="width:10%">Estado</th>
-                                <th style="width:12%">Acciones</th>
+                                <th style="width:10%">Acciones</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -155,11 +156,22 @@
                                     </td>
                                     <td>{{ foo.training_by }}</td>
                                     <td>{{ foo.date_training | date:'Y-m-d' }}</td>
+                                    <td>{{ foo.date_training_expire | date:'Y-m-d' }}</td>
                                     <td>
                                         {% if foo.training_status == 'Vencido' %}
                                             <span class="badge bg-danger">{{ foo.training_status }}</span>
+                                        {% elif foo.training_status == 'Vigente' %}
+                                            {% now "Y-m-d" as today %}
+                                            {% if today >= foo.date_training_alert|date:"Y-m-d" %}
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                                    {{ foo.training_status }}
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-success">{{ foo.training_status }}</span>
+                                            {% endif %}
                                         {% else %}
-                                            {{ foo.training_status }}
+                                            <span class="badge bg-secondary">{{ foo.training_status }}</span>
                                         {% endif %}
                                     </td>
                                     <td>
@@ -171,7 +183,7 @@
                                            title="Eliminar">
                                             <i class="bi bi-trash text-danger me-2"></i>
                                         </a>
-                                        {% if foo.training_status == 'Vencido' %}
+                                        {% if foo.training_status == 'Vencido' and object.id == request.user.id %}
                                             <a onclick="open_modal('{% url 'user:create_update_training' foo.id %}')"
                                                title="Actualizar">
                                                 <i class="bi bi-arrow-clockwise text-info me-2"></i>
@@ -279,12 +291,12 @@
                         },
                         columnDefs: [
                             {
-                                targets: [1, 5],
+                                targets: [1, 6],
                                 className: 'td-actions text-center',
                                 orderable: false,
                             },
                             {
-                                targets: [2, 3, 4],
+                                targets: [2, 3, 4, 5],
                                 className: 'td-actions text-center',
                             }
                         ]
