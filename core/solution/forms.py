@@ -17,9 +17,71 @@ class SolutionForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['solute_reagent'].queryset = InventoryReagent.objects.select_related('reagent').filter(
-            date_expire__gte=timezone.now(), reagent__solvent=False, quantity_stock__gt=0)
+            date_expire__gte=timezone.now(), reagent__solvent=False, quantity_stock__gt=0, reagent__standard=False)
         self.fields['solvent_reagent'].queryset = InventoryReagent.objects.select_related('reagent').filter(
-            date_expire__gte=timezone.now(), reagent__solvent=True, quantity_stock__gt=0)
+            date_expire__gte=timezone.now(), reagent__solvent=True, quantity_stock__gt=0, reagent__standard=False)
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = Solution
+        fields = [
+            'code_solution', 'solute_reagent', 'concentration', 'concentration_unit', 'quantity_solution', 'solvent_reagent', 'standardizable']
+        widgets = {
+            'code_solution': TextInput(attrs={'class': 'form-control', 'readonly': True}),
+            'solute_reagent': Select(attrs={'class': 'form-control', 'required': True}),
+            'solvent_reagent': Select(attrs={'class': 'form-control', 'required': True}),
+            'standardizable': Select(attrs={'class': 'form-control', 'required': True}, choices=BOOLEAN),
+            'concentration': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
+            'concentration_unit': Select(attrs={'class': 'form-control', 'required': True}, choices=CONC),
+            'quantity_solution': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
+        }
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        user = get_current_user()
+
+        instance.preparated_by_id = user.id
+
+        # Validar que los campos necesarios no sean None
+        if not instance.solute_reagent.purity:
+            raise ValidationError('El reactivo seleccionado no tiene pureza definida')
+        if not instance.solute_reagent.density:
+            raise ValidationError('El reactivo seleccionado no tiene densidad definida')
+
+        if instance.concentration_unit == '%':
+            instance.quantity_reagent = float(instance.quantity_solution * (
+                        instance.concentration / instance.solute_reagent.purity) * instance.solute_reagent.density)
+        elif instance.concentration_unit == 'mg/L':
+            instance.quantity_reagent = float(instance.quantity_solution * (
+                        instance.concentration / 10000 * instance.solute_reagent.purity) * instance.solute_reagent.density)
+        elif instance.concentration_unit == 'M':
+            if not instance.solute_reagent.reagent.molecular_weight:
+                raise ValidationError('El reactivo seleccionado no tiene peso molecular registrado')
+            instance.quantity_reagent = float(instance.quantity_solution * (
+                        (instance.concentration * instance.solute_reagent.reagent.molecular_weight) / (
+                            10 * instance.solute_reagent.purity)) * instance.solute_reagent.density)
+        elif instance.concentration_unit == 'N':
+            if not instance.solute_reagent.reagent.gram_equivalent:
+                raise ValidationError('El reactivo seleccionado no tiene equivalente gramo registrado')
+            instance.quantity_reagent = float(instance.quantity_solution * (
+                        (instance.concentration * instance.solute_reagent.reagent.gram_equivalent) / (
+                            10 * instance.solute_reagent.purity)) * instance.solute_reagent.density)
+
+        if commit:
+            instance.save()
+
+        return instance
+
+
+# Creación de Soluciones Estándar
+class SolutionStandardForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['solute_reagent'].queryset = InventoryReagent.objects.select_related('reagent').filter(
+            date_expire__gte=timezone.now(), reagent__solvent=False, quantity_stock__gt=0, reagent__standard=True)
+        self.fields['solvent_reagent'].queryset = InventoryReagent.objects.select_related('reagent').filter(
+            date_expire__gte=timezone.now(), reagent__solvent=True, quantity_stock__gt=0, reagent__standard=True)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 

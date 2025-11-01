@@ -9,6 +9,7 @@ app_name = 'solution'
 
 urlpatterns = [
     path('add/', SolutionCreateView.as_view(), name='create_solution'),
+    path('add_std/', SolutionStandardCreateView.as_view(), name='create_solution_std'),
     path('list/', SolutionListView.as_view(), name='list_solution'),
     path('update/<uuid:pk>/', SolutionUpdateView.as_view(), name='update_solution'),
     path('detail/<uuid:pk>/', SolutionDetailView.as_view(), name='detail_solution'),

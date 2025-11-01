@@ -70,7 +70,7 @@ class Solution(BaseModel):
 class StandarizationSolution(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     solution = models.ForeignKey(Solution, verbose_name='Solución', on_delete=models.CASCADE)
-    standard_sln = models.ForeignKey(InventoryReagent, verbose_name='Solución Estándar', on_delete=models.CASCADE)
+    standard_sln = models.ForeignKey(InventoryReagent, verbose_name='Solución| Estándar', on_delete=models.CASCADE)
     quantity_solution = models.FloatField(verbose_name='mL de Solución')
     concentration_sln = models.FloatField(verbose_name='Concentración Sln')
     quantity_standard = models.FloatField(verbose_name='mL Estándar')

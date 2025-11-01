@@ -75,6 +75,57 @@ class SolutionCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cr
         return context
 
 
+# Creación de Soluciones Estándar
+class SolutionStandardCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    model = Solution
+    form_class = SolutionStandardForm
+    template_name = 'create_three.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = None
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'add':
+                form = self.get_form()
+                if form.is_valid():
+                    self.object = form.save()
+                    code_solution = form.cleaned_data.get('code_solution')
+                    messages.success(request, f'Solución Estándar "{code_solution}" creada satisfactoriamente!')
+                    # Provide redirect URL to detail view for AJAX to use
+                    data['redirect_url'] = self.get_success_url()
+                else:
+                    messages.error(request, form.errors)
+                    data['error'] = str(form.errors)
+            else:
+                data['error'] = 'No ha ingresado datos en los campos'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_success_url(self):
+        return reverse('solution:detail_solution', kwargs={'pk': self.object.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Preparar Solución STD'
+        context['action'] = 'add'
+        context['entity'] = 'Preparar Solución Estándar'
+        context['div'] = '10'
+        context['icon'] = 'fa-solid fa-flask-vial'
+        # Fallback cancel/back link to the solutions list
+        try:
+            context['list_url'] = reverse_lazy('solution:list_solution')
+        except Exception:
+            pass
+        return context
+
+
 # Listado de Soluciones
 class SolutionListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
     model = Solution
@@ -123,6 +174,7 @@ class SolutionListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, List
         context = super().get_context_data(**kwargs)
         context['title'] = 'Soluciones'
         context['create_url'] = reverse_lazy('solution:create_solution')
+        context['create_url_std'] = reverse_lazy('solution:create_solution_std')
         context['entity'] = 'Soluciones'
         context['div'] = '12'
         context['icon'] = 'fa-solid fa-flask-vial'

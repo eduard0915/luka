@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 {'data': 'volumetric'},
                 {'data': 'solvent'},
                 {'data': 'density_enable'},
+                {'data': 'standard'},
                 {'data': 'id'}
             ],
             columnDefs: [
@@ -112,13 +113,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 {
                     targets: [12],
+                    className: 'text-center',
+                    render: function (data, type, row) {
+                        let estado = null;
+                        switch (row['standard']) {
+                            case true:
+                                return 'Si';
+                                break;
+                            case false:
+                                return 'No';
+                                break;
+                        }
+                        return estado;
+                    }
+                },
+                {
+                    targets: [13],
                     class: 'td-actions text-center',
                     orderable: false,
                     render: function (data, type, row) {
-                        let actions
-                        actions = '<a href="/reagent/detail/' + row['id'] + '/" type="button" title="Detalle Perfil"><i class="bi bi-info-square text-info"></i></a> &nbsp';
-                        actions += '<a href="/reagent/update/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a>';
-                        return actions
+                        return '<a href="/reagent/update/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a>';
                     }
                 },
             ],
