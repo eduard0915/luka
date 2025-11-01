@@ -92,7 +92,8 @@ class ReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
                     'stability_solution',
                     'volumetric',
                     'solvent',
-                    'density_enable'
+                    'density_enable',
+                    'standard'
                 ).order_by('code_reagent'))
                 return JsonResponse(reagents, safe=False)
             else:
