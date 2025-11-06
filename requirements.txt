@@ -11,7 +11,7 @@ charset-normalizer==3.4.4
 cryptography==46.0.3
 cssselect2==0.8.0
 dj-database-url==3.0.1
-Django==5.2.7
+Django==5.2.8
 django-crum==0.7.9
 django-decouple==2.1
 django-model-utils==5.0.0
