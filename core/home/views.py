@@ -7,5 +7,5 @@ class HomeView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Quality Lims'
+        context['title'] = 'PadLIMS'
         return context

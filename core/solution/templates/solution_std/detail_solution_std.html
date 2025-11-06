@@ -1,0 +1,237 @@
+{% extends 'body.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% load humanize %}
+{% load l10n %}
+
+
+{% block head %}
+    {% block head_list %}
+        <style>
+            /* Ajustes para la tabla con id data_0 */
+            #data_0, #data_0 th, #data_0 td {
+                font-size: 0.85rem;
+            }
+
+            #data_0 thead th {
+                text-align: center;
+                vertical-align: middle;
+            }
+        </style>
+    {% endblock %}
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-11">
+            <div class="tile">
+                <div class="tile-title">
+                    <h3 class="title">
+                        Solución {{ object.solute_reagent.reagent.description_reagent }} {{ object.concentration | unlocalize }}
+                        {{ object.concentration_unit }} <span class="m-4">{{ object.code_solution }}</span>
+                    </h3>
+                </div>
+                <div class="tile-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <b>Cantidad a Preparar </b><br>
+                            <p>{{ object.quantity_solution | intcomma:False }} mL</p>
+                        </div>
+                        <div class="col-md-2">
+                            <b>Concentración</b><br>
+                            <p>{{ object.concentration | unlocalize }} {{ object.concentration_unit }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <b>Reactivo </b><br>
+                            <p><b class="text-danger">{{ object.quantity_reagent | unlocalize }} {{ object.solute_reagent.reagent.umb }}</b>
+                                de {{ object.solute_reagent.reagent.description_reagent }} al
+                                {{ object.solute_reagent.purity }}{{ object.solute_reagent.reagent.purity_unit }}, Lote
+                                N°: {{ object.solute_reagent.batch_number }}
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <b>Solvente</b><br>
+                            <p>
+                                {% if object.quantity_solvent %}
+                                    {{ object.quantity_solvent | unlocalize }} {{ object.solvent_reagent.reagent.umb }} de
+                                {% endif %}
+                                {{ object.solvent_reagent.reagent.description_reagent }}
+                                {% if not object.solvent_reagent.purity == 100 %}
+                                    {{ object.solvent_reagent.purity }}{{ object.solvent_reagent.reagent.purity_unit }},
+                                {% endif %}
+                                Lote N°: {{ object.solvent_reagent.batch_number }}
+                            </p>
+                        </div>
+                    </div>
+                    {% if object.quantity_solvent %}
+                        <div class="row mt-1">
+                            <div class="col-md-4">
+                                <b>Preparado por </b><br>
+                                <p>{{ object.preparated_by }}</p>
+                            </div>
+                            <div class="col-md-3">
+                                <b>Fecha de Preparación</b><br>
+                                <p>{{ object.preparation_date | date:'Y-m-d' }}</p>
+                            </div>
+                            <div class="col-md-3">
+                                <b>Vencimiento</b><br>
+                                <p>{{ object.expire_date_solution | date:'Y-m-d' }}</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="tile-footer">
+                    {% if not object.quantity_solvent %}
+                        {% if object.quantity_reagent < object.solute_reagent.quantity_stock %}
+                            <button onclick="open_modal('{% url 'solution:add_solvent_solution' object.id %}')"
+                                    class="btn btn-primary me-2">
+                                <i class="bi bi-moisture me-2"></i> Añadir de Solvente
+                            </button>
+                        {% else %}
+                                <p class="text-danger p-2">Cantidad de Reactivo requerida mayor que la
+                                    disponible {{ object.solute_reagent.quantity_stock | unlocalize }} {{ object.solute_reagent.reagent.umb }}</p>
+                        {% endif %}
+                        <a href="{{ update_solution }}" type="button" class="btn btn-warning me-2">
+                            <i class="fa fa-fw fa-lg fa-pencil me-2"></i> Editar
+                        </a>
+                    {% endif %}
+                    <a href="{{ label_url }}" type="button" class="btn btn-danger me-2">
+                        <i class="fa fa-fw fa-lg fa-ticket me-2"></i> Etiqueta
+                    </a>
+                    {% if list_url %}
+                        <a href="{{ list_url }}" class="btn btn-secondary me-2">
+                            <i class="fa fa-fw fa-lg fa-list me-2"></i>Soluciones
+                        </a>
+                    {% endif %}
+                    {% if object.standardizable %}
+                        <a onclick="open_modal('{{ std }}')" class="btn btn-success">
+                            <i class="fa fa-fw fa-lg fa-check-double me-2"></i> Estandarizar
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {#    <div class="row">#}
+    {#        <div class="col-md-10">#}
+    {#            <div class="tile mb-3">#}
+    {#                <div class="tile-title-w-btn">#}
+    {#                    <h3 class="title">Capacitaciones</h3>#}
+    {#                    <p>#}
+    {#                        <a class="btn btn-primary icon-btn"#}
+    {#                           onclick="open_modal('{% url 'user:create_training' object.slug %}')"><i#}
+    {#                                class="bi bi-plus-square me-2"></i>Nuevo</a>#}
+    {##}
+    {#                    </p>#}
+    {#                </div>#}
+    {#                <div class="tile-body">#}
+    {#                    <div class="table-responsive">#}
+    {#                        <table class="table table-hover table-bordered" id="data_0">#}
+    {#                            <thead>#}
+    {#                            <tr>#}
+    {#                                <th style="width:35%">Descripción</th>#}
+    {#                                <th style="width:5%">Ver</th>#}
+    {#                                <th style="width:25%">Realizada por</th>#}
+    {#                                <th style="width:13%">Fecha</th>#}
+    {#                                <th style="width:10%">Estado</th>#}
+    {#                                <th style="width:12%">Acciones</th>#}
+    {#                            </tr>#}
+    {#                            </thead>#}
+    {#                            <tbody>#}
+    {#                            {% for foo in training %}#}
+    {#                                <tr>#}
+    {#                                    <td>{{ foo.description_training }}</td>#}
+    {#                                    <td>#}
+    {#                                        <a href="{% url 'user:download_training' %}?id={{ foo.id }}&type=support_training"#}
+    {#                                           target="_blank">#}
+    {#                                            <i class="bi bi-file-earmark-pdf text-danger"></i>#}
+    {#                                        </a>#}
+    {#                                    </td>#}
+    {#                                    <td>{{ foo.training_by }}</td>#}
+    {#                                    <td>{{ foo.date_training | date:'Y-m-d' }}</td>#}
+    {#                                    <td>#}
+    {#                                        {% if foo.training_status == 'Vencido' %}#}
+    {#                                        	<span class="badge bg-danger">{{ foo.training_status }}</span>#}
+    {#                                        {% else %}#}
+    {#                                            {{ foo.training_status }}#}
+    {#                                        {% endif %}#}
+    {#                                    </td>#}
+    {#                                    <td>#}
+    {#                                        <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"#}
+    {#                                           title="Editar">#}
+    {#                                            <i class="bi bi-pencil-square text-warning me-2"></i>#}
+    {#                                        </a>#}
+    {#                                        <a onclick="open_modal('{% url 'user:delete_training' foo.id %}')"#}
+    {#                                           title="Eliminar">#}
+    {#                                            <i class="bi bi-trash text-danger me-2"></i>#}
+    {#                                        </a>#}
+    {#                                        {% if foo.training_status == 'Vencido' %}#}
+    {#                                            <a onclick="open_modal('{% url 'user:create_update_training' foo.id %}')"#}
+    {#                                               title="Actualizar">#}
+    {#                                                <i class="bi bi-arrow-clockwise text-info me-2"></i>#}
+    {#                                            </a>#}
+    {#                                        {% endif %}#}
+    {#                                    </td>#}
+    {#                                </tr>#}
+    {#                            {% empty %}#}
+    {#                                <tr>#}
+    {#                                    <td colspan="6" class="text-center">#}
+    {#                                        No hay capacitaciones asociadas.#}
+    {#                                    </td>#}
+    {#                                </tr>#}
+    {#                            {% endfor %}#}
+    {#                            </tbody>#}
+    {#                        </table>#}
+    {#                    </div>#}
+    {#                </div>#}
+    {#            </div>#}
+    {#        </div>#}
+    {#    </div>   #}
+
+{% endblock %}
+
+{% block scripts_detail %}
+    <!-- Data table plugin-->
+    <script src="{% static 'lib/vali-admin/js/plugins/jquery.dataTables.min.js' %}"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-1.13.4/datatables.min.css">
+
+    <script>
+
+        try {
+            $(function () {
+                // Solo inicializar DataTable si hay filas de datos
+                const hasData = $('#data_0 tbody tr').length > 0 && !$('#data_0 tbody tr td[colspan]').length;
+
+                if (hasData) {
+                    $('#data_0').DataTable({
+                        responsive: true,
+                        autoWidth: false,
+                        searching: false,
+                        info: false,
+                        order: [[3, 'desc']],
+                        language: {
+                            url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
+                        },
+                        columnDefs: [
+                            {
+                                targets: [1, 5],
+                                className: 'td-actions text-center',
+                                orderable: false,
+                            },
+                            {
+                                targets: [2, 3, 4],
+                                className: 'td-actions text-center',
+                            }
+                        ]
+                    });
+                } else {
+                    console.info('DataTable no inicializado: tabla vacía o sin datos válidos');
+                }
+            })
+        } catch (error) {
+            console.error('Error al inicializar DataTable:', error);
+        }
+
+    </script>
+
+{% endblock %}
