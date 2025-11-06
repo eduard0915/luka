@@ -6,6 +6,7 @@ from botocore.config import Config
 from botocore.exceptions import ClientError
 from decouple import config
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
@@ -14,6 +15,7 @@ from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, ListView, UpdateView, DetailView
 from xhtml2pdf import pisa
 
@@ -65,57 +67,6 @@ class SolutionCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cr
         context['title'] = 'Preparar Solución'
         context['action'] = 'add'
         context['entity'] = 'Preparar Solución'
-        context['div'] = '10'
-        context['icon'] = 'fa-solid fa-flask-vial'
-        # Fallback cancel/back link to the solutions list
-        try:
-            context['list_url'] = reverse_lazy('solution:list_solution')
-        except Exception:
-            pass
-        return context
-
-
-# Creación de Soluciones Estándar
-class SolutionStandardCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
-    model = Solution
-    form_class = SolutionStandardForm
-    template_name = 'create_three.html'
-    permission_required = 'reagent.add_reagent'
-
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        self.object = None
-        return super().dispatch(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        data = {}
-        try:
-            action = request.POST['action']
-            if action == 'add':
-                form = self.get_form()
-                if form.is_valid():
-                    self.object = form.save()
-                    code_solution = form.cleaned_data.get('code_solution')
-                    messages.success(request, f'Solución Estándar "{code_solution}" creada satisfactoriamente!')
-                    # Provide redirect URL to detail view for AJAX to use
-                    data['redirect_url'] = self.get_success_url()
-                else:
-                    messages.error(request, form.errors)
-                    data['error'] = str(form.errors)
-            else:
-                data['error'] = 'No ha ingresado datos en los campos'
-        except Exception as e:
-            data['error'] = str(e)
-        return JsonResponse(data)
-
-    def get_success_url(self):
-        return reverse('solution:detail_solution', kwargs={'pk': self.object.pk})
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Preparar Solución STD'
-        context['action'] = 'add'
-        context['entity'] = 'Preparar Solución Estándar'
         context['div'] = '10'
         context['icon'] = 'fa-solid fa-flask-vial'
         # Fallback cancel/back link to the solutions list
@@ -270,14 +221,6 @@ class SolutionDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, De
 
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
-
-    # def get_queryset(self):
-    #     now = timezone.now()
-    #     Training.objects.filter(
-    #         training_status='Vigente',
-    #         date_training_expire__lte=now
-    #     ).update(training_status='Vencido')
-    #     return super(UserDetailView, self).get_queryset()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

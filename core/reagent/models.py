@@ -28,6 +28,7 @@ class Reagent(BaseModel):
     density_enable = models.BooleanField(default=False, verbose_name='Densidad')
     sig_figs_solution = models.PositiveSmallIntegerField(default=2, verbose_name='Cifras Significativas')
     standard = models.BooleanField(default=False, verbose_name='Estándar')
+    ready_to_use = models.BooleanField(verbose_name='STD Listo para Usar', default=False)
 
     def __str__(self):
         return str(self.code_reagent) + ' '  + str(self.description_reagent) + ' (' + str(self.umb) + ') - ' + 'Pureza: ' + str(self.purity_unit) + ''

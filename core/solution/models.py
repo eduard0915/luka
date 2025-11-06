@@ -22,6 +22,19 @@ def code_solution_generator():
     return new_code_sln
 
 
+# Generador de códigos de soluciones Estándares
+def code_solution_std_generator():
+    today = timezone.now().strftime('%Y%m%d')
+    last_sln = SolutionStd.objects.order_by('date_creation').last()
+    if not last_sln or last_sln.date_creation.strftime('%Y%m%d') != timezone.now().strftime('%Y%m%d'):
+        return 'STD-' + today + '-' + '1'
+    code_std = last_sln.code_solution_std
+    code_std_int = int(code_std.split('-')[2])
+    new_code_std_int = code_std_int + 1
+    new_code_std = 'STD-' + today + '-' + str(new_code_std_int)
+    return new_code_std
+
+
 # Soluciones
 class Solution(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
@@ -33,7 +46,7 @@ class Solution(BaseModel):
     preparation_date = models.DateField(verbose_name='Fecha de Preparación', null=True, blank=True)
     expire_date_solution = models.DateField(verbose_name='Fecha de Vencimiento', null=True, blank=True)
     quantity_solution = models.FloatField(verbose_name='Cant. a Preparar (mL)')
-    quantity_reagent = models.FloatField(verbose_name='Cant. Reactivo (mL)')
+    quantity_reagent = models.FloatField(verbose_name='Cant. Reactivo')
     quantity_solvent = models.FloatField(verbose_name='Solvente (mL)', null=True, blank=True)
     preparated_by = models.ForeignKey(User, verbose_name='Preparado por', on_delete=models.CASCADE)
     standardizable = models.BooleanField(verbose_name='Estandarizable', default=False)
@@ -66,11 +79,51 @@ class Solution(BaseModel):
         return super(Solution, self).save(*args, **kwargs)
 
 
+# Soluciones Estándares
+class SolutionStd(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    solute_std = models.ForeignKey(InventoryReagent, verbose_name='Estándar', on_delete=models.CASCADE, related_name='solute_std')
+    solvent_reagent = models.ForeignKey(InventoryReagent, verbose_name='Solvente', on_delete=models.CASCADE, related_name='solvent_std', null=True, blank=True)
+    code_solution_std = models.CharField(max_length=20, verbose_name='Código', default=code_solution_std_generator)
+    concentration_std = models.FloatField(verbose_name='Concentración')
+    concentration_unit = models.CharField(max_length=4, verbose_name='Unidad Conc.')
+    preparation_std_date = models.DateField(verbose_name='Fecha de Preparación', null=True, blank=True)
+    expire_std_date_solution = models.DateField(verbose_name='Fecha de Vencimiento', null=True, blank=True)
+    quantity_solution_std = models.FloatField(verbose_name='Cant. a Preparar (mL)')
+    quantity_std = models.FloatField(verbose_name='Cantidad de Estándar')
+    quantity_solvent = models.FloatField(verbose_name='Solvente (mL)', null=True, blank=True)
+    preparated_std_by = models.ForeignKey(User, verbose_name='Preparado por', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.solute_std.reagent) + ' ' + str(self.concentration_std) + str(self.concentration_unit) + ' - ' + str(self.code_solution_std)
+
+    class Meta:
+        verbose_name = 'SolutionStd'
+        verbose_name_plural = 'SolutionSTDs'
+        db_table = 'SolutionStd'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+
+        if self.quantity_std:
+            self.quantity_reagent = round(self.quantity_std, self.solute_std.reagent.sig_figs_solution)
+
+        if self.quantity_solvent:
+            self.quantity_solvent = round(self.quantity_solvent, self.solute_std.reagent.sig_figs_solution)
+
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(SolutionStd, self).save(*args, **kwargs)
+
+
 # Estandarización de soluciones
 class StandarizationSolution(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     solution = models.ForeignKey(Solution, verbose_name='Solución', on_delete=models.CASCADE)
-    standard_sln = models.ForeignKey(InventoryReagent, verbose_name='Solución| Estándar', on_delete=models.CASCADE)
+    standard_sln = models.ForeignKey(InventoryReagent, verbose_name='Solución Estándar', on_delete=models.CASCADE)
     quantity_solution = models.FloatField(verbose_name='mL de Solución')
     concentration_sln = models.FloatField(verbose_name='Concentración Sln')
     quantity_standard = models.FloatField(verbose_name='mL Estándar')
