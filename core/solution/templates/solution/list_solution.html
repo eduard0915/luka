@@ -2,16 +2,17 @@
 {% load static %}
 
 {% block head_list %}
-    <script src="{% static 'list_solution.js' %}"></script>
+    {% if entity == 'Soluciones' %}
+        <script src="{% static 'list_solution.js' %}"></script>
+    {% else %}
+        <script src="{% static 'list_solution_std.js' %}"></script>
+    {% endif %}
     <script>let toDay = {{ today | date:'Y-m-d' }}</script>
 {% endblock %}
 
 {% block buttons %}
-    <a href="{{ create_url_std }}" class="btn btn-dark me-2" type="button">
-        <i class="bi bi-plus-square me-2"></i> Nuevo STD
-    </a>
     <a href="{{ create_url }}" class="btn btn-primary me-2" type="button">
-        <i class="bi bi-plus-square me-2"></i> Nuevo SLN
+        <i class="bi bi-plus-square me-2"></i> Nuevo
     </a>
 {#    <a href="{{ download_url }}" class="btn btn-outline-primary me-2" type="button"> Descargar</a>#}
 {% endblock %}
