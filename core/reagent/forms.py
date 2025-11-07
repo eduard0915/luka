@@ -22,7 +22,7 @@ class ReagentForm(ModelForm):
         fields = [
             'code_reagent', 'description_reagent', 'umb', 'manufacturer', 'site', 'technical_sheet', 'purity_unit',
             'molecular_weight', 'gram_equivalent', 'stability_solution', 'volumetric', 'solvent', 'density_enable',
-            'standard']
+            'standard', 'ready_to_use']
         widgets = {
             'description_reagent': TextInput(attrs={'class': 'form-control', 'required': True}),
             'code_reagent': TextInput(attrs={'class': 'form-control', 'required': True}),
@@ -38,6 +38,7 @@ class ReagentForm(ModelForm):
             'solvent': Select(attrs={'class': 'form-control', 'required': True}, choices=BOOLEAN),
             'density_enable': Select(attrs={'class': 'form-control', 'required': True}, choices=BOOLEAN),
             'standard': Select(attrs={'class': 'form-control', 'required': True}, choices=BOOLEAN),
+            'ready_to_use': Select(attrs={'class': 'form-control', 'required': True}, choices=BOOLEAN),
         }
 
     def save(self, commit=True):

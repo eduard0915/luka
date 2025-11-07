@@ -31,7 +31,7 @@ class Reagent(BaseModel):
     ready_to_use = models.BooleanField(verbose_name='STD Listo para Usar', default=False)
 
     def __str__(self):
-        return str(self.code_reagent) + ' '  + str(self.description_reagent) + ' (' + str(self.umb) + ') - ' + 'Pureza: ' + str(self.purity_unit) + ''
+        return str(self.code_reagent) + ' '  + str(self.description_reagent)
 
     class Meta:
         verbose_name = 'Reagent'
