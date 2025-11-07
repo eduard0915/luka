@@ -4,10 +4,32 @@
 
 {% block content_pdf %}
 
-    <table class="table">
+    <table style="width: 100%; margin-bottom: 10px;">
         <tr>
-            <td>
-                <h5>
+            <td style="vertical-align: top;">
+                {% if company_logo_path %}
+                    <img src="{{ company_logo_path }}" alt="Logo {{ company.company_name }}"
+                         style="width: 150px; height: auto;">
+                {% else %}
+                    <p style="font-size: 12px; color: #666;">{{ company.company_name }}</p>
+                {% endif %}
+            </td>
+            <td style="vertical-align: top; padding-left: 15px;">
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="margin: 0; padding: 15px 0 0;">
+                            <b style="font-size: 13px;">{{ sln.code_solution }}</b>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <table class="table" style="margin-bottom: 5px;">
+        <tr>
+            <td style="text-align: center; vertical-align: middle; padding-top: 10px">
+                <h5 style="margin: 0; padding: 0; text-align: center;">
                     <b>
                         Solución de {{ sln.solute_reagent.reagent.description_reagent }}
                         {{ sln.concentration }}{{ sln.concentration_unit }}
@@ -17,24 +39,40 @@
         </tr>
     </table>
 
-    <table class="tabContent" style="border-radius: 15px">
+    <table class="tabContent" style="border-radius: 15px; width: 100%;">
         <tr style="border-bottom: none; padding-bottom: 1px">
-            <th style="border: none"><strong>Código: </strong></th>
-            <th style="border: none"><strong>Preparación: </strong></th>
-            <th style="border: none"><strong>Volumen: </strong></th>
-            <th style="border: none"><strong>Vence: </strong></th>
+            <th style="border: none; padding: 2px 5px 0;"><strong>Preparación:</strong></th>
+            <th style="border: none; padding: 2px 5px 0;"><strong>Volumen:</strong></th>
+            <th style="border: none; padding: 2px 5px 0;"><strong>Vence:</strong></th>
         </tr>
-        <tr style="border-top: none; border-bottom: none">
-            <td style="border: none">{{ sln.code_solution }}</td>
-            <td style="border: none">{{ sln.preparation_date | date:'Y-m-d' }}</td>
-            <td style="border: none">{{ sln.quantity_solution | intcomma:False }}mL</td>
-            <td style="border: none">{{ sln.expire_date_solution | date:'Y-m-d' }}</td>
+        <tr style="border-bottom: none; border-top:none; padding-bottom: 1px">
+            <td style="border: none; padding: 0 5px 3px;">{{ sln.preparation_date|date:'Y-m-d' }}</td>
+            <td style="border: none; padding: 0 5px 3px;">{{ sln.quantity_solution|intcomma:False }}mL</td>
+            <td style="border: none; padding: 0 5px 3px;">{{ sln.expire_date_solution|date:'Y-m-d' }}</td>
         </tr>
-        <tr style="border-bottom: none; border-top: none">
-            <th style="border: none" colspan="2"><strong>Preparado por:</strong></th>
+        <tr style="border-bottom: none; border-top:none; padding-bottom: 1px">
+            <th style="border: none; padding: 2px 5px 0;"><strong>N° de Lote:</strong></th>
+            {% if sln.standardizable %}
+                <th style="border: none; padding: 2px 5px 0;" colspan="2"><strong>Concentración STD:</strong></th>
+            {% endif %}
         </tr>
-        <tr style="border-top: none">
-            <td style="border: none" colspan="2">{{ sln.preparated_by }}</td>
+        <tr style="border-bottom: none; border-top:none; padding-bottom: 1px">
+            <td style="border: none; padding: 0 5px 3px;">{{ sln.solute_reagent.batch_number }}</td>
+            {% if sln.standardizable %}
+                <td style="border: none; padding: 0 5px 3px;" colspan="2">
+                    {% if sln.average_concentration %}
+                        {{ sln.average_concentration }} {{ sln.concentration_unit }}
+                    {% else %}
+                        <p style="color: red">Pendiente</p>
+                    {% endif %}
+                </td>
+            {% endif %}
+        </tr>
+        <tr style="border-bottom: none; border-top:none; padding-bottom: 1px">
+            <th style="border: none; padding: 2px 5px 0;" colspan="3"><strong>Preparado por:</strong></th>
+        </tr>
+        <tr style="border-top:none; padding-bottom: 1px">
+            <td style="border: none; padding: 0 5px;" colspan="3">{{ sln.preparated_by }}</td>
         </tr>
     </table>
 

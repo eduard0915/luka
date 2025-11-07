@@ -125,7 +125,6 @@ class SolutionListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, List
         context = super().get_context_data(**kwargs)
         context['title'] = 'Soluciones'
         context['create_url'] = reverse_lazy('solution:create_solution')
-        context['create_url_std'] = reverse_lazy('solution:create_solution_std')
         context['entity'] = 'Soluciones'
         context['div'] = '12'
         context['icon'] = 'fa-solid fa-flask-vial'
@@ -242,44 +241,68 @@ class SolutionLabelPDFDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
 
     @staticmethod
     def link_callback(uri, rel):
+        """
+        Convierte URIs a rutas absolutas del sistema de archivos
+        """
+        sUrl = settings.STATIC_URL  # Típicamente /static/
+        sRoot = settings.STATIC_ROOT  # Típicamente /home/userX/project_static/
+        mUrl = settings.MEDIA_URL  # Típicamente /media/
+        mRoot = settings.MEDIA_ROOT  # Típicamente /home/userX/project_media/
 
-        # use short variable names
-        sUrl = settings.STATIC_URL  # Typically /static/
-        sRoot = settings.STATIC_ROOT  # Typically /home/userX/project_static/
-        mUrl = settings.MEDIA_URL  # Typically /static/media/
-
-        # convert URIs to absolute system paths
+        # Convertir URIs a rutas absolutas del sistema
         if uri.startswith(mUrl):
-            return uri
+            path = os.path.join(mRoot, uri.replace(mUrl, ""))
         elif uri.startswith(sUrl):
             path = os.path.join(sRoot, uri.replace(sUrl, ""))
-            if not os.path.isfile(path):
-                raise Exception(
-                    'Logo provided do not exists on path given: %s' % path
-                )
-            return path
+        else:
+            return uri
+
+        # Verificar que el archivo existe
+        if not os.path.isfile(path):
+            print(f'Advertencia: El archivo no existe en la ruta: {path}')
+            return None
+
+        return path
 
     def get(self, request, *args, **kwargs):
         try:
             template = get_template('solution/label_solution.html')
             sln = Solution.objects.get(pk=self.kwargs['pk'])
+            company = Company.objects.first()
+
             context = {
-                'sln': Solution.objects.get(pk=self.kwargs['pk']),
-                'company': Company.objects.first(),
-                'title': 'Etiqueta Sln: ' + sln.code_solution,
-                # 'page_size': '101.6mm 101.6mm',
-                'page_size': '101.6mm 50.8mm',
+                'sln': sln,
+                'company': company,
+                'title': f'Etiqueta Sln: {sln.code_solution}',
+                'page_size': '101.6mm 80.8mm',
             }
+
+            # Si existe logo, agregar la ruta ABSOLUTA del sistema
+            if company and company.company_logo:
+                logo_path = os.path.join(settings.MEDIA_ROOT, str(company.company_logo))
+                if os.path.isfile(logo_path):
+                    context['company_logo_path'] = logo_path
+                else:
+                    print(f'Advertencia: Logo no encontrado en: {logo_path}')
+
             html = template.render(context)
             response = HttpResponse(content_type='application/pdf')
-            pisa.CreatePDF(
-                html, dest=response,
+
+            pisa_status = pisa.CreatePDF(
+                html,
+                dest=response,
                 link_callback=self.link_callback
             )
+
+            if pisa_status.err:
+                raise Exception('Error al generar el PDF')
+
             return response
-        except ValueError as error:
-            print(f'Tiene un valor errado: {error}')
-        except TypeError as error:
-            print(f'Tiene un error de tipo: {error}')
-            pass
+
+        except Solution.DoesNotExist:
+            messages.error(request, 'La solución no existe')
+        except Exception as error:
+            messages.error(request, f'Error al generar el PDF: {error}')
+            print(f'Error al generar PDF: {error}')
+
         return HttpResponseRedirect(reverse_lazy('solution:list_solution'))
