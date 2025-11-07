@@ -13,11 +13,12 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView, DetailView
 
 from core.mixins import ValidatePermissionRequiredMixin
 from core.reagent.forms import InventoryReagentForm
-from core.reagent.models import InventoryReagent, TransactionReagent
+from core.reagent.models import InventoryReagent, TransactionReagent, Reagent
 
 
 # Registro de Entrada Inventario de Reactivo
@@ -265,3 +266,17 @@ class CertificateQualityDownloadView(LoginRequiredMixin, ValidatePermissionRequi
                 return HttpResponse('El documento solicitado no existe')
         else:
             return HttpResponse('La solicitud es incorrecta, faltan parámetros')
+
+
+@require_http_methods(["GET"])
+def get_reagent_info(request, reagent_id):
+    try:
+        reagent = Reagent.objects.get(id=reagent_id)
+        return JsonResponse({
+            'volumetric': reagent.volumetric,
+            'purity_unit': reagent.purity_unit,
+            'umb': reagent.umb,
+            'description': reagent.description_reagent
+        })
+    except Reagent.DoesNotExist:
+        return JsonResponse({'error': 'Reactivo no encontrado'}, status=404)

@@ -69,6 +69,10 @@
 {% endblock %}
 {% block scripts_detail %}
 
+    {% if entity == 'Registro de Entrada de Reactivos' %}
+        <script src="{% static 'form_inventory_reagent.js' %}"></script>
+    {% endif %}
+
     <script type="application/javascript">
 
         const dateInputs = document.querySelectorAll('[data-datepicker="1"], .js-datepicker');

@@ -18,6 +18,7 @@ urlpatterns = [
     path('inventory/delete/<uuid:pk>/', InventoryReagentDeleteView.as_view(), name='delete_inventory_reagent'),
     path('inventory/list/', InventoryReagentListView.as_view(), name='list_inventory_reagent'),
     path('inventory/detail/<uuid:pk>/', InventoryReagentDetailView.as_view(), name='detail_inventory_reagent'),
+    path('get-reagent-info/<uuid:reagent_id>/', get_reagent_info, name='get_reagent_info'),
     path('transaction_reagent/add/<uuid:pk>/', TransactionReagentCreateView.as_view(), name='create_transaction_reagent'),
     path('transaction_reagent/coa/', CertificateQualityDownloadView.as_view(), name='download_reagent_coa'),
 ]
