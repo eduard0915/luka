@@ -22,8 +22,8 @@
                         <div class="row">
                             {% for field in form.visible_fields %}
                                 <div class="{% if field.name == 'reagent' %}col-md-5
-                                {% elif field.name == 'code_solution' or field.name == 'concentration' or field.name == 'concentration_unit' %}col-md-2
-                                {% elif field.name == 'solute_reagent' or field.name == 'solvent_reagent' %}col-md-6
+                                {% elif field.name == 'code_solution' or field.name == 'code_solution_std' or field.name == 'concentration' or field.name == 'concentration_std' or field.name == 'concentration_unit' %}col-md-2
+                                {% elif field.name == 'solute_reagent' or field.name == 'solute_std' or field.name == 'solvent_reagent' %}col-md-6
                                 {% else %}col-md-3{% endif %}">
                                     <div class="form-group mb-2">
                                         {% if field.name == 'groups' or field.name == 'is_active' or field.name == 'site' or field.name == 'reagent' or field.name == 'reagent_liquid' %}

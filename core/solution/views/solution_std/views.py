@@ -11,13 +11,13 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from django.views.generic import CreateView, DetailView, ListView
+from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from xhtml2pdf import pisa
 
 from core.company.models import Company
 from core.mixins import ValidatePermissionRequiredMixin
 from core.reagent.models import InventoryReagent
-from core.solution.forms import SolutionStandardForm
+from core.solution.forms import SolutionStandardForm, SolutionStdAddSolventForm
 from core.solution.models import SolutionStd
 from luka import settings
 
@@ -42,7 +42,7 @@ class SolutionStandardCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
                 form = self.get_form()
                 if form.is_valid():
                     self.object = form.save()
-                    code_solution = form.cleaned_data.get('code_solution')
+                    code_solution = form.cleaned_data.get('code_solution_std')
                     messages.success(request, f'Solución Estándar "{code_solution}" creada satisfactoriamente!')
                     # Provide redirect URL to detail view for AJAX to use
                     data['redirect_url'] = self.get_success_url()
@@ -67,9 +67,47 @@ class SolutionStandardCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['icon'] = 'fa-solid fa-flask-vial'
         # Fallback cancel/back link to the solutions list
         try:
-            context['list_url'] = reverse_lazy('solution:list_solution')
+            context['list_url'] = reverse_lazy('solution:list_solution_std')
         except Exception:
             pass
+        return context
+
+
+# Adición de Solvente a Sln Estándar
+class SolutionStdAddSolventUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    model = SolutionStd
+    form_class = SolutionStdAddSolventForm
+    template_name = 'solution/create_solvent.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'edit':
+                form = self.get_form()
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, f'Solvente Añadido satisfactoriamente!')
+                else:
+                    messages.error(request, form.errors)
+            else:
+                data['error'] = 'No ha ingresado datos en los campos'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Adición de Solvente'
+        context['action'] = 'edit'
+        context['class'] = 'col-md-6'
+        context['info_form'] = self.object.solvent_reagent.reagent.description_reagent + ' al ' + str(self.object.solvent_reagent.purity) + self.object.solvent_reagent.reagent.purity_unit
         return context
 
 
@@ -177,6 +215,7 @@ def get_inventory_reagent_data(request, reagent_id):
                 'gram_equivalent': float(
                     inventory_reagent.reagent.gram_equivalent) if inventory_reagent.reagent.gram_equivalent else None,
                 'ready_to_use': inventory_reagent.reagent.ready_to_use,
+                'volumetric': inventory_reagent.reagent.volumetric,  # NUEVO CAMPO
                 'stability_solution': inventory_reagent.reagent.stability_solution,
             }
         }

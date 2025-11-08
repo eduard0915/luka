@@ -1,7 +1,7 @@
 import uuid
 
 from crum import get_current_user
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 
 from core.models import BaseModel
@@ -11,28 +11,52 @@ from core.user.models import User
 
 # Generador de códigos de soluciones
 def code_solution_generator():
-    today = timezone.now().strftime('%Y%m%d')
-    last_sln = Solution.objects.order_by('date_creation').last()
-    if not last_sln or last_sln.date_creation.strftime('%Y%m%d') != timezone.now().strftime('%Y%m%d'):
-        return 'SLN-' + today + '-' + '1'
-    code_sln = last_sln.code_solution
-    code_sln_int = int(code_sln.split('-')[2])
-    new_code_sln_int = code_sln_int + 1
-    new_code_sln = 'SLN-' + today + '-' + str(new_code_sln_int)
-    return new_code_sln
+    # Obtener la fecha actual en la zona horaria local
+    now = timezone.localtime(timezone.now())
+    today = now.date()
+    today_str = now.strftime('%Y%m%d')
+
+    # Buscar el último registro del día actual
+    with transaction.atomic():
+        last_sln = Solution.objects.filter(
+            date_creation__date=today
+        ).select_for_update().order_by('-date_creation').first()
+
+        if not last_sln:
+            # Primer registro del día
+            return f'SLN-{today_str}-1'
+
+        # Extraer el número secuencial del código existente
+        code_parts = last_sln.code_solution.split('-')
+        current_number = int(code_parts[2])
+        new_number = current_number + 1
+
+        return f'SLN-{today_str}-{new_number}'
 
 
 # Generador de códigos de soluciones Estándares
 def code_solution_std_generator():
-    today = timezone.now().strftime('%Y%m%d')
-    last_sln = SolutionStd.objects.order_by('date_creation').last()
-    if not last_sln or last_sln.date_creation.strftime('%Y%m%d') != timezone.now().strftime('%Y%m%d'):
-        return 'STD-' + today + '-' + '1'
-    code_std = last_sln.code_solution_std
-    code_std_int = int(code_std.split('-')[2])
-    new_code_std_int = code_std_int + 1
-    new_code_std = 'STD-' + today + '-' + str(new_code_std_int)
-    return new_code_std
+    # Obtener la fecha actual en la zona horaria local
+    now = timezone.localtime(timezone.now())
+    today = now.date()
+    today_str = now.strftime('%Y%m%d')
+
+    # Buscar el último registro del día actual
+    with transaction.atomic():
+        last_sln = SolutionStd.objects.filter(
+            date_creation__date=today
+        ).select_for_update().order_by('-date_creation').first()
+
+        if not last_sln:
+            # Primer registro del día
+            return f'STD-{today_str}-1'
+
+        # Extraer el número secuencial del código existente
+        code_parts = last_sln.code_solution_std.split('-')
+        current_number = int(code_parts[2])
+        new_number = current_number + 1
+
+        return f'STD-{today_str}-{new_number}'
 
 
 # Soluciones
@@ -106,7 +130,7 @@ class SolutionStd(BaseModel):
         user = get_current_user()
 
         if self.quantity_std:
-            self.quantity_reagent = round(self.quantity_std, self.solute_std.reagent.sig_figs_solution)
+            self.quantity_std = round(self.quantity_std, self.solute_std.reagent.sig_figs_solution)
 
         if self.quantity_solvent:
             self.quantity_solvent = round(self.quantity_solvent, self.solute_std.reagent.sig_figs_solution)

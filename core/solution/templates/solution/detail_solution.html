@@ -103,7 +103,7 @@
                             <i class="fa fa-fw fa-lg fa-list me-2"></i>Soluciones
                         </a>
                     {% endif %}
-                    {% if object.standardizable %}
+                    {% if object.standardizable and object.quantity_solvent %}
                         <a onclick="open_modal('{{ std }}')" class="btn btn-success">
                             <i class="fa fa-fw fa-lg fa-check-double me-2"></i> Estandarizar
                         </a>

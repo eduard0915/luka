@@ -86,7 +86,7 @@ def discount_inventory_reagent_solvent(sender, instance, **kwargs):
 def discount_inventory_reagent_solvent_std(sender, instance, **kwargs):
     if instance.quantity_solvent and instance.solvent_reagent:
         InventoryReagent.objects.filter(pk=instance.solvent_reagent.id).update(
-            quantity_stock=float(instance.solvent_reagent.quantity_stock - instance.quantity_solvent))
+            quantity_stock=round(instance.solvent_reagent.quantity_stock - instance.quantity_solvent, 2))
 
         TransactionReagent.objects.create(
             reagent_inventory_id=instance.solvent_reagent.id,

@@ -101,17 +101,14 @@
                 <div class="tile-footer">
                     {% if not object.quantity_solvent and not object.solute_std.reagent.ready_to_use %}
                         {% if object.quantity_std < object.solute_std.quantity_stock %}
-                            <button onclick="open_modal('{% url 'solution:add_solvent_solution' object.id %}')"
+                            <button onclick="open_modal('{% url 'solution:add_solvent_solution_std' object.id %}')"
                                     class="btn btn-primary me-2">
                                 <i class="bi bi-moisture me-2"></i> Añadir de Solvente
                             </button>
                         {% else %}
                                 <p class="text-danger p-2">Cantidad de Reactivo requerida mayor que la
-                                    disponible {{ object.solute_reagent.quantity_stock | unlocalize }} {{ object.solute_reagent.reagent.umb }}</p>
+                                    disponible {{ object.solute_std.quantity_stock | unlocalize }} {{ object.solute_std.reagent.umb }}</p>
                         {% endif %}
-{#                        <a href="{{ update_solution }}" type="button" class="btn btn-warning me-2">#}
-{#                            <i class="fa fa-fw fa-lg fa-pencil me-2"></i> Editar#}
-{#                        </a>#}
                     {% endif %}
                     <a href="{{ label_url }}" type="button" class="btn btn-danger me-2" target="_blank">
                         <i class="fa fa-fw fa-lg fa-ticket me-2"></i> Etiqueta

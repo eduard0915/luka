@@ -17,6 +17,7 @@ urlpatterns = [
     path('detail/<uuid:pk>/', SolutionDetailView.as_view(), name='detail_solution'),
     path('detail_std/<uuid:pk>/', SolutionStdDetailView.as_view(), name='detail_solution_std'),
     path('add_solvent/<uuid:pk>/', SolutionAddSolventUpdateView.as_view(), name='add_solvent_solution'),
+    path('add_solvent_std/<uuid:pk>/', SolutionStdAddSolventUpdateView.as_view(), name='add_solvent_solution_std'),
     path('solution_label/<uuid:pk>/', SolutionLabelPDFDetailView.as_view(), name='solution_label_pdf'),
     path('solution_label_std/<uuid:pk>/', SolutionStdLabelPDFDetailView.as_view(), name='solution_label_std_pdf'),
     path('solution_std/<uuid:pk>/', StandarizationSolutionCreateView.as_view(), name='create_solution_std'),
