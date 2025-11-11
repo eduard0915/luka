@@ -3,7 +3,10 @@ from django.urls import path
 
 from core.solution.views.solution.views import *
 from core.solution.views.solution_std.views import *
-from core.solution.views.standarization.views import StandarizationSolutionCreateView
+from core.solution.views.standardization_sln.views import StandardizationSolutionDetailView, \
+    StandardizationSolutionCreateView
+from core.solution.views.standarization.views import StandardizationCreateView, StandardizationUpdateView
+# from core.solution.standardization_sln.standarization.standardization_sln import
 from luka import settings
 
 app_name = 'solution'
@@ -20,8 +23,11 @@ urlpatterns = [
     path('add_solvent_std/<uuid:pk>/', SolutionStdAddSolventUpdateView.as_view(), name='add_solvent_solution_std'),
     path('solution_label/<uuid:pk>/', SolutionLabelPDFDetailView.as_view(), name='solution_label_pdf'),
     path('solution_label_std/<uuid:pk>/', SolutionStdLabelPDFDetailView.as_view(), name='solution_label_std_pdf'),
-    path('solution_std/<uuid:pk>/', StandarizationSolutionCreateView.as_view(), name='create_solution_std'),
     path('api/inventory-reagent/<uuid:reagent_id>/', get_inventory_reagent_data, name='inventory_reagent_data'),
+    path('add_standardization/<uuid:pk>/', StandardizationCreateView.as_view(), name='create_standardization'),
+    path('update_standardization/<uuid:pk>/', StandardizationUpdateView.as_view(), name='update_standardization'),
+    # path('detail_standardization_sln/<uuid:pk>/', StandardizationSolutionDetailView.as_view(), name='detail_standardization_solution'),
+    path('add_standardization_sln/<uuid:pk>/', StandardizationSolutionCreateView.as_view(), name='create_standardization_solution'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL,

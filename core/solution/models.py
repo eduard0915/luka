@@ -143,42 +143,86 @@ class SolutionStd(BaseModel):
         return super(SolutionStd, self).save(*args, **kwargs)
 
 
-# Estandarización de soluciones
-class StandarizationSolution(BaseModel):
+# Estandarización
+class Standardization(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    solution = models.ForeignKey(Solution, verbose_name='Solución', on_delete=models.CASCADE)
-    standard_sln = models.ForeignKey(InventoryReagent, verbose_name='Solución Estándar', on_delete=models.CASCADE)
-    quantity_solution = models.FloatField(verbose_name='mL de Solución')
-    concentration_sln = models.FloatField(verbose_name='Concentración Sln')
-    quantity_standard = models.FloatField(verbose_name='mL Estándar')
-    standardized_by = models.ForeignKey(User, verbose_name='Realizado por', on_delete=models.CASCADE)
-    standarization_date = models.DateField(verbose_name='Fecha de Estandarización')
+    solution_reagent = models.ForeignKey(Reagent, verbose_name='Solución', on_delete=models.CASCADE, related_name='solution')
+    solution_std = models.ForeignKey(Reagent, verbose_name='Solución Estándar', on_delete=models.CASCADE, related_name='solution_std')
+    quantity_aliquot = models.FloatField(verbose_name='mL de Alícuota')
+    molar_relation = models.FloatField(verbose_name='Relación Molar', default=1)
 
     def __str__(self):
-        return str(self.quantity_standard)
+        return str(self.quantity_aliquot)
 
     class Meta:
-        verbose_name = 'StandarizationSolution'
-        verbose_name_plural = 'StandarizationSolutions'
-        db_table = 'StandarizationSolution'
+        verbose_name = 'Standardization'
+        verbose_name_plural = 'Standardizations'
+        db_table = 'Standardization'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
         user = get_current_user()
-
-        # significant_figures = None
-        # if (self.solute_reagent and self.solute_reagent.reagent and
-        #     self.solute_reagent.reagent.site and self.solute_reagent.reagent.site.company):
-        #     significant_figures = self.solute_reagent.reagent.site.company.sig_figs_solution
-        #
-        # if self.quantity_reagent and significant_figures is not None:
-        #     self.quantity_reagent = round(self.quantity_reagent, significant_figures)
-        #
-        # if self.quantity_solvent and significant_figures is not None:
-        #     self.quantity_solvent = round(self.quantity_solvent, significant_figures)
 
         if user:
             if not self.user_creation:
                 self.user_creation = user
             else:
                 self.user_updated = user
-        return super(StandarizationSolution, self).save(*args, **kwargs)
+        return super(Standardization, self).save(*args, **kwargs)
+
+
+# Estandarización de soluciones
+class StandardizationSolution(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    solution = models.ForeignKey(Solution, verbose_name='Solución', on_delete=models.CASCADE)
+    standard_sln = models.ForeignKey(SolutionStd, verbose_name='Solución Estándar', on_delete=models.CASCADE, null=True, blank=True)
+    quantity_aliquot = models.FloatField(verbose_name='mL de Alícuota')
+    concentration_sln = models.FloatField(verbose_name='Concentración Sln', null=True, blank=True)
+    quantity_standard = models.FloatField(verbose_name='mL Estándar', null=True, blank=True)
+    standardized_by = models.ForeignKey(User, verbose_name='', on_delete=models.CASCADE, null=True, blank=True)
+    standarization_date = models.DateField(verbose_name='', null=True, blank=True)
+
+    def __str__(self):
+        return str(self.quantity_standard)
+
+    class Meta:
+        verbose_name = 'StandardizationSolution'
+        verbose_name_plural = 'StandardizationSolutions'
+        db_table = 'StandardizationSolution'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(StandardizationSolution, self).save(*args, **kwargs)
+
+
+# Movimientos de Soluciones
+class TransactionSolution(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    solution_inventory = models.ForeignKey(Solution, verbose_name='Solución', on_delete=models.CASCADE)
+    date_transaction = models.DateField(verbose_name='Fecha')
+    type_transaction = models.CharField(max_length=50, verbose_name='Tipo de Registro')
+    detail_transaction = models.CharField(max_length=250, verbose_name='Detalle de Registro')
+    quantity = models.IntegerField(verbose_name='Cantidad')
+    user_transaction = models.ForeignKey(User, verbose_name='', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.quantity)
+
+    class Meta:
+        verbose_name = 'TransactionSolution'
+        verbose_name_plural = 'TransactionSolutions'
+        db_table = 'TransactionSolution'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(TransactionSolution, self).save(*args, **kwargs)

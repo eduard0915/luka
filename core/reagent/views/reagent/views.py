@@ -6,6 +6,7 @@ from botocore.exceptions import ClientError
 from decouple import config
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import OuterRef, Exists
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
@@ -17,6 +18,7 @@ from django.views.generic import CreateView, ListView, UpdateView
 from core.mixins import ValidatePermissionRequiredMixin
 from core.reagent.models import Reagent
 from core.reagent.forms import ReagentForm
+from core.solution.models import Standardization
 
 
 # Creación de reactivo
@@ -78,24 +80,36 @@ class ReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
         try:
             action = request.POST['action']
             if action == 'searchdata':
-                data = []
-                reagents = list(Reagent.objects.values(
+                # Obtener reactivos con LEFT JOIN a Standardization
+                # IMPORTANTE: 'solution' debe coincidir con el related_name en tu modelo
+                reagents = Reagent.objects.select_related('solution').values(
                     'id',
-                    'description_reagent',
                     'code_reagent',
-                    'technical_sheet',
-                    'enable_reagent',
-                    'site__site_name',
-                    'manufacturer',
+                    'description_reagent',
                     'umb',
                     'purity_unit',
+                    'manufacturer',
+                    'enable_reagent',
+                    'technical_sheet',
                     'stability_solution',
                     'volumetric',
                     'solvent',
                     'density_enable',
-                    'standard'
-                ).order_by('code_reagent'))
-                return JsonResponse(reagents, safe=False)
+                    'standard',
+                    'solution__id'  # ID de la Standardization relacionada
+                ).order_by('code_reagent')
+
+                # Procesar los datos para agregar campos calculados
+                data = []
+                for reagent in reagents:
+                    reagent_data = dict(reagent)
+                    # Extraer el ID de standardization y agregarlo como campo separado
+                    reagent_data['standardization_id'] = reagent_data.pop('solution__id')
+                    # Calcular si tiene estandarización
+                    reagent_data['has_standardization'] = reagent_data['standardization_id'] is not None
+                    data.append(reagent_data)
+
+                return JsonResponse(data, safe=False)
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:

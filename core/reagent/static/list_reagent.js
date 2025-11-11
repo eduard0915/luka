@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 {'data': 'umb'},
                 {'data': 'purity_unit'},
                 {'data': 'manufacturer'},
-                {'data': 'site__site_name'},
                 {'data': 'enable_reagent'},
                 {'data': 'technical_sheet'},
                 {'data': 'stability_solution'},
@@ -36,11 +35,11 @@ document.addEventListener('DOMContentLoaded', function () {
             ],
             columnDefs: [
                 {
-                    targets: [0, 1, 2, 3, 4, 5, 8],
+                    targets: [0, 1, 2, 3, 4, 5, 7],
                     class: 'td-actions text-center'
                 },
                 {
-                    targets: [6],
+                    targets: [5],
                     className: 'td-actions text-center',
                     render: function (data, type, row) {
                         let estado = null;
@@ -56,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 {
-                    targets: [7],
+                    targets: [6],
                     className: 'td-actions text-center',
                     orderable: false,
                     render: function (data, type, row) {
@@ -64,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 {
-                    targets: [9],
+                    targets: [8],
                     className: 'td-actions text-center',
                     render: function (data, type, row) {
                         let estado = null;
@@ -80,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 {
-                    targets: [10],
+                    targets: [9],
                     className: 'td-actions text-center',
                     render: function (data, type, row) {
                         let estado = null;
@@ -96,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 {
-                    targets: [11],
+                    targets: [10],
                     className: 'td-actions text-center',
                     render: function (data, type, row) {
                         let estado = null;
@@ -112,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 {
-                    targets: [12],
+                    targets: [11],
                     className: 'text-center',
                     render: function (data, type, row) {
                         let estado = null;
@@ -127,14 +126,50 @@ document.addEventListener('DOMContentLoaded', function () {
                         return estado;
                     }
                 },
+                // {
+                //     targets: [12],
+                //     class: 'td-actions text-center',
+                //     orderable: false,
+                //     render: function (data, type, row) {
+                //         let actions
+                //         actions = '<a href="/reagent/update/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a>&nbsp';
+                //         if (row['standard'] === false && row['solvent'] === false) {
+                //             actions += '<a onclick=open_modal("/solution/add_standardization/' + row['id'] + '/") type="button" title="Estandarización"><i class="bi bi-award-fill text-info"></i></a>';
+                //         }
+                //         return actions;
+                //     }
+                // },
                 {
-                    targets: [13],
+                    targets: [12],
                     class: 'td-actions text-center',
                     orderable: false,
                     render: function (data, type, row) {
-                        return '<a href="/reagent/update/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a>';
+                        let actions = '';
+
+                        // Botón de editar reactivo
+                        actions += '<a href="/reagent/update/' + row['id'] + '/" type="button" title="Editar">';
+                        actions += '<i class="bi bi-pencil-square text-warning"></i></a>&nbsp;';
+
+                        // Validar si puede tener estandarización
+                        if (row['standard'] === false && row['solvent'] === false) {
+
+                            // Si NO tiene estandarización: mostrar botón para CREAR
+                            if (row['has_standardization'] === false) {
+                                actions += '<a onclick="open_modal(\'/solution/add_standardization/' + row['id'] + '/\')" ';
+                                actions += 'type="button" title="Agregar Estandarización">';
+                                actions += '<i class="bi bi-award-fill text-info"></i></a>&nbsp;';
+                            }
+                            // Si YA tiene estandarización: mostrar botón para EDITAR
+                            else {
+                                actions += '<a onclick="open_modal(\'/solution/update_standardization/' + row['standardization_id'] + '/\')" ';
+                                actions += 'type="button" title="Editar Estandarización">';
+                                actions += '<i class="bi bi-award-fill text-success"></i></a>&nbsp;';
+                            }
+                        }
+
+                        return actions;
                     }
-                },
+                }
             ],
             initComplete: function (settings, json) {
             }
