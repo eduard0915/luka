@@ -61,7 +61,7 @@
             {% if sln.standardizable %}
                 <td style="border: none; padding: 0 5px 3px;" colspan="2">
                     {% if sln.average_concentration %}
-                        {{ sln.average_concentration }} {{ sln.concentration_unit }}
+                        <b style="color: red">{{ sln.average_concentration }} {{ sln.concentration_unit }}</b>
                     {% else %}
                         <p style="color: red">Pendiente</p>
                     {% endif %}

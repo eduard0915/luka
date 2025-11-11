@@ -105,7 +105,7 @@ class SolutionStandardForm(ModelForm):
         widgets = {
             'code_solution_std': TextInput(attrs={'class': 'form-control', 'readonly': True}),
             'solute_std': Select(attrs={'class': 'form-control', 'required': True}),
-            'solvent_reagent': Select(attrs={'class': 'form-control', 'required': True}),
+            'solvent_reagent': Select(attrs={'class': 'form-control'}),
             'concentration_std': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
             'concentration_unit': Select(attrs={'class': 'form-control', 'required': True}, choices=CONC),
             'quantity_solution_std': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),

@@ -122,82 +122,66 @@
             </div>
         </div>
     </div>
-    {#    <div class="row">#}
-    {#        <div class="col-md-10">#}
-    {#            <div class="tile mb-3">#}
-    {#                <div class="tile-title-w-btn">#}
-    {#                    <h3 class="title">Capacitaciones</h3>#}
-    {#                    <p>#}
-    {#                        <a class="btn btn-primary icon-btn"#}
-    {#                           onclick="open_modal('{% url 'user:create_training' object.slug %}')"><i#}
-    {#                                class="bi bi-plus-square me-2"></i>Nuevo</a>#}
-    {##}
-    {#                    </p>#}
-    {#                </div>#}
-    {#                <div class="tile-body">#}
-    {#                    <div class="table-responsive">#}
-    {#                        <table class="table table-hover table-bordered" id="data_0">#}
-    {#                            <thead>#}
-    {#                            <tr>#}
-    {#                                <th style="width:35%">Descripción</th>#}
-    {#                                <th style="width:5%">Ver</th>#}
-    {#                                <th style="width:25%">Realizada por</th>#}
-    {#                                <th style="width:13%">Fecha</th>#}
-    {#                                <th style="width:10%">Estado</th>#}
-    {#                                <th style="width:12%">Acciones</th>#}
-    {#                            </tr>#}
-    {#                            </thead>#}
-    {#                            <tbody>#}
-    {#                            {% for foo in training %}#}
-    {#                                <tr>#}
-    {#                                    <td>{{ foo.description_training }}</td>#}
-    {#                                    <td>#}
-    {#                                        <a href="{% url 'user:download_training' %}?id={{ foo.id }}&type=support_training"#}
-    {#                                           target="_blank">#}
-    {#                                            <i class="bi bi-file-earmark-pdf text-danger"></i>#}
-    {#                                        </a>#}
-    {#                                    </td>#}
-    {#                                    <td>{{ foo.training_by }}</td>#}
-    {#                                    <td>{{ foo.date_training | date:'Y-m-d' }}</td>#}
-    {#                                    <td>#}
-    {#                                        {% if foo.training_status == 'Vencido' %}#}
-    {#                                        	<span class="badge bg-danger">{{ foo.training_status }}</span>#}
-    {#                                        {% else %}#}
-    {#                                            {{ foo.training_status }}#}
-    {#                                        {% endif %}#}
-    {#                                    </td>#}
-    {#                                    <td>#}
-    {#                                        <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"#}
-    {#                                           title="Editar">#}
-    {#                                            <i class="bi bi-pencil-square text-warning me-2"></i>#}
-    {#                                        </a>#}
-    {#                                        <a onclick="open_modal('{% url 'user:delete_training' foo.id %}')"#}
-    {#                                           title="Eliminar">#}
-    {#                                            <i class="bi bi-trash text-danger me-2"></i>#}
-    {#                                        </a>#}
-    {#                                        {% if foo.training_status == 'Vencido' %}#}
-    {#                                            <a onclick="open_modal('{% url 'user:create_update_training' foo.id %}')"#}
-    {#                                               title="Actualizar">#}
-    {#                                                <i class="bi bi-arrow-clockwise text-info me-2"></i>#}
-    {#                                            </a>#}
-    {#                                        {% endif %}#}
-    {#                                    </td>#}
-    {#                                </tr>#}
-    {#                            {% empty %}#}
-    {#                                <tr>#}
-    {#                                    <td colspan="6" class="text-center">#}
-    {#                                        No hay capacitaciones asociadas.#}
-    {#                                    </td>#}
-    {#                                </tr>#}
-    {#                            {% endfor %}#}
-    {#                            </tbody>#}
-    {#                        </table>#}
-    {#                    </div>#}
-    {#                </div>#}
-    {#            </div>#}
-    {#        </div>#}
-    {#    </div>   #}
-
+    {% if transactions %}
+        <div class="row">
+            <div class="col-md-10">
+                <div class="tile mb-3">
+                    <div class="tile-title">
+                        <h3 class="title">Detalle Consumo</h3>
+                    </div>
+                    <div class="tile-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered" id="data_0">
+                                <thead>
+                                <tr>
+                                    <th style="width:10%">Fecha</th>
+                                    <th style="width:15%">Tipo</th>
+                                    <th style="width:10%">Cant. ({{ object.solute_std.reagent.umb }})</th>
+                                    <th style="width:25%">Realizada por</th>
+                                    <th style="width:30%">Detalle</th>
+                                    <th style="width:10%">Acciones</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for foo in transactions %}
+                                    <tr>
+                                        <td>{{ foo.date_transaction | date:'Y-m-d' }}</td>
+                                        <td>{{ foo.type_transaction }}</td>
+                                        <td>{{ foo.quantity | intcomma:False }}</td>
+                                        <td>{{ foo.user_transaction }}</td>
+                                        <td>{{ foo.detail_transaction }}</td>
+                                        <td>
+                                            <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
+                                               title="Editar">
+                                                <i class="bi bi-pencil-square text-warning me-2"></i>
+                                            </a>
+                                            <a onclick="open_modal('{% url 'user:delete_training' foo.id %}')"
+                                               title="Eliminar">
+                                                <i class="bi bi-trash text-danger me-2"></i>
+                                            </a>
+                                            {% if foo.training_status == 'Vencido' %}
+                                                <a onclick="open_modal('{% url 'user:create_update_training' foo.id %}')"
+                                                   title="Actualizar">
+                                                    <i class="bi bi-arrow-clockwise text-info me-2"></i>
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center">
+                                            No hay capacitaciones asociadas.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block scripts_detail %}

@@ -226,3 +226,31 @@ class TransactionSolution(BaseModel):
             else:
                 self.user_updated = user
         return super(TransactionSolution, self).save(*args, **kwargs)
+
+
+# Movimientos de Soluciones Estándares
+class TransactionSolutionStd(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    solution_std_inventory = models.ForeignKey(SolutionStd, verbose_name='Solución Estándar', on_delete=models.CASCADE)
+    date_transaction = models.DateField(verbose_name='Fecha')
+    type_transaction = models.CharField(max_length=50, verbose_name='Tipo de Registro')
+    detail_transaction = models.CharField(max_length=250, verbose_name='Detalle de Registro')
+    quantity = models.IntegerField(verbose_name='Cantidad')
+    user_transaction = models.ForeignKey(User, verbose_name='', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.quantity)
+
+    class Meta:
+        verbose_name = 'TransactionSolutionStd'
+        verbose_name_plural = 'TransactionSolutionStds'
+        db_table = 'TransactionSolutionStd'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(TransactionSolutionStd, self).save(*args, **kwargs)

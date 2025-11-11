@@ -4,32 +4,11 @@ from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import DetailView, CreateView
+from django.views.generic import DetailView, CreateView, DeleteView
 
 from core.mixins import ValidatePermissionRequiredMixin
 from core.solution.forms import StandardizationSolutionForm
 from core.solution.models import StandardizationSolution, Standardization, Solution
-
-
-# Detalle de Estandarización
-class StandardizationSolutionDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
-    model = StandardizationSolution
-    template_name = 'standardization_sln/detail_standardization.html'
-    permission_required = 'reagent.add_reagent'
-
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        sln = Solution.objects.get(pk=self.object.solution.id)
-        context['title'] = 'Estandarización de Solución'
-        context['entity'] = 'Estandarización de Solución'
-        context['icon'] = 'fa-solid fa-flask-vial'
-        context['std'] = Standardization.objects.get(solution_reagent_id=self.object.solution.solute_reagent.reagent.id)
-        context['list_url'] = reverse_lazy('solution:list_solution')
-        context['add_standardization'] = reverse_lazy('solution:create_standardization_solution', kwargs={'pk': sln.id})
-        return context
 
 
 # Registro de Estandarización
@@ -71,4 +50,30 @@ class StandardizationSolutionCreateView(LoginRequiredMixin, ValidatePermissionRe
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Registro de Estandarización'
+        return context
+
+
+# Eliminación de Estandarización
+class StandardizationSolutionDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DeleteView):
+    model = StandardizationSolution
+    template_name = 'standardization_sln/delete_standardization_sln.html'
+    permission_required = 'reagent.add_reagent'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            self.object.delete()
+            messages.success(request, 'Registro de Estandarización Eliminado Satisfactoriamente!')
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Eliminar de Registro'
+        context['delete'] = 'Está seguro de eliminar la Estandarización?'
         return context

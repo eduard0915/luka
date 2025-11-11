@@ -95,9 +95,11 @@
                             <i class="fa fa-fw fa-lg fa-pencil me-2"></i> Editar
                         </a>
                     {% endif %}
-                    <a href="{{ label_url }}" type="button" class="btn btn-danger me-2" target="_blank">
-                        <i class="fa fa-fw fa-lg fa-ticket me-2"></i> Etiqueta
-                    </a>
+                    {% if object.coefficient_variation < 2 %}
+                        <a href="{{ label_url }}" type="button" class="btn btn-danger me-2" target="_blank">
+                            <i class="fa fa-fw fa-lg fa-ticket me-2"></i> Etiqueta
+                        </a>
+                    {% endif %}
                     {% if list_url %}
                         <a href="{{ list_url }}" class="btn btn-secondary me-2">
                             <i class="fa fa-fw fa-lg fa-list me-2"></i>Soluciones
@@ -133,10 +135,37 @@
                             </div>
                             <div class="col-md-3">
                                 <b>Coeficiente de Variación</b><br>
-                                {% if object.average_concentration %}
-                                    <p class="text-success"><b>{{ object.coefficient_variation | unlocalize }}</b></p>
+                                {% if object.coefficient_variation %}
+                                    <p class="text-success"><b>{{ object.coefficient_variation | unlocalize }}%</b></p>
                                 {% else %}
                                     <p class="text-danger"><b>Pendiente</b></p>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                {% if standard_count > 2 %}
+                                    {% if object.coefficient_variation > 2 %}
+                                        <div class="bs-component">
+                                            <div class="alert alert-dismissible alert-danger d-flex align-items-center pe-3 mb-2">
+                                                <i class="bi bi-x-octagon fa-2x me-2"></i>
+                                                <strong class="me-2">No Cumple.</strong> CV Mayor del 2%.
+                                            </div>
+                                            <b class="text-danger"> Realice una Estandarización Adicional</b>
+                                        </div>
+                                    {% else %}
+                                        <div class="bs-component">
+                                            <div class="alert alert-dismissible alert-success d-flex align-items-center">
+                                                <i class="fas fa-check-circle fa-2x me-2"></i>
+                                                <strong>Cumple!</strong>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% elif standard_count > 0 and standard_count < 3 %}
+                                    <div class="bs-component">
+                                        <div class="alert alert-dismissible alert-warning d-flex align-items-center pe-3 mb-2">
+                                            <i class="bi bi-x-octagon fa-2x me-2"></i>
+                                            <strong class="me-2">Mínimo 3 replicas</strong>
+                                        </div>
+                                    </div>
                                 {% endif %}
                             </div>
                         </div>
@@ -154,15 +183,18 @@
                             </div>
                         {% endif %}
                     </div>
-                    <div class="tile-footer">
-                        <a onclick="open_modal('{{ add_standardization }}')" type="button" class="btn btn-primary me-2">
-                            <i class="fa fa-plus"></i> Registrar
-                        </a>
-                    </div>
+                    {% if standard_count <= 4 %}
+                        <div class="tile-footer">
+                            <a onclick="open_modal('{{ add_standardization }}')" type="button" class="btn btn-primary me-2">
+                                <i class="fa fa-plus"></i> Registrar
+                            </a>
+                        </div>
+                   {% endif %}
                 </div>
             </div>
         </div>
     {% endif %}
+
     {% if standardizations %}
         <!-- Historial de estandarizaciones de la misma solución -->
         <div class="row">
@@ -180,30 +212,24 @@
                                     <th style="width:45%">Solución Estándar</th>
                                     <th style="width:10%">mL Estándar </th>
                                     <th style="width:10%">[ ]</th>
-                                    <th style="width:15%">Realizado por</th>
-                                    <th style="width:10%">Acciones</th>
+                                    <th style="width:20%">Realizado por</th>
+                                    <th style="width:5%">Acciones</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {% for std in standardizations %}
-                                    <tr class="table-active">
+                                    <tr>
                                         <td class="text-center">{{ std.standarization_date | date:'Y-m-d' }}</td>
-                                        <td class="text-center">{{ std.standard_sln }} {{ std.standard_sln.concentration_std | unlocalize }}</td>
+                                        <td class="text-center">{{ std.standard_sln }}</td>
                                         <td class="text-center">{{ std.quantity_standard | unlocalize }}</td>
                                         <td class="text-center">
                                             <b>{{ std.concentration_sln | unlocalize }} {{ std.solution.concentration_unit }}</b>
                                         </td>
                                         <td>{{ std.standardized_by }}</td>
                                         <td class="text-center">
-                                            <a href="#" title="Ver">
-                                                <i class="bi bi-eye text-primary me-2"></i>
-                                            </a>
-                                            <a href="#" title="Editar">
-                                                <i class="bi bi-pencil-square text-warning me-2"></i>
-                                            </a>
-                                            <a onclick="open_modal()"
+                                            <a onclick="open_modal('{% url 'solution:delete_standardization_solution' std.id %}')"
                                                title="Eliminar">
-                                                <i class="bi bi-trash text-danger"></i>
+                                                <i class="bi bi-trash text-danger me-2"></i>
                                             </a>
                                         </td>
                                     </tr>
@@ -222,6 +248,59 @@
             </div>
         </div>
     {% endif %}
+
+    {% if transactions %}
+        <div class="row">
+            <div class="col-md-11">
+                <div class="tile mb-3">
+                    <div class="tile-title">
+                        <h3 class="title">Detalle Consumo</h3>
+                    </div>
+                    <div class="tile-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered" id="data_1">
+                                <thead>
+                                <tr>
+                                    <th style="width:12%">Fecha</th>
+                                    <th style="width:15%">Tipo</th>
+                                    <th style="width:10%">Cant. ({{ object.solute_reagent.reagent.umb }})</th>
+                                    <th style="width:25%">Realizada por</th>
+                                    <th style="width:30%">Detalle</th>
+                                    <th style="width:8%">Acciones</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for foo in transactions %}
+                                    <tr>
+                                        <td>{{ foo.date_transaction | date:'Y-m-d' }}</td>
+                                        <td>{{ foo.type_transaction }}</td>
+                                        <td>{{ foo.quantity | intcomma:False }}</td>
+                                        <td>{{ foo.user_transaction }}</td>
+                                        <td>{{ foo.detail_transaction }}</td>
+                                        <td>
+                                            <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
+                                               title="Editar">
+                                                <i class="bi bi-pencil-square text-warning me-2"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center">
+                                            No hay capacitaciones asociadas.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+
 {% endblock %}
 
 {% block scripts_detail %}
@@ -234,9 +313,10 @@
         try {
             $(function () {
                 // Solo inicializar DataTable si hay filas de datos
-                const hasData = $('#data_0 tbody tr').length > 0 && !$('#data_0 tbody tr td[colspan]').length;
+                const hasDataZero = $('#data_0 tbody tr').length > 0 && !$('#data_0 tbody tr td[colspan]').length;
+                const hasDataOne = $('#data_1 tbody tr').length > 0 && !$('#data_1 tbody tr td[colspan]').length;
 
-                if (hasData) {
+                if (hasDataZero) {
                     $('#data_0').DataTable({
                         responsive: true,
                         autoWidth: false,
@@ -249,12 +329,38 @@
                         columnDefs: [
                             {
                                 targets: [1, 5],
-                                className: 'td-actions text-center',
+                                className: 'align-middle text-center',
                                 orderable: false,
                             },
                             {
-                                targets: [2, 3, 4],
-                                className: 'td-actions text-center',
+                                targets: [0, 2, 3, 4],
+                                className: 'align-middle text-center',
+                            }
+                        ]
+                    });
+                } else {
+                    console.info('DataTable no inicializado: tabla vacía o sin datos válidos');
+                }
+
+                if (hasDataOne) {
+                    $('#data_1').DataTable({
+                        responsive: true,
+                        autoWidth: false,
+                        searching: false,
+                        info: false,
+                        order: [[0, 'desc']],
+                        language: {
+                            url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
+                        },
+                        columnDefs: [
+                            {
+                                targets: [5],
+                                className: 'align-middle text-center',
+                                orderable: false,
+                            },
+                            {
+                                targets: [0, 1, 2, 3, 4],
+                                className: 'align-middle text-center',
                             }
                         ]
                     });

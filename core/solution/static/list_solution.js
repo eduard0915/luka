@@ -44,13 +44,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     targets: [4],
                     className: 'td-actions text-center',
                     render: function (data, type, row) {
-                        let expire = null;
+                        let expire = '';
                         switch (row['expire_date_solution'] < toDay) {
                             case true:
                                 return '<span class="badge bg-danger">' + row['expire_date_solution'] + '</span>';
                                 break;
                             case false:
                                 return row['expire_date_solution'] ;
+                                break;
+                            case null:
+                                return '';
                                 break;
                         }
                         return expire;
@@ -63,7 +66,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     render: function (data, type, row) {
                         let actions
                         actions = '<a href="/solution/detail/' + row['id'] + '/" type="button" title="Detalle de Preparación"><i class="bi bi-info-square text-info"></i></a> &nbsp';
-                        actions += '<a href="/solution/update/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a>';
+                        if (row['quantity_solvent'] !== null){
+                            actions += '<a href="/solution/update/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a>';
+                        }
                         return actions
                     }
                 },
