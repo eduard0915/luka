@@ -58,15 +58,9 @@
         <div class="row">
             <div class="col-md-10">
                 <div class="tile mb-3">
-{#                    <div class="tile-title-w-btn">#}
-{#                        <h3 class="title">Capacitaciones</h3>#}
-{#                        <p>#}
-{#                            <a class="btn btn-primary icon-btn"#}
-{#                               onclick="open_modal('{% url 'user:create_training' object.slug %}')"><i#}
-{#                                    class="bi bi-plus-square me-2"></i>Nuevo</a>#}
-{##}
-{#                        </p>#}
-{#                    </div>#}
+                    <div class="tile-title">
+                        <h3 class="title">Detalle Consumo</h3>
+                    </div>
                     <div class="tile-body">
                         <div class="table-responsive">
                             <table class="table table-hover table-bordered" id="data_0">
@@ -140,7 +134,7 @@
                         autoWidth: false,
                         searching: false,
                         info: false,
-                        order: [[3, 'desc']],
+                        order: [[0, 'desc']],
                         language: {
                             url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
                         },

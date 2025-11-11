@@ -18,7 +18,7 @@ from core.company.models import Company
 from core.mixins import ValidatePermissionRequiredMixin
 from core.reagent.models import InventoryReagent
 from core.solution.forms import SolutionStandardForm, SolutionStdAddSolventForm
-from core.solution.models import SolutionStd
+from core.solution.models import SolutionStd, TransactionSolution, TransactionSolutionStd
 from luka import settings
 
 
@@ -184,7 +184,7 @@ class SolutionStdDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         #     context['back'] = reverse_lazy('user:user_list')
         context['icon'] = 'fa-solid fa-flask-vial'
         context['list_url'] = reverse_lazy('solution:list_solution_std')
-        # context['update_solution'] = reverse_lazy('solution:update_solution', kwargs={'pk': self.object.pk})
+        context['transactions'] = TransactionSolutionStd.objects.filter(solution_std_inventory_id=self.object.pk)
         context['std'] = reverse_lazy('solution:create_solution_std', kwargs={'pk': self.object.pk})
         return context
 
