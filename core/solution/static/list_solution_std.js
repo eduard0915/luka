@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
             autoWidth: false,
             destroy: true,
             deferRender: true,
+            order: [[ 0, "desc" ]],
             language: {
                 url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
             },

@@ -22,7 +22,7 @@ from xhtml2pdf import pisa
 from core.company.models import Company
 from core.mixins import ValidatePermissionRequiredMixin
 from core.solution.forms import *
-from core.solution.models import Solution
+from core.solution.models import Solution, StandardizationSolution
 from luka import settings
 
 
@@ -228,10 +228,12 @@ class SolutionDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, De
         context['label_url'] = reverse_lazy('solution:solution_label_pdf', kwargs={'pk': self.object.pk})
         # if self.request.user.has_perm('user.add_user'):
         #     context['back'] = reverse_lazy('user:user_list')
+        context['std'] = Standardization.objects.get(solution_reagent_id=self.object.solute_reagent.reagent.id)
         context['icon'] = 'fa-solid fa-flask-vial'
         context['list_url'] = reverse_lazy('solution:list_solution')
+        context['standardizations'] = StandardizationSolution.objects.filter(solution_id=self.object.id)
         context['update_solution'] = reverse_lazy('solution:update_solution', kwargs={'pk': self.object.pk})
-        context['std'] = reverse_lazy('solution:create_solution_std', kwargs={'pk': self.object.pk})
+        context['add_standardization'] = reverse_lazy('solution:create_standardization_solution', kwargs={'pk': self.object.pk})
         return context
 
 

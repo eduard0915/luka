@@ -15666,7 +15666,7 @@ eye:
       - seen
       - show
       - sight
-      - views
+      - standardization_sln
       - visible
   styles:
     - solid
@@ -15763,7 +15763,7 @@ eye-slash:
       - show
       - toggle
       - unseen
-      - views
+      - standardization_sln
       - visible
       - visiblity
   styles:

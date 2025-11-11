@@ -18811,7 +18811,7 @@ eye:
       - seen
       - show
       - sight
-      - views
+      - standardization_sln
       - visible
   unicode: f06e
   voted: false
@@ -18926,7 +18926,7 @@ eye-slash:
       - show
       - toggle
       - unseen
-      - views
+      - standardization_sln
       - visible
       - visiblity
   unicode: f070

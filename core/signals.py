@@ -1,9 +1,10 @@
+from django.db.models import Avg, StdDev
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 
 from core.reagent.models import InventoryReagent, TransactionReagent
-from core.solution.models import Solution, SolutionStd
+from core.solution.models import Solution, SolutionStd, StandardizationSolution, TransactionSolution
 from core.user.models import Training
 
 
@@ -34,13 +35,12 @@ def discount_inventory_reagent_solute(sender, instance, created, **kwargs):
         TransactionReagent.objects.create(
             reagent_inventory_id=instance.solute_reagent.id,
             type_transaction='Uso',
-            date_transaction=timezone.now(),
+            date_transaction=timezone.localtime(timezone.now()),
             detail_transaction='Solución ' + instance.code_solution + ' al ' + str(
                 instance.concentration) + instance.concentration_unit,
             quantity=instance.quantity_reagent,
             user_transaction_id=instance.preparated_by.id,
         )
-        return
 
 
 # Descuento de inventario de reactivos soluto para soluciones estándares
@@ -53,7 +53,7 @@ def discount_inventory_reagent_std(sender, instance, created, **kwargs):
         TransactionReagent.objects.create(
             reagent_inventory_id=instance.solute_std.id,
             type_transaction='Uso',
-            date_transaction=timezone.now(),
+            date_transaction=timezone.localtime(timezone.now()),
             detail_transaction='Solución Estándar ' + instance.code_solution_std + ' al ' + str(
                 instance.concentration_std) + instance.concentration_unit,
             quantity=instance.quantity_std,
@@ -72,7 +72,7 @@ def discount_inventory_reagent_solvent(sender, instance, **kwargs):
         TransactionReagent.objects.create(
             reagent_inventory_id=instance.solvent_reagent.id,
             type_transaction='Uso',
-            date_transaction=timezone.now(),
+            date_transaction=timezone.localtime(timezone.now()),
             detail_transaction='Solución ' + instance.code_solution + ' al ' + str(
                 instance.concentration) + instance.concentration_unit,
             quantity=instance.quantity_solvent,
@@ -91,7 +91,7 @@ def discount_inventory_reagent_solvent_std(sender, instance, **kwargs):
         TransactionReagent.objects.create(
             reagent_inventory_id=instance.solvent_reagent.id,
             type_transaction='Uso',
-            date_transaction=timezone.now(),
+            date_transaction=timezone.localtime(timezone.now()),
             detail_transaction='Solución Estándar' + instance.code_solution + ' al ' + str(
                 instance.concentration) + instance.concentration_unit,
             quantity=instance.quantity_solvent,
@@ -107,9 +107,43 @@ def register_inventory_reagent(sender, instance, created, **kwargs):
         TransactionReagent.objects.create(
             reagent_inventory_id=instance.id,
             type_transaction='Entrada',
-            date_transaction=timezone.now(),
+            date_transaction=timezone.localtime(timezone.now()),
             detail_transaction='Ingreso de Reactivo a Inventario',
             quantity=instance.quantity_stock,
             user_transaction_id=instance.user_creation.id,
         )
         return
+
+# Descuento de inventario de soluciones Estándares
+@receiver(post_save, sender=StandardizationSolution)
+def discount_inventory_std_solution(sender, instance, created, **kwargs):
+
+    if created:
+        SolutionStd.objects.filter(pk=instance.standard_sln.id).update(
+            quantity_solution_std=round((instance.standard_sln.quantity_solution_std - instance.quantity_standard), 2))
+
+        TransactionSolution.objects.create(
+            solution_inventory_id=instance.solution.id,
+            type_transaction='Uso',
+            date_transaction=timezone.localtime(timezone.now()),
+            detail_transaction='Estandarización de Solución ' + instance.solution.code_solution,
+            quantity=instance.quantity_standard,
+            user_transaction_id=instance.standardized_by.id,
+        )
+
+        # Para obtener promedio y desviación estándar
+        stats = StandardizationSolution.objects.filter(solution=instance.solution).aggregate(
+            average=Avg('concentration_sln'),
+            deviation_std=StdDev('concentration_sln')
+        )
+
+        media = round(stats['average'], 4) if stats['average'] else None
+        standard_deviation = round(stats['deviation_std'], 4) if stats['deviation_std'] else None
+
+        if media and media != 0 and standard_deviation is not None:
+            rsd = round((standard_deviation / media) * 100, 4)
+        else:
+            rsd = None
+
+        Solution.objects.filter(pk=instance.solution.id).update(
+            average_concentration=media, deviation_std=standard_deviation, coefficient_variation=rsd)
