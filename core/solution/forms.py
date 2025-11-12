@@ -38,47 +38,132 @@ class SolutionForm(ModelForm):
             'quantity_solution': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
         }
 
+    def clean(self):
+        """Validar datos y calcular cantidad de reactivo necesaria"""
+        cleaned_data = super().clean()
+
+        # Obtener campos necesarios
+        solute_reagent = cleaned_data.get('solute_reagent')
+        concentration = cleaned_data.get('concentration')
+        concentration_unit = cleaned_data.get('concentration_unit')
+        quantity_solution = cleaned_data.get('quantity_solution')
+
+        # Si falta algún campo crítico, retornar sin validar más
+        if not all([solute_reagent, concentration, concentration_unit, quantity_solution]):
+            return cleaned_data
+
+        # Validar valores numéricos positivos
+        if concentration <= 0:
+            self.add_error('concentration', 'La concentración debe ser mayor que cero')
+            return cleaned_data
+
+        if quantity_solution <= 0:
+            self.add_error('quantity_solution', 'La cantidad de solución debe ser mayor que cero')
+            return cleaned_data
+
+        # Validar propiedades del reactivo soluto
+        if not solute_reagent.purity:
+            self.add_error('solute_reagent', 'El reactivo seleccionado no tiene pureza definida')
+            return cleaned_data
+
+        if not solute_reagent.density:
+            self.add_error('solute_reagent', 'El reactivo seleccionado no tiene densidad definida')
+            return cleaned_data
+
+        # Obtener propiedades una sola vez
+        purity = solute_reagent.purity
+        density = solute_reagent.density
+        reagent = solute_reagent.reagent
+        sig_figs = reagent.sig_figs_solution
+
+        # Calcular base común
+        base_calc = quantity_solution * density
+
+        # Calcular quantity_reagent según la unidad de concentración
+        quantity_reagent = None
+
+        try:
+            if concentration_unit == '%':
+                quantity_reagent = round(
+                    base_calc * (concentration / purity),
+                    sig_figs
+                )
+
+            elif concentration_unit == 'mg/L':
+                quantity_reagent = round(
+                    base_calc * (concentration * purity / 10000),
+                    sig_figs
+                )
+
+            elif concentration_unit == 'M':
+                if not reagent.molecular_weight:
+                    self.add_error('solute_reagent', 'El reactivo seleccionado no tiene peso molecular registrado')
+                    return cleaned_data
+                factor = (concentration * reagent.molecular_weight) / (10 * purity)
+                quantity_reagent = round(base_calc * factor, sig_figs)
+
+            elif concentration_unit == 'N':
+                if not reagent.gram_equivalent:
+                    self.add_error('solute_reagent', 'El reactivo seleccionado no tiene equivalente gramo registrado')
+                    return cleaned_data
+                factor = (concentration * reagent.gram_equivalent) / (10 * purity)
+                quantity_reagent = round(base_calc * factor, sig_figs)
+
+        except Exception as e:
+            self.add_error(None, f'Error al calcular la cantidad de reactivo: {str(e)}')
+            return cleaned_data
+
+        # Validar stock disponible
+        if quantity_reagent is not None:
+            if quantity_reagent > solute_reagent.quantity_stock:
+                umb = reagent.umb
+                error_message = (
+                    f'La cantidad requerida ({quantity_reagent:.2f} {umb}) '
+                    f'excede el stock disponible ({solute_reagent.quantity_stock:.2f} {umb})'
+                )
+                self.add_error('solute_reagent', error_message)
+                return cleaned_data
+
+            # Guardar el valor calculado para usarlo en save()
+            cleaned_data['_quantity_reagent'] = quantity_reagent
+
+        return cleaned_data
+
     def save(self, commit=True):
+        """Guardar la instancia con los valores calculados"""
         instance = super().save(commit=False)
         user = get_current_user()
 
         instance.preparated_by_id = user.id
 
-        # Validar que los campos necesarios no sean None
-        if not instance.solute_reagent.purity:
-            raise ValidationError('El reactivo seleccionado no tiene pureza definida')
-        if not instance.solute_reagent.density:
-            raise ValidationError('El reactivo seleccionado no tiene densidad definida')
+        # Usar el valor calculado en clean()
+        if '_quantity_reagent' in self.cleaned_data:
+            instance.quantity_reagent = self.cleaned_data['_quantity_reagent']
+        else:
+            # Fallback: Si por alguna razón no está en cleaned_data, recalcular
+            # (esto no debería pasar si clean() se ejecutó correctamente)
+            solute_reagent = instance.solute_reagent
+            purity = solute_reagent.purity
+            density = solute_reagent.density
+            sig_figs = solute_reagent.reagent.sig_figs_solution
+            base_calc = instance.quantity_solution * density
 
-        if instance.concentration_unit == '%':
-            instance.quantity_reagent = round((instance.quantity_solution * (
-                    instance.concentration / instance.solute_reagent.purity) * instance.solute_reagent.density),
-                                              instance.solute_reagent.reagent.sig_figs_solution)
-        elif instance.concentration_unit == 'mg/L':
-            instance.quantity_reagent = round((instance.quantity_solution * (
-                    instance.concentration / 10000 * instance.solute_reagent.purity) * instance.solute_reagent.density),
-                                              instance.solute_reagent.reagent.sig_figs_solution)
-        elif instance.concentration_unit == 'M':
-            if not instance.solute_reagent.reagent.molecular_weight:
-                raise ValidationError('El reactivo seleccionado no tiene peso molecular registrado')
-            instance.quantity_reagent = round((instance.quantity_solution * (
-                    (instance.concentration * instance.solute_reagent.reagent.molecular_weight) / (
-                    10 * instance.solute_reagent.purity)) * instance.solute_reagent.density),
-                                              instance.solute_reagent.reagent.sig_figs_solution)
-        elif instance.concentration_unit == 'N':
-            if not instance.solute_reagent.reagent.gram_equivalent:
-                raise ValidationError('El reactivo seleccionado no tiene equivalente gramo registrado')
-            instance.quantity_reagent = round((instance.quantity_solution * (
-                    (instance.concentration * instance.solute_reagent.reagent.gram_equivalent) / (
-                    10 * instance.solute_reagent.purity)) * instance.solute_reagent.density),
-                                              instance.solute_reagent.reagent.sig_figs_solution)
-
-        # Validación de stock disponible
-        if instance.quantity_reagent > instance.solute_reagent.quantity_stock:
-            raise ValidationError(
-                f'La cantidad requerida ({instance.quantity_reagent:.2f}) excede el stock disponible '
-                f'({instance.solute_reagent.quantity_stock:.2f}) del reactivo seleccionado'
-            )
+            if instance.concentration_unit == '%':
+                instance.quantity_reagent = round(
+                    base_calc * (instance.concentration / purity),
+                    sig_figs
+                )
+            elif instance.concentration_unit == 'mg/L':
+                instance.quantity_reagent = round(
+                    base_calc * (instance.concentration * purity / 10000),
+                    sig_figs
+                )
+            elif instance.concentration_unit == 'M':
+                factor = (instance.concentration * solute_reagent.reagent.molecular_weight) / (10 * purity)
+                instance.quantity_reagent = round(base_calc * factor, sig_figs)
+            elif instance.concentration_unit == 'N':
+                factor = (instance.concentration * solute_reagent.reagent.gram_equivalent) / (10 * purity)
+                instance.quantity_reagent = round(base_calc * factor, sig_figs)
 
         if commit:
             instance.save()
@@ -358,3 +443,17 @@ class StandardizationSolutionForm(ModelForm):
             return instance
         except Exception as e:
             raise ValidationError({'error': str(e)})
+
+    def clean(self):
+        cleaned = super().clean()
+        quantity_standard = cleaned.get('quantity_standard')
+        stock_standard = cleaned.get('standard_sln').quantity_solution_std
+        umb = self.std.solution_std.umb
+
+        if quantity_standard > stock_standard:
+            raise ValidationError(
+                f'La cantidad requerida ({quantity_standard:.2f}{umb}) excede el stock disponible '
+                f'({stock_standard:.2f}{umb}) del reactivo seleccionado'
+            )
+
+        return cleaned

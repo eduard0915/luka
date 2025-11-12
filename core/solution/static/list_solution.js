@@ -44,19 +44,19 @@ document.addEventListener('DOMContentLoaded', function () {
                     targets: [4],
                     className: 'td-actions text-center',
                     render: function (data, type, row) {
-                        let expire = '';
-                        switch (row['expire_date_solution'] < toDay) {
-                            case true:
-                                return '<span class="badge bg-danger">' + row['expire_date_solution'] + '</span>';
-                                break;
-                            case false:
-                                return row['expire_date_solution'] ;
-                                break;
-                            case null:
-                                return '';
-                                break;
+                        let expireDate = row['expire_date_solution'];
+
+                        // Verificar si la fecha es null o undefined
+                        if (expireDate === null || expireDate === undefined) {
+                            return '<span class="badge bg-secondary">Sin fecha</span>';
                         }
-                        return expire;
+
+                        // Comparar con la fecha actual
+                        if (expireDate < toDay) {
+                            return '<span class="badge bg-danger">' + expireDate + '</span>';
+                        } else {
+                            return expireDate;
+                        }
                     }
                 },
                 {

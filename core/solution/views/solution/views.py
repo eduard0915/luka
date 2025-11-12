@@ -30,7 +30,7 @@ from luka import settings
 class SolutionCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
     model = Solution
     form_class = SolutionForm
-    template_name = 'create_three.html'
+    template_name = 'solution/create_solution.html'
     permission_required = 'reagent.add_reagent'
 
     @method_decorator(csrf_exempt)
@@ -49,10 +49,21 @@ class SolutionCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cr
                     code_solution = form.cleaned_data.get('code_solution')
                     messages.success(request, f'Solución "{code_solution}" creada satisfactoriamente!')
                     # Provide redirect URL to detail view for AJAX to use
+                    data['success'] = True
                     data['redirect_url'] = self.get_success_url()
                 else:
-                    messages.error(request, form.errors)
-                    data['error'] = str(form.errors)
+                    error_messages = []
+                    for field, errors in form.errors.items():
+                        if field == '__all__':
+                            error_messages.extend([str(e) for e in errors])
+                        else:
+                            field_label = form.fields[field].label or field
+                            for error in errors:
+                                error_messages.append(f"{field_label}: {error}")
+
+                    error_text = '<br>'.join(error_messages)
+                    messages.error(request, error_text)
+                    data['error'] = error_text
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -73,7 +84,7 @@ class SolutionCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cr
         try:
             context['list_url'] = reverse_lazy('solution:list_solution')
         except Exception:
-            pass
+            context['list_url'] = reverse_lazy('solution:list_solution')
         return context
 
 
