@@ -144,37 +144,51 @@
 
             // Deshabilitar el botón y mostrar spinner
             const btnSubmit = document.getElementById('btnSubmit');
+            const originalBtnContent = btnSubmit.innerHTML;
             btnSubmit.disabled = true;
             btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
 
             const parameters = new FormData(this);
+
             axios.post(window.location.pathname, parameters, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             })
                 .then(function (response) {
-                    console.log(response.data);
-                    if (response.data && response.data.redirect_url) {
-                        // Redirigir a la url redirect_url
+                    console.log('Response:', response.data);
+
+                    // ✅ Caso 1: Éxito - Redirigir al detalle
+                    if (response.data.success && response.data.redirect_url) {
                         window.location.href = response.data.redirect_url;
                         return;
                     }
-                    if (!response.data || response.data.error) {
-                        message_error(response.data && response.data.error ? response.data.error : 'Ha ocurrido un error');
-                        // Re-habilitar el botón en caso de error
-                        btnSubmit.disabled = false;
-                        btnSubmit.innerHTML = '<i class="fa fa-fw fa-lg fa-check-circle"></i>Guardar';
+
+                    // ❌ Caso 2: Error - Redirigir a la lista inmediatamente
+                    if (response.data.error) {
+                        console.error('Validation error:', response.data.error);
+                        window.location.href = '{{ list_url }}';
                         return;
                     }
-                    // Fallback: si no viene redirect_url pero no hay error
+
+                    // ⚠️ Caso 3: Respuesta inesperada - redirigir a lista
+                    console.error('Respuesta inesperada del servidor');
                     window.location.href = '{{ list_url }}';
                 })
                 .catch(function (error) {
-                    alert(error.response.status + ': ' + error.message);
-                    // Re-habilitar el botón en caso de error
-                    btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = '<i class="fa fa-fw fa-lg fa-check-circle"></i>Guardar';
+                    console.error('Error:', error);
+
+                    // Mostrar error en consola
+                    let errorMsg = 'Error al procesar la solicitud';
+                    if (error.response && error.response.data && error.response.data.error) {
+                        errorMsg = error.response.data.error;
+                    } else if (error.response) {
+                        errorMsg = `Error ${error.response.status}: ${error.response.statusText}`;
+                    } else if (error.message) {
+                        errorMsg = error.message;
+                    }
+                    console.error('Error:', errorMsg);
+                    window.location.href = '{{ list_url }}';
                 });
         });
 

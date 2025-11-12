@@ -1251,3 +1251,261 @@ Traceback (most recent call last):
     raise NoReverseMatch(msg)
 django.urls.exceptions.NoReverseMatch: Reverse for 'delete_standardization_solution' with arguments '('',)' not found. 1 pattern(s) tried: ['solution/delete_standardization_sln/(?P<pk>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/\\Z']
 ERROR 2025-11-11 13:15:52,476 basehttp 21778 132381408229056 "GET /solution/detail/91f06047-07b8-415a-bcfe-0346ecd0b124/ HTTP/1.1" 500 270832
+WARNING 2025-11-11 20:38:51,529 log 5634 125146406840000 Not Found: /favicon.ico
+WARNING 2025-11-11 20:38:51,530 basehttp 5634 125146406840000 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-11-11 21:06:33,303 log 10190 125261673658048 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 21:06:33,303 basehttp 10190 125261673658048 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 21:07:07,925 log 10190 125261673658048 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 21:07:07,925 basehttp 10190 125261673658048 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 21:19:18,195 log 10190 125261673658048 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 21:19:18,196 basehttp 10190 125261673658048 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 21:25:53,312 log 12752 130827925059264 Not Found: /favicon.ico
+WARNING 2025-11-11 21:25:53,313 basehttp 12752 130827925059264 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-11-11 21:45:45,080 log 14527 128686256813760 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 21:45:45,081 basehttp 14527 128686256813760 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 22:08:19,049 log 15752 126986830730944 Not Found: /favicon.ico
+WARNING 2025-11-11 22:08:19,049 basehttp 15752 126986830730944 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-11-11 22:17:35,760 log 16501 125328816076480 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 22:17:35,762 basehttp 16501 125328816076480 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 22:25:45,468 log 16992 128330299864768 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 22:25:45,468 basehttp 16992 128330299864768 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 22:30:13,042 log 17305 126308807866048 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 22:30:13,043 basehttp 17305 126308807866048 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 22:34:32,505 log 17578 139420571252416 Not Found: /favicon.ico
+WARNING 2025-11-11 22:34:32,505 basehttp 17578 139420571252416 "GET /favicon.ico HTTP/1.1" 404 3601
+ERROR 2025-11-11 22:43:37,605 log 17984 137308817848000 Internal Server Error: /solution/add/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1924, in transform
+    return self.try_transform(wrapped, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1458, in try_transform
+    raise FieldError(
+django.core.exceptions.FieldError: Unsupported lookup 'name' for UUIDField or join on the field not permitted.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/core/handlers/base.py", line 220, in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 171, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/defaulttags.py", line 243, in render
+    nodelist.append(node.render_annotated(context))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 1081, in render
+    return render_value_in_context(output, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/template/base.py", line 1058, in render_value_in_context
+    value = str(value)
+            ^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/forms/utils.py", line 79, in __str__
+    return self.as_widget()
+           ^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/forms/boundfield.py", line 108, in as_widget
+    return widget.render(
+           ^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/forms/widgets.py", line 329, in render
+    context = self.get_context(name, value, attrs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/forms/widgets.py", line 830, in get_context
+    context = super().get_context(name, value, attrs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/forms/widgets.py", line 781, in get_context
+    context["widget"]["optgroups"] = self.optgroups(
+                                     ^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/forms/widgets.py", line 721, in optgroups
+    for index, (option_value, option_label) in enumerate(self.choices):
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/forms/models.py", line 1424, in __iter__
+    for obj in queryset:
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/db/models/query.py", line 504, in _iterator
+    yield from iterable
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/db/models/query.py", line 93, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1610, in execute_sql
+    sql, params = self.as_sql()
+                  ^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 766, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 86, in pre_sql_setup
+    order_by = self.get_order_by()
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 490, in get_order_by
+    for expr, is_ref in self._order_by_pairs():
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 473, in _order_by_pairs
+    yield from self.find_ordering_name(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1120, in find_ordering_name
+    (OrderBy(transform_function(t, alias), descending=descending), False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1928, in transform
+    raise last_field_exception
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1901, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1806, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'name' into field. Choices are: code_reagent, date_creation, date_updated, density_enable, description_reagent, enable_reagent, gram_equivalent, id, inventoryreagent, manufacturer, molecular_weight, purity_unit, ready_to_use, sig_figs_solution, site, site_id, solution, solution_std, solvent, stability_solution, standard, technical_sheet, umb, user_creation, user_creation_id, user_updated, user_updated_id, volumetric
+ERROR 2025-11-11 22:43:37,613 basehttp 17984 137308817848000 "GET /solution/add/ HTTP/1.1" 500 367159
+WARNING 2025-11-11 22:48:04,587 log 18244 135638099687104 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 22:48:04,588 basehttp 18244 135638099687104 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 22:50:36,662 log 18450 132739856594624 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 22:50:36,663 basehttp 18450 132739856594624 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 22:51:10,908 log 18450 132739856594624 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 22:51:10,909 basehttp 18450 132739856594624 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 22:51:17,082 log 18450 132739856594624 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 22:51:17,083 basehttp 18450 132739856594624 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 22:59:57,432 log 19014 137557556852416 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 22:59:57,433 basehttp 19014 137557556852416 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 23:01:10,826 log 19014 137557556852416 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 23:01:10,826 basehttp 19014 137557556852416 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 23:11:26,681 log 19731 134976763852480 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 23:11:26,681 basehttp 19731 134976763852480 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 23:13:29,156 log 19907 138156011681472 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 23:13:29,156 basehttp 19907 138156011681472 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 23:14:38,163 log 20030 132540334601920 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 23:14:38,163 basehttp 20030 132540334601920 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 23:14:40,133 log 20030 132540334601920 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 23:14:40,133 basehttp 20030 132540334601920 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 23:14:56,503 log 20030 132540334601920 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 23:14:56,503 basehttp 20030 132540334601920 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 23:14:59,215 log 20030 132540334601920 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 23:14:59,216 basehttp 20030 132540334601920 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 23:18:47,581 log 20279 127413145040576 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 23:18:47,582 basehttp 20279 127413145040576 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 23:28:03,084 log 21681 138800835589824 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 23:28:03,085 basehttp 21681 138800835589824 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 23:29:02,360 log 21823 126770440304320 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 23:29:02,360 basehttp 21823 126770440304320 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-11 23:29:37,438 log 21823 126770440304320 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-11 23:29:37,439 basehttp 21823 126770440304320 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-12 07:22:57,932 log 6978 136227721311936 Not Found: /favicon.ico
+WARNING 2025-11-12 07:22:57,933 basehttp 6978 136227721311936 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-11-12 07:23:42,989 log 6978 136227721311936 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-12 07:23:42,990 basehttp 6978 136227721311936 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-12 07:26:42,146 log 7274 135750152615616 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-12 07:26:42,147 basehttp 7274 135750152615616 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-12 07:27:01,631 log 7274 135750152615616 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-12 07:27:01,631 basehttp 7274 135750152615616 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-12 07:29:53,337 log 7481 137053262042816 Not Found: /favicon.ico
+WARNING 2025-11-12 07:29:53,338 basehttp 7481 137053262042816 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-11-12 07:30:59,363 log 7585 125492606785216 Not Found: /favicon.ico
+WARNING 2025-11-12 07:30:59,363 basehttp 7585 125492606785216 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-11-12 07:31:11,953 log 7585 125492606785216 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-12 07:31:11,954 basehttp 7585 125492606785216 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+ERROR 2025-11-12 07:33:14,584 log 7773 139811896686272 Internal Server Error: /solution/add/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/utils/deprecation.py", line 122, in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/middleware/clickjacking.py", line 27, in process_response
+    if response.get("X-Frame-Options") is not None:
+       ^^^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'get'
+ERROR 2025-11-12 07:33:14,588 basehttp 7773 139811896686272 "POST /solution/add/ HTTP/1.1" 500 76238
+WARNING 2025-11-12 07:33:17,789 log 7773 139811896686272 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-12 07:33:17,790 basehttp 7773 139811896686272 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-12 07:37:52,061 log 8946 131076013946560 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-12 07:37:52,062 basehttp 8946 131076013946560 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-12 07:39:42,699 log 8946 131076013946560 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-12 07:39:42,700 basehttp 8946 131076013946560 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-12 07:39:46,102 log 8946 131076013946560 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-12 07:39:46,102 basehttp 8946 131076013946560 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-12 07:39:47,914 log 8946 131076013946560 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-12 07:39:47,917 basehttp 8946 131076013946560 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3712
+WARNING 2025-11-12 07:39:48,334 log 8946 131075969885888 Not Found: /favicon.ico
+WARNING 2025-11-12 07:39:48,334 basehttp 8946 131075969885888 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-11-12 07:43:15,329 log 8946 131075986671296 Not Found: /favicon.ico
+WARNING 2025-11-12 07:43:15,329 basehttp 8946 131075986671296 "GET /favicon.ico HTTP/1.1" 404 3601
+WARNING 2025-11-12 07:45:33,723 log 8946 131075978278592 Not Found: /favicon.ico
+WARNING 2025-11-12 07:45:33,723 basehttp 8946 131075978278592 "GET /favicon.ico HTTP/1.1" 404 3601
