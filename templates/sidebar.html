@@ -77,6 +77,8 @@
         {% url 'user:user_create' as create_user %}
         {% url 'company:list_site' as list_site %}
         {% url 'company:create_site' as create_site %}
+        {% url 'laboratory:list_laboratory' as list_lab %}
+        {% url 'laboratory:create_laboratory' as create_lab %}
 
         {% if perms.user.add_user %}
             <li class="treeview {% if list_user in request.path or create_user in request.path %}is-expanded{% endif %}">
@@ -94,7 +96,7 @@
         {% endif %}
 
         {% if perms.company.add_company %}
-            <li class="treeview ">
+            <li class="treeview treeview {% if list_lab in request.path or create_lab in request.path %}is-expanded{% endif %}">
                 <a class="app-menu__item" href="#" data-toggle="treeview">
                     <i class="bi bi-gear me-2"></i><span
                         class="app-menu__label">Configuración</span><i
@@ -106,7 +108,7 @@
                         <li><a class="treeview-item" href="{% url 'company:company_create' %}">
                     {% endif %}
                     <i class="icon bi bi-circle-fill"></i> Empresa</a></li>
-                    <li><a class="treeview-item" href="#">
+                    <li><a class="treeview-item {% if list_lab in request.path or create_lab in request.path %}active{% endif %}" href="{% url 'laboratory:list_laboratory' %}">
                         <i class="icon bi bi-circle-fill"></i> Laboratorios</a></li>
                     <li><a class="treeview-item" href="#">
                         <i class="icon bi bi-circle-fill"></i> Equipo Instrumental</a></li>

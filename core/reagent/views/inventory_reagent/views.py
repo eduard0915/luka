@@ -124,14 +124,6 @@ class InventoryReagentDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
-    # def get_queryset(self):
-    #     now = timezone.now()
-    #     Training.objects.filter(
-    #         training_status='Vigente',
-    #         date_training_expire__lte=now
-    #     ).update(training_status='Vencido')
-    #     return super(UserDetailView, self).get_queryset()
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Detalle Movimiento de Reactivo'
