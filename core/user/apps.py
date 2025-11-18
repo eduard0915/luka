@@ -8,6 +8,6 @@ class UserConfig(AppConfig):
     def ready(self):
         # Importing signals to ensure they are registered when the app is ready
         try:
-            import core.signals
+            import core.user.signals
         except ImportError as e:
             print(f"Error importando signals: {e}")

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'core.reagent',
     'core.solution',
     'core.laboratory',
+    'core.equipment',
     # Libs
     'widget_tweaks',
     'django_password_history',
