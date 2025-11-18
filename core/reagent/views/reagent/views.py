@@ -6,7 +6,6 @@ from botocore.exceptions import ClientError
 from decouple import config
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import OuterRef, Exists
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
@@ -16,9 +15,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, ListView, UpdateView
 
 from core.mixins import ValidatePermissionRequiredMixin
-from core.reagent.models import Reagent
 from core.reagent.forms import ReagentForm
-from core.solution.models import Standardization
+from core.reagent.models import Reagent
 
 
 # Creación de reactivo
