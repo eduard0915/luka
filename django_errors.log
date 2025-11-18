@@ -298,3 +298,27 @@ django.core.exceptions.FieldError: Cannot resolve keyword 'enable_site' into fie
 ERROR 2025-11-17 23:22:20,648 basehttp 58954 136919079974592 "GET /laboratory/add/ HTTP/1.1" 500 176972
 WARNING 2025-11-17 23:24:33,388 log 59025 133381114296000 Not Found: /.well-known/appspecific/com.chrome.devtools.json
 WARNING 2025-11-17 23:24:33,388 basehttp 59025 133381114296000 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+WARNING 2025-11-18 11:05:41,644 log 8958 133295143646912 Not Found: /favicon.ico
+WARNING 2025-11-18 11:05:41,645 basehttp 8958 133295143646912 "GET /favicon.ico HTTP/1.1" 404 3755
+WARNING 2025-11-18 11:28:11,563 log 8958 133295023048384 Not Found: /favicon.ico
+WARNING 2025-11-18 11:28:11,564 basehttp 8958 133295023048384 "GET /favicon.ico HTTP/1.1" 404 3755
+WARNING 2025-11-18 11:30:10,022 log 8958 133295023048384 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-18 11:30:10,023 basehttp 8958 133295023048384 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+WARNING 2025-11-18 11:30:45,964 log 8958 133295023048384 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-18 11:30:45,965 basehttp 8958 133295023048384 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+WARNING 2025-11-18 11:31:02,610 log 8958 133295023048384 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-18 11:31:02,611 basehttp 8958 133295023048384 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+WARNING 2025-11-18 11:31:04,136 log 8958 133295031441088 Not Found: /favicon.ico
+WARNING 2025-11-18 11:31:04,137 basehttp 8958 133295031441088 "GET /favicon.ico HTTP/1.1" 404 3755
+WARNING 2025-11-18 11:33:14,181 log 11714 124831065437888 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-18 11:33:14,186 basehttp 11714 124831065437888 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+WARNING 2025-11-18 11:33:15,810 log 11714 124831029769920 Not Found: /favicon.ico
+WARNING 2025-11-18 11:33:15,811 basehttp 11714 124831029769920 "GET /favicon.ico HTTP/1.1" 404 3755
+WARNING 2025-11-18 11:34:24,925 log 11714 124831029769920 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-18 11:34:24,927 basehttp 11714 124831029769920 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+WARNING 2025-11-18 11:34:44,341 log 11714 124831029769920 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-18 11:34:44,342 basehttp 11714 124831029769920 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+WARNING 2025-11-18 11:36:03,227 log 12060 123788607878848 Not Found: /favicon.ico
+WARNING 2025-11-18 11:36:03,230 basehttp 12060 123788607878848 "GET /favicon.ico HTTP/1.1" 404 3755
+WARNING 2025-11-18 11:38:21,520 log 12060 123788565915328 Not Found: /favicon.ico
+WARNING 2025-11-18 11:38:21,520 basehttp 12060 123788565915328 "GET /favicon.ico HTTP/1.1" 404 3755

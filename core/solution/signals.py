@@ -1,32 +1,14 @@
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 
 from django.db import transaction
-from django.db.models import Avg, StdDev, F
+from django.db.models import F, StdDev, Avg
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils import timezone
 
-from core.reagent.models import InventoryReagent, TransactionReagent
+from core.reagent.models import TransactionReagent, InventoryReagent
 from core.solution.models import Solution, SolutionStd, StandardizationSolution, TransactionSolution, \
     TransactionSolutionStd
-from core.user.models import Training
-
-
-# Registrar actualizado en capacitación
-@receiver(post_save, sender=Training)
-def update_training(sender, instance, **kwargs):
-    # Solo procede si el estado es 'Vencido'
-    if instance.training_status == 'Vencido':
-        return
-
-    training_last = Training.objects.select_related('user').filter(
-        description_training=instance.description_training, user__slug=instance.user.slug).last()
-    training_count = Training.objects.select_related('user').filter(
-        description_training=instance.description_training, user__slug=instance.user.slug).count()
-    if training_count > 1:
-        Training.objects.select_related('user').filter(
-            description_training=instance.description_training,
-            pk=training_last.id, user__slug=instance.user.slug).update(training_status='Actualizado')
 
 
 # Descuento de inventario de reactivos soluto para soluciones
@@ -111,22 +93,6 @@ def discount_inventory_reagent_solvent(sender, instance, created, **kwargs):
             quantity=instance.quantity_solvent,
             user_transaction_id=instance.preparated_by_id,
         )
-# @receiver(post_save, sender=Solution)
-# def discount_inventory_reagent_solvent(sender, instance, **kwargs):
-#     if instance.quantity_solvent and instance.solvent_reagent:
-#         InventoryReagent.objects.filter(pk=instance.solvent_reagent.id).update(
-#             quantity_stock=float(instance.solvent_reagent.quantity_stock - instance.quantity_solvent))
-#
-#         TransactionReagent.objects.create(
-#             reagent_inventory_id=instance.solvent_reagent.id,
-#             type_transaction='Uso',
-#             date_transaction=timezone.localtime(timezone.now()),
-#             detail_transaction='Solución ' + instance.code_solution + ' al ' + str(
-#                 instance.concentration) + instance.concentration_unit,
-#             quantity=instance.quantity_solvent,
-#             user_transaction_id=instance.preparated_by.id,
-#         )
-#         return
 
 
 # Descuento de inventario de reactivos solvente en preparación de soluciones Estándares
@@ -140,46 +106,27 @@ def discount_inventory_reagent_solvent_std(sender, instance, **kwargs):
             reagent_inventory_id=instance.solvent_reagent.id,
             type_transaction='Uso',
             date_transaction=timezone.localtime(timezone.now()),
-            detail_transaction='Solución Estándar' + instance.code_solution + ' al ' + str(
-                instance.concentration) + instance.concentration_unit,
+            detail_transaction='Solución Estándar' + instance.code_solution_std + ' al ' + str(
+                instance.concentration_std) + instance.concentration_unit,
             quantity=instance.quantity_solvent,
             user_transaction_id=instance.preparated_std_by.id,
         )
         return
 
 
-# Registro de Transacción de ingreso de reactivo en inventario
-@receiver(post_save, sender=InventoryReagent)
-def register_inventory_reagent(sender, instance, created, **kwargs):
-
-    if not created:
-        return
-    # Registro de ingreso de reactivo al inventario
-    TransactionReagent.objects.create(
-        reagent_inventory_id=instance.id,
-        type_transaction='Entrada',
-        date_transaction=timezone.localtime(timezone.now()),
-        detail_transaction='Ingreso de Reactivo a Inventario',
-        quantity=instance.quantity_stock,
-        user_transaction_id=instance.user_creation.id,
-    )
-
 # Descuento de inventario de soluciones Estándares
 @receiver(post_save, sender=StandardizationSolution)
 def discount_inventory_std_solution(sender, instance, created, **kwargs):
     """
-    Signal optimizado para descontar inventario y registrar transacciones
+    Descontar inventario y registrar transacciones
     al crear una nueva estandarización de solución.
     """
-    # Salida temprana si no es una creación
+
     if not created:
         return
 
     # Usar transacción atómica para garantizar consistencia
     with transaction.atomic():
-        # 1. Actualizar inventarios de forma eficiente
-        # Usamos refresh_from_db para obtener valores actuales y luego actualizamos
-        # Esto es más simple y evita problemas de tipos de datos
 
         # Actualizar SolutionStd
         std_solution = SolutionStd.objects.select_for_update().get(pk=instance.standard_sln_id)
@@ -195,7 +142,7 @@ def discount_inventory_std_solution(sender, instance, created, **kwargs):
         )
         solution.save(update_fields=['quantity_solution'])
 
-        # 2. Crear transacciones (modelos diferentes requieren creación separada)
+        # Crear transacciones (modelos diferentes requieren creación separada)
         current_time = timezone.localtime(timezone.now())
         detail_text = f'Estandarización de Solución {instance.solution.code_solution}'
 
@@ -219,7 +166,7 @@ def discount_inventory_std_solution(sender, instance, created, **kwargs):
             user_transaction_id=instance.standardized_by_id,
         )
 
-        # 3. Calcular estadísticas de forma eficiente
+        # Calcular estadísticas de forma eficiente
         stats = StandardizationSolution.objects.filter(
             solution_id=instance.solution_id
         ).aggregate(
@@ -227,7 +174,7 @@ def discount_inventory_std_solution(sender, instance, created, **kwargs):
             deviation_std=StdDev('concentration_sln')
         )
 
-        # 4. Procesar estadísticas con validaciones robustas
+        # Procesar estadísticas con validaciones robustas
         media = _round_decimal(stats.get('average'))
         standard_deviation = _round_decimal(stats.get('deviation_std'))
 
@@ -236,7 +183,7 @@ def discount_inventory_std_solution(sender, instance, created, **kwargs):
         if media and standard_deviation and media > 0:
             rsd = _round_decimal((standard_deviation / media) * Decimal('100'))
 
-        # 5. Actualizar solución con estadísticas calculadas
+        # Actualizar solución con estadísticas calculadas
         Solution.objects.filter(pk=instance.solution_id).update(
             average_concentration=media,
             deviation_std=standard_deviation,

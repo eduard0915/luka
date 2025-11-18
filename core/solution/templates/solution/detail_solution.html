@@ -152,12 +152,14 @@
                                             <b class="text-danger"> Realice una Estandarización Adicional</b>
                                         </div>
                                     {% else %}
-                                        <div class="bs-component">
-                                            <div class="alert alert-dismissible alert-success d-flex align-items-center">
-                                                <i class="fas fa-check-circle fa-2x me-2"></i>
-                                                <strong>Cumple!</strong>
+                                        {% if object.average_concentration %}
+                                            <div class="bs-component">
+                                                <div class="alert alert-dismissible alert-success d-flex align-items-center">
+                                                    <i class="fas fa-check-circle fa-2x me-2"></i>
+                                                    <strong>Cumple!</strong>
+                                                </div>
                                             </div>
-                                        </div>
+                                        {% endif %}
                                     {% endif %}
                                 {% elif standard_count > 0 and standard_count < 3 %}
                                     <div class="bs-component">
