@@ -1,16 +1,14 @@
-import os
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
-from django.shortcuts import redirect
 from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, ListView, UpdateView, DetailView
 
-from core.mixins import ValidatePermissionRequiredMixin
 from core.equipment.forms import EquipmentInstrumentalForm
 from core.equipment.models import EquipmentInstrumental
+from core.mixins import ValidatePermissionRequiredMixin
 
 
 # Creación de Equipos Instrumentales
@@ -57,7 +55,7 @@ class EquipmentInstrumentalCreateView(LoginRequiredMixin, ValidatePermissionRequ
         return JsonResponse(data)
 
     def get_success_url(self):
-        return reverse('equipment:detail_equipment_instrumental', kwargs={'pk': self.object.pk})
+        return reverse('equipment:list_equipment_instrumental')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -185,7 +183,6 @@ class EquipmentInstrumentalUpdateView(LoginRequiredMixin, ValidatePermissionRequ
         context['action'] = 'edit'
         context['div'] = '10'
         context['icon'] = 'fa-solid fa-microscope'
-        # context['list_url'] = reverse_lazy('equipment:detail_equipment_instrumental', kwargs={'pk': self.object.pk})
         context['list_url'] = reverse_lazy('equipment:list_equipment_instrumental')
         return context
 
@@ -194,7 +191,7 @@ class EquipmentInstrumentalUpdateView(LoginRequiredMixin, ValidatePermissionRequ
 class EquipmentInstrumentalDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
     model = EquipmentInstrumental
     template_name = 'equipment_instrumental/detail_equipment.html'
-    permission_required = 'equipment.view_equipmentinstrumental'
+    permission_required = 'equipment.add_equipmentinstrumental'
 
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
@@ -207,4 +204,3 @@ class EquipmentInstrumentalDetailView(LoginRequiredMixin, ValidatePermissionRequ
         context['list_url'] = reverse_lazy('equipment:list_equipment_instrumental')
         context['update_url'] = reverse_lazy('equipment:update_equipment_instrumental', kwargs={'pk': self.object.pk})
         return context
-
