@@ -15,6 +15,7 @@ urlpatterns = [
     path('reagent/', include('core.reagent.urls')),
     path('solution/', include('core.solution.urls')),
     path('laboratory/', include('core.laboratory.urls')),
+    path('equipment/', include('core.equipment.urls')),
     # path("__debug__/", include("debug_toolbar.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

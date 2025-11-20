@@ -79,6 +79,8 @@
         {% url 'company:create_site' as create_site %}
         {% url 'laboratory:list_laboratory' as list_lab %}
         {% url 'laboratory:create_laboratory' as create_lab %}
+        {% url 'equipment:list_equipment_instrumental' as list_eq %}
+        {% url 'equipment:create_equipment_instrumental' as create_eq %}
 
         {% if perms.user.add_user %}
             <li class="treeview {% if list_user in request.path or create_user in request.path %}is-expanded{% endif %}">
@@ -96,7 +98,7 @@
         {% endif %}
 
         {% if perms.company.add_company %}
-            <li class="treeview treeview {% if list_lab in request.path or create_lab in request.path %}is-expanded{% endif %}">
+            <li class="treeview treeview {% if list_lab in request.path or create_lab in request.path or list_eq in request.path or create_eq in request.path %}is-expanded{% endif %}">
                 <a class="app-menu__item" href="#" data-toggle="treeview">
                     <i class="bi bi-gear me-2"></i><span
                         class="app-menu__label">Configuración</span><i
@@ -110,7 +112,7 @@
                     <i class="icon bi bi-circle-fill"></i> Empresa</a></li>
                     <li><a class="treeview-item {% if list_lab in request.path or create_lab in request.path %}active{% endif %}" href="{% url 'laboratory:list_laboratory' %}">
                         <i class="icon bi bi-circle-fill"></i> Laboratorios</a></li>
-                    <li><a class="treeview-item" href="#">
+                    <li><a class="treeview-item {% if list_eq in request.path or create_eq in request.path %}active{% endif %}" href="{% url 'equipment:list_equipment_instrumental' %}">
                         <i class="icon bi bi-circle-fill"></i> Equipo Instrumental</a></li>
                     <li><a class="treeview-item" href="#">
                         <i class="icon bi bi-circle-fill"></i> Matrizes</a></li>
