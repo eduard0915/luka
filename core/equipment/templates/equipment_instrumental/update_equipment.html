@@ -1,10 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'create_two.html' %}
 
-</body>
-</html>
+
+{% block form_javascript %}
+
+    <script type="text/javascript">
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Manejo del formulario con archivos
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    const formData = new FormData(form);
+
+                    // Mostrar indicador de carga
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+
+                    fetch(window.location.pathname, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success && data.redirect_url) {
+                                window.location.href = data.redirect_url;
+                            } else if (data.error) {
+                                alert('Error: ' + data.error);
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = originalText;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Ha ocurrido un error al procesar la solicitud');
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalText;
+                        });
+                });
+            }
+
+            // Preview de imagen
+            const photoInput = document.querySelector('input[name="photo_equipment"]');
+            if (photoInput) {
+                photoInput.addEventListener('change', function (e) {
+                    const file = e.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            let preview = document.getElementById('photo-preview');
+                            if (!preview) {
+                                preview = document.createElement('img');
+                                preview.id = 'photo-preview';
+                                preview.className = 'img-thumbnail mt-2';
+                                preview.style.maxWidth = '200px';
+                                photoInput.parentElement.appendChild(preview);
+                            }
+                            preview.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        });
+    </script>
+
+{% endblock %}

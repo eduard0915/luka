@@ -1,102 +1,103 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'create_two.html' %}
 
-</body>
-</html>
 
-<script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function () {
-        // Inicializar Select2 si está disponible
-        if (typeof $.fn.select2 !== 'undefined') {
-            $('.select2').select2({
-                theme: 'bootstrap4',
-                language: 'es',
-                placeholder: 'Seleccione una opción'
-            });
-        }
+{% block form_javascript %}
 
-        // Manejo del formulario con archivos
-        const form = document.querySelector('form');
-        if (form) {
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
+    <script type="text/javascript">
 
-                const formData = new FormData(form);
+        document.addEventListener('DOMContentLoaded', function () {
+            // Inicializar Select2
+            {#if (typeof $.fn.select2 !== 'undefined') {#}
+            {#    $('.select2').select2({#}
+            {#        theme: 'bootstrap-5',#}
+            {#        language: 'es',#}
+            {#        placeholder: 'Seleccione una opción',#}
+            {#        allowClear: true,#}
+            {#        width: '100%',#}
+            {#        containerCssClass: 'select2-sm', // Clase personalizada#}
+            {#        dropdownCssClass: 'select2-sm'#}
+            {#    });#}
+            {# }#}
 
-                // Mostrar indicador de carga
-                const submitBtn = form.querySelector('button[type="submit"]');
-                const originalText = submitBtn.innerHTML;
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+            // Manejo del formulario con archivos
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
 
-                fetch(window.location.pathname, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success && data.redirect_url) {
-                            window.location.href = data.redirect_url;
-                        } else if (data.error) {
-                            alert('Error: ' + data.error);
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = originalText;
+                    const formData = new FormData(form);
+
+                    // Mostrar indicador de carga
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+
+                    fetch(window.location.pathname, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
                         }
                     })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Ha ocurrido un error al procesar la solicitud');
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = originalText;
-                    });
-            });
-        }
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success && data.redirect_url) {
+                                window.location.href = data.redirect_url;
+                            } else if (data.error) {
+                                alert('Error: ' + data.error);
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = originalText;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Ha ocurrido un error al procesar la solicitud');
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalText;
+                        });
+                });
+            }
 
-        // Preview de imagen
-        const photoInput = document.querySelector('input[name="photo_equipment"]');
-        if (photoInput) {
-            photoInput.addEventListener('change', function (e) {
-                const file = e.target.files[0];
-                if (file && file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        let preview = document.getElementById('photo-preview');
-                        if (!preview) {
-                            preview = document.createElement('img');
-                            preview.id = 'photo-preview';
-                            preview.className = 'img-thumbnail mt-2';
-                            preview.style.maxWidth = '200px';
-                            photoInput.parentElement.appendChild(preview);
-                        }
-                        preview.src = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        }
+            // Preview de imagen
+            const photoInput = document.querySelector('input[name="photo_equipment"]');
+            if (photoInput) {
+                photoInput.addEventListener('change', function (e) {
+                    const file = e.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            let preview = document.getElementById('photo-preview');
+                            if (!preview) {
+                                preview = document.createElement('img');
+                                preview.id = 'photo-preview';
+                                preview.className = 'img-thumbnail mt-2';
+                                preview.style.maxWidth = '200px';
+                                photoInput.parentElement.appendChild(preview);
+                            }
+                            preview.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
 
-        // Validación de fechas
-        const dateStartInput = document.querySelector('input[name="date_start_use"]');
-        const dateDisabledInput = document.querySelector('input[name="date_disabled"]');
+            // Validación de fechas
+            {#const dateStartInput = document.querySelector('input[name="date_start_use"]');#}
+            {#const dateDisabledInput = document.querySelector('input[name="date_disabled"]');#}
+            {##}
+            {#if (dateStartInput && dateDisabledInput) {#}
+            {#    dateDisabledInput.addEventListener('change', function () {#}
+            {#        const startDate = new Date(dateStartInput.value);#}
+            {#        const disabledDate = new Date(dateDisabledInput.value);#}
+            {##}
+            {#        if (startDate && disabledDate && disabledDate < startDate) {#}
+            {#            alert('La fecha de inactivación debe ser posterior a la fecha de inicio de uso');#}
+            {#            dateDisabledInput.value = '';#}
+            {#        }#}
+            {#    });#}
+            {# }#}
+        });
+    </script>
 
-        if (dateStartInput && dateDisabledInput) {
-            dateDisabledInput.addEventListener('change', function () {
-                const startDate = new Date(dateStartInput.value);
-                const disabledDate = new Date(dateDisabledInput.value);
-
-                if (startDate && disabledDate && disabledDate < startDate) {
-                    alert('La fecha de inactivación debe ser posterior a la fecha de inicio de uso');
-                    dateDisabledInput.value = '';
-                }
-            });
-        }
-    });
-</script>
+{% endblock %}

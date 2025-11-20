@@ -66,6 +66,9 @@
     <script src="{% static 'lib/vali-admin/js/jquery-3.7.0.min.js' %}"></script>
     <script src="{% static 'lib/vali-admin/js/bootstrap.min.js' %}"></script>
     <script src="{% static 'lib/vali-admin/js/main.js' %}"></script>
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/es.js"></script>
     <script type="application/javascript">
         function open_modal(url) {
             $('#modal_template').load(url, function () {
@@ -75,6 +78,10 @@
     </script>
 
     <!-- Page specific javascripts-->
+    {% block form_javascript %}
+
+    {% endblock %}
+    
     {% block scripts_detail %}
 
     {% endblock %}

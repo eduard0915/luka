@@ -176,7 +176,7 @@ class EquipmentInstrumentalUpdateView(LoginRequiredMixin, ValidatePermissionRequ
         return JsonResponse(data)
 
     def get_success_url(self):
-        return reverse('equipment:detail_equipment_instrumental', kwargs={'pk': self.object.pk})
+        return reverse('equipment:list_equipment_instrumental')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -185,7 +185,8 @@ class EquipmentInstrumentalUpdateView(LoginRequiredMixin, ValidatePermissionRequ
         context['action'] = 'edit'
         context['div'] = '10'
         context['icon'] = 'fa-solid fa-microscope'
-        context['list_url'] = reverse_lazy('equipment:detail_equipment_instrumental', kwargs={'pk': self.object.pk})
+        # context['list_url'] = reverse_lazy('equipment:detail_equipment_instrumental', kwargs={'pk': self.object.pk})
+        context['list_url'] = reverse_lazy('equipment:list_equipment_instrumental')
         return context
 
 
