@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function () {
             ],
             columnDefs: [
                 {
-                    targets: [0, 1, 3, 5, 6],
+                    targets: [0, 1, 5],
                     class: 'td-actions text-center'
                 },
                 {
@@ -38,6 +38,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     class: 'td-actions text-center',
                     render: function (data, type, row) {
                         return row['concentration_std'] + ' ' + row['concentration_unit'];
+                    }
+                },
+                {
+                    targets: [3],
+                    class: 'td-actions text-center',
+                    render: function (data, type, row) {
+                        if (row['preparation_std_date'] === null || row['preparation_std_date'] === undefined) {
+                            return '<span class="badge bg-secondary">No aplica</span>';
+                        } else {
+                            return row['preparation_std_date'];
+                        }
                     }
                 },
                 {
@@ -56,6 +67,17 @@ document.addEventListener('DOMContentLoaded', function () {
                             return '<span class="badge bg-danger">' + expireDate + '</span>';
                         } else {
                             return expireDate;
+                        }
+                    }
+                },
+                {
+                    targets: [6],
+                    class: 'td-actions text-center',
+                    render: function (data, type, row) {
+                        if (row['preparated_std_by'] === null || row['preparated_std_by'] === undefined) {
+                            return row['solute_std__reagent__manufacturer'];
+                        } else {
+                            return row['preparated_std_by__get_full_name'];
                         }
                     }
                 },

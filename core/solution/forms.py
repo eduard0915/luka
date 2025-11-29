@@ -176,7 +176,8 @@ class SolutionStandardForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['solute_std'].queryset = InventoryReagent.objects.select_related('reagent').filter(
-            date_expire__gte=timezone.localdate(), reagent__solvent=False, quantity_stock__gt=0, reagent__standard=True)
+            date_expire__gte=timezone.localdate(),
+            reagent__solvent=False, quantity_stock__gt=0, reagent__standard=True).exclude(reagent__ready_to_use=True)
         self.fields['solvent_reagent'].queryset = InventoryReagent.objects.select_related('reagent').filter(
             date_expire__gte=timezone.localdate(), reagent__solvent=True, quantity_stock__gt=0)
         for form in self.visible_fields():

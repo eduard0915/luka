@@ -22,31 +22,12 @@ def discount_inventory_reagent_solute(sender, instance, created, **kwargs):
     TransactionReagent.objects.create(
         reagent_inventory_id=instance.solute_reagent.id,
         type_transaction='Uso',
-        date_transaction=timezone.localtime(timezone.now()),
+        date_transaction=timezone.localdate(),
         detail_transaction='Solución ' + instance.code_solution + ' al ' + str(
             instance.concentration) + instance.concentration_unit,
         quantity=instance.quantity_reagent,
         user_transaction_id=instance.preparated_by.id,
     )
-
-
-# Descuento de inventario de reactivos soluto para soluciones estándares
-# @receiver(post_save, sender=SolutionStd)
-# def discount_inventory_reagent_std(sender, instance, created, **kwargs):
-#     if not created:
-#         return
-#     InventoryReagent.objects.filter(pk=instance.solute_std.id).update(
-#         quantity_stock=round(float(instance.solute_std.quantity_stock) - float(instance.quantity_std), 2))
-#
-#     TransactionReagent.objects.create(
-#         reagent_inventory_id=instance.solute_std.id,
-#         type_transaction='Uso',
-#         date_transaction=timezone.localtime(timezone.now()),
-#         detail_transaction='Solución Estándar ' + instance.code_solution_std + ' al ' + str(
-#             instance.concentration_std) + instance.concentration_unit,
-#         quantity=instance.quantity_std,
-#         user_transaction_id=instance.preparated_std_by.id,
-#     )
 
 
 # Descuento de inventario de reactivos solvente en preparación de soluciones
@@ -85,7 +66,7 @@ def discount_inventory_reagent_solvent(sender, instance, created, **kwargs):
         TransactionReagent.objects.create(
             reagent_inventory_id=instance.solvent_reagent_id,
             type_transaction='Uso',
-            date_transaction=timezone.now(),  # Simplificado
+            date_transaction=timezone.localdate(),  # Simplificado
             detail_transaction=(
                 f'Solución {instance.code_solution} al '
                 f'{instance.concentration}{instance.concentration_unit}'
@@ -99,7 +80,7 @@ def discount_inventory_reagent_solvent(sender, instance, created, **kwargs):
 @receiver(post_save, sender=SolutionStd)
 def discount_reagent_transaction_std(sender, instance, **kwargs):
 
-    if instance.preparation_confirmed:
+    if instance.preparation_confirmed and instance.solvent_reagent:
 
         InventoryReagent.objects.filter(pk=instance.solute_std.id).update(
             quantity_stock=round(float(instance.solute_std.quantity_stock) - float(instance.quantity_std), 2))
@@ -107,7 +88,7 @@ def discount_reagent_transaction_std(sender, instance, **kwargs):
         TransactionReagent.objects.create(
             reagent_inventory_id=instance.solute_std.id,
             type_transaction='Uso',
-            date_transaction=timezone.localtime(timezone.now()),
+            date_transaction=timezone.localdate(),
             detail_transaction='Solución Estándar ' + instance.code_solution_std + ' al ' + str(
                 instance.concentration_std) + instance.concentration_unit,
             quantity=instance.quantity_std,
@@ -121,7 +102,7 @@ def discount_reagent_transaction_std(sender, instance, **kwargs):
             TransactionReagent.objects.create(
                 reagent_inventory_id=instance.solvent_reagent.id,
                 type_transaction='Uso',
-                date_transaction=timezone.localtime(timezone.now()),
+                date_transaction=timezone.localdate(),
                 detail_transaction='Solución Estándar' + instance.code_solution_std + ' al ' + str(
                     instance.concentration_std) + instance.concentration_unit,
                 quantity=instance.quantity_solvent,
@@ -157,8 +138,7 @@ def discount_inventory_std_solution(sender, instance, created, **kwargs):
         )
         solution.save(update_fields=['quantity_solution'])
 
-        # Crear transacciones (modelos diferentes requieren creación separada)
-        current_time = timezone.localtime(timezone.now())
+        current_time = timezone.localdate()
         detail_text = f'Estandarización de Solución {instance.solution.code_solution}'
 
         # Crear transacción de solución

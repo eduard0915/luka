@@ -46,9 +46,11 @@ class InventoryReagentCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
                     batch_number = form.cleaned_data.get('batch_number')
                     messages.success(
                         request, f'Reactivo con Lote N° "{batch_number}" registrado satisfactoriamente!')
+                    data['success'] = True
+                    data['redirect_url'] = self.success_url
                 else:
                     messages.error(request, form.errors)
-                return redirect(self.get_context_data()['list_url'])
+                    data['error'] = str(form.errors)
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:

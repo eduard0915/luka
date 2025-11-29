@@ -128,6 +128,7 @@ class SolutionStdListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, L
                 stds = list(SolutionStd.objects.select_related('solute_std__reagent', 'preparated_std_by').values(
                     'id',
                     'solute_std__reagent__description_reagent',
+                    'solute_std__reagent__manufacturer',
                     'code_solution_std',
                     'concentration_std',
                     'concentration_unit',
