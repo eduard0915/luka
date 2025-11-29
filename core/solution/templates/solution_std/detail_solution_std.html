@@ -81,38 +81,57 @@
                             </div>
                         {% endif %}
                     </div>
-                    {% if object.quantity_solvent or object.solute_std.reagent.ready_to_use %}
                         <div class="row mt-1">
                             <div class="col-md-4">
                                 <b>Preparado por </b><br>
-                                <p>{{ object.preparated_std_by }}</p>
+                                <p>
+                                    {% if object.preparated_std_by %}
+                                        {{ object.preparated_std_by }}
+                                    {% else %}
+                                        <span class="text-danger">Pendiente Confirmación</span>
+                                    {% endif %}
+                                </p>
                             </div>
                             <div class="col-md-3">
                                 <b>Fecha de Preparación</b><br>
-                                <p>{{ object.preparation_std_date | date:'Y-m-d' }}</p>
+                                <p>
+                                    {% if object.preparation_std_date %}
+                                        {{ object.preparation_std_date | date:'Y-m-d' }}
+                                     {% else %}
+                                        <span class="text-danger">Pendiente Confirmación</span>
+                                    {% endif %}
+                                </p>
                             </div>
                             <div class="col-md-3">
                                 <b>Vencimiento</b><br>
-                                <p>{{ object.expire_std_date_solution | date:'Y-m-d' }}</p>
+                                <p>
+                                    {% if object.expire_std_date_solution %}
+                                        {{ object.expire_std_date_solution | date:'Y-m-d' }}
+                                    {% else %}
+                                        <span class="text-danger">Pendiente Confirmación</span>
+                                    {% endif %}
+                                </p>
                             </div>
                         </div>
-                    {% endif %}
+
                 </div>
                 <div class="tile-footer">
-                    {% if not object.quantity_solvent and not object.solute_std.reagent.ready_to_use %}
+                    {% if not object.solute_std.reagent.ready_to_use and not object.preparation_confirmed %}
                         {% if object.quantity_std < object.solute_std.quantity_stock %}
-                            <button onclick="open_modal('{% url 'solution:add_solvent_solution_std' object.id %}')"
+                            <button onclick="open_modal('{% url 'solution:confirmed_solution_std' object.id %}')"
                                     class="btn btn-primary me-2">
-                                <i class="bi bi-moisture me-2"></i> Añadir de Solvente
+                                <i class="bi bi-moisture me-2"></i> Confirmar Preparación
                             </button>
                         {% else %}
                                 <p class="text-danger p-2">Cantidad de Reactivo requerida mayor que la
                                     disponible {{ object.solute_std.quantity_stock | unlocalize }} {{ object.solute_std.reagent.umb }}</p>
                         {% endif %}
                     {% endif %}
-                    <a href="{{ label_url }}" type="button" class="btn btn-danger me-2" target="_blank">
-                        <i class="fa fa-fw fa-lg fa-ticket me-2"></i> Etiqueta
-                    </a>
+                    {% if object.preparation_confirmed %}
+                        <a href="{{ label_url }}" type="button" class="btn btn-danger me-2" target="_blank">
+                            <i class="fa fa-fw fa-lg fa-ticket me-2"></i> Etiqueta
+                        </a>
+                    {% endif %}
                     {% if list_url %}
                         <a href="{{ list_url }}" class="btn btn-secondary me-2">
                             <i class="fa fa-fw fa-lg fa-list me-2"></i>Soluciones Estándar

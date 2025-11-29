@@ -17,8 +17,8 @@ from xhtml2pdf import pisa
 from core.company.models import Company
 from core.mixins import ValidatePermissionRequiredMixin
 from core.reagent.models import InventoryReagent
-from core.solution.forms import SolutionStandardForm, SolutionStdAddSolventForm
-from core.solution.models import SolutionStd, TransactionSolution, TransactionSolutionStd
+from core.solution.forms import SolutionStandardForm, SolutionStdConfirmedForm
+from core.solution.models import SolutionStd, TransactionSolutionStd
 from luka import settings
 
 
@@ -44,7 +44,7 @@ class SolutionStandardCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
                     self.object = form.save()
                     code_solution = form.cleaned_data.get('code_solution_std')
                     messages.success(request, f'Solución Estándar "{code_solution}" creada satisfactoriamente!')
-                    # Provide redirect URL to detail view for AJAX to use
+                    data['success'] = True
                     data['redirect_url'] = self.get_success_url()
                 else:
                     messages.error(request, form.errors)
@@ -65,7 +65,6 @@ class SolutionStandardCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['entity'] = 'Preparar Solución Estándar'
         context['div'] = '10'
         context['icon'] = 'fa-solid fa-flask-vial'
-        # Fallback cancel/back link to the solutions list
         try:
             context['list_url'] = reverse_lazy('solution:list_solution_std')
         except Exception:
@@ -74,9 +73,9 @@ class SolutionStandardCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
 
 
 # Adición de Solvente a Sln Estándar
-class SolutionStdAddSolventUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+class SolutionStdConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
     model = SolutionStd
-    form_class = SolutionStdAddSolventForm
+    form_class = SolutionStdConfirmedForm
     template_name = 'solution/create_solvent.html'
     permission_required = 'reagent.add_reagent'
 
@@ -93,7 +92,7 @@ class SolutionStdAddSolventUpdateView(LoginRequiredMixin, ValidatePermissionRequ
                 form = self.get_form()
                 if form.is_valid():
                     form.save()
-                    messages.success(request, f'Solvente Añadido satisfactoriamente!')
+                    messages.success(request, f'Preparación de Solución Estándar Confirmada satisfactoriamente!')
                 else:
                     messages.error(request, form.errors)
             else:
@@ -104,10 +103,10 @@ class SolutionStdAddSolventUpdateView(LoginRequiredMixin, ValidatePermissionRequ
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['entity'] = 'Adición de Solvente'
+        context['entity'] = 'Confirmación de Preparación de Solución STD'
         context['action'] = 'edit'
         context['class'] = 'col-md-6'
-        context['info_form'] = self.object.solvent_reagent.reagent.description_reagent + ' al ' + str(self.object.solvent_reagent.purity) + self.object.solvent_reagent.reagent.purity_unit
+        context['info_form'] = 'Confirma Preparación de Solución Estándar ' + self.object.code_solution_std
         return context
 
 

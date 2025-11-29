@@ -176,9 +176,9 @@ class SolutionStandardForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['solute_std'].queryset = InventoryReagent.objects.select_related('reagent').filter(
-            date_expire__gte=timezone.localtime(timezone.now()), reagent__solvent=False, quantity_stock__gt=0, reagent__standard=True)
+            date_expire__gte=timezone.localdate(), reagent__solvent=False, quantity_stock__gt=0, reagent__standard=True)
         self.fields['solvent_reagent'].queryset = InventoryReagent.objects.select_related('reagent').filter(
-            date_expire__gte=timezone.localtime(timezone.now()), reagent__solvent=True, quantity_stock__gt=0)
+            date_expire__gte=timezone.localdate(), reagent__solvent=True, quantity_stock__gt=0)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
@@ -198,12 +198,7 @@ class SolutionStandardForm(ModelForm):
 
     def save(self, commit=True):
         instance = super().save(commit=False)
-        user = get_current_user()
 
-        instance.preparated_std_by_id = user.id
-        instance.preparation_std_date = timezone.localtime(timezone.now())
-
-        # Validar que los campos necesarios no sean None
         if not instance.solute_std.purity:
             raise ValidationError('El reactivo seleccionado no tiene pureza definida')
         if not instance.solute_std.density:
@@ -243,6 +238,9 @@ class SolutionStandardForm(ModelForm):
                     )
             else:
                 instance.quantity_std = (instance.quantity_solution_std * instance.concentration_std) / instance.solute_std.purity
+
+            instance.quantity_solvent = float(instance.quantity_solution_std - instance.quantity_std)
+
         else:
             instance.concentration_std = float(instance.solute_std.purity)
             instance.concentration_unit = 'M'
@@ -297,17 +295,18 @@ class SolutionAddSolventForm(ModelForm):
         return data
 
 
-# Adición de Solvente a Solución Estándar
-class SolutionStdAddSolventForm(ModelForm):
+# Confirmar Solución Estándar
+class SolutionStdConfirmedForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['preparation_confirmed'].label = ''
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
     class Meta:
         model = SolutionStd
-        fields = ['quantity_solvent']
-        widgets = {'quantity_solvent': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),}
+        fields = ['preparation_confirmed']
+        widgets = {'preparation_confirmed': Select(attrs={'class': 'form-control', 'hidden': True}),}
 
     def save(self, commit=True):
         data = {}
@@ -315,13 +314,17 @@ class SolutionStdAddSolventForm(ModelForm):
         try:
             if form.is_valid():
                 instance = super().save(commit=False)
-                instance.preparation_std_date = timezone.localtime(timezone.now())
+                user = get_current_user()
+
+                instance.preparated_std_by_id = user.id
+                instance.preparation_std_date = timezone.localdate()
+                instance.preparation_confirmed = True
 
                 if instance.solute_std.reagent.stability_solution:
                     instance.expire_std_date_solution = instance.preparation_std_date + timedelta(
                         days=instance.solute_std.reagent.stability_solution)
                 else:
-                    raise ValidationError('El Reactivo no tiene un Días Estabilidad definido')
+                    raise ValidationError('El Reactivo no tiene Días Estabilidad definido')
 
                 if commit:
                     instance.save()
