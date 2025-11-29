@@ -117,6 +117,7 @@ class SolutionStd(BaseModel):
     quantity_std = models.FloatField(verbose_name='Cantidad de Estándar')
     quantity_solvent = models.FloatField(verbose_name='Solvente (mL)', null=True, blank=True)
     preparated_std_by = models.ForeignKey(User, verbose_name='Preparado por', on_delete=models.CASCADE)
+    preparation_confirmed = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.solute_std.reagent) + ' ' + str(self.concentration_std) + str(self.concentration_unit) + ' - ' + str(self.code_solution_std)
