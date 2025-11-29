@@ -12,9 +12,8 @@ from core.user.models import User
 # Generador de códigos de soluciones
 def code_solution_generator():
     # Obtener la fecha actual en la zona horaria local
-    now = timezone.localtime(timezone.now())
-    today = now.date()
-    today_str = now.strftime('%Y%m%d')
+    today = timezone.localdate()
+    today_str = today.strftime('%Y%m%d')
 
     # Buscar el último registro del día actual
     with transaction.atomic():
@@ -37,9 +36,8 @@ def code_solution_generator():
 # Generador de códigos de soluciones Estándares
 def code_solution_std_generator():
     # Obtener la fecha actual en la zona horaria local
-    now = timezone.localtime(timezone.now())
-    today = now.date()
-    today_str = now.strftime('%Y%m%d')
+    today = timezone.localdate()
+    today_str = today.strftime('%Y%m%d')
 
     # Buscar el último registro del día actual
     with transaction.atomic():
@@ -116,7 +114,7 @@ class SolutionStd(BaseModel):
     quantity_solution_std = models.FloatField(verbose_name='Cant. a Preparar (mL)')
     quantity_std = models.FloatField(verbose_name='Cantidad de Estándar')
     quantity_solvent = models.FloatField(verbose_name='Solvente (mL)', null=True, blank=True)
-    preparated_std_by = models.ForeignKey(User, verbose_name='Preparado por', on_delete=models.CASCADE)
+    preparated_std_by = models.ForeignKey(User, verbose_name='Preparado por', on_delete=models.CASCADE, null=True, blank=True)
     preparation_confirmed = models.BooleanField(default=False)
 
     def __str__(self):

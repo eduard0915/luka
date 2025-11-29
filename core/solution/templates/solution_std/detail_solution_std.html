@@ -87,6 +87,8 @@
                                 <p>
                                     {% if object.preparated_std_by %}
                                         {{ object.preparated_std_by }}
+                                    {% elif object.solute_std.reagent.ready_to_use %}
+                                        {{ object.solute_std.reagent.manufacturer }}
                                     {% else %}
                                         <span class="text-danger">Pendiente Confirmación</span>
                                     {% endif %}
@@ -97,6 +99,8 @@
                                 <p>
                                     {% if object.preparation_std_date %}
                                         {{ object.preparation_std_date | date:'Y-m-d' }}
+                                     {% elif object.solute_std.reagent.ready_to_use %}
+                                        No aplica
                                      {% else %}
                                         <span class="text-danger">Pendiente Confirmación</span>
                                     {% endif %}

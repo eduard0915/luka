@@ -1,45 +1,3 @@
-{#{% extends 'label_pdf.html' %}#}
-{#{% load humanize %}#}
-{#{% load l10n %}#}
-{##}
-{#{% block content_pdf %}#}
-{##}
-{#    <table class="table">#}
-{#        <tr>#}
-{#            <td>#}
-{#                <h5>#}
-{#                    <b>#}
-{#                        {{ std.solute_std.reagent.description_reagent }}#}
-{#                        {{ std.concentration_std }}{{ std.concentration_unit }}#}
-{#                    </b>#}
-{#                </h5>#}
-{#            </td>#}
-{#        </tr>#}
-{#    </table>#}
-{##}
-{#    <table class="tabContent" style="border-radius: 15px">#}
-{#        <tr style="border-bottom: none; padding-bottom: 1px">#}
-{#            <th style="border: none"><strong>Código: </strong></th>#}
-{#            <th style="border: none"><strong>Preparación: </strong></th>#}
-{#            <th style="border: none"><strong>Volumen: </strong></th>#}
-{#            <th style="border: none"><strong>Vence: </strong></th>#}
-{#        </tr>#}
-{#        <tr style="border-top: none; border-bottom: none">#}
-{#            <td style="border: none">{{ std.code_solution_std }}</td>#}
-{#            <td style="border: none">{{ std.preparation_std_date | date:'Y-m-d' }}</td>#}
-{#            <td style="border: none">{{ std.quantity_solution_std | intcomma:False }}mL</td>#}
-{#            <td style="border: none">{{ std.expire_std_date_solution | date:'Y-m-d' }}</td>#}
-{#        </tr>#}
-{#        <tr style="border-bottom: none; border-top: none">#}
-{#            <th style="border: none" colspan="2"><strong>Preparado por:</strong></th>#}
-{#        </tr>#}
-{#        <tr style="border-top: none">#}
-{#            <td style="border: none" colspan="2">{{ std.preparated_std_by }}</td>#}
-{#        </tr>#}
-{#    </table>#}
-{##}
-{#{% endblock %}#}
-
 {% extends 'label_pdf.html' %}
 {% load humanize %}
 {% load l10n %}
@@ -88,7 +46,13 @@
             <th style="border: none; padding: 2px 5px 0;"><strong>Vence:</strong></th>
         </tr>
         <tr style="border-bottom: none; border-top:none; padding-bottom: 1px">
-            <td style="border: none; padding: 0 5px 3px;">{{ sln.preparation_std_date|date:'Y-m-d' }}</td>
+            <td style="border: none; padding: 0 5px 3px;">
+                {% if sln.solute_std.reagent.ready_to_use %}
+                    No aplica
+                {% else %}
+                    {{ sln.preparation_std_date|date:'Y-m-d' }}
+                {% endif %}
+            </td>
             <td style="border: none; padding: 0 5px 3px;">{{ sln.quantity_solution_std|intcomma:False }}mL</td>
             <td style="border: none; padding: 0 5px 3px;">{{ sln.expire_std_date_solution|date:'Y-m-d' }}</td>
         </tr>
@@ -102,7 +66,13 @@
             <th style="border: none; padding: 2px 5px 0;" colspan="3"><strong>Preparado por:</strong></th>
         </tr>
         <tr style="border-top:none; padding-bottom: 1px">
-            <td style="border: none; padding: 0 5px;" colspan="3">{{ sln.preparated_std_by }}</td>
+            <td style="border: none; padding: 0 5px;" colspan="3">
+                {% if sln.solute_std.reagent.ready_to_use %}
+                    {{ sln.solute_std.reagent.manufacturer }}
+                {% else %}
+                    {{ sln.preparated_std_by }}
+                {% endif %}
+            </td>
         </tr>
     </table>
 
