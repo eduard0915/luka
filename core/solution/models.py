@@ -70,11 +70,12 @@ class Solution(BaseModel):
     quantity_solution = models.FloatField(verbose_name='Cant. a Preparar (mL)')
     quantity_reagent = models.FloatField(verbose_name='Cant. Reactivo')
     quantity_solvent = models.FloatField(verbose_name='Solvente (mL)', null=True, blank=True)
-    preparated_by = models.ForeignKey(User, verbose_name='Preparado por', on_delete=models.CASCADE)
+    preparated_by = models.ForeignKey(User, verbose_name='Preparado por', on_delete=models.CASCADE, null=True, blank=True)
     standardizable = models.BooleanField(verbose_name='Estandarizable', default=False)
     average_concentration = models.FloatField(verbose_name='Media', null=True, blank=True)
     deviation_std = models.FloatField(verbose_name='Media', null=True, blank=True)
     coefficient_variation = models.FloatField(verbose_name='Coeficiente de Variación', null=True, blank=True)
+    preparation_confirmed = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.solute_reagent.reagent) + ' ' + str(self.concentration) + str(self.concentration_unit) + ' - ' + str(self.code_solution)

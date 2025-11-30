@@ -186,11 +186,11 @@ class SolutionUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Up
         return context
 
 
-# Adición de Solvente
-class SolutionAddSolventUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+# Confirmación de Preparación de solución
+class SolutionConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
     model = Solution
-    form_class = SolutionAddSolventForm
-    template_name = 'solution/create_solvent.html'
+    form_class = SolutionConfirmedForm
+    template_name = 'solution/confirmed_solution.html'
     permission_required = 'reagent.add_reagent'
 
     @method_decorator(csrf_exempt)
@@ -217,10 +217,10 @@ class SolutionAddSolventUpdateView(LoginRequiredMixin, ValidatePermissionRequire
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['entity'] = 'Adición de Solvente'
+        context['entity'] = 'Preparación de Solución ' + self.object.code_solution
         context['action'] = 'edit'
         context['class'] = 'col-md-6'
-        context['info_form'] = self.object.solvent_reagent.reagent.description_reagent + ' al ' + str(self.object.solvent_reagent.purity) + self.object.solvent_reagent.reagent.purity_unit
+        context['info_form'] = 'Confirma Preparación? Después de Confirmada No podrá editarse'
         return context
 
 

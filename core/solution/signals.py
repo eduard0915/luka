@@ -7,73 +7,87 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 from core.reagent.models import TransactionReagent, InventoryReagent
-from core.solution.models import Solution, SolutionStd, StandardizationSolution, TransactionSolution, \
-    TransactionSolutionStd
+from core.solution.models import *
 
 
 # Descuento de inventario de reactivos soluto para soluciones
 @receiver(post_save, sender=Solution)
 def discount_inventory_reagent_solute(sender, instance, created, **kwargs):
-    if not created:
-        return
-    InventoryReagent.objects.filter(pk=instance.solute_reagent.id).update(
-        quantity_stock=round(float(instance.solute_reagent.quantity_stock) - float(instance.quantity_reagent), 2))
 
-    TransactionReagent.objects.create(
-        reagent_inventory_id=instance.solute_reagent.id,
-        type_transaction='Uso',
-        date_transaction=timezone.localdate(),
-        detail_transaction='Solución ' + instance.code_solution + ' al ' + str(
-            instance.concentration) + instance.concentration_unit,
-        quantity=instance.quantity_reagent,
-        user_transaction_id=instance.preparated_by.id,
-    )
+    if instance.preparation_confirmed and instance.solvent_reagent:
 
+        InventoryReagent.objects.filter(pk=instance.solute_reagent.id).update(
+            quantity_stock=round((instance.solute_reagent.quantity_stock - instance.quantity_reagent), 2))
 
-# Descuento de inventario de reactivos solvente en preparación de soluciones
-@receiver(post_save, sender=Solution)
-def discount_inventory_reagent_solvent(sender, instance, created, **kwargs):
-    """
-    Descuenta inventario y crea transacción cuando se registra quantity_solvent.
-    Solo se ejecuta cuando quantity_solvent tiene un valor nuevo.
-    """
-    # Validar que existan los datos necesarios
-    if not (instance.quantity_solvent and instance.solvent_reagent_id):
-        return
-
-    # Si es actualización, verificar si quantity_solvent cambió
-    if not created:
-        # Obtener el valor anterior de quantity_solvent
-        try:
-            old_instance = Solution.objects.get(pk=instance.pk)
-            # Si ya tenía un valor, no procesar (evitar duplicados)
-            if old_instance.quantity_solvent:
-                return
-        except Solution.DoesNotExist:
-            return
-
-    # Usar transacción atómica para garantizar consistencia
-    with transaction.atomic():
-        # Actualizar inventario usando F() para evitar race conditions
-        # y select_for_update para bloquear el registro
-        InventoryReagent.objects.select_for_update().filter(
-            pk=instance.solvent_reagent_id
-        ).update(
-            quantity_stock=F('quantity_stock') - instance.quantity_solvent
-        )
-
-        # Crear la transacción
         TransactionReagent.objects.create(
-            reagent_inventory_id=instance.solvent_reagent_id,
-            type_transaction='Uso',
-            date_transaction=timezone.localdate(),  # Simplificado
-            detail_transaction=(
-                f'Solución {instance.code_solution} al '
-                f'{instance.concentration}{instance.concentration_unit}'
-            ),
-            quantity=instance.quantity_solvent,
-            user_transaction_id=instance.preparated_by_id,
+            reagent_inventory_id=instance.solute_reagent.id,
+            type_transaction='Uso - Preparación Sln',
+            date_transaction=timezone.localdate(),
+            detail_transaction='Solución ' + instance.code_solution + ' al ' + str(
+                instance.concentration) + instance.concentration_unit,
+            quantity=instance.quantity_reagent,
+            user_transaction_id=instance.preparated_by.id,
         )
+
+        InventoryReagent.objects.filter(pk=instance.solvent_reagent.id).update(
+            quantity_stock=round((instance.solvent_reagent.quantity_stock - instance.quantity_solvent), 2))
+
+        TransactionReagent.objects.create(
+            reagent_inventory_id=instance.solvent_reagent.id,
+            type_transaction='Uso - Preparación Sln',
+            date_transaction=timezone.localdate(),
+            detail_transaction='Solución' + instance.code_solution + ' al ' + str(
+                instance.concentration) + instance.concentration_unit,
+            quantity=instance.quantity_solvent,
+            user_transaction_id=instance.preparated_std_by.id,
+        )
+
+    # if not created:
+    #     # Si es actualización, verificar si quantity_solvent cambió
+    #     try:
+    #         old_instance = Solution.objects.get(pk=instance.pk)
+    #         # Si ya tenía un valor, no procesar (evitar duplicados)
+    #         if old_instance.quantity_solvent:
+    #             return
+    #     except Solution.DoesNotExist:
+    #         return
+    #
+    #     if instance.preparation_confirmed and instance.solvent_reagent:
+    #
+    #         InventoryReagent.objects.filter(pk=instance.solute_reagent.id).update(
+    #             quantity_stock=round(float(instance.solute_reagent.quantity_stock) - float(instance.quantity_reagent), 2))
+    #
+    #         TransactionReagent.objects.create(
+    #             reagent_inventory_id=instance.solute_reagent.id,
+    #             type_transaction='Uso',
+    #             date_transaction=timezone.localdate(),
+    #             detail_transaction='Solución ' + instance.code_solution + ' al ' + str(
+    #                 instance.concentration) + instance.concentration_unit,
+    #             quantity=instance.quantity_reagent,
+    #             user_transaction_id=instance.preparated_by.id,
+    #         )
+    #
+    # else:
+    #     # Usar transacción atómica para garantizar consistencia
+    #     with transaction.atomic():
+    #         InventoryReagent.objects.select_for_update().filter(
+    #             pk=instance.solvent_reagent_id
+    #         ).update(
+    #             quantity_stock=F('quantity_stock') - instance.quantity_solvent
+    #         )
+    #
+    #         # Crear la transacción
+    #         TransactionReagent.objects.create(
+    #             reagent_inventory_id=instance.solvent_reagent_id,
+    #             type_transaction='Uso',
+    #             date_transaction=timezone.localdate(),  # Simplificado
+    #             detail_transaction=(
+    #                 f'Solución {instance.code_solution} al '
+    #                 f'{instance.concentration}{instance.concentration_unit}'
+    #             ),
+    #             quantity=instance.quantity_solvent,
+    #             user_transaction_id=instance.preparated_by_id,
+    #         )
 
 
 # Descuento de inventario de reactivos solvente en preparación de soluciones Estándares
@@ -87,7 +101,7 @@ def discount_reagent_transaction_std(sender, instance, **kwargs):
 
         TransactionReagent.objects.create(
             reagent_inventory_id=instance.solute_std.id,
-            type_transaction='Uso',
+            type_transaction='Uso - Preparación Sln STD',
             date_transaction=timezone.localdate(),
             detail_transaction='Solución Estándar ' + instance.code_solution_std + ' al ' + str(
                 instance.concentration_std) + instance.concentration_unit,
