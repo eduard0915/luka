@@ -84,16 +84,10 @@ class SolutionForm(ModelForm):
 
         try:
             if concentration_unit == '%':
-                quantity_reagent = round(
-                    base_calc * (concentration / purity),
-                    sig_figs
-                )
+                quantity_reagent = round(base_calc * (concentration / purity), sig_figs)
 
             elif concentration_unit == 'mg/L':
-                quantity_reagent = round(
-                    base_calc * (concentration * purity / 10000),
-                    sig_figs
-                )
+                quantity_reagent = round(base_calc * (concentration * purity / 10000), sig_figs)
 
             elif concentration_unit == 'M':
                 if not reagent.molecular_weight:
@@ -132,16 +126,11 @@ class SolutionForm(ModelForm):
     def save(self, commit=True):
         """Guardar la instancia con los valores calculados"""
         instance = super().save(commit=False)
-        user = get_current_user()
-
-        instance.preparated_by_id = user.id
 
         # Usar el valor calculado en clean()
         if '_quantity_reagent' in self.cleaned_data:
             instance.quantity_reagent = self.cleaned_data['_quantity_reagent']
         else:
-            # Fallback: Si por alguna razón no está en cleaned_data, recalcular
-            # (esto no debería pasar si clean() se ejecutó correctamente)
             solute_reagent = instance.solute_reagent
             purity = solute_reagent.purity
             density = solute_reagent.density
@@ -164,6 +153,8 @@ class SolutionForm(ModelForm):
             elif instance.concentration_unit == 'N':
                 factor = (instance.concentration * solute_reagent.reagent.gram_equivalent) / (10 * purity)
                 instance.quantity_reagent = round(base_calc * factor, sig_figs)
+
+        instance.quantity_solvent = float(instance.quantity_solution - instance.quantity_reagent)
 
         if commit:
             instance.save()
@@ -263,32 +254,42 @@ class SolutionStandardForm(ModelForm):
         return instance
 
 
-# Adición de Solvente a Solución
-class SolutionAddSolventForm(ModelForm):
+# Confirmar preparación de Solución
+class SolutionConfirmedForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['preparation_confirmed'].label = ''
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
     class Meta:
         model = Solution
-        fields = ['quantity_solvent']
-        widgets = {'quantity_solvent': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),}
+        fields = ['preparation_confirmed']
+        widgets = {'preparation_confirmed': Select(attrs={'class': 'form-control', 'hidden': True}),}
 
     def save(self, commit=True):
         data = {}
         form = super()
         try:
             if form.is_valid():
-                data = form.save(commit=False)
-                data.preparation_date = timezone.localtime(timezone.now())
 
-                if data.solute_reagent.reagent.stability_solution:
-                    data.expire_date_solution = data.preparation_date + timedelta(
-                        days=data.solute_reagent.reagent.stability_solution)
+                instance = super().save(commit=False)
+                user = get_current_user()
+
+                instance.preparation_date = timezone.localdate()
+                instance.preparation_confirmed = True
+                instance.preparated_by_id = user.id
+
+                if instance.solute_reagent.reagent.stability_solution:
+                    instance.expire_date_solution = instance.preparation_date + timedelta(
+                        days=instance.solute_reagent.reagent.stability_solution)
                 else:
-                    raise ValidationError('El Reactivo no tiene un Días Estabilidad definido')
-                data.save()
+                    raise ValidationError('El Reactivo no tiene definido Días Estabilidad en Solución')
+
+                if commit:
+                    instance.save()
+
+                return instance
             else:
                 data['error'] = form.errors
         except Exception as e:

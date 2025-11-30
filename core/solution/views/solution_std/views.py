@@ -72,11 +72,11 @@ class SolutionStandardCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
         return context
 
 
-# Adición de Solvente a Sln Estándar
+# Confirmar Preparación de Sln Estándar
 class SolutionStdConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
     model = SolutionStd
     form_class = SolutionStdConfirmedForm
-    template_name = 'solution/create_solvent.html'
+    template_name = 'solution/confirmed_solution.html'
     permission_required = 'reagent.add_reagent'
 
     @method_decorator(csrf_exempt)

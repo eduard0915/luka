@@ -67,30 +67,46 @@
                         <div class="row mt-1">
                             <div class="col-md-4">
                                 <b>Preparado por </b><br>
-                                <p>{{ object.preparated_by }}</p>
+                                {% if object.preparated_by %}
+                                    <p>{{ object.preparated_by }}</p>
+                                {% else %}
+                                    <p class="text-danger">Pendiente Confirmación</p>
+                                {% endif %}
                             </div>
                             <div class="col-md-3">
                                 <b>Fecha de Preparación</b><br>
-                                <p>{{ object.preparation_date | date:'Y-m-d' }}</p>
+                                {% if object.preparation_date %}
+                                    <p>{{ object.preparation_date | date:'Y-m-d' }}</p>
+                                {% else %}
+                                    <p class="text-danger">Pendiente Confirmación</p>
+                                {% endif %}
                             </div>
                             <div class="col-md-3">
                                 <b>Vencimiento</b><br>
-                                <p>{{ object.expire_date_solution | date:'Y-m-d' }}</p>
+                                {% if object.expire_date_solution %}
+                                    <p>{{ object.expire_date_solution | date:'Y-m-d' }}</p>
+                                {% else %}
+                                    <p class="text-danger">Pendiente Confirmación</p>
+                                {% endif %}
                             </div>
                         </div>
                     {% endif %}
                 </div>
                 <div class="tile-footer">
-                    {% if not object.quantity_solvent %}
-                        {% if object.quantity_reagent < object.solute_reagent.quantity_stock %}
-                            <button onclick="open_modal('{% url 'solution:add_solvent_solution' object.id %}')"
-                                    class="btn btn-primary me-2">
-                                <i class="bi bi-moisture me-2"></i> Añadir de Solvente
-                            </button>
-                        {% else %}
-                                <p class="text-danger p-2">Cantidad de Reactivo requerida mayor que la
-                                    disponible {{ object.solute_reagent.quantity_stock | unlocalize }} {{ object.solute_reagent.reagent.umb }}</p>
-                        {% endif %}
+
+                    {% if object.quantity_reagent > object.solute_reagent.quantity_stock %}
+                        <p class="text-danger p-2">Cantidad de Reactivo requerida mayor que la
+                            disponible, {{ object.solute_reagent.quantity_stock | unlocalize }} {{ object.solute_reagent.reagent.umb }}</p>
+                    {% elif object.quantity_solvent > object.solvent_reagent.quantity_stock %}
+                        <p class="text-danger p-2"><b>Cantidad de solvente requerida mayor que la
+                            disponible, {{ object.solvent_reagent | unlocalize }}</b></p>
+                    {% elif not object.preparation_confirmed %}
+                        <button onclick="open_modal('{% url 'solution:confirmed_solution' object.id %}')"
+                                class="btn btn-primary me-2">
+                            <i class="bi bi-moisture me-2"></i> Confirmar Preparación
+                        </button>
+                    {% endif %}
+                    {% if not object.preparation_confirmed %}
                         <a href="{{ update_solution }}" type="button" class="btn btn-warning me-2">
                             <i class="fa fa-fw fa-lg fa-pencil me-2"></i> Editar
                         </a>
@@ -109,7 +125,7 @@
             </div>
         </div>
     </div>
-    {% if object.standardizable and object.quantity_solvent %}
+    {% if object.standardizable and object.preparation_confirmed %}
         <div class="row">
             <div class="col-md-11">
                 <div class="tile mb-3">
