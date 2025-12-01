@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             // Si NO tiene estandarización: mostrar botón para CREAR
                             if (row['has_standardization'] === false) {
                                 actions += '<a onclick="open_modal(\'/solution/add_standardization/' + row['id'] + '/\')" ';
-                                actions += 'type="button" title="Agregar Estandarización">';
+                                actions += 'type="button" title="Agregar Estandarización del Reactivo en Solución">';
                                 actions += '<i class="bi bi-award-fill text-info"></i></a>&nbsp;';
                             }
                             // Si YA tiene estandarización: mostrar botón para EDITAR

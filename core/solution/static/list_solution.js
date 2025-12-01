@@ -24,13 +24,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 {'data': 'concentration'},
                 {'data': 'preparation_date'},
                 {'data': 'expire_date_solution'},
-                {'data': 'quantity_solution'},
+                {'data': 'quantity_available_sln'},
                 {'data': 'preparated_by__get_full_name'},
                 {'data': 'id'}
             ],
             columnDefs: [
                 {
-                    targets: [0, 1, 3, 5, 6],
+                    targets: [0, 1, 3, 6],
                     class: 'td-actions text-center'
                 },
                 {
@@ -38,6 +38,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     class: 'td-actions text-center',
                     render: function (data, type, row) {
                         return row['concentration'] + ' ' + row['concentration_unit'];
+                    }
+                },
+                {
+                    targets: [5],
+                    class: 'td-actions text-center',
+                    render: function (data, type, row) {
+                        if (row['quantity_available_sln'] === null || row['quantity_available_sln'] === undefined) {
+                            return '<span class="badge bg-secondary">Sin Confirmar</span>';
+                        } else {
+                            return row['quantity_available_sln'];
+                        }
                     }
                 },
                 {
@@ -66,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     render: function (data, type, row) {
                         let actions
                         actions = '<a href="/solution/detail/' + row['id'] + '/" type="button" title="Detalle de Preparación"><i class="bi bi-info-square text-info"></i></a> &nbsp';
-                        if (row['quantity_solvent'] !== null){
+                        if (row['preparation_confirmed'] === false){
                             actions += '<a href="/solution/update/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a>';
                         }
                         return actions

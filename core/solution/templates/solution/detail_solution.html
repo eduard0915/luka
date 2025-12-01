@@ -34,7 +34,7 @@
                 <div class="tile-body">
                     <div class="row">
                         <div class="col-md-2">
-                            <b>Cantidad a Preparar </b><br>
+                            <b>Cantidad {% if object.preparation_confirmed %}Preparada{% else %}a Preparar{% endif %}</b><br>
                             <p>{{ object.quantity_solution | intcomma:False }} mL</p>
                         </div>
                         <div class="col-md-2">
@@ -65,7 +65,7 @@
                     </div>
                     {% if object.quantity_solvent %}
                         <div class="row mt-1">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <b>Preparado por </b><br>
                                 {% if object.preparated_by %}
                                     <p>{{ object.preparated_by }}</p>
@@ -89,15 +89,23 @@
                                     <p class="text-danger">Pendiente Confirmación</p>
                                 {% endif %}
                             </div>
+                            <div class="col-md-3">
+                                <b>Cantidad Disponible</b><br>
+                                {% if object.quantity_available_sln %}
+                                    <p>{{ object.quantity_available_sln | intcomma:False }} mL</p>
+                                {% else %}
+                                    <p class="text-danger">Pendiente Confirmación</p>
+                                {% endif %}
+                            </div>
                         </div>
                     {% endif %}
                 </div>
                 <div class="tile-footer">
 
-                    {% if object.quantity_reagent > object.solute_reagent.quantity_stock %}
+                    {% if object.quantity_reagent > object.solute_reagent.quantity_stock and not object.preparation_confirmed %}
                         <p class="text-danger p-2">Cantidad de Reactivo requerida mayor que la
                             disponible, {{ object.solute_reagent.quantity_stock | unlocalize }} {{ object.solute_reagent.reagent.umb }}</p>
-                    {% elif object.quantity_solvent > object.solvent_reagent.quantity_stock %}
+                    {% elif object.quantity_solvent > object.solvent_reagent.quantity_stock and not object.preparation_confirmed %}
                         <p class="text-danger p-2"><b>Cantidad de solvente requerida mayor que la
                             disponible, {{ object.solvent_reagent | unlocalize }}</b></p>
                     {% elif not object.preparation_confirmed %}
@@ -136,10 +144,6 @@
                     </div>
                     <div class="tile-body">
                         <div class="row">
-                            <div class="col-md-3">
-                                <b>Volumen de Alícuota</b><br>
-                                <p class="text-primary"><b>{{ std.quantity_aliquot | unlocalize }} mL</b></p>
-                            </div>
                             <div class="col-md-3">
                                 <b>Concentración Real</b><br>
                                 {% if object.average_concentration %}
@@ -201,7 +205,9 @@
                             </div>
                         {% endif %}
                     </div>
-                    {% if standard_count <= 4 %}
+                    {% if not std_config %}
+                        <p class="text-danger semibold-text">Ir al listado de reactivos y configurar Estandarización del Reactivo en solución</p>
+                    {% elif standard_count < 6 %}
                         <div class="tile-footer">
                             <a onclick="open_modal('{{ add_standardization }}')" type="button" class="btn btn-primary me-2">
                                 <i class="fa fa-plus"></i> Registrar
@@ -227,8 +233,9 @@
                                 <thead>
                                 <tr>
                                     <th style="width:10%">Fecha</th>
-                                    <th style="width:45%">Solución Estándar</th>
-                                    <th style="width:10%">mL Estándar </th>
+                                    <th style="width:35%">Solución STD</th>
+                                    <th style="width:10%">mL Alícuota STD</th>
+                                    <th style="width:10%">mL Solución </th>
                                     <th style="width:10%">[ ]</th>
                                     <th style="width:20%">Realizado por</th>
                                     <th style="width:5%">Acciones</th>
@@ -238,8 +245,9 @@
                                 {% for std in standardizations %}
                                     <tr>
                                         <td class="text-center">{{ std.standarization_date | date:'Y-m-d' }}</td>
-                                        <td class="text-center">{{ std.standard_sln }}</td>
-                                        <td class="text-center">{{ std.quantity_standard | unlocalize }}</td>
+                                        <td class="text-center">{{ std.standard_solution }}</td>
+                                        <td class="text-center">{{ std.quantity_standard | unlocalize}}</td>
+                                        <td class="text-center">{{ std.quantity_solution | unlocalize }}</td>
                                         <td class="text-center">
                                             <b>{{ std.concentration_sln | unlocalize }} {{ std.solution.concentration_unit }}</b>
                                         </td>

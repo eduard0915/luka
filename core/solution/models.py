@@ -68,6 +68,7 @@ class Solution(BaseModel):
     preparation_date = models.DateField(verbose_name='Fecha de Preparación', null=True, blank=True)
     expire_date_solution = models.DateField(verbose_name='Fecha de Vencimiento', null=True, blank=True)
     quantity_solution = models.FloatField(verbose_name='Cant. a Preparar (mL)')
+    quantity_available_sln = models.FloatField(verbose_name='Cantidad Disponible (mL)', null=True, blank=True)
     quantity_reagent = models.FloatField(verbose_name='Cant. Reactivo')
     quantity_solvent = models.FloatField(verbose_name='Solvente (mL)', null=True, blank=True)
     preparated_by = models.ForeignKey(User, verbose_name='Preparado por', on_delete=models.CASCADE, null=True, blank=True)
@@ -119,7 +120,7 @@ class SolutionStd(BaseModel):
     preparation_confirmed = models.BooleanField(default=False)
 
     def __str__(self):
-        return str(self.solute_std.reagent) + ' ' + str(self.concentration_std) + str(self.concentration_unit) + ' - ' + str(self.code_solution_std)
+        return f'{self.solute_std.reagent} {self.concentration_std}{self.concentration_unit} - {self.code_solution_std} - {self.quantity_solution_std}{self.solute_std.reagent.umb}'
 
     class Meta:
         verbose_name = 'SolutionStd'
@@ -148,11 +149,10 @@ class Standardization(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     solution_reagent = models.ForeignKey(Reagent, verbose_name='Solución', on_delete=models.CASCADE, related_name='solution')
     solution_std = models.ForeignKey(Reagent, verbose_name='Solución Estándar', on_delete=models.CASCADE, related_name='solution_std')
-    quantity_aliquot = models.FloatField(verbose_name='mL de Alícuota')
     molar_relation = models.FloatField(verbose_name='Relación Molar', default=1)
 
     def __str__(self):
-        return str(self.quantity_aliquot)
+        return str(self.molar_relation)
 
     class Meta:
         verbose_name = 'Standardization'
@@ -174,12 +174,12 @@ class Standardization(BaseModel):
 class StandardizationSolution(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     solution = models.ForeignKey(Solution, verbose_name='Solución', on_delete=models.CASCADE)
-    standard_sln = models.ForeignKey(SolutionStd, verbose_name='Solución Estándar', on_delete=models.CASCADE, null=True, blank=True)
-    quantity_aliquot = models.FloatField(verbose_name='mL de Alícuota')
-    concentration_sln = models.FloatField(verbose_name='Concentración Sln', null=True, blank=True)
-    quantity_standard = models.FloatField(verbose_name='mL Estándar', null=True, blank=True)
-    standardized_by = models.ForeignKey(User, verbose_name='', on_delete=models.CASCADE, null=True, blank=True)
-    standarization_date = models.DateField(verbose_name='', null=True, blank=True)
+    standard_solution = models.ForeignKey(SolutionStd, verbose_name='Solución Estándar', on_delete=models.CASCADE)
+    quantity_standard = models.FloatField(verbose_name=' Cantidad de Estándar')
+    quantity_solution = models.FloatField(verbose_name='mL de Solución Gastados')
+    concentration_sln = models.FloatField(verbose_name='Concentración Sln')
+    standardized_by = models.ForeignKey(User, verbose_name='', on_delete=models.CASCADE)
+    standarization_date = models.DateField(verbose_name='')
 
     def __str__(self):
         return str(self.quantity_standard)
@@ -207,7 +207,7 @@ class TransactionSolution(BaseModel):
     date_transaction = models.DateField(verbose_name='Fecha')
     type_transaction = models.CharField(max_length=50, verbose_name='Tipo de Registro')
     detail_transaction = models.CharField(max_length=250, verbose_name='Detalle de Registro')
-    quantity = models.IntegerField(verbose_name='Cantidad')
+    quantity = models.FloatField(verbose_name='Cantidad')
     user_transaction = models.ForeignKey(User, verbose_name='', on_delete=models.CASCADE)
 
     def __str__(self):
@@ -235,7 +235,7 @@ class TransactionSolutionStd(BaseModel):
     date_transaction = models.DateField(verbose_name='Fecha')
     type_transaction = models.CharField(max_length=50, verbose_name='Tipo de Registro')
     detail_transaction = models.CharField(max_length=250, verbose_name='Detalle de Registro')
-    quantity = models.IntegerField(verbose_name='Cantidad')
+    quantity = models.FloatField(verbose_name='Cantidad')
     user_transaction = models.ForeignKey(User, verbose_name='', on_delete=models.CASCADE)
 
     def __str__(self):
