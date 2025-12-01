@@ -25,8 +25,7 @@ urlpatterns = [
     path('api/inventory-reagent/<uuid:reagent_id>/', get_inventory_reagent_data, name='inventory_reagent_data'),
     path('add_standardization/<uuid:pk>/', StandardizationCreateView.as_view(), name='create_standardization'),
     path('update_standardization/<uuid:pk>/', StandardizationUpdateView.as_view(), name='update_standardization'),
-    path('add_standardization_sln/<uuid:pk>/', StandardizationSolutionCreateView.as_view(),
-         name='create_standardization_solution'),
+    path('add_standardization_sln/<uuid:pk>/', StandardizationSolutionCreateView.as_view(), name='create_std_solution'),
     path('delete_standardization_sln/<uuid:pk>/', StandardizationSolutionDeleteView.as_view(),
          name='delete_standardization_solution'),
 ]

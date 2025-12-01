@@ -582,3 +582,193 @@ WARNING 2025-11-30 12:31:45,763 log 19962 133078346364608 Not Found: /.well-know
 WARNING 2025-11-30 12:31:45,764 basehttp 19962 133078346364608 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 4019
 WARNING 2025-11-30 13:11:22,631 log 6169 138846039701184 Not Found: /favicon.ico
 WARNING 2025-11-30 13:11:22,632 basehttp 6169 138846039701184 "GET /favicon.ico HTTP/1.1" 404 3908
+WARNING 2025-11-30 19:39:06,704 log 9181 123958303127232 Not Found: /favicon.ico
+WARNING 2025-11-30 19:39:06,705 basehttp 9181 123958303127232 "GET /favicon.ico HTTP/1.1" 404 3908
+WARNING 2025-11-30 19:41:58,306 log 9391 139208098309824 Not Found: /favicon.ico
+WARNING 2025-11-30 19:41:58,307 basehttp 9391 139208098309824 "GET /favicon.ico HTTP/1.1" 404 3908
+WARNING 2025-11-30 19:42:20,972 log 9391 139208098309824 Not Found: /favicon.ico
+WARNING 2025-11-30 19:42:20,972 basehttp 9391 139208098309824 "GET /favicon.ico HTTP/1.1" 404 3908
+ERROR 2025-11-30 19:42:28,790 log 9391 139208098309824 Internal Server Error: /solution/add_standardization_sln/83c5a69b-8d2b-450e-b4da-7ef26914ca0c/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/utils/decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/solution/views/standardization_sln/views.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/generic/base.py", line 144, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/generic/edit.py", line 178, in get
+    return super().get(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/generic/edit.py", line 142, in get
+    return self.render_to_response(self.get_context_data())
+                                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/solution/views/standardization_sln/views.py", line 50, in get_context_data
+    context = super().get_context_data(**kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/generic/edit.py", line 72, in get_context_data
+    kwargs["form"] = self.get_form()
+                     ^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/generic/edit.py", line 37, in get_form
+    return form_class(**self.get_form_kwargs())
+                        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/solution/views/standardization_sln/views.py", line 45, in get_form_kwargs
+    std = Standardization.objects.get(solution_reagent_id=sln.solute_reagent.reagent.id)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/db/models/query.py", line 635, in get
+    raise self.model.DoesNotExist(
+core.solution.models.Standardization.DoesNotExist: Standardization matching query does not exist.
+ERROR 2025-11-30 19:42:28,792 basehttp 9391 139208098309824 "GET /solution/add_standardization_sln/83c5a69b-8d2b-450e-b4da-7ef26914ca0c/ HTTP/1.1" 500 141470
+ERROR 2025-11-30 20:18:40,586 log 11555 136579892901568 Internal Server Error: /solution/add_standardization_sln/83c5a69b-8d2b-450e-b4da-7ef26914ca0c/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/utils/decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/solution/views/standardization_sln/views.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/generic/base.py", line 144, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/generic/edit.py", line 178, in get
+    return super().get(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/generic/edit.py", line 142, in get
+    return self.render_to_response(self.get_context_data())
+                                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/solution/views/standardization_sln/views.py", line 50, in get_context_data
+    context = super().get_context_data(**kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/generic/edit.py", line 72, in get_context_data
+    kwargs["form"] = self.get_form()
+                     ^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/generic/edit.py", line 37, in get_form
+    return form_class(**self.get_form_kwargs())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/solution/forms.py", line 408, in __init__
+    self.fields['quantity_standard'].label = self.std.reagent.umb + 'de Estándar'
+                                             ^^^^^^^^^^^^^^^^
+AttributeError: 'Standardization' object has no attribute 'reagent'
+ERROR 2025-11-30 20:18:40,593 basehttp 11555 136579892901568 "GET /solution/add_standardization_sln/83c5a69b-8d2b-450e-b4da-7ef26914ca0c/ HTTP/1.1" 500 132405
+ERROR 2025-11-30 20:19:04,489 log 11687 127381549348544 Internal Server Error: /solution/add_standardization_sln/83c5a69b-8d2b-450e-b4da-7ef26914ca0c/
+Traceback (most recent call last):
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/utils/decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/solution/views/standardization_sln/views.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/mixins.py", line 23, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/generic/base.py", line 144, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/generic/edit.py", line 178, in get
+    return super().get(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/generic/edit.py", line 142, in get
+    return self.render_to_response(self.get_context_data())
+                                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/solution/views/standardization_sln/views.py", line 50, in get_context_data
+    context = super().get_context_data(**kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/generic/edit.py", line 72, in get_context_data
+    kwargs["form"] = self.get_form()
+                     ^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/venv_lims/lib/python3.12/site-packages/django/views/generic/edit.py", line 37, in get_form
+    return form_class(**self.get_form_kwargs())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/eduard/DevelopProjects/lims/luka/core/solution/forms.py", line 408, in __init__
+    self.fields['quantity_standard'].label = str(self.std.reagent.umb) + ' de Estándar'
+                                                 ^^^^^^^^^^^^^^^^
+AttributeError: 'Standardization' object has no attribute 'reagent'
+ERROR 2025-11-30 20:19:04,493 basehttp 11687 127381549348544 "GET /solution/add_standardization_sln/83c5a69b-8d2b-450e-b4da-7ef26914ca0c/ HTTP/1.1" 500 132425
+WARNING 2025-11-30 20:56:43,670 log 13915 130553679443648 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-30 20:56:43,670 basehttp 13915 130553679443648 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 4019
+WARNING 2025-11-30 21:03:14,038 log 14369 131356474472128 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-30 21:03:14,038 basehttp 14369 131356474472128 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 4019
+WARNING 2025-11-30 21:05:48,840 log 14369 131356474472128 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-30 21:05:48,841 basehttp 14369 131356474472128 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 4019
+WARNING 2025-11-30 21:23:21,267 log 15383 130340630812352 Not Found: /favicon.ico
+WARNING 2025-11-30 21:23:21,267 basehttp 15383 130340630812352 "GET /favicon.ico HTTP/1.1" 404 3908
+WARNING 2025-11-30 21:23:29,395 log 15383 130340614026944 Not Found: /favicon.ico
+WARNING 2025-11-30 21:23:29,396 basehttp 15383 130340614026944 "GET /favicon.ico HTTP/1.1" 404 3908
+WARNING 2025-11-30 21:24:04,918 log 15383 130340647597760 Not Found: /favicon.ico
+WARNING 2025-11-30 21:24:04,919 basehttp 15383 130340647597760 "GET /favicon.ico HTTP/1.1" 404 3908
+WARNING 2025-11-30 21:24:29,957 log 15383 130340728338112 Not Found: /favicon.ico
+WARNING 2025-11-30 21:24:29,958 basehttp 15383 130340728338112 "GET /favicon.ico HTTP/1.1" 404 3908
+WARNING 2025-11-30 21:25:06,564 log 15383 130340614026944 Not Found: /favicon.ico
+WARNING 2025-11-30 21:25:06,565 basehttp 15383 130340614026944 "GET /favicon.ico HTTP/1.1" 404 3908
+WARNING 2025-11-30 21:25:27,152 log 15383 130340639205056 Not Found: /favicon.ico
+WARNING 2025-11-30 21:25:27,152 basehttp 15383 130340639205056 "GET /favicon.ico HTTP/1.1" 404 3908
+WARNING 2025-11-30 21:31:31,114 log 16470 136249272673984 Not Found: /favicon.ico
+WARNING 2025-11-30 21:31:31,114 basehttp 16470 136249272673984 "GET /favicon.ico HTTP/1.1" 404 3908
+WARNING 2025-11-30 21:31:32,265 log 16470 136249272673984 Not Found: /favicon.ico
+WARNING 2025-11-30 21:31:32,266 basehttp 16470 136249272673984 "GET /favicon.ico HTTP/1.1" 404 3908
+WARNING 2025-11-30 21:31:53,412 log 16470 136249272673984 Not Found: /favicon.ico
+WARNING 2025-11-30 21:31:53,413 basehttp 16470 136249272673984 "GET /favicon.ico HTTP/1.1" 404 3908
+WARNING 2025-11-30 21:32:24,129 log 17023 125119792936640 Not Found: /favicon.ico
+WARNING 2025-11-30 21:32:24,129 basehttp 17023 125119792936640 "GET /favicon.ico HTTP/1.1" 404 3908
+WARNING 2025-11-30 21:32:49,050 log 17023 125119792936640 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-30 21:32:49,051 basehttp 17023 125119792936640 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 4019
+WARNING 2025-11-30 21:35:28,116 log 17224 133236152858304 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-30 21:35:28,116 basehttp 17224 133236152858304 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 4019
+WARNING 2025-12-01 06:15:12,953 log 5637 130572068316864 Not Found: /favicon.ico
+WARNING 2025-12-01 06:15:12,954 basehttp 5637 130572068316864 "GET /favicon.ico HTTP/1.1" 404 3908

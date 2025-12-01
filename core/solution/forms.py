@@ -278,6 +278,7 @@ class SolutionConfirmedForm(ModelForm):
 
                 instance.preparation_date = timezone.localdate()
                 instance.preparation_confirmed = True
+                instance.quantity_available_sln = instance.quantity_solution
                 instance.preparated_by_id = user.id
 
                 if instance.solute_reagent.reagent.stability_solution:
@@ -348,10 +349,9 @@ class StandardizationForm(ModelForm):
 
     class Meta:
         model = Standardization
-        fields = ['solution_std', 'quantity_aliquot', 'molar_relation']
+        fields = ['solution_std', 'molar_relation']
         widgets = {
             'solution_std': Select(attrs={'class': 'form-control select2', 'required': True, 'style': 'width: 100%'}),
-            'quantity_aliquot': TextInput(attrs={'class': 'form-control', 'required': True}),
             'molar_relation': TextInput(attrs={'class': 'form-control', 'required': True})
         }
 
@@ -380,10 +380,9 @@ class StandardizationUpdateForm(ModelForm):
 
     class Meta:
         model = Standardization
-        fields = ['solution_std', 'quantity_aliquot', 'molar_relation']
+        fields = ['solution_std', 'molar_relation']
         widgets = {
             'solution_std': Select(attrs={'class': 'form-control select2', 'required': True, 'style': 'width: 100%'}),
-            'quantity_aliquot': TextInput(attrs={'class': 'form-control', 'required': True}),
             'molar_relation': TextInput(attrs={'class': 'form-control', 'required': True})
         }
 
@@ -406,24 +405,24 @@ class StandardizationSolutionForm(ModelForm):
         self.std = kwargs.pop('std')
         self.sln = kwargs.pop('sln')
         super().__init__(*args, **kwargs)
-        self.fields['standard_sln'].queryset = SolutionStd.objects.filter(
-            solute_std__reagent_id=self.std.solution_std_id, quantity_solution_std__gt=0)
+        self.fields['quantity_standard'].label = str(self.std.solution_std.umb) + ' de Estándar'
+        self.fields['standard_solution'].queryset = SolutionStd.objects.select_related('solute_std').filter(
+            solute_std__reagent_id=self.std.solution_std.id, quantity_solution_std__gt=0)
+
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
     class Meta:
         model = StandardizationSolution
-        fields = ['standard_sln', 'quantity_standard']
+        fields = ['standard_solution', 'quantity_standard', 'quantity_solution']
         widgets = {
-            'standard_sln': Select(attrs={
+            'standard_solution': Select(attrs={
                 'class': 'form-control select2',
                 'required': True,
                 'style': 'width: 100%'
             }),
-            'quantity_standard': TextInput(attrs={
-                'class': 'form-control',
-                'required': True
-            })
+            'quantity_standard': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'quantity_solution': TextInput(attrs={'class': 'form-control', 'required': True}),
         }
 
     def save(self, commit=True):
@@ -431,16 +430,17 @@ class StandardizationSolutionForm(ModelForm):
         try:
             instance = super().save(commit=False)
             instance.solution_id = self.sln.id
-            instance.quantity_aliquot = float(self.std.quantity_aliquot)
             instance.standardized_by_id = user.id
-            instance.standarization_date = timezone.localtime(timezone.now())
+            instance.standarization_date = timezone.localdate()
+
+            aliquot = float(instance.quantity_standard)
 
             if self.sln.concentration_unit == 'M':
-                mol_solute = instance.quantity_standard * instance.standard_sln.concentration_std / self.std.molar_relation
-                instance.concentration_sln = round((mol_solute / self.std.quantity_aliquot), 3)
+                mol_solute = (instance.quantity_solution * instance.standard_solution.concentration_std) / self.std.molar_relation
+                instance.concentration_sln = round((mol_solute / aliquot), 3)
             elif self.sln.concentration_unit == 'N':
-                eq_solute = instance.quantity_standard * instance.standard_sln.concentration_std
-                instance.concentration_sln = round((eq_solute / self.std.quantity_aliquot), 3)
+                eq_solute = instance.quantity_solution * instance.standard_solution.concentration_std
+                instance.concentration_sln = round((eq_solute / aliquot), 3)
 
             if commit:
                 instance.save()
@@ -452,7 +452,7 @@ class StandardizationSolutionForm(ModelForm):
     def clean(self):
         cleaned = super().clean()
         quantity_standard = cleaned.get('quantity_standard')
-        stock_standard = cleaned.get('standard_sln').quantity_solution_std
+        stock_standard = cleaned.get('standard_solution').quantity_solution_std
         umb = self.std.solution_std.umb
 
         if quantity_standard > stock_standard:

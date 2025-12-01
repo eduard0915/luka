@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 from core.reagent.models import TransactionReagent, InventoryReagent
-from core.solution.models import SolutionStd, code_solution_std_generator
+from core.solution.models import SolutionStd, code_solution_std_generator, TransactionSolutionStd
 
 
 # Registro de Transacción de ingreso de reactivo en inventario
@@ -13,8 +13,6 @@ def register_inventory_reagent(sender, instance, created, **kwargs):
 
     if not created:
         return
-
-    user = get_current_user()
 
     # Evitar ejecución durante fixtures/migraciones
     if kwargs.get('raw', False):
@@ -27,7 +25,7 @@ def register_inventory_reagent(sender, instance, created, **kwargs):
         date_transaction=timezone.localdate(),
         detail_transaction='Ingreso de Reactivo a Inventario',
         quantity=instance.quantity_stock,
-        user_transaction_id=instance.user_creation.id,
+        user_transaction=instance.user_creation,
     )
 
     if instance.reagent.ready_to_use:
@@ -44,3 +42,13 @@ def register_inventory_reagent(sender, instance, created, **kwargs):
             user_creation=instance.user_creation,
         )
         solution.save()
+
+        std = TransactionSolutionStd(
+            solution_std_inventory=instance,
+            date_transaction=timezone.localdate(),
+            type_transaction='Entrada',
+            detail_transaction='Ingreso a Inventario de Soluciones Estándares',
+            quantity=instance.quantity_stock,
+            user_transaction=instance.user_creation,
+        )
+        std.save()
