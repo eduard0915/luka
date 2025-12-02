@@ -62,15 +62,14 @@ class Stage(BaseModel):
 # Puntos de Muestreo
 class SamplePoint(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    sample_point_name = models.CharField(max_length=100, verbose_name='Punto de Muestreo')
     sample_point_code = models.CharField(max_length=30, verbose_name='Código')
-    sample_point_version = models.SmallIntegerField(verbose_name='', default=1)
-    sample_type = models.CharField(max_length=30, verbose_name='Tipo de Muestra (Matriz)')
+    sample_point_name = models.CharField(max_length=100, verbose_name='Punto de Muestreo')
+    sample_frequency = models.SmallIntegerField(verbose_name='Frecuencia de Muestreo')
     stage = models.ForeignKey(Stage, on_delete=models.CASCADE, verbose_name='Etapa')
     enable_point = models.BooleanField(default=True, verbose_name='Habilitado')
 
     def __str__(self):
-        return str(self.sample_point_name) + ' - ' + str(self.stage.stage_name) + ' - ' + str(self.stage.process.process_name)
+        return str(self.sample_point_name) + ' - ' + str(self.stage.stage_name)
 
     class Meta:
         verbose_name = 'SamplePoint'

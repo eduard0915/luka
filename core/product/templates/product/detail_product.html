@@ -1,0 +1,176 @@
+{% extends 'body.html' %}
+
+{% load static %}
+
+
+{% block head %}
+    {% block head_list %}
+
+    {% endblock %}
+{% endblock %}
+
+{% block content %}
+    <div class="row" style="margin-bottom: 0;">
+        <div class="col-md-8">
+            <div class="tile">
+                <div class="tile-title-w-btn">
+                    <h3 class="title">Etapas</h3>
+                    <p>
+                        <a class="btn btn-primary icon-btn"
+                           onclick="open_modal('{{ create_stage }}')"><i
+                                class="bi bi-plus-square me-2"></i>Nuevo
+                        </a>
+                    </p>
+                </div>
+                <div class="tile-body">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Etapa</th>
+                            <th>Proceso</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for stg in stages %}
+                            <tr>
+                                <td>{{ stg.stage_code }} {{ stg.stage_name }}</td>
+                                <td>{{ stg.process }}</td>
+                                <td>
+                                    {% if stg.enable_stage %}
+                                        <span class="me-1 badge bg-primary">Activo</span>
+                                    {% else %}
+                                        <span class="me-1 badge bg-danger">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a onclick="open_modal('{% url 'company:update_stage' stg.id %}')" title="Editar">
+                                        <i class="bi bi-pencil-square text-warning me-2"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">
+                                    No hay etapas asociadas a esta planta.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <div class="tile-title-w-btn">
+                    <h3 class="title">Puntos de Muestreo</h3>
+                    <p>
+                        {% if stages %}
+                            <a class="btn btn-primary icon-btn"
+                               onclick="open_modal('{% url 'company:create_sample_point' object.id %}')"><i
+                                    class="bi bi-plus-square me-2"></i>Nuevo</a>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="tile-body">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Punto de Muestreo</th>
+                            <th>Etapa</th>
+                            <th>Matriz</th>
+                            <th>Versión</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for sample in sample_point %}
+                            <tr>
+                                <td>{{ sample.sample_point_code }} {{ sample.sample_point_name }}</td>
+                                <td>{{ sample.stage }}</td>
+                                <td>{{ sample.sample_type }}</td>
+                                <td>{{ sample.sample_point_version }}</td>
+                                <td>
+                                    {% if sample.enable_point %}
+                                        <span class="me-1 badge bg-primary">Activo</span>
+                                    {% else %}
+                                        <span class="me-1 badge bg-danger">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a onclick="open_modal('{% url 'company:update_sample_point' sample.id %}')"
+                                       title="Editar">
+                                        <i class="bi bi-pencil-square text-warning me-2"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">
+                                    No hay puntos de muestreo asociados a esta planta.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts_detail %}
+
+    <script>
+        // Initialize tooltips
+        document.addEventListener("DOMContentLoaded", function () {
+            // Inicializar tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
+        // Handle form submission in modal using vanilla JavaScript
+        document.addEventListener('submit', function (e) {
+            // Check if the form is inside a modal
+            if (e.target.closest('.modal') && e.target.tagName === 'FORM') {
+                e.preventDefault();
+                var form = e.target;
+                var url = form.getAttribute('action');
+                var data = new FormData(form);
+
+                // Use fetch API instead of $.ajax
+                fetch(url, {
+                    method: 'POST',
+                    body: data
+                })
+                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.hasOwnProperty('error')) {
+                            // Close modal using Bootstrap 5 syntax
+                            var modalElement = document.getElementById('modal_template');
+                            var modalInstance = bootstrap.Modal.getInstance(modalElement);
+                            modalInstance.hide();
+                            // Reload page to show new data
+                            location.reload();
+                        } else {
+                            // Show error message
+                            alert(response.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error en el envío del formulario');
+                    });
+            }
+        });
+    </script>
+
+{% endblock %}
+
