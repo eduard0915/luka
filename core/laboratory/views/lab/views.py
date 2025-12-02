@@ -9,6 +9,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, ListView, UpdateView, DetailView, DeleteView
 
+from core.equipment.models import EquipmentInstrumental
 from core.mixins import ValidatePermissionRequiredMixin
 from core.laboratory.forms import LaboratoryForm
 from core.laboratory.models import Laboratory
@@ -185,6 +186,7 @@ class LaboratoryDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
         context['title'] = 'Detalle de Laboratorio'
         context['entity'] = 'Detalle de Laboratorio'
         context['icon'] = 'fa-solid fa-flask'
+        context['equipment'] = EquipmentInstrumental.objects.select_related('laboratory').filter(laboratory=self.object)
         context['list_url'] = reverse_lazy('laboratory:list_laboratory')
         context['update_url'] = reverse_lazy('laboratory:update_laboratory', kwargs={'pk': self.object.pk})
         return context

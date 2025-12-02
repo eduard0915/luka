@@ -5,10 +5,10 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import ListView, CreateView, UpdateView, DetailView
+from django.views.generic import CreateView, UpdateView, DetailView
 
 from core.company.forms import SiteForm, SiteUpdateForm
-from core.company.models import Site, Company, Process, Stage, SamplePoint
+from core.company.models import Site, Company, Process
 from core.mixins import ValidatePermissionRequiredMixin
 
 
@@ -118,8 +118,8 @@ class SiteDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Detail
         context['div'] = '12'
         # Get all processes associated with this site
         context['processes'] = Process.objects.select_related('site').filter(site_id=self.object.id, enable_process=True)
-        context['stages'] = Stage.objects.filter(
-            enable_stage=True, process__site_id=self.object.id).order_by('stage_name')
-        context['sample_point'] = SamplePoint.objects.filter(
-            enable_point=True, stage__process__site_id=self.object.id).order_by('sample_point_name')
+        # context['stages'] = Stage.objects.filter(
+        #     enable_stage=True, process__site_id=self.object.id).order_by('stage_name')
+        # context['sample_point'] = SamplePoint.objects.filter(
+        #     enable_point=True, stage__process__site_id=self.object.id).order_by('sample_point_name')
         return context

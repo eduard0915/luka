@@ -78,9 +78,7 @@ class ReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
         try:
             action = request.POST['action']
             if action == 'searchdata':
-                # Obtener reactivos con LEFT JOIN a Standardization
-                # IMPORTANTE: 'solution' debe coincidir con el related_name en tu modelo
-                reagents = Reagent.objects.select_related('solution').values(
+                reagents = Reagent.objects.values(
                     'id',
                     'code_reagent',
                     'description_reagent',
@@ -94,10 +92,8 @@ class ReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
                     'solvent',
                     'density_enable',
                     'standard',
-                    'solution__id'  # ID de la Standardization relacionada
+                    'solution__id'
                 ).order_by('code_reagent')
-
-                # Procesar los datos para agregar campos calculados
                 data = []
                 for reagent in reagents:
                     reagent_data = dict(reagent)

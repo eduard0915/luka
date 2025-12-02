@@ -81,6 +81,8 @@
         {% url 'laboratory:create_laboratory' as create_lab %}
         {% url 'equipment:list_equipment_instrumental' as list_eq %}
         {% url 'equipment:create_equipment_instrumental' as create_eq %}
+        {% url 'product:list_product' as list_prod %}
+        {% url 'product:create_product' as create_prod %}
 
         {% if perms.user.add_user %}
             <li class="treeview {% if list_user in request.path or create_user in request.path %}is-expanded{% endif %}">
@@ -114,8 +116,8 @@
                         <i class="icon bi bi-circle-fill"></i> Laboratorios</a></li>
                     <li><a class="treeview-item {% if list_eq in request.path or create_eq in request.path %}active{% endif %}" href="{% url 'equipment:list_equipment_instrumental' %}">
                         <i class="icon bi bi-circle-fill"></i> Equipo Instrumental</a></li>
-                    <li><a class="treeview-item" href="#">
-                        <i class="icon bi bi-circle-fill"></i> Matrizes</a></li>
+                    <li><a class="treeview-item" href="{% url 'product:list_product' %}">
+                        <i class="icon bi bi-circle-fill"></i> Productos</a></li>
                 </ul>
             </li>
         {% endif %}

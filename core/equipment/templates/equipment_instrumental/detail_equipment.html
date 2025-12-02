@@ -10,11 +10,6 @@
     <div class="row">
         <div class="col-lg-12">
             <div class="card shadow-sm">
-                <div class="card-header">
-                    <h3 class="card-title mb-0">
-                        <i class="{{ icon }}"></i> {{ title }}
-                    </h3>
-                </div>
                 <div class="card-body">
                     <div class="row">
                         <!-- Columna izquierda: Información del equipo -->
@@ -196,9 +191,7 @@
                         <!-- Columna derecha: Foto del equipo -->
                         <div class="col-lg-4">
                             <div class="mb-4">
-                                <h5 class="section-title">
-                                    <i class="fas fa-camera"></i> Imagen del Equipo
-                                </h5>
+                                <h5 class="section-title"><br></h5>
                                 <div class="photo-container">
                                     {% if object.photo_equipment %}
                                         <img src="{{ object.photo_equipment.url }}"

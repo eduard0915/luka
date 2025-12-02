@@ -65,39 +65,3 @@ class Process(models.Model):
         verbose_name = 'Process'
         verbose_name_plural = 'Processes'
         db_table = 'Process'
-
-
-# Etapas
-class Stage(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    stage_name = models.CharField(max_length=100, verbose_name='Etapa')
-    stage_code = models.CharField(max_length=20, verbose_name='Código')
-    process = models.ForeignKey(Process, on_delete=models.CASCADE, verbose_name='Proceso')
-    enable_stage = models.BooleanField(default=True, verbose_name='Habilitado')
-
-    def __str__(self):
-        return str(self.stage_name) + ' - ' + str(self.process.process_name)
-
-    class Meta:
-        verbose_name = 'Stage'
-        verbose_name_plural = 'Stages'
-        db_table = 'Stage'
-
-
-# Puntos de Muestreo
-class SamplePoint(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    sample_point_name = models.CharField(max_length=100, verbose_name='Punto de Muestreo')
-    sample_point_code = models.CharField(max_length=30, verbose_name='Código')
-    sample_point_version = models.SmallIntegerField(verbose_name='', default=1)
-    sample_type = models.CharField(max_length=30, verbose_name='Tipo de Muestra (Matriz)')
-    stage = models.ForeignKey(Stage, on_delete=models.CASCADE, verbose_name='Etapa')
-    enable_point = models.BooleanField(default=True, verbose_name='Habilitado')
-
-    def __str__(self):
-        return str(self.sample_point_name) + ' - ' + str(self.stage.stage_name) + ' - ' + str(self.stage.process.process_name)
-
-    class Meta:
-        verbose_name = 'SamplePoint'
-        verbose_name_plural = 'SamplePoints'
-        db_table = 'SamplePoint'

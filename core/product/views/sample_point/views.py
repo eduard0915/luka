@@ -5,16 +5,17 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, UpdateView
 
-from core.company.forms import StageForm, StageUpdateForm
-from core.company.models import Stage, Site
+from core.company.models import Site
 from core.mixins import ValidatePermissionRequiredMixin
+from core.product.forms import SamplePointForm, SamplePointUpdateForm
+from core.product.models import SamplePoint
 
 
-# Creación de Etapas
-class StageCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
-    model = Stage
-    form_class = StageForm
-    template_name = 'stage/create_stage.html'
+# Creación de Puntos de Muestreo
+class SamplePointCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    model = SamplePoint
+    form_class = SamplePointForm
+    template_name = 'sample_point/create_sample_point.html'
     permission_required = 'company.add_company'
 
     @method_decorator(csrf_exempt)
@@ -30,7 +31,7 @@ class StageCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Creat
                 form = self.get_form()
                 if form.is_valid():
                     form.save()
-                    messages.success(request, f'Etapa creada satisfactoriamente!')
+                    messages.success(request, f'Punto de Muestreo creado satisfactoriamente!')
                 else:
                     messages.error(request, 'Por favor corrija los errores: {}'.format(form.errors.as_json()))
             else:
@@ -48,15 +49,15 @@ class StageCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Creat
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
-        context['entity'] = 'Creación de Etapa'
+        context['entity'] = 'Creación de Punto de Muestreo'
         return context
 
 
-# Edición de Etapa
-class StageUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
-    model = Stage
-    form_class = StageUpdateForm
-    template_name = 'stage/create_stage.html'
+# Edición de Puntos de Muestreo
+class SamplePointUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    model = SamplePoint
+    form_class = SamplePointUpdateForm
+    template_name = 'sample_point/create_sample_point.html'
     permission_required = 'company.add_company'
 
     @method_decorator(csrf_exempt)
@@ -72,7 +73,7 @@ class StageUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Updat
                 form = self.get_form()
                 if form.is_valid():
                     form.save()
-                    messages.success(request, f'Etapa editada satisfactoriamente!')
+                    messages.success(request, f'Punto de Muestreo editado satisfactoriamente!')
                 else:
                     messages.error(request, 'Por favor corrija los errores: {}'.format(form.errors.as_json()))
             else:
@@ -83,12 +84,12 @@ class StageUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Updat
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        stage = Stage.objects.get(pk=self.kwargs.get('pk'))
-        kwargs.update({'stage': stage})
+        sample = SamplePoint.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'sample': sample})
         return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['entity'] = 'Edición de Etapa'
+        context['entity'] = 'Edición de Punto de Muestreo'
         context['action'] = 'edit'
         return context

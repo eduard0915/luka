@@ -84,7 +84,7 @@ class InventoryReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMix
             action = request.POST['action']
             if action == 'searchdata':
                 data = []
-                inventory_reagents = list(InventoryReagent.objects.select_related('reagent').values(
+                inventory_reagents = list(InventoryReagent.objects.values(
                     'id',
                     'reagent__description_reagent',
                     'reagent__code_reagent',
