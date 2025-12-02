@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     orderable: false,
                     render: function (data, type, row) {
                         let actions = '';
-                        actions += '<a href="/equipment/instrumental/detail/' + row['id'] + '/" type="button" title="Detalle"><i class="bi bi-info-square text-info"></i></a> &nbsp;';
+                        actions += '<a href="/product/detail/' + row['id'] + '/" type="button" title="Detalle"><i class="bi bi-info-square text-info"></i></a> &nbsp;';
                         actions += '<a href="/product/update/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a>';
                         return actions;
                     }

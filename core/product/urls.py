@@ -2,7 +2,7 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 
-from core.product.views.product.views import ProductCreateView, ProductUpdateView, ProductListView
+from core.product.views.product.views import ProductCreateView, ProductUpdateView, ProductListView, ProductDetailView
 from core.product.views.sample_point.views import SamplePointCreateView, SamplePointUpdateView
 from core.product.views.stage.views import StageCreateView, StageUpdateView
 
@@ -12,6 +12,7 @@ urlpatterns = [
     # Productos
     path('add/', ProductCreateView.as_view(), name='create_product'),
     path('update/<uuid:pk>/', ProductUpdateView.as_view(), name='update_product'),
+    path('detail/<uuid:pk>/', ProductDetailView.as_view(), name='detail_product'),
     path('list/', ProductListView.as_view(), name='list_product'),
     # Etapas
     path('add_stage/<uuid:pk>/', StageCreateView.as_view(), name='create_stage'),

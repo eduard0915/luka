@@ -74,6 +74,9 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.extras_processor',
             ],
+            'builtins': [
+                'templatetags.path_helpers',
+            ],
         },
     },
 ]

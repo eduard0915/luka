@@ -36,19 +36,17 @@ class ProductForm(ModelForm):
 # Creación de Etapas
 class StageForm(ModelForm):
     def __init__(self, *args, **kwargs):
-        self.site = kwargs.pop('site')
+        self.prod = kwargs.pop('prod')
         super().__init__(*args, **kwargs)
-        # self.fields['process'].queryset = Process.objects.select_related('site').filter(site_id=self.site.id)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
     class Meta:
         model = Stage
-        fields = ['stage_code', 'stage_name', 'product']
+        fields = ['stage_code', 'stage_name']
         widgets = {
             'stage_code': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'stage_name': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'product': Select(attrs={'class': 'form-control', 'required': True}),
+            'stage_name': TextInput(attrs={'class': 'form-control', 'required': True})
         }
 
     def save(self, commit=True):
@@ -56,7 +54,9 @@ class StageForm(ModelForm):
         form = super()
         try:
             if form.is_valid():
-                data = form.save()
+                data = form.save(commit=False)
+                data.product_id = self.prod.id
+                data.save()
             else:
                 data['error'] = form.errors
         except Exception as e:
@@ -69,18 +69,15 @@ class StageUpdateForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.stage = kwargs.pop('stage')
         super().__init__(*args, **kwargs)
-        # self.fields['process'].queryset = Process.objects.select_related('site').filter(
-        #     site_id=self.stage.process.site.id)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
     class Meta:
         model = Stage
-        fields = ['stage_code', 'stage_name', 'product']
+        fields = ['stage_code', 'stage_name']
         widgets = {
             'stage_code': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'stage_name': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'product': Select(attrs={'class': 'form-control', 'required': True}),
+            'stage_name': TextInput(attrs={'class': 'form-control', 'required': True})
         }
 
     def save(self, commit=True):
@@ -107,11 +104,11 @@ class SamplePointForm(ModelForm):
 
     class Meta:
         model = SamplePoint
-        fields = ['sample_point_code', 'sample_point_name', 'stage', 'sample_type']
+        fields = ['sample_point_code', 'sample_point_name', 'stage', 'sample_frequency']
         widgets = {
             'sample_point_code': TextInput(attrs={'class': 'form-control', 'required': True}),
             'sample_point_name': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'sample_type': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'sample_frequency': TextInput(attrs={'class': 'form-control', 'required': True}),
             'stage': Select(attrs={'class': 'form-control', 'required': True}),
         }
 
@@ -140,11 +137,11 @@ class SamplePointUpdateForm(ModelForm):
 
     class Meta:
         model = SamplePoint
-        fields = ['sample_point_code', 'sample_point_name', 'stage', 'sample_type']
+        fields = ['sample_point_code', 'sample_point_name', 'stage', 'sample_frequency']
         widgets = {
             'sample_point_code': TextInput(attrs={'class': 'form-control', 'required': True}),
             'sample_point_name': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'sample_type': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'sample_frequency': TextInput(attrs={'class': 'form-control', 'required': True}),
             'stage': Select(attrs={'class': 'form-control', 'required': True}),
         }
 

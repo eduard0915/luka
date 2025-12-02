@@ -9,7 +9,7 @@ from django.views.generic import CreateView, UpdateView
 from core.company.models import Site
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.forms import StageForm, StageUpdateForm
-from core.product.models import Stage
+from core.product.models import Stage, Product
 
 
 # Creación de Etapas
@@ -43,8 +43,8 @@ class StageCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Creat
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        site = Site.objects.get(pk=self.kwargs.get('pk'))
-        kwargs.update({'site': site})
+        prod = Product.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'prod': prod})
         return kwargs
 
     def get_context_data(self, **kwargs):

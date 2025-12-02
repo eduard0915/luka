@@ -4,11 +4,11 @@ from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import CreateView, UpdateView, ListView
+from django.views.generic import CreateView, UpdateView, ListView, DetailView
 
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.forms import ProductForm
-from core.product.models import Product
+from core.product.models import Product, Stage, SamplePoint
 
 
 # Creación de Productos
@@ -125,4 +125,26 @@ class ProductListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
         context['entity'] = 'Productos'
         context['div'] = '8'
         context['icon'] = 'fa-solid fa-vial-virus'
+        return context
+
+
+class ProductDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    model = Product
+    template_name = 'product/detail_product.html'
+    permission_required = 'equipment.add_equipmentinstrumental'
+
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Detalle de Product'
+        context['entity'] = 'Detalle de Product'
+        context['icon'] = 'fa-solid fa-microscope'
+        context['list_url'] = reverse_lazy('product:list_product')
+        context['create_stage'] = reverse_lazy('product:create_stage', kwargs={'pk': self.object.pk})
+        context['stages'] = Stage.objects.filter(
+            enable_stage=True, product_id=self.object.id).order_by('stage_name')
+        # context['sample_point'] = SamplePoint.objects.filter(
+        #     enable_point=True, stage__process__site_id=self.object.id).order_by('sample_point_name')
         return context
