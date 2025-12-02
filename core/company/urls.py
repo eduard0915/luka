@@ -4,9 +4,7 @@ from django.conf.urls.static import static
 
 from core.company.views.company.views import *
 from core.company.views.process.views import *
-from core.company.views.sample_point.views import *
-from core.company.views.site.views import *
-from core.company.views.stage.views import *
+from core.company.views.site.views import SiteCreateView, SiteUpdateView, SiteDetailView
 
 app_name = 'company'
 
@@ -21,13 +19,7 @@ urlpatterns = [
     path('detail_site/<uuid:pk>/', SiteDetailView.as_view(), name='detail_site'),
     # Procesos
     path('add_process/<uuid:pk>/', ProcessCreateView.as_view(), name='create_process'),
-    path('update_process/<uuid:pk>/', ProcessUpdateView.as_view(), name='update_process'),
-    # Etapas
-    path('add_stage/<uuid:pk>/', StageCreateView.as_view(), name='create_stage'),
-    path('update_stage/<uuid:pk>/', StageUpdateView.as_view(), name='update_stage'),
-    # Puntos de Muestreo
-    path('add_sample_point/<uuid:pk>/', SamplePointCreateView.as_view(), name='create_sample_point'),
-    path('update_sample_point/<uuid:pk>/', SamplePointUpdateView.as_view(), name='update_sample_point')
+    path('update_process/<uuid:pk>/', ProcessUpdateView.as_view(), name='update_process')
 ]
 
 urlpatterns += static(settings.MEDIA_URL,
