@@ -58,7 +58,7 @@ class ReagentCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
         context['list_url'] = self.success_url
         context['action'] = 'add'
         context['entity'] = 'Creación de Reactivo'
-        context['div'] = '10'
+        context['div'] = '12'
         context['icon'] = 'fa-solid fa-flask-vial'
         return context
 

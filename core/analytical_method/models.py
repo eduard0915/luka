@@ -19,7 +19,6 @@ class AnalyticalMethod(BaseModel):
     sample_size = models.FloatField(verbose_name='Tamaño de Muestra (g)')
     type_method = models.CharField(verbose_name='Tipo de Método', max_length=100)
     laboratory = models.ForeignKey(Laboratory, verbose_name='Laboratorio', on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, verbose_name='Laboratorio', on_delete=models.CASCADE)
     sig_figs_result = models.PositiveSmallIntegerField(default=2, verbose_name='Cifras Significativas')
 
     def __str__(self):

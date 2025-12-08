@@ -18,12 +18,29 @@
         </div>
     </div>
     <ul class="app-menu">
-        <li><a class="app-menu__item" href="{% url 'start:start' %}"><i class="app-menu__icon bi bi-speedometer"></i><span
-                class="app-menu__label">Inicio</span></a></li>
-        <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i
+        <li>
+            <a class="app-menu__item" href="{% url 'start:start' %}"><i class="app-menu__icon bi bi-speedometer"></i><span
+                class="app-menu__label">Inicio</span>
+            </a>
+        </li>
+
+        {% url 'analytical_method:create_method' as create_method %}
+        {% url 'analytical_method:list_method' as list_method %}
+
+        {% is_expanded create_method list_method as analysis_expanded %}
+
+        {% is_active_section create_method list_method as method_active %}
+
+        <li class="{{ analysis_expanded }}">
+            <a class="app-menu__item" href="#" data-toggle="treeview"><i
                 class="app-menu__icon bi bi-laptop"></i><span class="app-menu__label">Análisis Químico</span><i
                 class="treeview-indicator bi bi-chevron-right"></i></a>
             <ul class="treeview-menu">
+                <li class="{{ method_active }}">
+                    <a class="treeview-item" href="{% url 'analytical_method:list_method' %}">
+                        <i class="icon bi bi-circle-fill"></i>Métodos
+                    </a>
+                </li>
                 <li><a class="treeview-item" href="#"><i class="icon bi bi-circle-fill"></i>
                     Muestreo</a></li>
                 <li><a class="treeview-item" href="#" target="_blank" rel="noopener"><i
