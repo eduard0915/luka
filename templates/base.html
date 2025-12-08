@@ -5,9 +5,26 @@
 <head>
     <title>{{ title }}</title>
     <meta charset="utf-8">
+    <link rel="apple-touch-icon" sizes="76x76" href="{% static 'lib/vali-admin/img/favicon.png' %}">
+    <link rel="icon" type="image/png" href="{% static 'lib/vali-admin/img/favicon.png' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'lib/vali-admin/img/favicon.png' %}"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Main CSS-->
+    <style>
+        .logo {
+            text-align: center;
+            margin-bottom: 0;
+            margin-top: 5px;
+        }
+
+        .logo img {
+            max-width: 90%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
     <link rel="stylesheet" type="text/css" href="{% static 'lib/vali-admin/css/main.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/my_styles.css' %}">
     <!-- Font-icon css-->

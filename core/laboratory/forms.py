@@ -14,6 +14,14 @@ class LaboratoryForm(ModelForm):
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
+        col_classes = {
+            'laboratory_name': 'col-md-6',
+            'enable_laboratory': 'col-md-2',
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
     class Meta:
         model = Laboratory
         fields = ['laboratory_name', 'site', 'enable_laboratory']
@@ -41,15 +49,3 @@ class LaboratoryForm(ModelForm):
         except Exception as e:
             data['error'] = str(e)
         return data
-
-    # def clean_laboratory_name(self):
-    #     laboratory_name = self.cleaned_data.get('laboratory_name')
-    #     if laboratory_name:
-    #         laboratory_name = laboratory_name.strip()
-    #         # Validar que no exista otro laboratorio con el mismo nombre
-    #         qs = Laboratory.objects.filter(laboratory_name__iexact=laboratory_name)
-    #         if self.instance.pk:
-    #             qs = qs.exclude(pk=self.instance.pk)
-    #         if qs.exists():
-    #             raise forms.ValidationError('Ya existe un laboratorio con este nombre')
-    #     return laboratory_name

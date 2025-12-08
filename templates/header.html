@@ -1,5 +1,12 @@
+{% load static %}
+
 <!-- Navbar-->
-<header class="app-header"><a class="app-header__logo" href="{% url 'start:start' %}">Quality Lims</a>
+<header class="app-header">
+    <a class="app-header__logo" href="{% url 'start:start' %}">
+        <div class="logo">
+            <img src="{% static 'lib/vali-admin/img/padlims_white.png' %}" alt="Logo de Lims">
+        </div>
+    </a>
     <!-- Sidebar toggle button--><a class="app-sidebar__toggle" href="#" data-toggle="sidebar"
                                     aria-label="Hide Sidebar"></a>
     <!-- Navbar Right Menu-->

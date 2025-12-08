@@ -17,6 +17,18 @@ class ReagentForm(ModelForm):
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
+        col_classes = {
+            'code_reagent': 'col-md-2',
+            'description_reagent': 'col-md-5',
+            'umb': 'col-md-2',
+            'purity_unit': 'col-md-2',
+            'molecular_weight': 'col-md-2',
+            'gram_equivalent': 'col-md-2',
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
     class Meta:
         model = Reagent
         fields = [
@@ -62,6 +74,17 @@ class InventoryReagentForm(ModelForm):
         self.fields['reagent'].queryset = Reagent.objects.filter(enable_reagent=True, site_id=user.site.id)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
+
+        col_classes = {
+            'reagent': 'col-md-5',
+            'quantity_stock': 'col-md-2',
+            'batch_number': 'col-md-2',
+            'purity': 'col-md-2',
+            'certificate_quality': 'col-md-6',
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
 
     class Meta:
         model = InventoryReagent
