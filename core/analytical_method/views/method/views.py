@@ -62,7 +62,7 @@ class AnalyticalMethodListView(LoginRequiredMixin, ValidatePermissionRequiredMix
         return context
 
 
-# Crear Método Analítico
+# Creación de Métodos Analíticos
 class AnalyticalMethodCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
     model = AnalyticalMethod
     form_class = AnalyticalMethodForm
@@ -118,7 +118,7 @@ class AnalyticalMethodCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
         return context
 
 
-# Editar Método Analítico
+# Editar Métodos Analíticos
 class AnalyticalMethodUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
     model = AnalyticalMethod
     form_class = AnalyticalMethodForm
@@ -174,7 +174,7 @@ class AnalyticalMethodUpdateView(LoginRequiredMixin, ValidatePermissionRequiredM
         return context
 
 
-# Detalle de Método Analítico
+# Detalle de Métodos Analíticos
 class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
     model = AnalyticalMethod
     template_name = 'method/detail_method.html'
