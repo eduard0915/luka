@@ -8,7 +8,7 @@ from django.views.generic import CreateView, UpdateView, ListView, DetailView
 
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.forms import ProductForm
-from core.product.models import Product, Stage, SamplePoint
+from core.product.models import Product, SamplePoint
 
 
 # Creación de Productos
@@ -109,7 +109,7 @@ class ProductListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
             if action == 'searchdata':
                 data = []
                 prod = list(Product.objects.values(
-                    'id', 'code_product', 'description_product', 'process__process_name', 'enable_product'
+                    'id', 'code_product', 'description_product', 'enable_product'
                 ).order_by('-date_creation'))
                 return JsonResponse(prod, safe=False)
             else:
@@ -123,11 +123,12 @@ class ProductListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
         context['title'] = 'Productos'
         context['create_url'] = reverse_lazy('product:create_product')
         context['entity'] = 'Productos'
-        context['div'] = '8'
+        context['div'] = '7'
         context['icon'] = 'fa-solid fa-vial-virus'
         return context
 
 
+# Detalle de Producto
 class ProductDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
     model = Product
     template_name = 'product/detail_product.html'
@@ -138,13 +139,13 @@ class ProductDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Det
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Detalle de Product'
-        context['entity'] = 'Detalle de Product'
+        context['title'] = 'Detalle de Producto'
+        context['entity'] = 'Detalle de Producto'
         context['icon'] = 'fa-solid fa-microscope'
         context['list_url'] = reverse_lazy('product:list_product')
-        context['create_stage'] = reverse_lazy('product:create_stage', kwargs={'pk': self.object.pk})
-        context['stages'] = Stage.objects.filter(
-            enable_stage=True, product_id=self.object.id).order_by('stage_name')
-        # context['sample_point'] = SamplePoint.objects.filter(
-        #     enable_point=True, stage__process__site_id=self.object.id).order_by('sample_point_name')
+        context['create_sample_point'] = reverse_lazy('product:create_sample_point', kwargs={'pk': self.object.pk})
+        # context['stages'] = Stage.objects.filter(
+        #     enable_stage=True, product_id=self.object.id).order_by('stage_name')
+        context['sample_point'] = SamplePoint.objects.filter(
+            enable_point=True, product_id=self.object.id).order_by('sequence')
         return context

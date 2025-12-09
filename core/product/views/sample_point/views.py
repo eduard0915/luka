@@ -8,7 +8,7 @@ from django.views.generic import CreateView, UpdateView
 from core.company.models import Site
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.forms import SamplePointForm, SamplePointUpdateForm
-from core.product.models import SamplePoint
+from core.product.models import SamplePoint, Product
 
 
 # Creación de Puntos de Muestreo
@@ -42,8 +42,8 @@ class SamplePointCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        site = Site.objects.get(pk=self.kwargs.get('pk'))
-        kwargs.update({'site': site})
+        product = Product.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'product': product})
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -81,12 +81,6 @@ class SamplePointUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         except Exception as e:
             data['error'] = str(e)
         return JsonResponse(data)
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        sample = SamplePoint.objects.get(pk=self.kwargs.get('pk'))
-        kwargs.update({'sample': sample})
-        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

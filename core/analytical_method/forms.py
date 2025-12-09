@@ -5,9 +5,15 @@ from core.laboratory.models import Laboratory
 
 BOOLEAN = [(True, 'Si'), (False, 'No')]
 
-TYPE_METHOD = [('Volumetrico', 'Volumétrico'), ('Gravimetrico', 'Gravimétrico'), ('Espectrofotometrico', 'Espectrofotométrico'), ('Espectroscopico', 'Espectroscópico')]
+TYPE_METHOD = [
+    ('Volumetrico', 'Volumétrico'),
+    ('Gravimetrico', 'Gravimétrico'),
+    ('Espectrofotometrico', 'Espectrofotométrico'),
+    ('Espectroscopico', 'Espectroscópico')
+]
 
 
+# Creación de Métodos Analíticos
 class AnalyticalMethodForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -50,3 +56,15 @@ class AnalyticalMethodForm(ModelForm):
             'laboratory': Select(attrs={'class': 'form-control', 'required': True}),
             'sig_figs_result': TextInput(attrs={'class': 'form-control', 'required': True, 'min': 0}),
         }
+
+    def save(self, commit=True):
+        data = {}
+        form = super()
+        try:
+            if form.is_valid():
+                data = form.save()
+            else:
+                data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data

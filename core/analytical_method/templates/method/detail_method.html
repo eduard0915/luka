@@ -1,0 +1,215 @@
+{% extends 'body.html' %}
+{% load static %}
+
+{% block head %}
+    {% block head_list %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="btn-group">
+                        <a href="{{ list_url }}" class="btn btn-outline-secondary me-2">
+                            <i class="bi bi-arrow-left me-1"></i> Volver al listado
+                        </a>
+                        <a href="{{ update_url }}" class="btn btn-primary">
+                            <i class="bi bi-pencil-square me-1"></i> Editar Método
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover mb-0">
+                                    <tbody>
+                                    <tr>
+                                        <td style="width:35%"><strong>Código</strong></td>
+                                        <td><span class="text-primary">{{ object.code_analytical_method }}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Descripción</strong></td>
+                                        <td>{{ object.description_analytical_method }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Tipo de Método</strong></td>
+                                        <td>{{ object.type_method }}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover mb-0">
+                                    <tbody>
+                                    <tr>
+                                        <td style="width:35%"><strong>Tamaño de Muestra (g)</strong></td>
+                                        <td>{{ object.sample_size }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Cifras Significativas</strong></td>
+                                        <td>{{ object.sig_figs_result }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Laboratorio</strong></td>
+                                        <td>
+                                            <i class="fas fa-flask"></i> {{ object.laboratory.laboratory_name }}
+                                            {% if object.laboratory.site %}
+                                                <br>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-building"></i> {{ object.laboratory.site.site_name }}
+                                                </small>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Estado</strong></td>
+                                        <td>
+                                            {% if object.enable_analytical_method %}
+                                                <span class="badge bg-primary">Habilitado</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Deshabilitado</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Cards: Soluciones, Soluciones Estándar, Reactivos, Materiales y Equipos -->
+                    <div class="row mt-4">
+                        <!-- Soluciones -->
+                        <div class="col-lg-4 col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3">
+                                        <i class="bi bi-beaker me-2"></i> Soluciones
+                                    </h5>
+                                    <p class="card-text text-muted mb-3">
+                                        Gestión de soluciones preparadas en el laboratorio.
+                                    </p>
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'solution:list_solution' %}" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-list-ul me-1"></i> Ver listado
+                                        </a>
+                                        <a href="{% url 'solution:create_solution' %}" class="btn btn-primary btn-sm">
+                                            <i class="bi bi-plus-square me-1"></i> Nueva
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Soluciones Estándar -->
+                        <div class="col-lg-4 col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3">
+                                        <i class="bi bi-bezier2 me-2"></i> Soluciones Estándar
+                                    </h5>
+                                    <p class="card-text text-muted mb-3">
+                                        Registro y control de soluciones estándar.
+                                    </p>
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'solution:list_solution_std' %}" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-list-ul me-1"></i> Ver listado
+                                        </a>
+                                        <a href="{% url 'solution:create_solution_std' %}" class="btn btn-primary btn-sm">
+                                            <i class="bi bi-plus-square me-1"></i> Nueva
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reactivos -->
+                        <div class="col-lg-4 col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3">
+                                        <i class="bi bi-droplet-half me-2"></i> Reactivos
+                                    </h5>
+                                    <p class="card-text text-muted mb-3">
+                                        Catálogo y existencias de reactivos.
+                                    </p>
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'reagent:list_reagent' %}" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-list-ul me-1"></i> Ver listado
+                                        </a>
+                                        <a href="{% url 'reagent:create_reagent' %}" class="btn btn-primary btn-sm">
+                                            <i class="bi bi-plus-square me-1"></i> Nuevo
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Materiales -->
+                        <div class="col-lg-6 col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3">
+                                        <i class="bi bi-box-seam me-2"></i> Materiales
+                                    </h5>
+                                    <p class="card-text text-muted mb-0">
+                                        Material instrumental y de laboratorio.
+                                    </p>
+                                    {# Nota: Agregue enlaces cuando existan las vistas/URLs para materiales #}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Equipos -->
+                        <div class="col-lg-6 col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3">
+                                        <i class="bi bi-cpu me-2"></i> Equipos
+                                    </h5>
+                                    <p class="card-text text-muted mb-3">
+                                        Gestión de equipos instrumentales.
+                                    </p>
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'equipment:list_equipment_instrumental' %}" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-list-ul me-1"></i> Ver listado
+                                        </a>
+                                        <a href="{% url 'equipment:create_equipment_instrumental' %}" class="btn btn-primary btn-sm">
+                                            <i class="bi bi-plus-square me-1"></i> Nuevo
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-end">
+                    <a href="{{ list_url }}" class="btn btn-secondary me-2">
+                        <i class="bi bi-plus-square me-1"></i> Soluciones STD
+                    </a>
+                    <a href="{{ update_url }}" class="btn btn-primary me-2">
+                        <i class="bi bi-plus-square me-2"></i> Soluciones
+                    </a>
+                    <a href="{{ update_url }}" class="btn btn-outline-primary me-2">
+                        <i class="bi bi-plus-square me-1"></i> Reactivos
+                    </a>
+                    <a href="{{ update_url }}" class="btn btn-outline-secondary me-2">
+                        <i class="bi bi-plus-square"></i> Materiales
+                    </a>
+                    <a href="{{ update_url }}" class="btn btn-success">
+                        <i class="bi bi-plus-square"></i> Equipos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts_detail %}
+    {{ block.super }}
+{% endblock %}
