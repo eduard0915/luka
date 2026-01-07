@@ -37,20 +37,29 @@ class SolutionStandardCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
     def post(self, request, *args, **kwargs):
         data = {}
         try:
-            action = request.POST['action']
+            action = request.POST.get('action')
             if action == 'add':
                 form = self.get_form()
                 if form.is_valid():
                     self.object = form.save()
-                    code_solution = form.cleaned_data.get('code_solution_std')
-                    messages.success(request, f'Solución Estándar "{code_solution}" creada satisfactoriamente!')
+                    messages.success(request, f'Solución Estándar "{self.object.code_solution_std}" creada satisfactoriamente!')
                     data['success'] = True
                     data['redirect_url'] = self.get_success_url()
                 else:
-                    messages.error(request, form.errors)
-                    data['error'] = str(form.errors)
+                    error_messages = []
+                    for field, errors in form.errors.items():
+                        if field == '__all__':
+                            error_messages.extend([str(e) for e in errors])
+                        else:
+                            field_label = form.fields[field].label or field
+                            for error in errors:
+                                error_messages.append(f"{field_label}: {error}")
+
+                    error_text = '<br>'.join(error_messages)
+                    messages.error(request, error_text)
+                    data['error'] = error_text
             else:
-                data['error'] = 'No ha ingresado datos en los campos'
+                data['error'] = 'No ha ingresado ninguna acción'
         except Exception as e:
             data['error'] = str(e)
         return JsonResponse(data)
@@ -63,7 +72,7 @@ class SolutionStandardCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['title'] = 'Preparar Solución STD'
         context['action'] = 'add'
         context['entity'] = 'Preparar Solución Estándar'
-        context['div'] = '10'
+        context['div'] = '11'
         context['icon'] = 'fa-solid fa-flask-vial'
         try:
             context['list_url'] = reverse_lazy('solution:list_solution_std')

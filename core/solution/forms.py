@@ -6,7 +6,8 @@ from django.forms import ModelForm, TextInput, FileInput, Select, DateInput, Num
 from django.utils import timezone
 
 from core.reagent.models import InventoryReagent, Reagent
-from core.solution.models import Solution, SolutionStd, Standardization, StandardizationSolution, SolutionBase, SolutionStdBase
+from core.solution.models import Solution, SolutionStd, Standardization, StandardizationSolution, SolutionBase, \
+    SolutionStdBase
 
 CONC = [('', '-----'), ('%', '%'), ('mg/L', 'mg/L'), ('M', 'M'), ('N', 'N')]
 BOOLEAN = [(True, 'Si'), (False, 'No')]
@@ -17,7 +18,8 @@ class SolutionForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         solute_qs = InventoryReagent.objects.select_related('reagent').filter(
-            date_expire__gte=timezone.localtime(), reagent__solvent=False, quantity_stock__gt=0, reagent__standard=False)
+            date_expire__gte=timezone.localtime(), reagent__solvent=False, quantity_stock__gt=0,
+            reagent__standard=False)
         self.fields['solute_reagent'].queryset = solute_qs
         self.fields['solute_reagent'].widget.attrs['data-reagents'] = {
             str(obj.id): str(obj.reagent.id) for obj in solute_qs
@@ -33,12 +35,11 @@ class SolutionForm(ModelForm):
         self.fields['solution_base'].queryset = SolutionBase.objects.filter(enable_solution=True)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
+
         col_classes = {
             'code_solution': 'col-md-2',
-            'concentration': 'col-md-2',
             'solution_base': 'col-md-4',
             'solute_reagent': 'col-md-6',
-            'concentration_unit': 'col-md-2',
             'quantity_solution': 'col-md-2',
             'solvent_reagent': 'col-md-6',
             'standardizable': 'col-md-2',
@@ -47,12 +48,13 @@ class SolutionForm(ModelForm):
         for field_name, field in self.fields.items():
             field.col_class = col_classes.get(field_name, 'col-md-3')
 
-
     class Meta:
         model = Solution
+
         fields = [
-            'code_solution', 'solution_base', 'solute_reagent', 'quantity_solution',
-            'solvent_reagent', 'standardizable']
+            'code_solution', 'solution_base', 'solute_reagent', 'quantity_solution', 'solvent_reagent',
+            'standardizable']
+
         widgets = {
             'code_solution': TextInput(attrs={'class': 'form-control', 'readonly': True}),
             'solute_reagent': Select(attrs={'class': 'form-control', 'required': True}),
@@ -84,7 +86,8 @@ class SolutionForm(ModelForm):
         # Validar correspondencia con la base
         if solution_base and solute_reagent:
             if solute_reagent.reagent_id != solution_base.solute_reagent_base_id:
-                self.add_error('solute_reagent', f'El reactivo seleccionado ({solute_reagent.reagent.description_reagent}) no coincide con el definido en la base ({solution_base.solute_reagent_base.description_reagent})')
+                self.add_error('solute_reagent',
+                               f'El reactivo seleccionado ({solute_reagent.reagent.description_reagent}) no coincide con el definido en la base ({solution_base.solute_reagent_base.description_reagent})')
 
         # Si falta algún campo crítico, retornar sin validar más
         if not all([solute_reagent, concentration, concentration_unit, quantity_solution]):
@@ -189,10 +192,12 @@ class SolutionForm(ModelForm):
                     sig_figs
                 )
             elif instance.solution_base.concentration_unit_base == 'M':
-                factor = (instance.solution_base.concentration_base * solute_reagent.reagent.molecular_weight) / (10 * purity)
+                factor = (instance.solution_base.concentration_base * solute_reagent.reagent.molecular_weight) / (
+                            10 * purity)
                 instance.quantity_reagent = round(base_calc * factor, sig_figs)
             elif instance.solution_base.concentration_unit_base == 'N':
-                factor = (instance.solution_base.concentration_base * solute_reagent.reagent.gram_equivalent) / (10 * purity)
+                factor = (instance.solution_base.concentration_base * solute_reagent.reagent.gram_equivalent) / (
+                            10 * purity)
                 instance.quantity_reagent = round(base_calc * factor, sig_figs)
 
         instance.quantity_solvent = float(instance.quantity_solution - instance.quantity_reagent)
@@ -222,22 +227,30 @@ class SolutionStandardForm(ModelForm):
             str(obj.id): str(obj.reagent.id) for obj in solvent_qs
         }
 
-        self.fields['solution_std_base'].queryset = SolutionStdBase.objects.filter(enable_solution_std=True)
+        self.fields['solution_std_base'].queryset = SolutionStdBase.objects.filter(
+            enable_solution_std=True, solute_std_base__ready_to_use=False)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
+        col_classes = {
+            'code_solution_std': 'col-md-2',
+            'solution_std_base': 'col-md-4',
+            'solute_std': 'col-md-6',
+            'quantity_solution_std': 'col-md-2',
+            'solvent_reagent': 'col-md-6'
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
     class Meta:
         model = SolutionStd
-        fields = [
-            'code_solution_std', 'solution_std_base', 'solute_std', 'concentration_std', 'concentration_unit', 'quantity_solution_std',
-            'solvent_reagent']
+        fields = ['code_solution_std', 'solution_std_base', 'solute_std', 'quantity_solution_std', 'solvent_reagent']
         widgets = {
             'code_solution_std': TextInput(attrs={'class': 'form-control', 'readonly': True}),
             'solution_std_base': Select(attrs={'class': 'form-control', 'required': True}),
             'solute_std': Select(attrs={'class': 'form-control', 'required': True}),
             'solvent_reagent': Select(attrs={'class': 'form-control'}),
-            'concentration_std': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
-            'concentration_unit': Select(attrs={'class': 'form-control', 'required': True}, choices=CONC),
             'quantity_solution_std': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
         }
 
@@ -257,64 +270,59 @@ class SolutionStandardForm(ModelForm):
             cleaned_data['concentration_unit'] = concentration_unit
 
         if solution_std_base and solute_std:
-            if solute_std.reagent_id != solution_std_base.solute_std_base.reagent_id:
-                self.add_error('solute_std', f'El estándar seleccionado ({solute_std.reagent.description_reagent}) no coincide con el definido en la base ({solution_std_base.solute_std_base.reagent.description_reagent})')
+            if solute_std.reagent_id != solution_std_base.solute_std_base_id:
+                self.add_error('solute_std',
+                               f'El estándar seleccionado ({solute_std.reagent.description_reagent}) no coincide con el definido en la base ({solution_std_base.solute_std_base.description_reagent})')
         return cleaned_data
 
     def save(self, commit=True):
         instance = super().save(commit=False)
+
+        # Usar los valores del formulario si están presentes, de lo contrario usar los de la base
+        if not instance.concentration_std:
+            instance.concentration_std = instance.solution_std_base.concentration_std_base
+        if not instance.concentration_unit:
+            instance.concentration_unit = instance.solution_std_base.concentration_unit_base
 
         if not instance.solute_std.purity:
             raise ValidationError('El reactivo seleccionado no tiene pureza definida')
         if not instance.solute_std.density:
             raise ValidationError('El reactivo seleccionado no tiene densidad definida')
 
-        if not instance.solute_std.reagent.ready_to_use:
-            if not instance.solute_std.reagent.volumetric:
-                if instance.concentration_unit == '%':
-                    instance.quantity_std = float(
-                        instance.quantity_solution_std * (
-                                instance.concentration_std / instance.solute_std.purity
-                        ) * instance.solute_std.density
-                    )
-                elif instance.concentration_unit == 'mg/L':
-                    instance.quantity_std = float(
-                        instance.quantity_solution_std * (
-                                instance.concentration_std / 10000 * instance.solute_std.purity
-                        ) * instance.solute_std.density
-                    )
-                elif instance.concentration_unit == 'M':
-                    if not instance.solute_std.reagent.molecular_weight:
-                        raise ValidationError('El reactivo seleccionado no tiene peso molecular registrado')
-                    instance.quantity_std = float(
-                        instance.quantity_solution_std * (
-                                (instance.concentration_std * instance.solute_std.reagent.molecular_weight) /
-                                (10 * instance.solute_std.purity)
-                        ) * instance.solute_std.density
-                    )
-                elif instance.concentration_unit == 'N':
-                    if not instance.solute_std.reagent.gram_equivalent:
-                        raise ValidationError('El reactivo seleccionado no tiene equivalente gramo registrado')
-                    instance.quantity_std = float(
-                        instance.quantity_solution_std * (
-                                (instance.concentration_std * instance.solute_std.reagent.gram_equivalent) /
-                                (10 * instance.solute_std.purity)
-                        ) * instance.solute_std.density
-                    )
-            else:
-                instance.quantity_std = (instance.quantity_solution_std * instance.concentration_std) / instance.solute_std.purity
-
-            instance.quantity_solvent = float(instance.quantity_solution_std - instance.quantity_std)
-
+        if not instance.solute_std.reagent.volumetric:
+            if instance.concentration_unit == '%':
+                instance.quantity_std = float(
+                    instance.quantity_solution_std * (
+                            instance.concentration_std / instance.solute_std.purity
+                    ) * instance.solute_std.density
+                )
+            elif instance.concentration_unit == 'mg/L':
+                instance.quantity_std = float(
+                    instance.quantity_solution_std * (
+                            instance.concentration_std / 10000 * instance.solute_std.purity
+                    ) * instance.solute_std.density
+                )
+            elif instance.concentration_unit == 'M':
+                if not instance.solute_std.reagent.molecular_weight:
+                    raise ValidationError('El reactivo seleccionado no tiene peso molecular registrado')
+                instance.quantity_std = float(
+                    instance.quantity_solution_std * (
+                            (
+                                        instance.concentration_std * instance.solute_std.reagent.molecular_weight) /
+                            (10 * instance.solute_std.purity)
+                    ) * instance.solute_std.density
+                )
+            elif instance.concentration_unit == 'N':
+                if not instance.solute_std.reagent.gram_equivalent:
+                    raise ValidationError('El reactivo seleccionado no tiene equivalente gramo registrado')
+                instance.quantity_std = float(
+                    instance.quantity_solution_std * ((instance.concentration_std * instance.solute_std.reagent.gram_equivalent) / (10 * instance.solute_std.purity)) * instance.solute_std.density)
         else:
-            instance.concentration_std = float(instance.solute_std.purity)
-            instance.concentration_unit = 'M'
-            instance.quantity_solution_std = instance.solute_std.quantity_stock
-            instance.quantity_std = instance.solute_std.quantity_stock
-            instance.quantity_solvent = 0
-            instance.expire_std_date_solution = instance.solute_std.date_expire
+            instance.quantity_std = (instance.quantity_solution_std * instance.concentration_std) / instance.solute_std.purity
 
-        # Validación de stock disponible
+        instance.quantity_solvent = float(instance.quantity_solution_std - instance.quantity_std)
+
+            # Validación de stock disponible
         if instance.quantity_std > instance.solute_std.quantity_stock:
             raise ValidationError(
                 f'La cantidad requerida ({instance.quantity_std:.2f}) excede el stock disponible '
@@ -338,7 +346,7 @@ class SolutionConfirmedForm(ModelForm):
     class Meta:
         model = Solution
         fields = ['preparation_confirmed']
-        widgets = {'preparation_confirmed': Select(attrs={'class': 'form-control', 'hidden': True}),}
+        widgets = {'preparation_confirmed': Select(attrs={'class': 'form-control', 'hidden': True}), }
 
     def save(self, commit=True):
         data = {}
@@ -382,7 +390,7 @@ class SolutionStdConfirmedForm(ModelForm):
     class Meta:
         model = SolutionStd
         fields = ['preparation_confirmed']
-        widgets = {'preparation_confirmed': Select(attrs={'class': 'form-control', 'hidden': True}),}
+        widgets = {'preparation_confirmed': Select(attrs={'class': 'form-control', 'hidden': True}), }
 
     def save(self, commit=True):
         data = {}
@@ -509,7 +517,8 @@ class StandardizationSolutionForm(ModelForm):
             aliquot = float(instance.quantity_standard)
 
             if self.sln.concentration_unit == 'M':
-                mol_solute = (instance.quantity_solution * instance.standard_solution.concentration_std) / self.std.molar_relation
+                mol_solute = (
+                                         instance.quantity_solution * instance.standard_solution.concentration_std) / self.std.molar_relation
                 instance.concentration_sln = round((mol_solute / aliquot), 3)
             elif self.sln.concentration_unit == 'N':
                 eq_solute = instance.quantity_solution * instance.standard_solution.concentration_std
@@ -541,8 +550,10 @@ class StandardizationSolutionForm(ModelForm):
 class SolutionBaseForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['solute_reagent_base'].queryset = Reagent.objects.filter(enable_reagent=True, solvent=False, standard=False)
-        self.fields['solvent_reagent_base'].queryset = Reagent.objects.filter(enable_reagent=True, solvent=True, standard=False)
+        self.fields['solute_reagent_base'].queryset = Reagent.objects.filter(enable_reagent=True, solvent=False,
+                                                                             standard=False)
+        self.fields['solvent_reagent_base'].queryset = Reagent.objects.filter(enable_reagent=True, solvent=True,
+                                                                              standard=False)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
@@ -583,7 +594,8 @@ class SolutionBaseForm(ModelForm):
 class SolutionStdBaseForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['solute_std_base'].queryset = Reagent.objects.filter(enable_reagent=True, solvent=False, standard=True)
+        self.fields['solute_std_base'].queryset = Reagent.objects.filter(enable_reagent=True, solvent=False,
+                                                                         standard=True)
         self.fields['solvent_reagent_base'].queryset = Reagent.objects.filter(enable_reagent=True, solvent=True)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
