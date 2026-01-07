@@ -1,6 +1,7 @@
 from django.forms import ModelForm, TextInput, Select, NumberInput
 
-from core.analytical_method.models import AnalyticalMethod
+from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodSolution, AnalyticalMethodSolutionStd, \
+    AnalyticalMethodReagent, AnalyticalMethodEquipment, AnalyticalMethodMaterial
 from core.laboratory.models import Laboratory
 
 BOOLEAN = [(True, 'Si'), (False, 'No')]
@@ -65,6 +66,161 @@ class AnalyticalMethodForm(ModelForm):
                 data = form.save()
             else:
                 data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+class AnalyticalMethodSolutionForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodSolution
+        fields = ['solution']
+        widgets = {
+            'solution': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+class AnalyticalMethodSolutionStdForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodSolutionStd
+        fields = ['solution_std']
+        widgets = {
+            'solution_std': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+class AnalyticalMethodReagentForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodReagent
+        fields = ['reagent']
+        widgets = {
+            'reagent': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+class AnalyticalMethodEquipmentForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodEquipment
+        fields = ['equipment_instrumental']
+        widgets = {
+            'equipment_instrumental': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+class AnalyticalMethodMaterialForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodMaterial
+        fields = ['material_instrumental']
+        widgets = {
+            'material_instrumental': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
         except Exception as e:
             data['error'] = str(e)
         return data

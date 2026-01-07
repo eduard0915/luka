@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm, TextInput, Select, DateInput, FileInput, NumberInput
-from core.equipment.models import EquipmentInstrumental
+from core.equipment.models import EquipmentInstrumental, MaterialInstrumental
 from core.laboratory.models import Laboratory
 from core.user.views.user.views import User
 
@@ -59,3 +59,39 @@ class EquipmentInstrumentalForm(ModelForm):
             if qs.exists():
                 raise forms.ValidationError('Ya existe un equipo con este número de serie')
         return serie_equipment
+
+
+# Material Instrumental o de Laboratorio
+class MaterialInstrumentalForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['responsible_user'].queryset = User.objects.filter(is_active=True)
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = MaterialInstrumental
+        fields = [
+            'code_instrumental', 'description_instrumental', 'supplier_equipment',
+            'brand_instrumental', 'responsible_user', 'photo_instrumental'
+        ]
+        widgets = {
+            'code_instrumental': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'description_instrumental': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'supplier_equipment': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'brand_instrumental': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'responsible_user': Select(attrs={'class': 'form-control', 'required': True, 'style': 'width: 100%'}),
+            'photo_instrumental': FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+        }
+
+    def clean_code_instrumental(self):
+        code_instrumental = self.cleaned_data.get('code_instrumental')
+        if code_instrumental:
+            code_instrumental = code_instrumental.strip().upper()
+            # Validar que no exista otro material con el mismo código
+            qs = MaterialInstrumental.objects.filter(code_instrumental__iexact=code_instrumental)
+            if self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise forms.ValidationError('Ya existe un material con este código')
+        return code_instrumental

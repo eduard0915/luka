@@ -22,7 +22,7 @@ from xhtml2pdf import pisa
 from core.company.models import Company
 from core.mixins import ValidatePermissionRequiredMixin
 from core.solution.forms import *
-from core.solution.models import Solution, StandardizationSolution, TransactionSolution
+from core.solution.models import Solution, StandardizationSolution, TransactionSolution, SolutionBase, SolutionStdBase
 from luka import settings
 
 
@@ -78,7 +78,7 @@ class SolutionCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cr
         context['title'] = 'Preparar Solución'
         context['action'] = 'add'
         context['entity'] = 'Preparar Solución'
-        context['div'] = '10'
+        context['div'] = '11'
         context['icon'] = 'fa-solid fa-flask-vial'
         # Fallback cancel/back link to the solutions list
         try:
@@ -86,6 +86,42 @@ class SolutionCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cr
         except Exception:
             context['list_url'] = reverse_lazy('solution:list_solution')
         return context
+
+
+@login_required
+@require_http_methods(["GET"])
+def get_solution_base_data(request, base_id):
+    """
+    API endpoint para obtener datos de una Solución Base o Solución Estándar Base
+    """
+    try:
+        # Intentar buscar en SolutionBase
+        base = SolutionBase.objects.filter(id=base_id).first()
+        if base:
+            data = {
+                'id': str(base.id),
+                'solute_reagent_id': str(base.solute_reagent_base.id),
+                'solvent_reagent_id': str(base.solvent_reagent_base.id) if base.solvent_reagent_base else None,
+                'concentration': base.concentration_base,
+                'concentration_unit': base.concentration_unit_base,
+            }
+            return JsonResponse(data)
+        
+        # Si no se encuentra, intentar buscar en SolutionStdBase
+        base_std = SolutionStdBase.objects.filter(id=base_id).first()
+        if base_std:
+            data = {
+                'id': str(base_std.id),
+                'solute_reagent_id': str(base_std.solute_std_base.id),
+                'solvent_reagent_id': str(base_std.solvent_reagent_base.id) if base_std.solvent_reagent_base else None,
+                'concentration': base_std.concentration_std_base,
+                'concentration_unit': base_std.concentration_unit_base,
+            }
+            return JsonResponse(data)
+
+        return JsonResponse({'error': 'Solución Base no encontrada'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 # Listado de Soluciones
@@ -142,7 +178,7 @@ class SolutionListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, List
         context['entity'] = 'Soluciones'
         context['div'] = '12'
         context['icon'] = 'fa-solid fa-flask-vial'
-        context['today'] = timezone.now()
+        context['today'] = timezone.localdate()
         return context
 
 

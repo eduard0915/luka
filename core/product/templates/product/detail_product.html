@@ -11,7 +11,7 @@
 
 {% block content %}
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="tile mb-2">
                 <div class="tile-title-w-btn mb-0">
                     <h3 class="title">{{ object.code_product}} {{ object.description_product }}</h3>
@@ -25,7 +25,71 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-12">
+            <div class="tile">
+                <div class="tile-title-w-btn">
+                    <h3 class="title">Métodos Analíticos</h3>
+                    <p>
+                        <a class="btn btn-primary icon-btn"
+                           onclick="open_modal('{{ create_sample_point }}')"><i
+                                class="bi bi-plus-square me-2"></i>Nuevo
+                        </a>
+                    </p>
+                </div>
+                <div class="tile-body">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th class="text-center">Secuencia</th>
+                            <th class="text-center">Código</th>
+                            <th class="text-center">Descripción</th>
+                            <th class="text-center">Frecuencia (Horas)</th>
+                            <th class="text-center">Estado</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for sample in sample_point %}
+                            <tr>
+                                <td class="text-center">{{ sample.sequence }}</td>
+                                <td class="text-center">{{ sample.sample_point_code }}</td>
+                                <td class="text-center">{{ sample.sample_point_name }}</td>
+                                <td class="text-center">
+                                    {% if sample.sample_frequency %}
+                                        {{ sample.sample_frequency }}
+                                    {% else %}
+                                        No aplica
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if sample.enable_point %}
+                                        <span class="me-1 badge bg-primary">Activo</span>
+                                    {% else %}
+                                        <span class="me-1 badge bg-danger">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <a onclick="open_modal('{% url 'product:update_sample_point' sample.id %}')"
+                                       title="Editar">
+                                        <i class="bi bi-pencil-square text-warning me-2"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">
+                                    No hay puntos de muestreo asociados a esta planta.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
             <div class="tile">
                 <div class="tile-title-w-btn">
                     <h3 class="title">Puntos de Muestreo</h3>
@@ -54,7 +118,13 @@
                                 <td class="text-center">{{ sample.sequence }}</td>
                                 <td class="text-center">{{ sample.sample_point_code }}</td>
                                 <td class="text-center">{{ sample.sample_point_name }}</td>
-                                <td class="text-center">{{ sample.sample_frequency }}</td>
+                                <td class="text-center">
+                                    {% if sample.sample_frequency %}
+                                        {{ sample.sample_frequency }}
+                                    {% else %}
+                                        No aplica
+                                    {% endif %}
+                                </td>
                                 <td class="text-center">
                                     {% if sample.enable_point %}
                                         <span class="me-1 badge bg-primary">Activo</span>

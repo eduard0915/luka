@@ -1,0 +1,216 @@
+{% extends 'body.html' %}
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/equipment.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Columna izquierda: Información del material -->
+                        <div class="col-lg-8">
+                            <!-- Información General -->
+                            <div class="mb-4">
+                                <h5 class="section-title">
+                                    <i class="fas fa-info-circle"></i> Información General
+                                </h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover">
+                                        <tbody>
+                                            <tr>
+                                                <td class="info-label" style="width: 30%">Código:</td>
+                                                <td class="info-value">
+                                                    <strong class="text-primary">{{ object.code_instrumental }}</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="info-label">Descripción:</td>
+                                                <td class="info-value">{{ object.description_instrumental }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="info-label">Proveedor:</td>
+                                                <td class="info-value">{{ object.supplier_equipment }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="info-label">Marca:</td>
+                                                <td class="info-value">{{ object.brand_instrumental }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Ubicación y Responsabilidad -->
+                            <div class="mb-4">
+                                <h5 class="section-title">
+                                    <i class="fas fa-map-marker-alt"></i> Responsabilidad
+                                </h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover">
+                                        <tbody>
+                                            <tr>
+                                                <td class="info-label" style="width: 30%">Responsable:</td>
+                                                <td class="info-value">
+                                                    <i class="fas fa-user"></i> {{ object.responsible_user.get_full_name }}
+                                                    {% if object.responsible_user.email %}
+                                                        <br>
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-envelope"></i> {{ object.responsible_user.email }}
+                                                        </small>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Fechas y Uso -->
+                            <div class="mb-4">
+                                <h5 class="section-title">
+                                    <i class="fas fa-calendar-alt"></i> Estado
+                                </h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover">
+                                        <tbody>
+                                            <tr>
+                                                <td class="info-label" style="width: 30%">Fecha de Inactivación:</td>
+                                                <td class="info-value">
+                                                    {% if object.date_disabled %}
+                                                        <i class="fas fa-calendar-times text-danger"></i>
+                                                        {{ object.date_disabled|date:"d/m/Y" }}
+                                                    {% else %}
+                                                        <span class="status-active">
+                                                            <i class="fas fa-check-circle"></i> Material Activo
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Columna derecha: Foto del material -->
+                        <div class="col-lg-4">
+                            <div class="mb-4">
+                                <h5 class="section-title"><br></h5>
+                                <div class="photo-container">
+                                    {% if object.photo_instrumental %}
+                                        <img src="{{ object.photo_instrumental.url }}"
+                                             alt="Foto de {{ object.description_instrumental }}"
+                                             class="equipment-photo">
+                                    {% else %}
+                                        <div class="text-center">
+                                            <i class="fas fa-camera-retro no-photo-icon"></i>
+                                            <p class="text-muted mt-3">
+                                                <strong>Sin Imagen</strong>
+                                            </p>
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                Foto pendiente
+                                            </span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Información rápida en tarjetas -->
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <div class="card bg-light mb-2">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title text-muted mb-2">
+                                                <i class="fas fa-hashtag"></i> Código
+                                            </h6>
+                                            <h4 class="mb-0 text-primary">{{ object.code_instrumental }}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title text-muted mb-2">
+                                                <i class="fas fa-toggle-on"></i> Estado
+                                            </h6>
+                                            <h5 class="mb-0">
+                                                {% if object.enable_instrumental %}
+                                                    <span class="badge bg-success">Habilitado</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">No Habilitado</span>
+                                                {% endif %}
+                                            </h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer con botones de acción -->
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <a href="{{ list_url }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Volver al Listado
+                            </a>
+                        </div>
+                        <div>
+                            <a href="{{ update_url }}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Editar Material
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+    // Agregar efecto de zoom a la imagen al hacer clic
+    document.addEventListener('DOMContentLoaded', function() {
+        const equipmentPhoto = document.querySelector('.equipment-photo');
+        if (equipmentPhoto) {
+            equipmentPhoto.style.cursor = 'pointer';
+            equipmentPhoto.addEventListener('click', function() {
+                // Crear modal para ver imagen en grande
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.9);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                    cursor: pointer;
+                `;
+
+                const img = document.createElement('img');
+                img.src = this.src;
+                img.style.cssText = 'max-width: 90%; max-height: 90%; border-radius: 8px;';
+
+                modal.appendChild(img);
+                document.body.appendChild(modal);
+
+                modal.addEventListener('click', function() {
+                    document.body.removeChild(modal);
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -36,13 +36,14 @@
                 class="app-menu__icon bi bi-laptop"></i><span class="app-menu__label">Análisis Químico</span><i
                 class="treeview-indicator bi bi-chevron-right"></i></a>
             <ul class="treeview-menu">
-                <li class="{{ method_active }}">
-                    <a class="treeview-item" href="{% url 'analytical_method:list_method' %}">
+                <li>
+                    <a class="treeview-item {{ method_active }}" href="{% url 'analytical_method:list_method' %}">
                         <i class="icon bi bi-circle-fill"></i>Métodos
                     </a>
                 </li>
                 <li><a class="treeview-item" href="#"><i class="icon bi bi-circle-fill"></i>
-                    Muestreo</a></li>
+                    Muestreo</a>
+                </li>
                 <li><a class="treeview-item" href="#" target="_blank" rel="noopener"><i
                         class="icon bi bi-circle-fill"></i> Procesamiento</a></li>
                 <li><a class="treeview-item" href="#"><i class="icon bi bi-circle-fill"></i> Gráficos</a></li>
@@ -57,9 +58,14 @@
         {% url 'solution:list_solution' as list_sln %}
         {% url 'solution:list_solution_std' as list_sln_std %}
 
-        {% is_expanded list_sln_std list_sln inv_reagent create_reagent list_reagent as materials_expanded %}
+        {% url 'equipment:list_material_instrumental' as list_material %}
+        {% url 'equipment:create_material_instrumental' as create_material %}
+
+        {% is_expanded list_sln_std list_sln inv_reagent create_reagent list_reagent list_material create_material as materials_expanded %}
 
         {% is_active_section list_reagent create_reagent as reagent_active %}
+
+        {% is_active_section list_material create_material as material_active %}
 
         <li class="{{ materials_expanded }}">
             <a class="app-menu__item" href="#" data-toggle="treeview">
@@ -82,6 +88,8 @@
                 </li>
                 <li><a class="{{ reagent_active }}" href="{% url 'reagent:list_reagent' %}">
                     <i class="icon bi bi-circle-fill"></i> Reactivos</a>
+                <li><a class="{{ material_active }}" href="{% url 'equipment:list_material_instrumental' %}">
+                    <i class="icon bi bi-circle-fill"></i> Material Instrumental</a>
                 </li>
             </ul>
         </li>
@@ -97,14 +105,26 @@
 
         {% url 'user:user_list' as list_user %}
         {% url 'user:user_create' as create_user %}
+
         {% url 'company:list_site' as list_site %}
         {% url 'company:create_site' as create_site %}
+
         {% url 'laboratory:list_laboratory' as list_lab %}
         {% url 'laboratory:create_laboratory' as create_lab %}
+
         {% url 'equipment:list_equipment_instrumental' as list_eq %}
         {% url 'equipment:create_equipment_instrumental' as create_eq %}
+
         {% url 'product:list_product' as list_prod %}
         {% url 'product:create_product' as create_prod %}
+
+        {% url 'solution:list_solution_base' as list_sln_base %}
+        {% url 'solution:create_solution_base' as add_sln_base %}
+
+        {% url 'solution:create_solution_std_base' as add_std_base %}
+        {% url 'solution:list_solution_std_base' as list_std_base %}
+
+        {% is_expanded list_site create_site list_lab create_lab list_eq create_eq list_sln_base add_sln_base list_std_base add_std_base as lab_expanded %}
 
         {% if perms.user.add_user %}
             <li class="treeview {% if list_user in request.path or create_user in request.path %}is-expanded{% endif %}">
@@ -122,7 +142,7 @@
         {% endif %}
 
         {% if perms.company.add_company %}
-            <li class="treeview {% if list_lab in request.path or create_lab in request.path or list_eq in request.path or create_eq in request.path %}is-expanded{% endif %}">
+            <li class="treeview {{ lab_expanded }}">
                 <a class="app-menu__item" href="#" data-toggle="treeview">
                     <i class="bi bi-gear me-2"></i><span
                         class="app-menu__label">Configuración</span><i
@@ -136,6 +156,10 @@
                     <i class="icon bi bi-circle-fill"></i> Empresa</a></li>
                     <li><a class="treeview-item {% if list_lab in request.path or create_lab in request.path %}active{% endif %}" href="{% url 'laboratory:list_laboratory' %}">
                         <i class="icon bi bi-circle-fill"></i> Laboratorios</a></li>
+                    <li><a class="treeview-item {% if list_sln_base in request.path or add_sln_base in request.path %}active{% endif %}" href="{% url 'solution:list_solution_base' %}">
+                        <i class="icon bi bi-circle-fill"></i> Soluciones Base</a></li>
+                    <li><a class="treeview-item {% if list_std_base in request.path or add_std_base in request.path %}active{% endif %}" href="{% url 'solution:list_solution_std_base' %}">
+                        <i class="icon bi bi-circle-fill"></i> Soluciones STD Base</a></li>
                     <li><a class="treeview-item {% if list_eq in request.path or create_eq in request.path %}active{% endif %}" href="{% url 'equipment:list_equipment_instrumental' %}">
                         <i class="icon bi bi-circle-fill"></i> Equipo Instrumental</a></li>
                     <li><a class="treeview-item" href="{% url 'product:list_product' %}">
