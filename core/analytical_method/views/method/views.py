@@ -185,9 +185,14 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Detalle de Método Analítico'
-        context['entity'] = 'Detalle de Método Analítico'
+        context['title'] = 'Método Analítico: ' + str(self.object.code_analytical_method)
+        context['entity'] = self.object
         context['icon'] = 'fa-solid fa-vial'
         context['list_url'] = reverse_lazy('analytical_method:list_method')
         context['update_url'] = reverse_lazy('analytical_method:update_method', kwargs={'pk': self.object.pk})
+        context['solutions'] = self.object.analyticalmethodsolution_set.all()
+        context['std_solutions'] = self.object.analyticalmethodsolutionstd_set.all()
+        context['reagents'] = self.object.analyticalmethodreagent_set.all()
+        context['equipments'] = self.object.analyticalmethodequipment_set.all()
+        context['materials'] = self.object.analyticalmethodmaterial_set.all()
         return context

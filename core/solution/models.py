@@ -57,11 +57,39 @@ def code_solution_std_generator():
         return f'STD-{today_str}-{new_number}'
 
 
+# Soluciones Base
+class SolutionBase(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    solute_reagent_base = models.ForeignKey(Reagent, verbose_name='Reactivo', on_delete=models.CASCADE, related_name='solute_base')
+    solvent_reagent_base = models.ForeignKey(Reagent, verbose_name='Solvente', on_delete=models.CASCADE, related_name='solvent_base')
+    concentration_base = models.FloatField(verbose_name='Concentración')
+    concentration_unit_base = models.CharField(max_length=4, verbose_name='Unidad Conc.')
+    enable_solution = models.BooleanField(verbose_name='Habilitado', default=True)
+
+    def __str__(self):
+        return str(self.solute_reagent_base.description_reagent) + ' ' + str(self.concentration_base) + str(self.concentration_unit_base)
+
+    class Meta:
+        verbose_name = 'SolutionBase'
+        verbose_name_plural = 'SolutionsBase'
+        db_table = 'SolutionBase'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(SolutionBase, self).save(*args, **kwargs)
+
+
 # Soluciones
 class Solution(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     solute_reagent = models.ForeignKey(InventoryReagent, verbose_name='Reactivo', on_delete=models.CASCADE, related_name='solute')
     solvent_reagent = models.ForeignKey(InventoryReagent, verbose_name='Solvente', on_delete=models.CASCADE, related_name='solvent')
+    solution_base = models.ForeignKey(SolutionBase, verbose_name='Solución a Preparar', on_delete=models.CASCADE)
     code_solution = models.CharField(max_length=20, verbose_name='Código', default=code_solution_generator)
     concentration = models.FloatField(verbose_name='Concentración')
     concentration_unit = models.CharField(max_length=4, verbose_name='Unidad Conc.')
@@ -79,7 +107,7 @@ class Solution(BaseModel):
     preparation_confirmed = models.BooleanField(default=False)
 
     def __str__(self):
-        return str(self.solute_reagent.reagent) + ' ' + str(self.concentration) + str(self.concentration_unit) + ' - ' + str(self.code_solution)
+        return str(self.solution_base) + ' - ' + str(self.code_solution)
 
     class Meta:
         verbose_name = 'Solution'
@@ -103,11 +131,39 @@ class Solution(BaseModel):
         return super(Solution, self).save(*args, **kwargs)
 
 
+# Soluciones Estándar Base
+class SolutionStdBase(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    solute_std_base = models.ForeignKey(Reagent, verbose_name='Estándar', on_delete=models.CASCADE, related_name='solute_std_base')
+    solvent_reagent_base = models.ForeignKey(Reagent, verbose_name='Solvente', on_delete=models.CASCADE, related_name='solvent_std_base', null=True, blank=True)
+    concentration_std_base = models.FloatField(verbose_name='Concentración')
+    concentration_unit_base = models.CharField(max_length=4, verbose_name='Unidad Conc.')
+    enable_solution_std = models.BooleanField(verbose_name='Habilitado', default=True)
+
+    def __str__(self):
+        return str(self.solute_std_base.description_reagent) + ' ' + str(self.concentration_std_base) + str(self.concentration_unit_base)
+
+    class Meta:
+        verbose_name = 'SolutionStdBase'
+        verbose_name_plural = 'SolutionsStdBase'
+        db_table = 'SolutionStdBase'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(SolutionStdBase, self).save(*args, **kwargs)
+
+
 # Soluciones Estándares
 class SolutionStd(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     solute_std = models.ForeignKey(InventoryReagent, verbose_name='Estándar', on_delete=models.CASCADE, related_name='solute_std')
     solvent_reagent = models.ForeignKey(InventoryReagent, verbose_name='Solvente', on_delete=models.CASCADE, related_name='solvent_std', null=True, blank=True)
+    solution_std_base = models.ForeignKey(SolutionStdBase, verbose_name='Solución Estándar a Preparar', on_delete=models.CASCADE, related_name='solution_std')
     code_solution_std = models.CharField(max_length=20, verbose_name='Código', default=code_solution_std_generator)
     concentration_std = models.FloatField(verbose_name='Concentración')
     concentration_unit = models.CharField(max_length=4, verbose_name='Unidad Conc.')

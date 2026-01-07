@@ -53,7 +53,8 @@ class MaterialInstrumental(BaseModel):
     brand_instrumental = models.CharField(max_length=100, verbose_name='Marca')
     date_disabled = models.DateField(verbose_name='Fecha de Inactivación', null=True, blank=True)
     responsible_user = models.ForeignKey(User, verbose_name='Responsable', on_delete=models.CASCADE)
-    photo_instrumental = models.FileField(upload_to='equipment/material/%Y%m%d', verbose_name='Foto del Equipo', null=True, blank=True)
+    photo_instrumental = models.FileField(
+        upload_to='equipment/material/%Y%m%d', verbose_name='Foto del Material', null=True, blank=True)
     enable_instrumental = models.BooleanField(default=True, verbose_name='Habilitado')
 
     def __str__(self):

@@ -87,7 +87,7 @@ class TransactionReagent(BaseModel):
     date_transaction = models.DateField(verbose_name='Fecha')
     type_transaction = models.CharField(max_length=50, verbose_name='Tipo de Registro')
     detail_transaction = models.CharField(max_length=250, verbose_name='Detalle de Registro')
-    quantity = models.IntegerField(verbose_name='Cantidad')
+    quantity = models.FloatField(verbose_name='Cantidad')
     user_transaction = models.ForeignKey(User, verbose_name='', on_delete=models.CASCADE)
 
     def __str__(self):

@@ -1,0 +1,30 @@
+{% extends 'list_one.html' %}
+{% load static %}
+
+{% block head_list %}
+    <script src="{% static 'list_solution_base.js' %}"></script>
+{% endblock %}
+
+{% block buttons %}
+    <a href="{{ create_url }}" class="btn btn-primary me-2" type="button">
+        <i class="bi bi-plus-square me-2"></i> Nuevo
+    </a>
+{% endblock %}
+
+{% block columns %}
+    <tr>
+        <th class="text-md-center" style="width:47%">Descripción</th>
+        <th style="width:20%">Concentración</th>
+        <th style="width:18%">Estado</th>
+        <th style="width:15%">Acciones</th>
+    </tr>
+{% endblock %}
+
+{% block rows %}
+
+
+{% endblock %}
+
+{% block scripts_detail %}
+    {{ block.super }}
+{% endblock %}
