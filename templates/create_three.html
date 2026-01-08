@@ -21,13 +21,7 @@
                         <input type="hidden" name="action" value="{{ action }}">
                         <div class="row">
                             {% for field in form.visible_fields %}
-                                {#                                <div class="{% if field.name == 'reagent' %}col-md-5#}
-                                {#                                {% elif field.name == 'code_solution_std' or field.name == 'concentration_std' %}col-md-2#}
-                                {#                                {% elif field.name == 'solution_base' or field.name == 'solute_reagent' %}col-md-5#}
-                                {#                                {% elif field.name == 'solute_std' or field.name == 'solvent_reagent' %}col-md-6#}
-                                {#                                {% else %}col-md-3{% endif %}">#}
-                                <div class="
-                                        {% if field.field.col_class %}{{ field.field.col_class }}{% else %}col-md-3{% endif %}">
+                                <div class="{% if field.field.col_class %}{{ field.field.col_class }}{% else %}col-md-3{% endif %}">
                                     <div class="form-group mb-2">
                                         {% if field.name == 'groups' or field.name == 'is_active' or field.name == 'site' or field.name == 'reagent' or field.name == 'reagent_liquid' %}
                                             <label class="control-label">
@@ -70,99 +64,18 @@
         </div>
     </div>
 {% endblock %}
+
 {% block scripts_detail %}
 
     {% if entity == 'Preparar Solución' or entity == 'Preparar Solución Estándar' %}
+
+        <script src="{% static 'solution_filter.js' %}"></script>
         <script type="application/javascript">
             $(function () {
-                const entity = "{{ entity }}";
-                const select_base = entity === 'Preparar Solución'
-                    ? $('select[name="solution_base"]')
-                    : $('select[name="solution_std_base"]');
-
-                const select_solute = entity === 'Preparar Solución'
-                    ? $('select[name="solute_reagent"]')
-                    : $('select[name="solute_std"]');
-
-                const select_solvent = $('select[name="solvent_reagent"]');
-
-                function filterOptions(select, reagentId) {
-                    if (!select.length) return;
-
-                    let dataReagents = select.attr('data-reagents');
-                    if (dataReagents) {
-                        try {
-                            dataReagents = JSON.parse(dataReagents.replace(/'/g, '"'));
-                        } catch (e) {
-                            console.error("Error parsing data-reagents", e);
-                            return;
-                        }
-                    } else {
-                        return;
-                    }
-
-                    let firstValid = null;
-                    select.find('option').each(function () {
-                        const option = $(this);
-                        const val = option.val();
-                        if (!val) return; // Skip placeholder
-
-                        const associatedReagentId = dataReagents[val];
-                        if (associatedReagentId === reagentId) {
-                            option.show().prop('disabled', false);
-                            if (!firstValid) firstValid = val;
-                        } else {
-                            option.hide().prop('disabled', true);
-                        }
-                    });
-
-                    // Si el valor actual no es válido, cambiar al primero válido o vacío
-                    const currentVal = select.val();
-                    if (currentVal && dataReagents[currentVal] !== reagentId) {
-                        select.val(firstValid || "").trigger('change');
-                    } else if (!currentVal && firstValid) {
-                        // Opcional: auto-seleccionar si solo hay uno?
-                        // select.val(firstValid).trigger('change');
-                    }
-
-                    // Si usa select2, hay que destruir y recrear o simplemente disparar change
-                    if (select.hasClass('select2-hidden-accessible')) {
-                        // select.select2('destroy').select2({theme: 'bootstrap-5'});
-                    }
-                }
-
-                select_base.on('change', function () {
-                    const id = $(this).val();
-                    if (!id) return false;
-
-                    $.ajax({
-                        url: '/solution/api/solution-base/' + id + '/',
-                        type: 'GET',
-                        dataType: 'json'
-                    }).done(function (data) {
-                        if (!data.error) {
-                            // Filtrar opciones
-                            filterOptions(select_solute, data.solute_reagent_id);
-                            if (data.solvent_reagent_id) {
-                                filterOptions(select_solvent, data.solvent_reagent_id);
-                            }
-
-                            // Opcionalmente llenar concentración si existen los campos
-                            const input_conc = entity === 'Preparar Solución' ? $('input[name="concentration"]') : $('input[name="concentration_std"]');
-                            const select_unit = $('select[name="concentration_unit"]');
-
-                            if (input_conc.length && data.concentration) input_conc.val(data.concentration);
-                            if (select_unit.length && data.concentration_unit) select_unit.val(data.concentration_unit).trigger('change');
-
-                        } else {
-                            console.error(data.error);
-                        }
-                    }).fail(function (jqXHR, textStatus, errorThrown) {
-                        console.error(textStatus + ': ' + errorThrown);
-                    });
-                });
+                window.initSolutionFilters("{{ entity }}");
             });
         </script>
+
     {% endif %}
 
     <script type="application/javascript">
