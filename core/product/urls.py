@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 from core.product.views.product.views import *
 from core.product.views.sample_point.views import *
 from core.product.views.analytical_method.views import *
+from core.product.views.specification.views import *
 
 app_name = 'product'
 
@@ -20,6 +21,9 @@ urlpatterns = [
     # Metodos Analíticos
     path('add_method/<uuid:pk>/', AnalyticalMethodProductCreateView.as_view(), name='create_method_product'),
     path('update_method/<uuid:pk>/', AnalyticalMethodProductUpdateView.as_view(), name='update_method_product'),
+    # Especificaciones
+    path('add_specification/<uuid:pk>/', SpecificationProductCreateView.as_view(), name='create_specification_product'),
+    path('update_specification/<uuid:pk>/', SpecificationProductUpdateView.as_view(), name='update_specification_product'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL,

@@ -67,7 +67,7 @@
                     <h3 class="title">Especificaciones</h3>
                     <p>
                         <a class="btn btn-primary icon-btn"
-                           onclick="open_modal('{{ create_method_product }}')"><i
+                           onclick="open_modal('{{ create_specification_product }}')"><i
                                 class="bi bi-plus-square me-2"></i>Nuevo
                         </a>
                     </p>
@@ -76,22 +76,24 @@
                     <table class="table">
                         <thead>
                         <tr>
-                            <th class="text-center">Código</th>
-                            <th class="text-center">Descripción</th>
-                            <th class="text-center">Tipo</th>
-                            <th class="text-center">Version</th>
+                            <th class="text-center">Ensayo</th>
+                            <th class="text-center">Límite Inferior</th>
+                            <th class="text-center">Límite Superior</th>
+                            <th class="text-center">Método</th>
+                            <th class="text-center">U.M.</th>
                             <th class="text-center">Acciones</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {% for item in analytical_methods %}
+                        {% for item in specifications %}
                             <tr>
-                                <td class="text-center">{{ item.analytical_method.code_analytical_method }}</td>
-                                <td class="text-center">{{ item.analytical_method.description_analytical_method }}</td>
-                                <td class="text-center">{{ item.analytical_method.type_method }}</td>
-                                <td class="text-center">{{ item.analytical_method.version }}</td>
+                                <td class="text-center">{{ item.test_prod }}</td>
+                                <td class="text-center">{{ item.lower_limit_prod|default_if_none:"-" }}</td>
+                                <td class="text-center">{{ item.upper_limit_prod|default_if_none:"-" }}</td>
+                                <td class="text-center">{{ item.method_test.analytical_method.code_analytical_method }}</td>
+                                <td class="text-center">{{ item.unit_measure }}</td>
                                 <td class="text-center">
-                                    <a onclick="open_modal('{% url 'product:update_method_product' item.id %}')"
+                                    <a onclick="open_modal('{% url 'product:update_specification_product' item.id %}')"
                                        title="Editar" style="cursor: pointer;">
                                         <i class="bi bi-pencil-square text-warning me-2"></i>
                                     </a>
@@ -99,8 +101,8 @@
                             </tr>
                         {% empty %}
                             <tr>
-                                <td colspan="3" class="text-center">
-                                    No hay métodos analíticos asociados a este producto.
+                                <td colspan="6" class="text-center">
+                                    No hay especificaciones asociadas a este producto.
                                 </td>
                             </tr>
                         {% endfor %}
