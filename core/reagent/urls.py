@@ -12,6 +12,7 @@ urlpatterns = [
     path('add/', ReagentCreateView.as_view(), name='create_reagent'),
     path('list/', ReagentListView.as_view(), name='list_reagent'),
     path('update/<uuid:pk>/', ReagentUpdateView.as_view(), name='update_reagent'),
+    path('detail/<uuid:pk>/', ReagentDetailView.as_view(), name='detail_reagent'),
     path('technical_sheet/', ReagentDownloadView.as_view(), name='download_technical_sheet'),
     path('inventory/register/', InventoryReagentCreateView.as_view(), name='register_inventory_reagent'),
     path('inventory/update/<uuid:pk>/', InventoryReagentUpdateView.as_view(), name='update_inventory_reagent'),

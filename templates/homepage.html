@@ -5,6 +5,9 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
+    <link rel="apple-touch-icon" sizes="76x76" href="{% static 'lib/vali-admin/img/favicon.png' %}">
+    <link rel="icon" type="image/png" href="{% static 'lib/vali-admin/img/favicon.png' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'lib/vali-admin/img/favicon.png' %}"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Main CSS-->
@@ -103,6 +106,18 @@
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         }
 
+        .logo {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .logo img {
+            max-width: 45%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
         /* Tablets en orientación portrait */
         @media (max-width: 768px) {
             .hero-section {
@@ -188,7 +203,9 @@
     <section class="hero-section">
         <div class="hero-overlay"></div>
         <div class="hero-content">
-            <h1>Bienvenido a PadLIMS</h1>
+            <div class="logo">
+                <img src="{% static 'lib/vali-admin/img/padlims_white.png' %}" alt="PadLims">
+            </div>
             <p>
                 Sistema de Gestión de Información de Laboratorio.
                 Optimiza tus procesos, gestiona tus muestras y obtén

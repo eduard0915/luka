@@ -9,7 +9,7 @@ from core.reagent.models import InventoryReagent, Reagent
 from core.solution.models import Solution, SolutionStd, Standardization, StandardizationSolution, SolutionBase, \
     SolutionStdBase
 
-CONC = [('', '-----'), ('%', '%'), ('mg/L', 'mg/L'), ('M', 'M'), ('N', 'N')]
+CONC = [('', '-----'), ('%', '%'), ('g/L', 'g/L'), ('mg/L', 'mg/L'), ('M', 'M'), ('N', 'N')]
 BOOLEAN = [(True, 'Si'), (False, 'No')]
 
 

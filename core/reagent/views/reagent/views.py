@@ -12,7 +12,7 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import CreateView, ListView, UpdateView
+from django.views.generic import CreateView, ListView, UpdateView, DetailView
 
 from core.mixins import ValidatePermissionRequiredMixin
 from core.reagent.forms import ReagentForm
@@ -160,6 +160,19 @@ class ReagentUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
         context['entity'] = 'Editar Reactivo'
         context['action'] = 'edit'
         context['div'] = '10'
+        context['icon'] = 'fa-solid fa-flask-vial'
+        return context
+
+
+# Detalle de reactivo
+class ReagentDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    model = Reagent
+    template_name = 'reagent/detail_reagent.html'
+    permission_required = 'reagent.view_reagent'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = self.object
         context['icon'] = 'fa-solid fa-flask-vial'
         return context
 
