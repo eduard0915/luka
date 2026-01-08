@@ -34,6 +34,10 @@ urlpatterns = [
     # Materiales
     path('detail/material/add/<uuid:pk>/', AnalyticalMethodMaterialCreateView.as_view(), name='add_material'),
     path('detail/material/update/<uuid:pk>/', AnalyticalMethodMaterialUpdateView.as_view(), name='update_material'),
+
+    # Procedimientos
+    path('detail/procedure/add/<uuid:pk>/', AnalyticalMethodProcedureCreateView.as_view(), name='add_procedure'),
+    path('detail/procedure/update/<uuid:pk>/', AnalyticalMethodProcedureUpdateView.as_view(), name='update_procedure'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

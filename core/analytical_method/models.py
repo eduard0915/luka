@@ -2,7 +2,6 @@ import uuid
 
 from crum import get_current_user
 from django.db import models
-from django.db.models import ForeignKey
 
 from core.company.models import Site
 from core.equipment.models import EquipmentInstrumental, MaterialInstrumental
@@ -10,7 +9,7 @@ from core.laboratory.models import Laboratory
 from core.models import BaseModel
 from core.product.models import Product
 from core.reagent.models import Reagent
-from core.solution.models import Solution, SolutionStd
+from core.solution.models import SolutionBase, SolutionStdBase
 from core.user.models import User
 
 
@@ -47,7 +46,7 @@ class AnalyticalMethod(BaseModel):
 class AnalyticalMethodSolution(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE)
-    solution = models.ForeignKey(Solution, verbose_name='Solución', on_delete=models.CASCADE)
+    solution = models.ForeignKey(SolutionBase, verbose_name='Solución', on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.solution)
@@ -71,7 +70,7 @@ class AnalyticalMethodSolution(BaseModel):
 class AnalyticalMethodSolutionStd(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE)
-    solution_std = models.ForeignKey(SolutionStd, verbose_name='Solución Estándar', on_delete=models.CASCADE)
+    solution_std = models.ForeignKey(SolutionStdBase, verbose_name='Solución Estándar', on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.solution_std)
@@ -160,4 +159,28 @@ class AnalyticalMethodMaterial(BaseModel):
                 self.user_creation = user
             else:
                 self.user_updated = user
-        return super(AnalyticalMethodMaterialInstrumental, self).save(*args, **kwargs)
+        return super(AnalyticalMethodMaterial, self).save(*args, **kwargs)
+
+
+# Procedimiento de Metodos Analítico
+class AnalyticalMethodProcedure(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE)
+    procedure = models.TextField(verbose_name='Procedimiento')
+
+    def __str__(self):
+        return str(self.procedure)
+
+    class Meta:
+        verbose_name = 'AnalyticalMethodProcedure'
+        verbose_name_plural = 'AnalyticalMethodProcedures'
+        db_table = 'AnalyticalMethodProcedure'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(AnalyticalMethodProcedure, self).save(*args, **kwargs)
