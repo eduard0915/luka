@@ -321,7 +321,9 @@
     <script>
         function open_modal(url) {
             $('#myModal').load(url, function () {
-                $(this).modal('show');
+                var modalElement = document.getElementById('myModal');
+                var modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+                modal.show();
             });
         }
         document.addEventListener('DOMContentLoaded', function () {

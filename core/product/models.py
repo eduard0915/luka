@@ -3,6 +3,7 @@ import uuid
 from crum import get_current_user
 from django.db import models
 
+from core.analytical_method.models import AnalyticalMethod
 from core.company.models import Process, Site
 from core.models import BaseModel
 
@@ -59,3 +60,56 @@ class SamplePoint(BaseModel):
             else:
                 self.user_updated = user
         return super(SamplePoint, self).save(*args, **kwargs)
+
+
+# Metodos Analíticos de Productos
+class AnalyticalMethodProduct(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    product = models.ForeignKey(Product, verbose_name='Producto', on_delete=models.CASCADE)
+    analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analítico', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.analytical_method)
+
+    class Meta:
+        verbose_name = 'AnalyticalMethodProduct'
+        verbose_name_plural = 'AnalyticalMethodProducts'
+        db_table = 'AnalyticalMethodProduct'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(AnalyticalMethodProduct, self).save(*args, **kwargs)
+
+
+# Especificaciones de Productos
+class SpecificationProduct(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    product = models.ForeignKey(Product, verbose_name='Producto', on_delete=models.CASCADE)
+    test_prod = models.CharField(max_length=150, verbose_name='Ensayo')
+    features_prod = models.CharField(max_length=250, verbose_name='Descripción', null=True, blank=True)
+    lower_limit_prod = models.FloatField(verbose_name='Limite Inferior', null=True, blank=True)
+    upper_limit_prod = models.FloatField(verbose_name='Limite Superior', null=True, blank=True)
+    method_test = models.ForeignKey(AnalyticalMethodProduct, verbose_name='Método', on_delete=models.CASCADE)
+    unit_measure = models.CharField(max_length=10, verbose_name='Unidad de Medida')
+
+    def __str__(self):
+        return str(self.test_prod)
+
+    class Meta:
+        verbose_name = 'SpecificationProduct'
+        verbose_name_plural = 'SpecificationProducts'
+        db_table = 'SpecificationProduct'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(SpecificationProduct, self).save(*args, **kwargs)

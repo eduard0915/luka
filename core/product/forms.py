@@ -1,7 +1,8 @@
 from crum import get_current_user
 from django.forms import ModelForm, TextInput, Select
 
-from core.product.models import SamplePoint, Product
+from core.analytical_method.models import AnalyticalMethod
+from core.product.models import SamplePoint, Product, AnalyticalMethodProduct
 
 
 FREQUENCY = [
@@ -81,6 +82,7 @@ class SamplePointForm(ModelForm):
 class SamplePointUpdateForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['analytical_method'].queryset = AnalyticalMethod.objects.filter(enable_analytical_method=True)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
@@ -102,6 +104,38 @@ class SamplePointUpdateForm(ModelForm):
                 data = form.save()
             else:
                 data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+class AnalyticalMethodProductForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.product = kwargs.pop('product', None)
+        super().__init__(*args, **kwargs)
+        self.fields['analytical_method'].queryset = AnalyticalMethod.objects.filter(enable_analytical_method=True)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodProduct
+        fields = ['analytical_method']
+        widgets = {
+            'analytical_method': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.product:
+                    instance.product = self.product
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
         except Exception as e:
             data['error'] = str(e)
         return data
