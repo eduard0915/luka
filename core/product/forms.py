@@ -2,7 +2,7 @@ from crum import get_current_user
 from django.forms import ModelForm, TextInput, Select
 
 from core.analytical_method.models import AnalyticalMethod
-from core.product.models import SamplePoint, Product, AnalyticalMethodProduct
+from core.product.models import SamplePoint, Product, AnalyticalMethodProduct, SpecificationProduct
 
 
 FREQUENCY = [
@@ -104,6 +104,40 @@ class SamplePointUpdateForm(ModelForm):
                 data = form.save()
             else:
                 data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Creación de Especificación de Producto
+class SpecificationProductForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.product = kwargs.pop('product', None)
+        super().__init__(*args, **kwargs)
+        if self.product:
+            self.fields['method_test'].queryset = AnalyticalMethodProduct.objects.filter(product=self.product)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = SpecificationProduct
+        exclude = ['product', 'features_prod', 'user_creation', 'user_updated', 'date_creation', 'date_updated']
+        widgets = {
+            'method_test': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.product:
+                    instance.product = self.product
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
         except Exception as e:
             data['error'] = str(e)
         return data

@@ -8,7 +8,7 @@ from django.views.generic import CreateView, UpdateView, ListView, DetailView
 
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.forms import ProductForm
-from core.product.models import Product, SamplePoint, AnalyticalMethodProduct
+from core.product.models import Product, SamplePoint, AnalyticalMethodProduct, SpecificationProduct
 
 
 # Creación de Productos
@@ -149,4 +149,6 @@ class ProductDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Det
             enable_point=True, product_id=self.object.id).order_by('sequence')
         context['create_method_product'] = reverse_lazy('product:create_method_product', kwargs={'pk': self.object.pk})
         context['analytical_methods'] = AnalyticalMethodProduct.objects.select_related('product').filter(product_id=self.object.id)
+        context['create_specification_product'] = reverse_lazy('product:create_specification_product', kwargs={'pk': self.object.pk})
+        context['specifications'] = SpecificationProduct.objects.filter(product_id=self.object.id)
         return context
