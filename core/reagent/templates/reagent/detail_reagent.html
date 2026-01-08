@@ -1,0 +1,200 @@
+<div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">{{ entity }}</h5>
+            <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"><span
+                    aria-hidden="true"></span></button>
+        </div>
+        <div class="modal-body">
+            <style>
+                .info-label {
+                    font-weight: bold;
+                    color: #495057;
+                    font-size: 0.875rem;
+                    margin-bottom: 0.25rem;
+                }
+
+                .info-value {
+                    color: #212529;
+                    margin-bottom: 1rem;
+                    font-size: 0.95rem;
+                }
+
+                .section-title {
+                    color: #0f5132;
+                    font-weight: 600;
+                    padding-bottom: 0.5rem;
+                    border-bottom: 2px solid #e9ecef;
+                }
+            </style>
+
+            <!-- Información General -->
+            <h6 class="section-title">
+                <i class="bi bi-info-circle me-2"></i>Información General
+            </h6>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="info-label">Descripción</div>
+                    <p class="info-value">{{ object.description_reagent }}</p>
+                </div>
+                <div class="col-md-3">
+                    <div class="info-label">Código</div>
+                    <p class="info-value">{{ object.code_reagent }}</p>
+                </div>
+                <div class="col-md-3">
+                    <div class="info-label">Estado</div>
+                    <p class="info-value">
+                        {% if object.enable_reagent %}
+                            <span class="badge bg-success">Habilitado</span>
+                        {% else %}
+                            <span class="badge bg-danger">Deshabilitado</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="info-label">Fabricante/Marca</div>
+                    <p class="info-value">
+                        {{ object.manufacturer|default:"No especificado" }}
+                    </p>
+                </div>
+                <div class="col-md-4">
+                    <div class="info-label">Planta</div>
+                    <p class="info-value text-danger">{{ object.site }}</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="info-label">Ficha Técnica</div>
+                    <p class="info-value">
+                        {% if object.technical_sheet %}
+                            <a href="{{ object.technical_sheet.url }}" target="_blank"
+                               class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-file-earmark-pdf me-1"></i>Ver Documento
+                            </a>
+                        {% else %}
+                            <span class="text-muted">No disponible</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Propiedades y Unidades -->
+            <h6 class="section-title">
+                <i class="bi bi-clipboard-data me-2"></i>Propiedades y Unidades
+            </h6>
+            <div class="row">
+                <div class="col-md-1">
+                    <div class="info-label">UMB</div>
+                    <p class="info-value">{{ object.umb }}</p>
+                </div>
+                <div class="col-md-1">
+                    <div class="info-label">Pureza</div>
+                    <p class="info-value">{{ object.purity_unit }}</p>
+                </div>
+                <div class="col-md-2">
+                    <div class="info-label">Peso Molecular</div>
+                    <p class="info-value">{{ object.molecular_weight }} g/mol</p>
+                </div>
+                <div class="col-md-2">
+                    <div class="info-label">Eq-gramo</div>
+                    <p class="info-value">{{ object.gram_equivalent }}</p>
+                </div>
+                <div class="col-md-3">
+                    <div class="info-label">Estabilidad en Sln</div>
+                    <p class="info-value">
+                        {% if object.stability_solution %}
+                            {{ object.stability_solution }} días
+                        {% else %}
+                            <span class="text-muted">No especificado</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-md-3">
+                    <div class="info-label">Cifras Significativas</div>
+                    <p class="info-value">{{ object.sig_figs_solution }}</p>
+                </div>
+            </div>
+
+            <!-- Características del Reactivo -->
+            <h6 class="section-title">
+                <i class="bi bi-toggles me-2"></i>Características del Reactivo
+            </h6>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <span class="me-2">
+                            {% if object.volumetric %}
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                            {% else %}
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                            {% endif %}
+                        </span>
+                        <label class="info-label">
+                            Volumétrico
+                        </label>
+                    </div>
+                    <div class="mb-3">
+                        <span class="me-2">
+                            {% if object.solvent %}
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                            {% else %}
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                            {% endif %}
+                        </span>
+                        <label class="info-label">
+                            Solvente
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <span class="me-2">
+                            {% if object.density_enable %}
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                            {% else %}
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                            {% endif %}
+                        </span>
+                        <label class="info-label">
+                            Densidad Habilitada
+                        </label>
+                    </div>
+                    <div class="mb-3">
+                        <span class="me-2">
+                            {% if object.standard %}
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                            {% else %}
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                            {% endif %}
+                        </span>
+                        <label class="info-label">
+                            Estándar
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <span class="me-2">
+                            {% if object.ready_to_use %}
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                            {% else %}
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                            {% endif %}
+                        </span>
+                        <label class="info-label">
+                            Listo para Usar
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+    </div>
+
+    {% block scripts_detail %}
+
+    {% endblock %}
+</div>

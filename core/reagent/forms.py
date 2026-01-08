@@ -6,7 +6,7 @@ from core.reagent.models import Reagent, TransactionReagent, InventoryReagent
 
 UMB = [('', '-----'), ('mL', 'Mililitro'), ('g', 'Gramo')]
 BOOLEAN = [(False, 'No'), (True, 'Si')]
-UNIT_PURITY = [('', '-----'), ('%', '%'), ('mg/L', 'mg/L'), ('M', 'M'), ('N', 'N')]
+UNIT_PURITY = [('', '-----'), ('%', '%'), ('mg/L', 'mg/L'), ('g/L', 'g/L'), ('M', 'M'), ('N', 'N'), ('ppm', 'ppm'), ('ppb', 'ppb')]
 REGISTRY_TYPE = [('', '-----'), ('Uso', 'Uso'), ('Ajuste de Salida', 'Ajuste de Salida'), ('Ajuste de Entrada', 'Ajuste de Entrada')]
 
 
