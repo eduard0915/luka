@@ -77,10 +77,8 @@
                         <thead>
                         <tr>
                             <th class="text-center">Ensayo</th>
-                            <th class="text-center">Límite Inferior</th>
-                            <th class="text-center">Límite Superior</th>
+                            <th class="text-center">Especificación</th>
                             <th class="text-center">Método</th>
-                            <th class="text-center">U.M.</th>
                             <th class="text-center">Acciones</th>
                         </tr>
                         </thead>
@@ -88,10 +86,12 @@
                         {% for item in specifications %}
                             <tr>
                                 <td class="text-center">{{ item.test_prod }}</td>
-                                <td class="text-center">{{ item.lower_limit_prod|default_if_none:"-" }}</td>
-                                <td class="text-center">{{ item.upper_limit_prod|default_if_none:"-" }}</td>
+                                {% if item.lower_limit_prod or  item.upper_limit_prod %}
+                                    <td class="text-center">{{ item.lower_limit_prod|default_if_none:" " }} - {{ item.upper_limit_prod|default_if_none:" " }} {{ item.unit_measure|default_if_none:" " }}</td>
+                                {% else %}     
+                                    <td class="text-center">{{ item.features_prod }}</td>
+                                {% endif %}
                                 <td class="text-center">{{ item.method_test.analytical_method.code_analytical_method }}</td>
-                                <td class="text-center">{{ item.unit_measure }}</td>
                                 <td class="text-center">
                                     <a onclick="open_modal('{% url 'product:update_specification_product' item.id %}')"
                                        title="Editar" style="cursor: pointer;">

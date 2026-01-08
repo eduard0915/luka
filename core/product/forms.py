@@ -14,6 +14,20 @@ FREQUENCY = [
     (720, 'Mensual'),
 ]
 
+UM = [
+    ('', '----'),
+    ('% p/p', '% p/p'),
+    ('% p/v', '% p/v'),
+    ('M', 'M'),
+    ('N', 'N'),
+    ('mg/L', 'mg/L'),
+    ('ppm', 'ppm'),
+    ('ppb', 'ppb'),
+]
+
+TYPE_TEST = [('Rango', 'Rango'), ('Descriptivo', 'Descriptivo')]
+
+
 # Creación de Productos
 class ProductForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -120,11 +134,28 @@ class SpecificationProductForm(ModelForm):
             form.field.widget.attrs['class'] = 'form-control'
             form.field.widget.attrs['autocomplete'] = 'off'
 
+        col_classes = {
+            'type_test': 'col-md-4',
+            'test_prod': 'col-md-8',
+            'lower_limit_prod': 'col-md-4',
+            'upper_limit_prod': 'col-md-4',
+            'features_prod': 'col-md-12',
+            'method_test': 'col-md-12',
+            'unit_measure': 'col-md-4',
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
     class Meta:
         model = SpecificationProduct
-        exclude = ['product', 'features_prod', 'user_creation', 'user_updated', 'date_creation', 'date_updated']
+        fields = ['type_test', 'test_prod', 'lower_limit_prod', 'upper_limit_prod', 'unit_measure', 'features_prod','method_test']
         widgets = {
             'method_test': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+            'type_test': Select(attrs={'class': 'form-control', 'style': 'width: 100%'}, choices=TYPE_TEST),
+            'unit_measure': Select(attrs={'class': 'form-control', 'style': 'width: 100%'}, choices=UM),
+            'lower_limit_prod': TextInput(attrs={'class': 'form-control', 'style': 'width: 100%'}),
+            'upper_limit_prod': TextInput(attrs={'class': 'form-control', 'style': 'width: 100%'}),
         }
 
     def save(self, commit=True):
