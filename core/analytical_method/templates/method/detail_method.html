@@ -25,7 +25,7 @@
 {% block content %}
     <div class="container-fluid">
         <div class="row">
-            <div class="col-lg-12">
+            <div class="col-lg-12 p-0">
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <div class="col-md-12">
@@ -67,13 +67,20 @@
                             <div class="col-lg-4 col-md-6 mb-3">
                                 <div class="card h-100">
                                     <div class="card-body">
-                                        <h5 class="card-title mb-3">
-                                            <i class="bi bi-beaker me-2"></i> Soluciones
-                                        </h5>
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <h5 class="card-title mb-0">
+                                                <i class="bi bi-beaker me-2"></i> Soluciones
+                                            </h5>
+                                            <a href="javascript:void(0);"
+                                               onclick="open_modal('{% url 'analytical_method:add_solution' object.id %}')"
+                                               class="btn btn-primary btn-sm">
+                                                <i class="bi bi-plus-square m-0"></i>
+                                            </a>
+                                        </div>
                                         <div class="list-container mb-3" id="solutions-container">
                                             <ol class="list-group list-group-numbered list-group-flush">
                                                 {% for item in solutions %}
-                                                    <li class="list-group-item py-1 border-0 d-flex justify-content-between align-items-center">
+                                                    <li class="list-group-item py-1 p-1 border-0 d-flex align-items-center">
                                                         <span>{{ item.solution }}</span>
                                                         <a href="javascript:void(0);"
                                                            onclick="open_modal('{% url 'analytical_method:update_solution' item.id %}')"
@@ -91,17 +98,6 @@
                                                     data-target="solutions-container">Ver más
                                             </button>
                                         {% endif %}
-                                        <div class="d-flex gap-2">
-                                            <a href="{% url 'solution:list_solution' %}"
-                                               class="btn btn-outline-primary btn-sm">
-                                                <i class="bi bi-list-ul me-1"></i> Ver listado
-                                            </a>
-                                            <a href="javascript:void(0);"
-                                               onclick="open_modal('{% url 'analytical_method:add_solution' object.id %}')"
-                                               class="btn btn-primary btn-sm">
-                                                <i class="bi bi-plus-square me-1"></i> Nueva
-                                            </a>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -110,13 +106,20 @@
                             <div class="col-lg-4 col-md-6 mb-3">
                                 <div class="card h-100">
                                     <div class="card-body">
-                                        <h5 class="card-title mb-3">
-                                            <i class="bi bi-bezier2 me-2"></i> Soluciones Estándar
-                                        </h5>
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <h5 class="card-title mb-0">
+                                                <i class="bi bi-flask me-2"></i> Soluciones Estándar
+                                            </h5>
+                                             <a href="javascript:void(0);"
+                                               onclick="open_modal('{% url 'analytical_method:add_solution_std' object.id %}')"
+                                               class="btn btn-primary btn-sm">
+                                                <i class="bi bi-plus-square m-0"></i>
+                                            </a>
+                                        </div>
                                         <div class="list-container mb-3" id="std_solutions-container">
                                             <ol class="list-group list-group-numbered list-group-flush">
                                                 {% for item in std_solutions %}
-                                                    <li class="list-group-item py-1 border-0 d-flex justify-content-between align-items-center">
+                                                    <li class="list-group-item py-1 p-1 border-0 d-flex align-items-center">
                                                         <span>{{ item.solution_std }}</span>
                                                         <a href="javascript:void(0);"
                                                            onclick="open_modal('{% url 'analytical_method:update_solution_std' item.id %}')"
@@ -134,17 +137,6 @@
                                                     data-target="std_solutions-container">Ver más
                                             </button>
                                         {% endif %}
-                                        <div class="d-flex gap-2">
-                                            <a href="{% url 'solution:list_solution_std' %}"
-                                               class="btn btn-outline-primary btn-sm">
-                                                <i class="bi bi-list-ul me-1"></i> Ver listado
-                                            </a>
-                                            <a href="javascript:void(0);"
-                                               onclick="open_modal('{% url 'analytical_method:add_solution_std' object.id %}')"
-                                               class="btn btn-primary btn-sm">
-                                                <i class="bi bi-plus-square me-1"></i> Nueva
-                                            </a>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -153,13 +145,20 @@
                             <div class="col-lg-4 col-md-6 mb-3">
                                 <div class="card h-100">
                                     <div class="card-body">
-                                        <h5 class="card-title mb-3">
-                                            <i class="bi bi-droplet-half me-2"></i> Reactivos
-                                        </h5>
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <h5 class="card-title mb-0">
+                                                <i class="bi bi-droplet-half me-2"></i> Reactivos
+                                            </h5>
+                                            <a href="javascript:void(0);"
+                                               onclick="open_modal('{% url 'analytical_method:add_reagent' object.id %}')"
+                                               class="btn btn-primary btn-sm">
+                                                <i class="bi bi-plus-square m-0"></i>
+                                            </a>
+                                        </div>
                                         <div class="list-container mb-3" id="reagents-container">
                                             <ol class="list-group list-group-numbered list-group-flush">
                                                 {% for item in reagents %}
-                                                    <li class="list-group-item py-1 border-0 d-flex justify-content-between align-items-center">
+                                                    <li class="list-group-item py-1 p-1 border-0 d-flex align-items-center">
                                                         <span>{{ item.reagent }}</span>
                                                         <a href="javascript:void(0);"
                                                            onclick="open_modal('{% url 'analytical_method:update_reagent' item.id %}')"
@@ -168,7 +167,7 @@
                                                         </a>
                                                     </li>
                                                 {% empty %}
-                                                    <li class="list-group-item py-1 border-0 text-muted">No hay reactivos registrados</li>
+                                                    <li class="py-1 border-0 text-muted">No hay reactivos registrados</li>
                                                 {% endfor %}
                                             </ol>
                                         </div>
@@ -177,32 +176,28 @@
                                                     data-target="reagents-container">Ver más
                                             </button>
                                         {% endif %}
-                                        <div class="d-flex gap-2">
-                                            <a href="{% url 'reagent:list_reagent' %}"
-                                               class="btn btn-outline-primary btn-sm">
-                                                <i class="bi bi-list-ul me-1"></i> Ver listado
-                                            </a>
-                                            <a href="javascript:void(0);"
-                                               onclick="open_modal('{% url 'analytical_method:add_reagent' object.id %}')"
-                                               class="btn btn-primary btn-sm">
-                                                <i class="bi bi-plus-square me-1"></i> Nuevo
-                                            </a>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Materiales -->
-                            <div class="col-lg-6 col-md-6 mb-3">
+                            <div class="col-lg-4 col-md-6 mb-3">
                                 <div class="card h-100">
                                     <div class="card-body">
-                                        <h5 class="card-title mb-3">
-                                            <i class="bi bi-box-seam me-2"></i> Materiales
-                                        </h5>
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <h5 class="card-title mb-0">
+                                                <i class="bi bi-box-seam me-2"></i> Materiales
+                                            </h5>
+                                            <a href="javascript:void(0);"
+                                               onclick="open_modal('{% url 'analytical_method:add_material' object.id %}')"
+                                               class="btn btn-primary btn-sm">
+                                                <i class="bi bi-plus-square m-0"></i>
+                                            </a>
+                                        </div>
                                         <div class="list-container mb-3" id="materials-container">
                                             <ol class="list-group list-group-numbered list-group-flush">
                                                 {% for item in materials %}
-                                                    <li class="list-group-item py-1 border-0 d-flex justify-content-between align-items-center">
+                                                    <li class="list-group-item py-1 p-1 border-0 d-flex align-items-center">
                                                         <span>{{ item.material_instrumental }}</span>
                                                         <a href="javascript:void(0);"
                                                            onclick="open_modal('{% url 'analytical_method:update_material' item.id %}')"
@@ -211,7 +206,7 @@
                                                         </a>
                                                     </li>
                                                 {% empty %}
-                                                    <li class="list-group-item py-1 border-0 text-muted">No hay materiales registrados</li>
+                                                    <li class="py-1 border-0 text-muted">No hay materiales registrados</li>
                                                 {% endfor %}
                                             </ol>
                                         </div>
@@ -220,28 +215,28 @@
                                                     data-target="materials-container">Ver más
                                             </button>
                                         {% endif %}
-                                        <div class="d-flex gap-2">
-                                            <a href="javascript:void(0);"
-                                               onclick="open_modal('{% url 'analytical_method:add_material' object.id %}')"
-                                               class="btn btn-primary btn-sm">
-                                                <i class="bi bi-plus-square me-1"></i> Nuevo
-                                            </a>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Equipos -->
-                            <div class="col-lg-6 col-md-6 mb-3">
+                            <div class="col-lg-4 col-md-6 mb-3">
                                 <div class="card h-100">
                                     <div class="card-body">
-                                        <h5 class="card-title mb-3">
-                                            <i class="bi bi-cpu me-2"></i> Equipos
-                                        </h5>
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <h5 class="card-title mb-0">
+                                                <i class="bi bi-cpu me-2"></i> Equipos
+                                            </h5>
+                                             <a href="javascript:void(0);"
+                                               onclick="open_modal('{% url 'analytical_method:add_equipment' object.id %}')"
+                                               class="btn btn-primary btn-sm">
+                                                <i class="bi bi-plus-square m-0"></i>
+                                            </a>
+                                        </div>
                                         <div class="list-container mb-3" id="equipments-container">
                                             <ol class="list-group list-group-numbered list-group-flush">
                                                 {% for item in equipments %}
-                                                    <li class="list-group-item py-1 border-0 d-flex justify-content-between align-items-center">
+                                                    <li class="list-group-item py-1 p-1 border-0 d-flex align-items-center">
                                                         <span>{{ item.equipment_instrumental }}</span>
                                                         <a href="javascript:void(0);"
                                                            onclick="open_modal('{% url 'analytical_method:update_equipment' item.id %}')"
@@ -250,7 +245,7 @@
                                                         </a>
                                                     </li>
                                                 {% empty %}
-                                                    <li class="list-group-item py-1 border-0 text-muted">No hay equipos registrados</li>
+                                                    <li class="list-group-item py-1 p-1 border-0 text-muted">No hay equipos registrados</li>
                                                 {% endfor %}
                                             </ol>
                                         </div>
@@ -259,17 +254,45 @@
                                                     data-target="equipments-container">Ver más
                                             </button>
                                         {% endif %}
-                                        <div class="d-flex gap-2">
-                                            <a href="{% url 'equipment:list_equipment_instrumental' %}"
-                                               class="btn btn-outline-primary btn-sm">
-                                                <i class="bi bi-list-ul me-1"></i> Ver listado
-                                            </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Procedimientos -->
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <h5 class="card-title mb-0">
+                                                <i class="bi bi-list me-2"></i> Procedimiento
+                                            </h5>
                                             <a href="javascript:void(0);"
-                                               onclick="open_modal('{% url 'analytical_method:add_equipment' object.id %}')"
+                                               onclick="open_modal('{% url 'analytical_method:add_procedure' object.id %}')"
                                                class="btn btn-primary btn-sm">
-                                                <i class="bi bi-plus-square me-1"></i> Nuevo
+                                                <i class="bi bi-plus-square m-0"></i>
                                             </a>
                                         </div>
+                                        <div class="list-container mb-3" id="procedures-container">
+                                            <ol class="list-group list-group-numbered list-group-flush">
+                                                {% for item in procedures %}
+                                                    <li class="list-group-item py-1 p-1 border-0 d-flex align-items-center">
+                                                        <span>{{ item.procedure|truncatechars:50 }}</span>
+                                                        <a href="javascript:void(0);"
+                                                           onclick="open_modal('{% url 'analytical_method:update_procedure' item.id %}')"
+                                                           class="btn btn-link btn-sm p-0 text-primary">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
+                                                    </li>
+                                                {% empty %}
+                                                    <li class="list-group-item py-1 p-1 border-0 text-muted">No hay procedimientos registrados</li>
+                                                {% endfor %}
+                                            </ol>
+                                        </div>
+                                        {% if procedures|length > 5 %}
+                                            <button class="btn btn-link btn-sm p-0 mb-3 toggle-expand"
+                                                    data-target="procedures-container">Ver más
+                                            </button>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>

@@ -8,9 +8,9 @@ from django.views.generic import CreateView, UpdateView, DeleteView
 
 from core.mixins import ValidatePermissionRequiredMixin
 from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodSolution, AnalyticalMethodSolutionStd, \
-    AnalyticalMethodReagent, AnalyticalMethodEquipment, AnalyticalMethodMaterial
+    AnalyticalMethodReagent, AnalyticalMethodEquipment, AnalyticalMethodMaterial, AnalyticalMethodProcedure
 from core.analytical_method.forms import AnalyticalMethodSolutionForm, AnalyticalMethodSolutionStdForm, \
-    AnalyticalMethodReagentForm, AnalyticalMethodEquipmentForm, AnalyticalMethodMaterialForm
+    AnalyticalMethodReagentForm, AnalyticalMethodEquipmentForm, AnalyticalMethodMaterialForm, AnalyticalMethodProcedureForm
 
 
 class BaseAnalyticalMethodDetailView(ValidatePermissionRequiredMixin):
@@ -25,20 +25,21 @@ class BaseAnalyticalMethodDetailView(ValidatePermissionRequiredMixin):
         data = {}
         try:
             action = request.POST.get('action')
-            if action in ['add', 'edit']:
-                if action == 'add':
-                    analytical_method = AnalyticalMethod.objects.get(pk=self.kwargs.get('pk'))
-                    form = self.get_form_class()(request.POST, analytical_method=analytical_method)
-                else:
-                    form = self.get_form()
-                
-                if form.is_valid():
-                    form.save()
-                    messages.success(request, f'Operación realizada con éxito!')
-                else:
-                    data['error'] = form.errors
+            if action == 'add':
+                analytical_method = AnalyticalMethod.objects.get(pk=self.kwargs.get('pk'))
+                form = self.get_form_class()(request.POST, analytical_method=analytical_method)
+            elif action == 'edit':
+                self.object = self.get_object()
+                form = self.get_form()
             else:
-                data['error'] = 'No ha ingresado datos en los campos'
+                data['error'] = 'No ha ingresado una acción válida'
+                return JsonResponse(data)
+
+            if form.is_valid():
+                form.save()
+                messages.success(request, f'Operación realizada con éxito!')
+            else:
+                data['error'] = form.errors
         except Exception as e:
             data['error'] = str(e)
         return JsonResponse(data)
@@ -160,6 +161,29 @@ class AnalyticalMethodMaterialUpdateView(LoginRequiredMixin, BaseAnalyticalMetho
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Editar Material'
+        context['action'] = 'edit'
+        return context
+
+
+# Procedimientos
+class AnalyticalMethodProcedureCreateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, CreateView):
+    model = AnalyticalMethodProcedure
+    form_class = AnalyticalMethodProcedureForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Agregar Procedimiento'
+        context['action'] = 'add'
+        return context
+
+
+class AnalyticalMethodProcedureUpdateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, UpdateView):
+    model = AnalyticalMethodProcedure
+    form_class = AnalyticalMethodProcedureForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Editar Procedimiento'
         context['action'] = 'edit'
         return context
 

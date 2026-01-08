@@ -1,8 +1,9 @@
-from django.forms import ModelForm, TextInput, Select, NumberInput
+from django.forms import ModelForm, TextInput, Select, NumberInput, Textarea
 
 from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodSolution, AnalyticalMethodSolutionStd, \
-    AnalyticalMethodReagent, AnalyticalMethodEquipment, AnalyticalMethodMaterial
+    AnalyticalMethodReagent, AnalyticalMethodEquipment, AnalyticalMethodMaterial, AnalyticalMethodProcedure
 from core.laboratory.models import Laboratory
+from core.solution.models import SolutionStdBase, SolutionBase
 
 BOOLEAN = [(True, 'Si'), (False, 'No')]
 
@@ -75,6 +76,7 @@ class AnalyticalMethodSolutionForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
+        self.fields['solution'].queryset = SolutionBase.objects.filter(enable_solution=True)
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -106,6 +108,7 @@ class AnalyticalMethodSolutionStdForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
+        self.fields['solution_std'].queryset = SolutionStdBase.objects.filter(enable_solution_std=True)
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -208,6 +211,37 @@ class AnalyticalMethodMaterialForm(ModelForm):
         fields = ['material_instrumental']
         widgets = {
             'material_instrumental': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+class AnalyticalMethodProcedureForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodProcedure
+        fields = ['procedure']
+        widgets = {
+            'procedure': Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Ingrese el procedimiento'}),
         }
 
     def save(self, commit=True):

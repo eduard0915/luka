@@ -195,4 +195,5 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['reagents'] = self.object.analyticalmethodreagent_set.all()
         context['equipments'] = self.object.analyticalmethodequipment_set.all()
         context['materials'] = self.object.analyticalmethodmaterial_set.all()
+        context['procedures'] = self.object.analyticalmethodprocedure_set.all()
         return context
