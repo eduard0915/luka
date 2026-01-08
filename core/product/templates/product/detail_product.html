@@ -11,27 +11,13 @@
 
 {% block content %}
     <div class="row">
-        <div class="col-md-12">
-            <div class="tile mb-2">
-                <div class="tile-title-w-btn mb-0">
-                    <h3 class="title">{{ object.code_product}} {{ object.description_product }}</h3>
-                    <p>
-                        <a href="{{ list_url }}" class="btn btn-outline-secondary me-2">
-                            <i class="bi bi-arrow-left me-1"></i> Volver al listado
-                        </a>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="tile">
+        <div class="col-md-9">
+            <div class="tile mb-3">
                 <div class="tile-title-w-btn">
                     <h3 class="title">Métodos Analíticos</h3>
                     <p>
                         <a class="btn btn-primary icon-btn"
-                           onclick="open_modal('{{ create_sample_point }}')"><i
+                           onclick="open_modal('{{ create_method_product }}')"><i
                                 class="bi bi-plus-square me-2"></i>Nuevo
                         </a>
                     </p>
@@ -40,45 +26,31 @@
                     <table class="table">
                         <thead>
                         <tr>
-                            <th class="text-center">Secuencia</th>
                             <th class="text-center">Código</th>
                             <th class="text-center">Descripción</th>
-                            <th class="text-center">Frecuencia (Horas)</th>
-                            <th class="text-center">Estado</th>
+                            <th class="text-center">Tipo</th>
+                            <th class="text-center">Version</th>
                             <th class="text-center">Acciones</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {% for sample in sample_point %}
+                        {% for item in analytical_methods %}
                             <tr>
-                                <td class="text-center">{{ sample.sequence }}</td>
-                                <td class="text-center">{{ sample.sample_point_code }}</td>
-                                <td class="text-center">{{ sample.sample_point_name }}</td>
+                                <td class="text-center">{{ item.analytical_method.code_analytical_method }}</td>
+                                <td class="text-center">{{ item.analytical_method.description_analytical_method }}</td>
+                                <td class="text-center">{{ item.analytical_method.type_method }}</td>
+                                <td class="text-center">{{ item.analytical_method.version }}</td>
                                 <td class="text-center">
-                                    {% if sample.sample_frequency %}
-                                        {{ sample.sample_frequency }}
-                                    {% else %}
-                                        No aplica
-                                    {% endif %}
-                                </td>
-                                <td class="text-center">
-                                    {% if sample.enable_point %}
-                                        <span class="me-1 badge bg-primary">Activo</span>
-                                    {% else %}
-                                        <span class="me-1 badge bg-danger">Inactivo</span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-center">
-                                    <a onclick="open_modal('{% url 'product:update_sample_point' sample.id %}')"
-                                       title="Editar">
+                                    <a onclick="open_modal('{% url 'product:update_method_product' item.id %}')"
+                                       title="Editar" style="cursor: pointer;">
                                         <i class="bi bi-pencil-square text-warning me-2"></i>
                                     </a>
                                 </td>
                             </tr>
                         {% empty %}
                             <tr>
-                                <td colspan="4" class="text-center">
-                                    No hay puntos de muestreo asociados a esta planta.
+                                <td colspan="3" class="text-center">
+                                    No hay métodos analíticos asociados a este producto.
                                 </td>
                             </tr>
                         {% endfor %}
@@ -89,7 +61,57 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-9">
+            <div class="tile mb-3">
+                <div class="tile-title-w-btn">
+                    <h3 class="title">Especificaciones</h3>
+                    <p>
+                        <a class="btn btn-primary icon-btn"
+                           onclick="open_modal('{{ create_method_product }}')"><i
+                                class="bi bi-plus-square me-2"></i>Nuevo
+                        </a>
+                    </p>
+                </div>
+                <div class="tile-body">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th class="text-center">Código</th>
+                            <th class="text-center">Descripción</th>
+                            <th class="text-center">Tipo</th>
+                            <th class="text-center">Version</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for item in analytical_methods %}
+                            <tr>
+                                <td class="text-center">{{ item.analytical_method.code_analytical_method }}</td>
+                                <td class="text-center">{{ item.analytical_method.description_analytical_method }}</td>
+                                <td class="text-center">{{ item.analytical_method.type_method }}</td>
+                                <td class="text-center">{{ item.analytical_method.version }}</td>
+                                <td class="text-center">
+                                    <a onclick="open_modal('{% url 'product:update_method_product' item.id %}')"
+                                       title="Editar" style="cursor: pointer;">
+                                        <i class="bi bi-pencil-square text-warning me-2"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center">
+                                    No hay métodos analíticos asociados a este producto.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-9">
             <div class="tile">
                 <div class="tile-title-w-btn">
                     <h3 class="title">Puntos de Muestreo</h3>
@@ -152,11 +174,21 @@
             </div>
         </div>
     </div>
+    <!-- Modal -->
+    <div class="modal fade" id="modal_template" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    </div>
 {% endblock %}
 
 {% block scripts_detail %}
 
     <script>
+        function open_modal(url) {
+            $('#modal_template').load(url, function () {
+                var modalElement = document.getElementById('modal_template');
+                var modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+                modal.show();
+            });
+        }
         // Initialize tooltips
         document.addEventListener("DOMContentLoaded", function () {
             // Inicializar tooltips
@@ -164,41 +196,6 @@
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
-        });
-
-        // Handle form submission in modal using vanilla JavaScript
-        document.addEventListener('submit', function (e) {
-            // Check if the form is inside a modal
-            if (e.target.closest('.modal') && e.target.tagName === 'FORM') {
-                e.preventDefault();
-                var form = e.target;
-                var url = form.getAttribute('action');
-                var data = new FormData(form);
-
-                // Use fetch API instead of $.ajax
-                fetch(url, {
-                    method: 'POST',
-                    body: data
-                })
-                    .then(response => response.json())
-                    .then(response => {
-                        if (!response.hasOwnProperty('error')) {
-                            // Close modal using Bootstrap 5 syntax
-                            var modalElement = document.getElementById('modal_template');
-                            var modalInstance = bootstrap.Modal.getInstance(modalElement);
-                            modalInstance.hide();
-                            // Reload page to show new data
-                            location.reload();
-                        } else {
-                            // Show error message
-                            alert(response.error);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Error en el envío del formulario');
-                    });
-            }
         });
     </script>
 

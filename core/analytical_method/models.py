@@ -7,7 +7,6 @@ from core.company.models import Site
 from core.equipment.models import EquipmentInstrumental, MaterialInstrumental
 from core.laboratory.models import Laboratory
 from core.models import BaseModel
-from core.product.models import Product
 from core.reagent.models import Reagent
 from core.solution.models import SolutionBase, SolutionStdBase
 from core.user.models import User
@@ -23,6 +22,7 @@ class AnalyticalMethod(BaseModel):
     type_method = models.CharField(verbose_name='Tipo de Método', max_length=100)
     laboratory = models.ForeignKey(Laboratory, verbose_name='Laboratorio', on_delete=models.CASCADE)
     sig_figs_result = models.PositiveSmallIntegerField(default=2, verbose_name='Cifras Significativas')
+    version = models.PositiveSmallIntegerField(default=1, verbose_name='Versión')
 
     def __str__(self):
         return str(self.code_analytical_method) + ' '  + str(self.description_analytical_method)

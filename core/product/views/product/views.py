@@ -8,7 +8,7 @@ from django.views.generic import CreateView, UpdateView, ListView, DetailView
 
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.forms import ProductForm
-from core.product.models import Product, SamplePoint
+from core.product.models import Product, SamplePoint, AnalyticalMethodProduct
 
 
 # Creación de Productos
@@ -93,6 +93,7 @@ class ProductUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
         return context
 
 
+# Listado de Productos
 class ProductListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
     model = Product
     template_name = 'product/list_product.html'
@@ -139,13 +140,13 @@ class ProductDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Det
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Detalle de Producto'
-        context['entity'] = 'Detalle de Producto'
-        context['icon'] = 'fa-solid fa-microscope'
-        context['list_url'] = reverse_lazy('product:list_product')
+        context['title'] = self.object.code_product
+        context['entity'] = self.object
+        context['icon'] = 'bi bi-file-earmark-ruled'
+        context['back'] = reverse_lazy('product:list_product')
         context['create_sample_point'] = reverse_lazy('product:create_sample_point', kwargs={'pk': self.object.pk})
-        # context['stages'] = Stage.objects.filter(
-        #     enable_stage=True, product_id=self.object.id).order_by('stage_name')
-        context['sample_point'] = SamplePoint.objects.filter(
+        context['sample_point'] = SamplePoint.objects.select_related('product').filter(
             enable_point=True, product_id=self.object.id).order_by('sequence')
+        context['create_method_product'] = reverse_lazy('product:create_method_product', kwargs={'pk': self.object.pk})
+        context['analytical_methods'] = AnalyticalMethodProduct.objects.select_related('product').filter(product_id=self.object.id)
         return context
