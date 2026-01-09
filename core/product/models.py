@@ -15,9 +15,10 @@ class Product(BaseModel):
     description_product = models.CharField(max_length=200, verbose_name='Descripción')
     site = models.ForeignKey(Site, on_delete=models.CASCADE, verbose_name='Planta')
     enable_product = models.BooleanField(default=True, verbose_name='Habilitado')
+    version = models.PositiveIntegerField(default=1, verbose_name='Version')
 
     def __str__(self):
-        return str(self.code_product) + ' '  + str(self.description_product)
+        return str(self.code_product) + ' '  + str(self.description_product) + ' Versión ' + str(self.version)
 
     class Meta:
         verbose_name = 'Product'

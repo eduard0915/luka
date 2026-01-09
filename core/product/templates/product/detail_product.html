@@ -87,8 +87,16 @@
                             <tr>
                                 <td class="text-center">{{ item.test_prod }}</td>
                                 {% if item.lower_limit_prod or  item.upper_limit_prod %}
-                                    <td class="text-center">{{ item.lower_limit_prod|default_if_none:" " }} - {{ item.upper_limit_prod|default_if_none:" " }} {{ item.unit_measure|default_if_none:" " }}</td>
-                                {% else %}     
+                                    <td class="text-center">
+                                        {% if not item.lower_limit_prod or item.lower_limit_prod == 0 %}
+                                            Menor que {{ item.upper_limit_prod|default_if_none:" " }} {{ item.unit_measure|default_if_none:" " }}
+                                        {% elif not item.upper_limit_prod or item.upper_limit_prod == 0 %}
+                                            Mayor que {{ item.lower_limit_prod|default_if_none:" " }} {{ item.unit_measure|default_if_none:" " }}
+                                        {% else %}
+                                            {{ item.lower_limit_prod|default_if_none:" " }} - {{ item.upper_limit_prod|default_if_none:" " }} {{ item.unit_measure|default_if_none:" " }}
+                                        {% endif %}
+                                    </td>
+                                {% else %}
                                     <td class="text-center">{{ item.features_prod }}</td>
                                 {% endif %}
                                 <td class="text-center">{{ item.method_test.analytical_method.code_analytical_method }}</td>

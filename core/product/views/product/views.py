@@ -110,7 +110,7 @@ class ProductListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
             if action == 'searchdata':
                 data = []
                 prod = list(Product.objects.values(
-                    'id', 'code_product', 'description_product', 'enable_product'
+                    'id', 'code_product', 'description_product', 'enable_product', 'version'
                 ).order_by('-date_creation'))
                 return JsonResponse(prod, safe=False)
             else:
