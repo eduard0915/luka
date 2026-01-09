@@ -21,16 +21,17 @@ document.addEventListener('DOMContentLoaded', function () {
             columns: [
                 {'data': 'code_product'},
                 {'data': 'description_product'},
+                {'data': 'version'},
                 {'data': 'enable_product'},
                 {'data': 'id'}
             ],
             columnDefs: [
                 {
-                    targets: [0, 1],
+                    targets: [0, 1, 2],
                     class: 'td-actions text-center'
                 },
                 {
-                    targets: [2],
+                    targets: [3],
                     class: 'td-actions text-center',
                     render: function (data, type, row) {
                         if (row['enable_product']) {
@@ -41,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 {
-                    targets: [3],
+                    targets: [4],
                     class: 'td-actions text-center',
                     orderable: false,
                     render: function (data, type, row) {

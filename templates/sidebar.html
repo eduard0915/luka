@@ -37,7 +37,7 @@
                 class="treeview-indicator bi bi-chevron-right"></i></a>
             <ul class="treeview-menu">
                 <li>
-                    <a class="treeview-item {{ method_active }}" href="{% url 'analytical_method:list_method' %}">
+                    <a class="{{ method_active }}" href="{% url 'analytical_method:list_method' %}">
                         <i class="icon bi bi-circle-fill"></i>Métodos
                     </a>
                 </li>
@@ -106,8 +106,20 @@
         {% url 'user:user_list' as list_user %}
         {% url 'user:user_create' as create_user %}
 
-        {% url 'company:list_site' as list_site %}
-        {% url 'company:create_site' as create_site %}
+        {% if perms.user.add_user %}
+            <li class="treeview {% if list_user in request.path or create_user in request.path %}is-expanded{% endif %}">
+                <a class="app-menu__item" href="#" data-toggle="treeview">
+                <i class="app-menu__icon bi bi-people"></i><span class="app-menu__label">Usuarios</span><i
+                    class="treeview-indicator bi bi-chevron-right"></i></a>
+                <ul class="treeview-menu">
+                    <li>
+                        <a class="treeview-item {% if list_user in request.path or create_user in request.path %}active{% endif %}" href="{% url 'user:user_list' %}">
+                        <i class="icon bi bi-circle-fill"></i> Lista Usuarios
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        {% endif %}
 
         {% url 'laboratory:list_laboratory' as list_lab %}
         {% url 'laboratory:create_laboratory' as create_lab %}
@@ -124,25 +136,10 @@
         {% url 'solution:create_solution_std_base' as add_std_base %}
         {% url 'solution:list_solution_std_base' as list_std_base %}
 
-        {% is_expanded list_site create_site list_lab create_lab list_eq create_eq list_sln_base add_sln_base list_std_base add_std_base as lab_expanded %}
-
-        {% if perms.user.add_user %}
-            <li class="treeview {% if list_user in request.path or create_user in request.path %}is-expanded{% endif %}">
-                <a class="app-menu__item" href="#" data-toggle="treeview">
-                <i class="app-menu__icon bi bi-people"></i><span class="app-menu__label">Usuarios</span><i
-                    class="treeview-indicator bi bi-chevron-right"></i></a>
-                <ul class="treeview-menu">
-                    <li>
-                        <a class="treeview-item {% if list_user in request.path or create_user in request.path %}active{% endif %}" href="{% url 'user:user_list' %}">
-                        <i class="icon bi bi-circle-fill"></i> Lista Usuarios
-                        </a>
-                    </li>
-                </ul>
-            </li>
-        {% endif %}
+        {% is_expanded list_lab create_lab list_eq create_eq list_sln_base add_sln_base list_std_base add_std_base list_prod create_prod as config_expanded %}
 
         {% if perms.company.add_company %}
-            <li class="treeview {{ lab_expanded }}">
+            <li class="{{ config_expanded }}">
                 <a class="app-menu__item" href="#" data-toggle="treeview">
                     <i class="bi bi-gear me-2"></i><span
                         class="app-menu__label">Configuración</span><i
@@ -162,7 +159,7 @@
                         <i class="icon bi bi-circle-fill"></i> Soluciones STD Base</a></li>
                     <li><a class="treeview-item {% if list_eq in request.path or create_eq in request.path %}active{% endif %}" href="{% url 'equipment:list_equipment_instrumental' %}">
                         <i class="icon bi bi-circle-fill"></i> Equipo Instrumental</a></li>
-                    <li><a class="treeview-item" href="{% url 'product:list_product' %}">
+                    <li><a class="treeview-item {% if list_prod in request.path or create_prod in request.path %}active{% endif %}" href="{% url 'product:list_product' %}">
                         <i class="icon bi bi-circle-fill"></i> Productos</a></li>
                 </ul>
             </li>
