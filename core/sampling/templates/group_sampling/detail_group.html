@@ -1,0 +1,20 @@
+{% extends 'detail_one.html' %}
+{% load static %}
+
+{% block content_detail %}
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card card-primary card-outline">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="{{ icon }} me-2"></i>Información del Grupo de Muestreo</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Punto de Muestreo:</strong> {{ entity.sampling_point }}</p>
+                    <p><strong>Hora del Primer Muestreo:</strong> {{ entity.hour_sampling }}</p>
+                    <p><strong>Muestras por Día:</strong> {{ entity.number_sampling_day }}</p>
+                    <p><strong>Habilitado:</strong> {% if entity.enable_sampling_group %}Sí{% else %}No{% endif %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -9,12 +9,12 @@ class SolutionAdmin(admin.ModelAdmin):
     search_fields = (
         'id', 'solute_reagent', 'solvent_reagent', 'concentration', 'concentration_unit', 'preparation_date',
         'expire_date_solution', 'quantity_solution', 'quantity_reagent', 'quantity_solvent', 'preparated_by',
-        'standardizable', 'average_concentration', 'deviation_std', 'coefficient_variation'
+        'standardizable', 'average_concentration', 'deviation_std', 'coefficient_variation', 'solution_base'
     )
     list_display = (
         'id', 'solute_reagent', 'solvent_reagent', 'concentration', 'concentration_unit', 'preparation_date',
         'expire_date_solution', 'quantity_solution', 'quantity_reagent', 'quantity_solvent', 'preparated_by',
-        'standardizable', 'average_concentration', 'deviation_std', 'coefficient_variation'
+        'standardizable', 'average_concentration', 'deviation_std', 'coefficient_variation', 'solution_base'
     )
 
 admin.site.register(Solution, SolutionAdmin)

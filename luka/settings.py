@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'core.equipment',
     'core.product',
     'core.analytical_method',
+    'core.sampling',
     # Libs
     'widget_tweaks',
     'django_password_history',
