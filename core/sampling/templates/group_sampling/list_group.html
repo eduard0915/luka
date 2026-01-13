@@ -1,0 +1,25 @@
+{% extends 'list_one.html' %}
+{% load static %}
+
+{% block head_list %}
+    <script src="{% static 'list_sampling_group.js' %}"></script>
+{% endblock %}
+
+{% block buttons %}
+    <a href="{{ create_url }}" class="btn btn-primary me-2" type="button">
+        <i class="bi bi-plus-square me-2"></i> Nuevo
+    </a>
+{% endblock %}
+
+{% block columns %}
+    <tr>
+        <th style="width: 30%">Punto de Muestreo</th>
+        <th style="width: 20%">Hora Primer Muestreo</th>
+        <th style="width: 20%">Muestras por Día</th>
+        <th style="width: 15%">Habilitado</th>
+        <th style="width: 15%">Acciones</th>
+    </tr>
+{% endblock %}
+
+{% block rows %}
+{% endblock %}
