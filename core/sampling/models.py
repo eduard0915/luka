@@ -66,7 +66,7 @@ class SamplingProcess(BaseModel):
     group_sampling = models.ForeignKey(SamplingGroup, verbose_name='Grupo de Muestreo', on_delete=models.CASCADE)
     date_sampling_scheduled = models.DateTimeField(verbose_name='Programación de Muestreo')
     date_sampling = models.DateTimeField(verbose_name='Fecha y Hora de Muestreo')
-    number_sample = models.CharField(verbose_name='N° de Muestra', max_length=25, default=code_sample_generator)
+    number_sample = models.CharField(verbose_name='N° de Muestra', max_length=25)
     automatic_sampling = models.BooleanField(verbose_name='Muestreo Automático', default=True)
     sampling_confirmed_by = models.ForeignKey(User, verbose_name='Confirmado por', on_delete=models.CASCADE, related_name='sampling_confirmed_by', null=True, blank=True)
     sampling_created_by = models.ForeignKey(User, verbose_name='Realizado por', on_delete=models.CASCADE, related_name='sampling_created_by', null=True, blank=True)
@@ -84,9 +84,37 @@ class SamplingProcess(BaseModel):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
         user = get_current_user()
+
+        if not self.number_sample:
+            self.number_sample = self.generate_sample_code()
+
         if user:
             if not self.user_creation:
                 self.user_creation = user
             else:
                 self.user_updated = user
         return super(SamplingProcess, self).save(*args, **kwargs)
+
+    def generate_sample_code(self):
+        today = timezone.localdate()
+        today_str = today.strftime('%Y%m%d')
+
+        # Obtener el código del punto de muestreo
+        sufix_sample = self.group_sampling.sampling_point.sample_point_code
+
+        with transaction.atomic():
+            last_sample = SamplingProcess.objects.filter(
+                group_sampling__sampling_point=self.group_sampling.sampling_point,
+                date_creation__date=today
+            ).select_for_update().order_by('-date_creation').first()
+
+            if not last_sample:
+                # Primer registro del día
+                return f'{sufix_sample}-{today_str}-1'
+
+            # Extraer el número secuencial del código existente
+            code_parts = last_sample.number_sample.split('-')
+            current_number = int(code_parts[-1])
+            new_number = current_number + 1
+
+            return f'{sufix_sample}-{today_str}-{new_number}'

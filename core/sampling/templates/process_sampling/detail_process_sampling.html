@@ -1,0 +1,40 @@
+{% extends 'detail_one.html' %}
+{% load static %}
+
+{% block content_detail %}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card card-primary card-outline">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="{{ icon }} me-2"></i>Información del Proceso de Muestreo</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Grupo de Muestreo:</strong> {{ entity.group_sampling }}</p>
+                            <p><strong>Punto de Muestreo:</strong> {{ entity.group_sampling.sampling_point }}</p>
+                            <p><strong>N° de Muestra:</strong> {{ entity.number_sample }}</p>
+                            <p><strong>N° de Lote:</strong> {{ entity.batch_number|default:"N/A" }}</p>
+                            <p><strong>Estado:</strong> {{ entity.status_sampling }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Fecha Programada:</strong> {{ entity.date_sampling_scheduled|date:"Y-m-d H:i" }}</p>
+                            <p><strong>Fecha Realizada:</strong> {{ entity.date_sampling|date:"Y-m-d H:i" }}</p>
+                            <p><strong>Muestreo Automático:</strong> {% if entity.automatic_sampling %}Sí{% else %}No{% endif %}</p>
+                            <p><strong>Realizado por:</strong> {{ entity.sampling_created_by|default:"N/A" }}</p>
+                            <p><strong>Confirmado por:</strong> {{ entity.sampling_confirmed_by|default:"N/A" }}</p>
+                        </div>
+                    </div>
+                    {% if entity.image_sample %}
+                    <div class="row mt-3">
+                        <div class="col-12 text-center">
+                            <p><strong>Foto de la Muestra:</strong></p>
+                            <img src="{{ entity.image_sample.url }}" class="img-fluid rounded shadow-sm" style="max-height: 400px;" alt="Foto de la muestra">
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
