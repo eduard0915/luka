@@ -1,5 +1,5 @@
 from crum import get_current_user
-from django.forms import ModelForm, TextInput, Select
+from django.forms import ModelForm, TextInput, Select, SelectMultiple
 
 from core.analytical_method.models import AnalyticalMethod
 from core.product.models import SamplePoint, Product, AnalyticalMethodProduct, SpecificationProduct
@@ -26,6 +26,8 @@ UM = [
 ]
 
 TYPE_TEST = [('Rango', 'Rango'), ('Descriptivo', 'Descriptivo')]
+
+TYPE_SAMPLE = [('En Proceso', 'En Proceso'), ('Producto Terminado', 'Producto Terminado')]
 
 
 # Creación de Productos
@@ -64,17 +66,29 @@ class SamplePointForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.product = kwargs.pop('product')
         super().__init__(*args, **kwargs)
+        self.fields['method_analytical'].queryset = AnalyticalMethodProduct.objects.select_related('product').filter(product=self.product)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
+        col_classes = {
+            'method_analytical': 'col-md-12',
+            'sample_type': 'col-md-6',
+            'sequence': 'col-md-3',
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-4')
+
     class Meta:
         model = SamplePoint
-        fields = ['sample_point_code', 'sample_point_name', 'sample_frequency', 'sequence']
+        fields = ['sample_point_code', 'sample_point_name', 'sample_frequency', 'sequence', 'sample_type', 'method_analytical']
         widgets = {
             'sample_point_code': TextInput(attrs={'class': 'form-control', 'required': True}),
             'sample_point_name': TextInput(attrs={'class': 'form-control', 'required': True}),
             'sample_frequency': Select(attrs={'class': 'form-control'}, choices=FREQUENCY),
-            'sequence': TextInput(attrs={'class': 'form-control', 'required': True})
+            'sample_type': Select(attrs={'class': 'form-control'}, choices=TYPE_SAMPLE),
+            'sequence': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'method_analytical': SelectMultiple(attrs={'class': 'form-control', 'required': True})
         }
 
     def save(self, commit=True):
@@ -95,19 +109,31 @@ class SamplePointForm(ModelForm):
 # Edición de Puntos de Muestreo
 class SamplePointUpdateForm(ModelForm):
     def __init__(self, *args, **kwargs):
+        self.sample = kwargs.pop('sample')
         super().__init__(*args, **kwargs)
-        self.fields['analytical_method'].queryset = AnalyticalMethod.objects.filter(enable_analytical_method=True)
+        self.fields['method_analytical'].queryset = AnalyticalMethodProduct.objects.filter(product=self.sample.product)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
+        col_classes = {
+            'method_analytical': 'col-md-12',
+            'sample_type': 'col-md-6',
+            'sequence': 'col-md-3',
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-4')
+
     class Meta:
         model = SamplePoint
-        fields = ['sample_point_code', 'sample_point_name', 'sample_frequency', 'sequence']
+        fields = ['sample_point_code', 'sample_point_name', 'sample_frequency', 'sequence', 'sample_type', 'method_analytical']
         widgets = {
             'sample_point_code': TextInput(attrs={'class': 'form-control', 'required': True}),
             'sample_point_name': TextInput(attrs={'class': 'form-control', 'required': True}),
             'sample_frequency': Select(attrs={'class': 'form-control'}, choices=FREQUENCY),
-            'sequence': TextInput(attrs={'class': 'form-control', 'required': True})
+            'sample_type': Select(attrs={'class': 'form-control'}, choices=TYPE_SAMPLE),
+            'sequence': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'method_analytical': SelectMultiple(attrs={'class': 'form-control', 'required': True}),
         }
 
     def save(self, commit=True):

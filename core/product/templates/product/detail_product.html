@@ -169,6 +169,10 @@
                                        title="Editar">
                                         <i class="bi bi-pencil-square text-warning me-2"></i>
                                     </a>
+                                    <a onclick="open_modal('{% url 'product:detail_sample_point' sample.id %}')"
+                                       title="Métodos Analíticos">
+                                        <i class="bi bi-info-square text-info me-2"></i>
+                                    </a>
                                 </td>
                             </tr>
                         {% empty %}

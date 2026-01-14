@@ -35,34 +35,6 @@ class Product(BaseModel):
         return super(Product, self).save(*args, **kwargs)
 
 
-# Puntos de Muestreo
-class SamplePoint(BaseModel):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    sample_point_code = models.CharField(max_length=30, verbose_name='Código')
-    sample_point_name = models.CharField(max_length=100, verbose_name='Punto de Muestreo')
-    sample_frequency = models.SmallIntegerField(verbose_name='Frecuencia (Horas)', null=True, blank=True)
-    sequence = models.SmallIntegerField(verbose_name='Secuencia')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name='Producto')
-    enable_point = models.BooleanField(default=True, verbose_name='Habilitado')
-
-    def __str__(self):
-        return str(self.sample_point_name) + ' - ' + str(self.sample_point_code) + ' - ' + str(self.product.description_product)
-
-    class Meta:
-        verbose_name = 'SamplePoint'
-        verbose_name_plural = 'SamplePoints'
-        db_table = 'SamplePoint'
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
-        user = get_current_user()
-        if user:
-            if not self.user_creation:
-                self.user_creation = user
-            else:
-                self.user_updated = user
-        return super(SamplePoint, self).save(*args, **kwargs)
-
-
 # Metodos Analíticos de Productos
 class AnalyticalMethodProduct(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
@@ -85,6 +57,36 @@ class AnalyticalMethodProduct(BaseModel):
             else:
                 self.user_updated = user
         return super(AnalyticalMethodProduct, self).save(*args, **kwargs)
+
+
+# Puntos de Muestreo
+class SamplePoint(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    sample_point_code = models.CharField(max_length=30, verbose_name='Código')
+    sample_point_name = models.CharField(max_length=100, verbose_name='Punto de Muestreo')
+    sample_frequency = models.SmallIntegerField(verbose_name='Frecuencia (Horas)', null=True, blank=True)
+    sequence = models.SmallIntegerField(verbose_name='Secuencia')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name='Producto')
+    method_analytical = models.ManyToManyField(AnalyticalMethodProduct, verbose_name='Metodos Analíticos')
+    sample_type = models.CharField(max_length=30, verbose_name='Tipo de Muestra', default='Matriz')
+    enable_point = models.BooleanField(default=True, verbose_name='Habilitado')
+
+    def __str__(self):
+        return str(self.sample_point_name) + ' - ' + str(self.sample_point_code) + ' - ' + str(self.product.description_product)
+
+    class Meta:
+        verbose_name = 'SamplePoint'
+        verbose_name_plural = 'SamplePoints'
+        db_table = 'SamplePoint'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(SamplePoint, self).save(*args, **kwargs)
 
 
 # Especificaciones de Productos
