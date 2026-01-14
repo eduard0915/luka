@@ -46,7 +46,7 @@ class SamplePoint(BaseModel):
     enable_point = models.BooleanField(default=True, verbose_name='Habilitado')
 
     def __str__(self):
-        return str(self.sample_point_name) + ' - ' + str(self.product.description_product)
+        return str(self.sample_point_name) + ' - ' + str(self.sample_point_code) + ' - ' + str(self.product.description_product)
 
     class Meta:
         verbose_name = 'SamplePoint'

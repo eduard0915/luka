@@ -4,21 +4,19 @@ from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, UpdateView, ListView, DetailView
 
 from core.mixins import ValidatePermissionRequiredMixin
-from core.product.models import SamplePoint
-from core.sampling.forms import SamplingGroupForm
-from core.sampling.models import SamplingGroup
+from core.sampling.forms import SamplingProcessForm
+from core.sampling.models import SamplingProcess
 
 
-# Creación de Grupos de Muestreo
-class SamplingGroupCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
-    model = SamplingGroup
-    form_class = SamplingGroupForm
-    template_name = 'group_sampling/create_group_sampling.html'
-    success_url = reverse_lazy('sampling:list_sampling_group')
+# Creación de Proceso de Muestreo
+class SamplingProcessCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    model = SamplingProcess
+    form_class = SamplingProcessForm
+    template_name = 'process_sampling/create_process_sampling.html'
+    success_url = reverse_lazy('sampling:list_sampling_process')
     permission_required = 'reagent.add_reagent'
     url_redirect = success_url
 
@@ -35,7 +33,7 @@ class SamplingGroupCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixi
                 form = self.get_form()
                 if form.is_valid():
                     form.save()
-                    messages.success(request, f'Grupo de Muestreo creado satisfactoriamente!')
+                    messages.success(request, f'Proceso de Muestreo creado satisfactoriamente!')
                 else:
                     messages.error(request, 'Por favor corrija los errores: {}'.format(form.errors.as_json()))
             else:
@@ -47,19 +45,19 @@ class SamplingGroupCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixi
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
-        context['entity'] = 'Creación de Grupo de Muestreo'
-        context['title'] = 'Creación de Grupo de Muestreo'
-        context['div'] = '8'
+        context['entity'] = 'Creación de Muestreo'
+        context['title'] = 'Creación de Muestreo'
+        context['div'] = '10'
         context['list_url'] = self.success_url
         return context
 
 
-# Edición de Grupos de Muestreo
-class SamplingGroupUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
-    model = SamplingGroup
-    form_class = SamplingGroupForm
-    template_name = 'group_sampling/create_group_sampling.html'
-    success_url = reverse_lazy('sampling:list_sampling_group')
+# Edición de Proceso de Muestreo
+class SamplingProcessUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    model = SamplingProcess
+    form_class = SamplingProcessForm
+    template_name = 'process_sampling/create_process_sampling.html'
+    success_url = reverse_lazy('sampling:list_sampling_process')
     permission_required = 'reagent.add_reagent'
     url_redirect = success_url
 
@@ -76,7 +74,7 @@ class SamplingGroupUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixi
                 form = self.get_form()
                 if form.is_valid():
                     form.save()
-                    messages.success(request, f'Grupo de Muestreo editado satisfactoriamente!')
+                    messages.success(request, f'Proceso de Muestreo editado satisfactoriamente!')
                 else:
                     messages.error(request, 'Por favor corrija los errores: {}'.format(form.errors.as_json()))
             else:
@@ -87,39 +85,18 @@ class SamplingGroupUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixi
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Edición de Grupo de Muestreo'
-        context['entity'] = 'Edición de Grupo de Muestreo'
+        context['title'] = 'Edición de Muestreo'
+        context['entity'] = 'Edición de Muestreo'
         context['action'] = 'edit'
         context['div'] = '10'
         context['list_url'] = self.success_url
         return context
 
 
-# Vista para obtener los datos de un punto de muestreo
-@require_http_methods(["GET"])
-def get_sampling_point(request, pk):
-    """
-    API endpoint para obtener los datos de un punto de muestreo
-    """
-    try:
-        sampling_point = SamplePoint.objects.get(pk=pk)
-        data = {
-            'id': str(sampling_point.id),
-            'sample_frequency': sampling_point.sample_frequency,
-            'sample_point_code': sampling_point.sample_point_code,
-            'sample_point_name': sampling_point.sample_point_name,
-        }
-        return JsonResponse(data)
-    except SamplePoint.DoesNotExist:
-        return JsonResponse({'error': 'Punto de muestreo no encontrado'}, status=404)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
-
-
-# Listado de Grupos de Muestreo
-class SamplingGroupListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
-    model = SamplingGroup
-    template_name = 'group_sampling/list_group_sampling.html'
+# Listado de Procesos de Muestreo
+class SamplingProcessListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    model = SamplingProcess
+    template_name = 'process_sampling/list_process_sampling.html'
     permission_required = 'reagent.add_reagent'
 
     @method_decorator(csrf_exempt)
@@ -132,14 +109,15 @@ class SamplingGroupListView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
             action = request.POST['action']
             if action == 'searchdata':
                 data = []
-                groups = SamplingGroup.objects.filter(enable_sampling_group=True).order_by('sampling_point__sequence')
-                for group in groups:
+                processes = SamplingProcess.objects.all().order_by('-date_sampling')
+                for p in processes:
                     item = {
-                        'id': group.id,
-                        'sampling_point': str(group.sampling_point),
-                        'hour_sampling': group.hour_sampling.strftime('%H:%M'),
-                        'number_sampling_day': group.number_sampling_day,
-                        'enable_sampling_group': group.enable_sampling_group,
+                        'id': p.id,
+                        'group_sampling': str(p.group_sampling),
+                        'date_sampling_scheduled': p.date_sampling_scheduled.strftime('%Y-%m-%d %H:%M'),
+                        'date_sampling': p.date_sampling.strftime('%Y-%m-%d %H:%M'),
+                        'number_sample': p.number_sample,
+                        'status_sampling': p.status_sampling,
                     }
                     data.append(item)
                 return JsonResponse(data, safe=False)
@@ -151,18 +129,18 @@ class SamplingGroupListView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Grupos de Muestreo'
-        context['create_url'] = reverse_lazy('sampling:create_sampling_group')
-        context['entity'] = 'Grupos de Muestreo'
-        context['div'] = '9'
-        context['icon'] = 'fa-solid fa-vial-virus'
+        context['title'] = 'Procesos de Muestreo'
+        context['create_url'] = reverse_lazy('sampling:create_sampling_process')
+        context['entity'] = 'Procesos de Muestreo'
+        context['div'] = '12'
+        context['icon'] = 'fa-solid fa-vials'
         return context
 
 
-# Detalle de Grupo de Muestreo
-class SamplingGroupDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
-    model = SamplingGroup
-    template_name = 'group_sampling/detail_group_sampling.html'
+# Detalle de Proceso de Muestreo
+class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    model = SamplingProcess
+    template_name = 'process_sampling/detail_process_sampling.html'
     permission_required = 'reagent.add_reagent'
 
     def dispatch(self, request, *args, **kwargs):
@@ -170,8 +148,8 @@ class SamplingGroupDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixi
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Detalle de Grupo de Muestreo'
+        context['title'] = 'Detalle de Proceso de Muestreo'
         context['entity'] = self.object
         context['icon'] = 'bi bi-file-earmark-ruled'
-        context['back'] = reverse_lazy('sampling:list_sampling_group')
+        context['back'] = reverse_lazy('sampling:list_sampling_process')
         return context

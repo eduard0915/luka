@@ -27,9 +27,14 @@
         {% url 'analytical_method:create_method' as create_method %}
         {% url 'analytical_method:list_method' as list_method %}
 
-        {% is_expanded create_method list_method as analysis_expanded %}
+        {% url 'sampling:list_sampling_process' as list_sampling %}
+        {% url 'sampling:create_sampling_process' as create_sampling %}
+
+        {% is_expanded create_method list_method list_sampling create_sampling as analysis_expanded %}
 
         {% is_active_section create_method list_method as method_active %}
+
+        {% is_active_section create_sampling list_sampling as sampling_active %}
 
         <li class="{{ analysis_expanded }}">
             <a class="app-menu__item" href="#" data-toggle="treeview"><i
@@ -41,7 +46,7 @@
                         <i class="icon bi bi-circle-fill"></i>Métodos
                     </a>
                 </li>
-                <li><a class="treeview-item" href="#"><i class="icon bi bi-circle-fill"></i>
+                <li><a class="{{ sampling_active }}" href="{% url 'sampling:list_sampling_process' %}"><i class="icon bi bi-circle-fill"></i>
                     Muestreo</a>
                 </li>
                 <li><a class="treeview-item" href="#" target="_blank" rel="noopener"><i
@@ -136,7 +141,10 @@
         {% url 'solution:create_solution_std_base' as add_std_base %}
         {% url 'solution:list_solution_std_base' as list_std_base %}
 
-        {% is_expanded list_lab create_lab list_eq create_eq list_sln_base add_sln_base list_std_base add_std_base list_prod create_prod as config_expanded %}
+        {% url 'sampling:list_sampling_group' as list_group %}
+        {% url 'sampling:create_sampling_group' as create_group %}
+
+        {% is_expanded list_lab create_lab list_eq create_eq list_sln_base add_sln_base list_std_base add_std_base list_prod create_prod list_group create_group as config_expanded %}
 
         {% if perms.company.add_company %}
             <li class="{{ config_expanded }}">
@@ -161,6 +169,8 @@
                         <i class="icon bi bi-circle-fill"></i> Equipo Instrumental</a></li>
                     <li><a class="treeview-item {% if list_prod in request.path or create_prod in request.path %}active{% endif %}" href="{% url 'product:list_product' %}">
                         <i class="icon bi bi-circle-fill"></i> Productos</a></li>
+                    <li><a class="treeview-item {% if list_group in request.path or create_group in request.path %}active{% endif %}" href="{% url 'sampling:list_sampling_group' %}">
+                        <i class="icon bi bi-circle-fill"></i> Grupos de Muestreo</a></li>
                 </ul>
             </li>
         {% endif %}
