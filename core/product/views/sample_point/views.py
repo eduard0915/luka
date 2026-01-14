@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import CreateView, UpdateView
+from django.views.generic import CreateView, UpdateView, DetailView
 
 from core.company.models import Site
 from core.mixins import ValidatePermissionRequiredMixin
@@ -82,8 +82,26 @@ class SamplePointUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
             data['error'] = str(e)
         return JsonResponse(data)
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        sample = SamplePoint.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'sample': sample})
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Edición de Punto de Muestreo'
         context['action'] = 'edit'
+        return context
+
+
+# Detalle de Puntos de Muestreo
+class SamplePointDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    model = SamplePoint
+    template_name = 'sample_point/detail_sample_point.html'
+    permission_required = 'company.add_company'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Detalle de Punto de Muestreo'
         return context

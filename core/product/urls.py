@@ -18,6 +18,7 @@ urlpatterns = [
     # Puntos de Muestreo
     path('add_sample_point/<uuid:pk>/', SamplePointCreateView.as_view(), name='create_sample_point'),
     path('update_sample_point/<uuid:pk>/', SamplePointUpdateView.as_view(), name='update_sample_point'),
+    path('detail_sample_point/<uuid:pk>/', SamplePointDetailView.as_view(), name='detail_sample_point'),
     # Metodos Analíticos
     path('add_method/<uuid:pk>/', AnalyticalMethodProductCreateView.as_view(), name='create_method_product'),
     path('update_method/<uuid:pk>/', AnalyticalMethodProductUpdateView.as_view(), name='update_method_product'),
