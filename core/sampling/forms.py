@@ -27,10 +27,10 @@ class SamplingGroupForm(ModelForm):
 
     class Meta:
         model = SamplingGroup
-        fields = ['sampling_point', 'hour_sampling', 'number_sampling_day']
+        fields = ['sampling_point', 'first_hour_sampling', 'number_sampling_day']
         widgets = {
             'sampling_point': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
-            'hour_sampling': TimeInput(format='%H:%M', attrs={'class': 'form-control', 'type': 'time'}),
+            'first_hour_sampling': TimeInput(format='%H:%M', attrs={'class': 'form-control', 'type': 'time'}),
             'number_sampling_day': TextInput(attrs={'class': 'form-control', 'required': True})
         }
 

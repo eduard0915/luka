@@ -4,8 +4,8 @@ from core.sampling.models import SamplingGroup, SamplingProcess
 
 
 class SamplingGroupAdmin(admin.ModelAdmin):
-    search_fields = ('id', 'sampling_point', 'hour_sampling', 'number_sampling_day', 'enable_sampling_group')
-    list_display = ('id', 'sampling_point', 'hour_sampling', 'number_sampling_day', 'enable_sampling_group')
+    search_fields = ('id', 'sampling_point', 'first_hour_sampling', 'number_sampling_day', 'enable_sampling_group')
+    list_display = ('id', 'sampling_point', 'first_hour_sampling', 'number_sampling_day', 'enable_sampling_group')
 
 
 class SamplingProcessAdmin(admin.ModelAdmin):

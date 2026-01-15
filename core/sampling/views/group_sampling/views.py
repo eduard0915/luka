@@ -140,7 +140,7 @@ class SamplingGroupListView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
                     item = {
                         'id': group.id,
                         'sampling_point': str(group.sampling_point),
-                        'hour_sampling': group.hour_sampling.strftime('%H:%M'),
+                        'first_hour_sampling': group.first_hour_sampling.strftime('%H:%M'),
                         'number_sampling_day': group.number_sampling_day,
                         'enable_sampling_group': group.enable_sampling_group,
                     }
