@@ -3,11 +3,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
+from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, UpdateView, ListView, DetailView
 
 from core.mixins import ValidatePermissionRequiredMixin
-from core.sampling.forms import SamplingProcessForm
+from core.sampling.forms import SamplingProcessForm, SamplingProcessImageForm, SamplingProcessConfirmedForm
 from core.sampling.models import SamplingProcess
 from core.utils import format_form_errors
 
@@ -49,7 +50,7 @@ class SamplingProcessCreateView(LoginRequiredMixin, ValidatePermissionRequiredMi
         context['action'] = 'add'
         context['entity'] = 'Creación de Muestreo'
         context['title'] = 'Creación de Muestreo'
-        context['div'] = '10'
+        context['div'] = '12'
         context['list_url'] = self.success_url
         return context
 
@@ -111,18 +112,42 @@ class SamplingProcessListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
         try:
             action = request.POST['action']
             if action == 'searchdata':
-                data = []
-                processes = SamplingProcess.objects.all().order_by('-date_sampling')
-                for p in processes:
-                    item = {
-                        'id': p.id,
-                        'group_sampling': str(p.group_sampling),
-                        'date_sampling_scheduled': p.date_sampling_scheduled.strftime('%Y-%m-%d %H:%M'),
-                        'date_sampling': p.date_sampling.strftime('%Y-%m-%d %H:%M'),
-                        'number_sample': p.number_sample,
-                        'status_sampling': p.status_sampling,
-                    }
-                    data.append(item)
+                data = list(SamplingProcess.objects.select_related(
+                    'group_sampling',
+                    'point_sampling',
+                    'sampling_created_by'
+                ).values(
+                    'id',
+                    'group_sampling',
+                    'group_sampling__sampling_point__sample_point_code',
+                    'group_sampling__sampling_point__sample_point_name',
+                    'date_sampling_scheduled',
+                    'sampling_created_by__first_name',
+                    'sampling_created_by__last_name',
+                    'sampling_created_by__cargo',
+                    'number_sample',
+                    'point_sampling',
+                    'point_sampling__sample_point_code',
+                    'point_sampling__sample_point_name',
+                    'status_sampling'
+                ).order_by('-date_sampling'))
+
+                # Formatea de campos
+                for item in data:
+                    if item['date_sampling_scheduled']:
+                        item['date_sampling_scheduled'] = item['date_sampling_scheduled'].strftime('%Y-%m-%d %H:%M')
+                    first_name = item.get('sampling_created_by__first_name', '') or ''
+                    last_name = item.get('sampling_created_by__last_name', '') or ''
+                    cargo = item.get('sampling_created_by__cargo', '') or ''
+                    item['sampling_created_by__get_full_name'] = f"{first_name} {last_name}, {cargo}".strip()
+                    if item['group_sampling']:
+                        code_point = item.get('group_sampling__sampling_point__sample_point_code', '') or ''
+                        name_point = item.get('group_sampling__sampling_point__sample_point_name', '') or ''
+                        item['group_sampling'] = f'{code_point} - {name_point}'.strip()
+                    else:
+                        code_point = item.get('point_sampling__sample_point_code', '') or ''
+                        name_point = item.get('point_sampling__sample_point_name', '') or ''
+                        item['point_sampling'] = f'{code_point} - {name_point}'.strip()
                 return JsonResponse(data, safe=False)
             else:
                 data['error'] = 'Ha ocurrido un error'
@@ -155,4 +180,71 @@ class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMi
         context['entity'] = self.object
         context['icon'] = 'bi bi-file-earmark-ruled'
         context['back'] = reverse_lazy('sampling:list_sampling_process')
+        return context
+
+
+# Actualización de Foto de la Muestra
+class SamplingProcessImageUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    model = SamplingProcess
+    form_class = SamplingProcessImageForm
+    template_name = 'process_sampling/update_image_sample.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            form = self.get_form()
+            if form.is_valid():
+                form.save()
+                messages.success(request, f'Foto de la muestra actualizada satisfactoriamente!')
+            else:
+                error_messages = format_form_errors(form)
+                messages.error(request, f'Por favor corrija los errores: {error_messages}')
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Actualizar Foto de la Muestra'
+        context['action'] = 'edit'
+        return context
+
+
+# Confirmación de la Muestra
+class SamplingProcessConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    model = SamplingProcess
+    form_class = SamplingProcessConfirmedForm
+    template_name = 'process_sampling/update_image_sample.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            form = self.get_form()
+            if form.is_valid():
+                form.save()
+                messages.success(request, f'Toma de Muestra Confirmada satisfactoriamente!')
+            else:
+                error_messages = format_form_errors(form)
+                messages.error(request, f'Por favor corrija los errores: {error_messages}')
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Confirmación Toma de Muestra'
+        context['info_form'] = mark_safe('<span class="text-danger me-2">¿Está seguro de confirmar la toma de la muestra?</span>')
+        context['action'] = 'edit'
         return context

@@ -1,40 +1,193 @@
-{% extends 'detail_one.html' %}
+{% extends 'body.html' %}
 {% load static %}
 
-{% block content_detail %}
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="card card-primary card-outline">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="{{ icon }} me-2"></i>Información del Proceso de Muestreo</h3>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Grupo de Muestreo:</strong> {{ entity.group_sampling }}</p>
-                            <p><strong>Punto de Muestreo:</strong> {{ entity.group_sampling.sampling_point }}</p>
-                            <p><strong>N° de Muestra:</strong> {{ entity.number_sample }}</p>
-                            <p><strong>N° de Lote:</strong> {{ entity.batch_number|default:"N/A" }}</p>
-                            <p><strong>Estado:</strong> {{ entity.status_sampling }}</p>
+{% block head %}
+    {% block head_list %}{% endblock %}
+    <style>
+        .list-container {
+            max-height: 180px; /* Aproximadamente 5 items de ~35px cada uno */
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            position: relative;
+        }
+
+        .list-container.expanded {
+            max-height: 1000px; /* O un valor lo suficientemente grande */
+            transition: max-height 0.5s ease-in;
+        }
+
+        .list-group-item {
+            font-size: 0.875rem;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 p-0">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <b>N° de Muestra</b><br>
+                                    <p>{{ object.number_sample }}</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <b>Punto de Muestreo</b><br>
+                                    <p class="m-0">
+                                        {% if object.group_sampling %}
+                                            {{ object.group_sampling.sampling_point.sample_point_code }} - {{ object.group_sampling.sampling_point.sample_point_name }}
+                                        {% else %}
+                                            {{ object.point_sampling.sample_point_code }} - {{ object.point_sampling.sample_point_name }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div class="col-md-2">
+                                    <b>N° de Lote</b><br>
+                                    <p>{{ object.batch_number|default_if_none:"No Aplica" }}</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <b>Estado</b><br>
+                                    {% if object.status_sampling == 'Programada' %}
+                                        <span class="badge bg-warning text-dark">{{ object.status_sampling }}</span>
+                                    {% elif object.status_sampling == 'Confirmada' %}
+                                        <span class="badge bg-info">{{ object.status_sampling }}</span>
+                                    {% elif object.status_sampling == 'En Proceso' %}
+                                        <span class="badge bg-primary">{{ object.status_sampling }}</span>
+                                    {% elif object.status_sampling == 'Procesada' %}
+                                        <span class="badge bg-success">{{ object.status_sampling }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ object.status_sampling }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-2">
+                                    <b>Automático</b><br>
+                                    {% if object.automatic_sampling %}
+                                        <span class="badge bg-info">Sí</span>
+                                    {% else %}
+                                        <span class="badge bg-dark">No</span>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <p><strong>Fecha Programada:</strong> {{ entity.date_sampling_scheduled|date:"Y-m-d H:i" }}</p>
-                            <p><strong>Fecha Realizada:</strong> {{ entity.date_sampling|date:"Y-m-d H:i" }}</p>
-                            <p><strong>Muestreo Automático:</strong> {% if entity.automatic_sampling %}Sí{% else %}No{% endif %}</p>
-                            <p><strong>Realizado por:</strong> {{ entity.sampling_created_by|default:"N/A" }}</p>
-                            <p><strong>Confirmado por:</strong> {{ entity.sampling_confirmed_by|default:"N/A" }}</p>
+
+                        <div class="row mt-4">
+                            <!-- Información de Tiempos -->
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title mb-3">
+                                            <i class="bi bi-clock me-2"></i> Programación y Registro
+                                        </h5>
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                <span>Fecha Programada</span>
+                                                <span class="text-muted">{{ object.date_sampling_scheduled|date:"Y-m-d H:i" }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                <span>Fecha Realizada</span>
+                                                <span class="text-muted">{{ object.date_sampling|date:"Y-m-d H:i"|default:"Pendiente" }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Responsables -->
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title mb-3">
+                                            <i class="bi bi-person-check me-2"></i> Responsables
+                                        </h5>
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                <span>Realizado por</span>
+                                                <span class="text-muted">{{ object.sampling_created_by.get_full_name|default:"N/A" }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                <span>Confirmado por</span>
+                                                <span class="text-muted">{{ object.sampling_confirmed_by.get_full_name|default:"Pendiente" }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Foto de la Muestra -->
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <h5 class="card-title mb-0">
+                                                <i class="bi bi-camera me-2"></i> Foto de la Muestra
+                                            </h5>
+                                            <a href="javascript:void(0);"
+                                               onclick="open_modal('{% url 'sampling:update_image_sample' object.id %}')"
+                                               class="btn btn-primary btn-sm">
+                                                <i class="bi bi-plus-square m-0"></i>
+                                            </a>
+                                        </div>
+                                        {% if object.image_sample %}
+                                            <a href="{{ object.image_sample.url }}" target="_blank">
+                                                <img src="{{ object.image_sample.url }}" class="img-fluid rounded shadow-sm" style="max-height: 120px;" alt="Foto de la muestra">
+                                            </a>
+                                        {% else %}
+                                            <div class="py-4 text-muted">
+                                                <i class="bi bi-image" style="font-size: 2rem;"></i>
+                                                <p class="mb-0">Sin imagen</p>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    {% if entity.image_sample %}
-                    <div class="row mt-3">
-                        <div class="col-12 text-center">
-                            <p><strong>Foto de la Muestra:</strong></p>
-                            <img src="{{ entity.image_sample.url }}" class="img-fluid rounded shadow-sm" style="max-height: 400px;" alt="Foto de la muestra">
-                        </div>
+
+                    <div class="card-footer d-flex justify-content-end">
+                        <a href="{{ back }}" class="btn btn-outline-secondary me-2">
+                            <i class="bi bi-arrow-left me-1"></i> Volver al listado
+                        </a>
+                        <a href="{% url 'sampling:update_sampling_process' object.id %}" class="btn btn-primary">
+                            <i class="bi bi-pencil-square me-1"></i> Editar Muestreo
+                        </a>
                     </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    </div>
+{% endblock %}
+
+{% block scripts_detail %}
+    {{ block.super }}
+    <script>
+        function open_modal(url) {
+            $('#myModal').load(url, function () {
+                var modalElement = document.getElementById('myModal');
+                var modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+                modal.show();
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleButtons = document.querySelectorAll('.toggle-expand');
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const targetId = this.getAttribute('data-target');
+                    const container = document.getElementById(targetId);
+                    if (container.classList.contains('expanded')) {
+                        container.classList.remove('expanded');
+                        this.textContent = 'Ver más';
+                    } else {
+                        container.classList.add('expanded');
+                        this.textContent = 'Ver menos';
+                    }
+                });
+            });
+        });
+    </script>
 {% endblock %}

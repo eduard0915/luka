@@ -70,6 +70,10 @@
         <script src="{% static 'form_sampling_group.js' %}"></script>
     {% endif %}
 
+    {% if entity == 'Creación de Muestreo' or entity == 'Edición de Muestreo' %}
+        <script src="{% static 'form_sampling_process.js' %}"></script>
+    {% endif %}
+
     <script type="application/javascript">
         // ========== INICIALIZACIÓN DE DATE Y DATETIME PICKERS ==========
 
