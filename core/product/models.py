@@ -98,7 +98,7 @@ class SamplePoint(BaseModel):
     sequence = models.SmallIntegerField(verbose_name='Secuencia')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name='Producto')
     specification = models.ManyToManyField(SpecificationProduct, verbose_name='Especificaciones - Metodos')
-    sample_type = models.CharField(max_length=30, verbose_name='Tipo de Muestra', default='Matriz')
+    sample_type = models.CharField(max_length=30, verbose_name='Tipo de Muestra', default='En Proceso')
     periodicity = models.CharField(max_length=10, verbose_name='Periodicidad', default='Diario')
     enable_point = models.BooleanField(default=True, verbose_name='Habilitado')
 

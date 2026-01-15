@@ -60,10 +60,12 @@ class SamplingGroup(BaseModel):
         return super(SamplingGroup, self).save(*args, **kwargs)
 
 
-# Grupos de Muestreo
+# Muestreo
 class SamplingProcess(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    group_sampling = models.ForeignKey(SamplingGroup, verbose_name='Grupo de Muestreo', on_delete=models.CASCADE)
+    group_sampling = models.ForeignKey(SamplingGroup, verbose_name='Grupo de Muestreo', on_delete=models.CASCADE, null=True, blank=True)
+    point_sampling = models.ForeignKey(SamplePoint, verbose_name='Punto de Muestreo', on_delete=models.CASCADE, null=True, blank=True)
+    type_sampling = models.CharField(verbose_name='Tipo de Muestreo', max_length=30)
     date_sampling_scheduled = models.DateTimeField(verbose_name='Programación de Muestreo')
     date_sampling = models.DateTimeField(verbose_name='Fecha y Hora de Muestreo', null=True, blank=True)
     number_sample = models.CharField(verbose_name='N° de Muestra', max_length=25)
@@ -100,21 +102,40 @@ class SamplingProcess(BaseModel):
         today_str = today.strftime('%Y%m%d')
 
         # Obtener el código del punto de muestreo
-        sufix_sample = self.group_sampling.sampling_point.sample_point_code
+        if self.group_sampling:
+            sufix_sample = self.group_sampling.sampling_point.sample_point_code
+            sampling_point = self.group_sampling.sampling_point
+        elif self.point_sampling:
+            sufix_sample = self.point_sampling.sample_point_code
+            sampling_point = self.point_sampling
+        else:
+            raise ValueError("Debe especificar Grupo de Muestreo o Punto de Muestreo para generar el código de la muestra")
 
         with transaction.atomic():
+            # Buscar el último registro del día para el mismo punto de muestreo
             last_sample = SamplingProcess.objects.filter(
-                group_sampling__sampling_point=self.group_sampling.sampling_point,
                 date_creation__date=today
             ).select_for_update().order_by('-date_creation').first()
 
-            if not last_sample:
+            # Filtrar por punto de muestreo según el caso
+            if last_sample:
+                # Verificar que sea del mismo punto de muestreo
+                last_sample_point = None
+                if last_sample.group_sampling:
+                    last_sample_point = last_sample.group_sampling.sampling_point
+                elif last_sample.sampling_point:
+                    last_sample_point = last_sample.sampling_point
+
+                # Si no es del mismo punto o no hay muestra previa, empezar desde 1
+                if not last_sample_point or last_sample_point.id != sampling_point.id:
+                    return f'{sufix_sample}-{today_str}-1'
+
+                # Extraer el número secuencial del código existente
+                code_parts = last_sample.number_sample.split('-')
+                current_number = int(code_parts[-1])
+                new_number = current_number + 1
+
+                return f'{sufix_sample}-{today_str}-{new_number}'
+            else:
                 # Primer registro del día
                 return f'{sufix_sample}-{today_str}-1'
-
-            # Extraer el número secuencial del código existente
-            code_parts = last_sample.number_sample.split('-')
-            current_number = int(code_parts[-1])
-            new_number = current_number + 1
-
-            return f'{sufix_sample}-{today_str}-{new_number}'
