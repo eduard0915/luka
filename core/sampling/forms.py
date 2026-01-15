@@ -1,5 +1,5 @@
 from crum import get_current_user
-from django.forms import ModelForm, TextInput, Select, TimeInput, CheckboxInput, DateTimeInput, FileInput
+from django.forms import ModelForm, TextInput, Select, TimeInput, DateTimeInput
 
 from core.product.models import SamplePoint
 from core.sampling.models import SamplingGroup, SamplingProcess
@@ -50,9 +50,8 @@ class SamplingProcessForm(ModelForm):
             form.field.widget.attrs['autocomplete'] = 'off'
 
         col_classes = {
-            'group_sampling': 'col-md-6',
-            'date_sampling_scheduled': 'col-md-3',
-            'image_sample': 'col-md-6',
+            'group_sampling': 'col-md-5',
+            'date_sampling_scheduled': 'col-md-4'
         }
 
         for field_name, field in self.fields.items():
@@ -60,14 +59,11 @@ class SamplingProcessForm(ModelForm):
 
     class Meta:
         model = SamplingProcess
-        fields = ['group_sampling', 'date_sampling_scheduled', 'image_sample', 'batch_number']
+        fields = ['group_sampling', 'date_sampling_scheduled', 'batch_number']
         widgets = {
             'group_sampling': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
-            'date_sampling_scheduled': DateTimeInput(format='%Y-%m-%dT%H:%M', attrs={'class': 'form-control', 'type': 'datetime-local'}),
-            'number_sample': TextInput(attrs={'class': 'form-control', 'readonly': True}),
-            'sampling_created_by': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+            'date_sampling_scheduled': DateTimeInput(format='%Y-%m-%d %H:%M', attrs={'class': 'form-control', 'type': 'text', 'data-datepicker': '1', 'data-datetime': '1', 'placeholder': 'yyyy-mm-dd HH:MM'}),
             'batch_number': TextInput(attrs={'class': 'form-control'}),
-            'image_sample': FileInput(attrs={'class': 'form-control'}),
         }
 
     def save(self, commit=True):
@@ -78,6 +74,7 @@ class SamplingProcessForm(ModelForm):
             if form.is_valid():
                 data = form.save(commit=False)
                 data.sampling_created_by_id = user.id
+                data.automatic_sampling = False
                 data.save()
             else:
                 data['error'] = form.errors

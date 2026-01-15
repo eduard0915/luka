@@ -9,6 +9,7 @@ from django.views.generic import CreateView, UpdateView, ListView, DetailView
 from core.mixins import ValidatePermissionRequiredMixin
 from core.sampling.forms import SamplingProcessForm
 from core.sampling.models import SamplingProcess
+from core.utils import format_form_errors
 
 
 # Creación de Proceso de Muestreo
@@ -35,7 +36,8 @@ class SamplingProcessCreateView(LoginRequiredMixin, ValidatePermissionRequiredMi
                     form.save()
                     messages.success(request, f'Proceso de Muestreo creado satisfactoriamente!')
                 else:
-                    messages.error(request, 'Por favor corrija los errores: {}'.format(form.errors.as_json()))
+                    error_messages = format_form_errors(form)
+                    messages.error(request, f'Por favor corrija los errores: {error_messages}')
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -76,7 +78,8 @@ class SamplingProcessUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMi
                     form.save()
                     messages.success(request, f'Proceso de Muestreo editado satisfactoriamente!')
                 else:
-                    messages.error(request, 'Por favor corrija los errores: {}'.format(form.errors.as_json()))
+                    error_messages = format_form_errors(form)
+                    messages.error(request, f'Por favor corrija los errores: {error_messages}')
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -129,9 +132,9 @@ class SamplingProcessListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Procesos de Muestreo'
+        context['title'] = 'Muestreos'
         context['create_url'] = reverse_lazy('sampling:create_sampling_process')
-        context['entity'] = 'Procesos de Muestreo'
+        context['entity'] = 'Muestreos'
         context['div'] = '12'
         context['icon'] = 'fa-solid fa-vials'
         return context
