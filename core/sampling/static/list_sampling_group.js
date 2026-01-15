@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             columns: [
                 {'data': 'sampling_point'},
-                {'data': 'hour_sampling'},
+                {'data': 'first_hour_sampling'},
                 {'data': 'number_sampling_day'},
                 {'data': 'enable_sampling_group'},
                 {'data': 'id'}

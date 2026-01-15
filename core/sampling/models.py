@@ -38,7 +38,7 @@ def code_sample_generator():
 class SamplingGroup(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     sampling_point = models.ForeignKey(SamplePoint, verbose_name='Punto de Muestreo', on_delete=models.CASCADE)
-    hour_sampling = models.TimeField(verbose_name='Hora del Primer Muestreo', default='07:00:00')
+    first_hour_sampling = models.TimeField(verbose_name='Hora del Primer Muestreo', default='07:00:00')
     number_sampling_day = models.PositiveSmallIntegerField(verbose_name='Muestras por Día')
     enable_sampling_group = models.BooleanField(verbose_name='Habilitado', default=True)
 
