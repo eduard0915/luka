@@ -65,7 +65,7 @@ class SamplingProcess(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     group_sampling = models.ForeignKey(SamplingGroup, verbose_name='Grupo de Muestreo', on_delete=models.CASCADE)
     date_sampling_scheduled = models.DateTimeField(verbose_name='Programación de Muestreo')
-    date_sampling = models.DateTimeField(verbose_name='Fecha y Hora de Muestreo')
+    date_sampling = models.DateTimeField(verbose_name='Fecha y Hora de Muestreo', null=True, blank=True)
     number_sample = models.CharField(verbose_name='N° de Muestra', max_length=25)
     automatic_sampling = models.BooleanField(verbose_name='Muestreo Automático', default=True)
     sampling_confirmed_by = models.ForeignKey(User, verbose_name='Confirmado por', on_delete=models.CASCADE, related_name='sampling_confirmed_by', null=True, blank=True)

@@ -77,7 +77,8 @@ class SamplePointUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
                     form.save()
                     messages.success(request, f'Punto de Muestreo editado satisfactoriamente!')
                 else:
-                    messages.error(request, 'Por favor corrija los errores: {}'.format(form.errors.as_json()))
+                    error_messages = format_form_errors(form)
+                    messages.error(request, f'Por favor corrija los errores: {error_messages}')
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:

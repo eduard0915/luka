@@ -11,6 +11,7 @@ from core.mixins import ValidatePermissionRequiredMixin
 from core.product.models import SamplePoint
 from core.sampling.forms import SamplingGroupForm
 from core.sampling.models import SamplingGroup
+from core.utils import format_form_errors
 
 
 # Creación de Grupos de Muestreo
@@ -37,7 +38,8 @@ class SamplingGroupCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixi
                     form.save()
                     messages.success(request, f'Grupo de Muestreo creado satisfactoriamente!')
                 else:
-                    messages.error(request, 'Por favor corrija los errores: {}'.format(form.errors.as_json()))
+                    error_messages = format_form_errors(form)
+                    messages.error(request, f'Por favor corrija los errores: {error_messages}')
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -78,7 +80,8 @@ class SamplingGroupUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixi
                     form.save()
                     messages.success(request, f'Grupo de Muestreo editado satisfactoriamente!')
                 else:
-                    messages.error(request, 'Por favor corrija los errores: {}'.format(form.errors.as_json()))
+                    error_messages = format_form_errors(form)
+                    messages.error(request, f'Por favor corrija los errores: {error_messages}')
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
