@@ -59,6 +59,36 @@ class AnalyticalMethodProduct(BaseModel):
         return super(AnalyticalMethodProduct, self).save(*args, **kwargs)
 
 
+# Especificaciones de Productos
+class SpecificationProduct(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    product = models.ForeignKey(Product, verbose_name='Producto', on_delete=models.CASCADE)
+    type_test = models.CharField(max_length=15, verbose_name='Tipo de Ensayo')
+    test_prod = models.CharField(max_length=150, verbose_name='Ensayo')
+    features_prod = models.CharField(max_length=250, verbose_name='Descripción', null=True, blank=True)
+    lower_limit_prod = models.FloatField(verbose_name='Limite Inferior', null=True, blank=True)
+    upper_limit_prod = models.FloatField(verbose_name='Limite Superior', null=True, blank=True)
+    method_test = models.ForeignKey(AnalyticalMethodProduct, verbose_name='Método', on_delete=models.CASCADE)
+    unit_measure = models.CharField(max_length=10, verbose_name='Unidad de Medida', null=True, blank=True)
+
+    def __str__(self):
+        return str(self.test_prod) + ' - ' + str(self.method_test.analytical_method)
+
+    class Meta:
+        verbose_name = 'SpecificationProduct'
+        verbose_name_plural = 'SpecificationProducts'
+        db_table = 'SpecificationProduct'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(SpecificationProduct, self).save(*args, **kwargs)
+
+
 # Puntos de Muestreo
 class SamplePoint(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
@@ -67,8 +97,9 @@ class SamplePoint(BaseModel):
     sample_frequency = models.SmallIntegerField(verbose_name='Frecuencia (Horas)', null=True, blank=True)
     sequence = models.SmallIntegerField(verbose_name='Secuencia')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name='Producto')
-    method_analytical = models.ManyToManyField(AnalyticalMethodProduct, verbose_name='Metodos Analíticos')
+    specification = models.ManyToManyField(SpecificationProduct, verbose_name='Especificaciones - Metodos')
     sample_type = models.CharField(max_length=30, verbose_name='Tipo de Muestra', default='Matriz')
+    periodicity = models.CharField(max_length=10, verbose_name='Periodicidad', default='Diario')
     enable_point = models.BooleanField(default=True, verbose_name='Habilitado')
 
     def __str__(self):
@@ -87,33 +118,3 @@ class SamplePoint(BaseModel):
             else:
                 self.user_updated = user
         return super(SamplePoint, self).save(*args, **kwargs)
-
-
-# Especificaciones de Productos
-class SpecificationProduct(BaseModel):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    product = models.ForeignKey(Product, verbose_name='Producto', on_delete=models.CASCADE)
-    type_test = models.CharField(max_length=15, verbose_name='Tipo de Ensayo')
-    test_prod = models.CharField(max_length=150, verbose_name='Ensayo')
-    features_prod = models.CharField(max_length=250, verbose_name='Descripción', null=True, blank=True)
-    lower_limit_prod = models.FloatField(verbose_name='Limite Inferior', null=True, blank=True)
-    upper_limit_prod = models.FloatField(verbose_name='Limite Superior', null=True, blank=True)
-    method_test = models.ForeignKey(AnalyticalMethodProduct, verbose_name='Método', on_delete=models.CASCADE)
-    unit_measure = models.CharField(max_length=10, verbose_name='Unidad de Medida', null=True, blank=True)
-
-    def __str__(self):
-        return str(self.test_prod)
-
-    class Meta:
-        verbose_name = 'SpecificationProduct'
-        verbose_name_plural = 'SpecificationProducts'
-        db_table = 'SpecificationProduct'
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
-        user = get_current_user()
-        if user:
-            if not self.user_creation:
-                self.user_creation = user
-            else:
-                self.user_updated = user
-        return super(SpecificationProduct, self).save(*args, **kwargs)

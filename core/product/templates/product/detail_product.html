@@ -139,6 +139,7 @@
                             <th class="text-center">Secuencia</th>
                             <th class="text-center">Código</th>
                             <th class="text-center">Descripción</th>
+                            <th class="text-center">Periodicidad</th>
                             <th class="text-center">Frecuencia (Horas)</th>
                             <th class="text-center">Estado</th>
                             <th class="text-center">Acciones</th>
@@ -150,13 +151,8 @@
                                 <td class="text-center">{{ sample.sequence }}</td>
                                 <td class="text-center">{{ sample.sample_point_code }}</td>
                                 <td class="text-center">{{ sample.sample_point_name }}</td>
-                                <td class="text-center">
-                                    {% if sample.sample_frequency %}
-                                        {{ sample.sample_frequency }}
-                                    {% else %}
-                                        No aplica
-                                    {% endif %}
-                                </td>
+                                <td class="text-center">{{ sample.periodicity }}</td>
+                                <td class="text-center">{{ sample.sample_frequency|default_if_none:'No aplica' }}</td>
                                 <td class="text-center">
                                     {% if sample.enable_point %}
                                         <span class="me-1 badge bg-primary">Activo</span>

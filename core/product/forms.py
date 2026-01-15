@@ -1,4 +1,5 @@
 from crum import get_current_user
+from django.core.exceptions import ValidationError
 from django.forms import ModelForm, TextInput, Select, SelectMultiple
 
 from core.analytical_method.models import AnalyticalMethod
@@ -10,8 +11,14 @@ FREQUENCY = [
     (4, '4'),
     (6, '6'),
     (8, '8'),
-    (24, 'Diario'),
-    (720, 'Mensual'),
+    (12, '12'),
+    (24, '24'),
+]
+
+PERIODICITY = [
+    ('Diaria', 'Diaria'),
+    ('Semanal', 'Semanal'),
+    ('Mensual', 'Mensual'),
 ]
 
 UM = [
@@ -66,29 +73,43 @@ class SamplePointForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.product = kwargs.pop('product')
         super().__init__(*args, **kwargs)
-        self.fields['method_analytical'].queryset = AnalyticalMethodProduct.objects.select_related('product').filter(product=self.product)
+        self.fields['specification'].queryset = SpecificationProduct.objects.select_related('product').filter(product=self.product)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
         col_classes = {
-            'method_analytical': 'col-md-12',
-            'sample_type': 'col-md-6',
+            'specification': 'col-md-12',
+            'sample_type': 'col-md-5',
             'sequence': 'col-md-3',
         }
 
         for field_name, field in self.fields.items():
             field.col_class = col_classes.get(field_name, 'col-md-4')
 
+    def clean(self):
+        cleaned_data = super().clean()
+        periodicity = cleaned_data.get('periodicity')
+        sample_frequency = cleaned_data.get('sample_frequency')
+
+        # Validar que si la periodicidad es Diaria, la frecuencia no puede estar vacía
+        if periodicity == 'Diaria' and (sample_frequency is None or sample_frequency == ''):
+            raise ValidationError({
+                'sample_frequency': 'La frecuencia es obligatoria cuando la periodicidad es Diaria.'
+            })
+
+        return cleaned_data
+
     class Meta:
         model = SamplePoint
-        fields = ['sample_point_code', 'sample_point_name', 'sample_frequency', 'sequence', 'sample_type', 'method_analytical']
+        fields = ['sample_point_code', 'sample_point_name', 'periodicity', 'sequence', 'sample_type', 'sample_frequency', 'specification']
         widgets = {
             'sample_point_code': TextInput(attrs={'class': 'form-control', 'required': True}),
             'sample_point_name': TextInput(attrs={'class': 'form-control', 'required': True}),
             'sample_frequency': Select(attrs={'class': 'form-control'}, choices=FREQUENCY),
             'sample_type': Select(attrs={'class': 'form-control'}, choices=TYPE_SAMPLE),
+            'periodicity': Select(attrs={'class': 'form-control'}, choices=PERIODICITY),
             'sequence': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'method_analytical': SelectMultiple(attrs={'class': 'form-control', 'required': True})
+            'specification': SelectMultiple(attrs={'class': 'form-control', 'required': True})
         }
 
     def save(self, commit=True):
@@ -111,12 +132,12 @@ class SamplePointUpdateForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.sample = kwargs.pop('sample')
         super().__init__(*args, **kwargs)
-        self.fields['method_analytical'].queryset = AnalyticalMethodProduct.objects.filter(product=self.sample.product)
+        self.fields['specification'].queryset = SpecificationProduct.objects.filter(product=self.sample.product)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
         col_classes = {
-            'method_analytical': 'col-md-12',
+            'specification': 'col-md-12',
             'sample_type': 'col-md-6',
             'sequence': 'col-md-3',
         }
@@ -126,14 +147,14 @@ class SamplePointUpdateForm(ModelForm):
 
     class Meta:
         model = SamplePoint
-        fields = ['sample_point_code', 'sample_point_name', 'sample_frequency', 'sequence', 'sample_type', 'method_analytical']
+        fields = ['sample_point_code', 'sample_point_name', 'sample_frequency', 'sequence', 'sample_type', 'specification']
         widgets = {
             'sample_point_code': TextInput(attrs={'class': 'form-control', 'required': True}),
             'sample_point_name': TextInput(attrs={'class': 'form-control', 'required': True}),
             'sample_frequency': Select(attrs={'class': 'form-control'}, choices=FREQUENCY),
             'sample_type': Select(attrs={'class': 'form-control'}, choices=TYPE_SAMPLE),
             'sequence': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'method_analytical': SelectMultiple(attrs={'class': 'form-control', 'required': True}),
+            'specification': SelectMultiple(attrs={'class': 'form-control', 'required': True}),
         }
 
     def save(self, commit=True):

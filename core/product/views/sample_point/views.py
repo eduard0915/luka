@@ -9,6 +9,7 @@ from core.company.models import Site
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.forms import SamplePointForm, SamplePointUpdateForm
 from core.product.models import SamplePoint, Product
+from core.utils import format_form_errors
 
 
 # Creación de Puntos de Muestreo
@@ -33,7 +34,8 @@ class SamplePointCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
                     form.save()
                     messages.success(request, f'Punto de Muestreo creado satisfactoriamente!')
                 else:
-                    messages.error(request, 'Por favor corrija los errores: {}'.format(form.errors.as_json()))
+                    error_messages = format_form_errors(form)
+                    messages.error(request, f'Por favor corrija los errores: {error_messages}')
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
