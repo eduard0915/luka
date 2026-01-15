@@ -54,9 +54,11 @@
     {% block scripts_detail %}
 
         {% if entity == 'Agregar Especificación' or entity == 'Editar Especificación' %}
-
             <script src="{% static 'type_test_toggle.js' %}"></script>
+        {% endif %}
 
+        {% if entity == 'Creación de Punto de Muestreo' or entity == 'Edición de Punto de Muestreo' %}
+            <script src="{% static 'periodicity_toggle.js' %}"></script>
         {% endif %}
 
         <script type="application/javascript">
