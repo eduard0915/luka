@@ -1,5 +1,8 @@
 {% extends 'body.html' %}
 {% load static %}
+{% load widget_tweaks %}
+{% load humanize %}
+{% load l10n %}
 
 {% block head %}
     {% block head_list %}{% endblock %}
@@ -38,9 +41,11 @@
                                     <b>Punto de Muestreo</b><br>
                                     <p class="m-0">
                                         {% if object.group_sampling %}
-                                            {{ object.group_sampling.sampling_point.sample_point_code }} - {{ object.group_sampling.sampling_point.sample_point_name }}
+                                            {{ object.group_sampling.sampling_point.sample_point_code }} -
+                                            {{ object.group_sampling.sampling_point.sample_point_name }}
                                         {% else %}
-                                            {{ object.point_sampling.sample_point_code }} - {{ object.point_sampling.sample_point_name }}
+                                            {{ object.point_sampling.sample_point_code }} -
+                                            {{ object.point_sampling.sample_point_name }}
                                         {% endif %}
                                     </p>
                                 </div>
@@ -132,7 +137,9 @@
                                         </div>
                                         {% if object.image_sample %}
                                             <a href="{{ object.image_sample.url }}" target="_blank">
-                                                <img src="{{ object.image_sample.url }}" class="img-fluid rounded shadow-sm" style="max-height: 120px;" alt="Foto de la muestra">
+                                                <img src="{{ object.image_sample.url }}"
+                                                     class="img-fluid rounded shadow-sm" style="max-height: 120px;"
+                                                     alt="Foto de la muestra">
                                             </a>
                                         {% else %}
                                             <div class="py-4 text-muted">
@@ -144,6 +151,85 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="row mt-2">
+                            <!-- Información de Tiempos -->
+                            <div class="col-lg-8 col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title mb-3">
+                                            <i class="bi bi-clock me-2"></i> Métodos Analíticos y Especificaciones de Calidad
+                                        </h5>
+                                        <div class="table-responsive">
+                                            <table class="table table-hover table-bordered">
+                                                <thead>
+                                                <tr>
+                                                    <th style="width:40%">Ensayo</th>
+                                                    <th style="width:25%">Especificación</th>
+                                                    <th style="width:20%">Método</th>
+                                                    <th style="width:15%">Acciones</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for foo in specifications %}
+                                                    <tr>
+                                                        <td>{{ foo.method_test.analytical_method.description_analytical_method }}</td>
+                                                        <td>{{ foo.lower_limit_prod|default_if_none:"Menor que" }}
+                                                            {{ foo.upper_limit_prod }} {{ foo.unit_measure|default_if_none:" " }}</td>
+                                                        <td>{{ foo.method_test.analytical_method.code_analytical_method }}</td>
+                                                        <td>
+                                                            <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
+                                                               title="Editar">
+                                                                <i class="bi bi-pencil-square text-warning me-2"></i>
+                                                            </a>
+                                                            <a onclick="open_modal('{% url 'user:delete_training' foo.id %}')"
+                                                               title="Eliminar">
+                                                                <i class="bi bi-trash text-danger me-2"></i>
+                                                            </a>
+                                                            {% if foo.training_status == 'Vencido' %}
+                                                                <a onclick="open_modal('{% url 'user:create_update_training' foo.id %}')"
+                                                                   title="Actualizar">
+                                                                    <i class="bi bi-arrow-clockwise text-info me-2"></i>
+                                                                </a>
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                {% empty %}
+                                                    <tr>
+                                                        <td colspan="6" class="text-center">
+                                                            No hay Métodos de Análisis asociados a esta Muestra.
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Responsables -->
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title mb-3">
+                                            <i class="bi bi-person-check me-2"></i> Responsables
+                                        </h5>
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                <span>Realizado por</span>
+                                                <span class="text-muted">{{ object.sampling_created_by.get_full_name|default:"N/A" }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                <span>Confirmado por</span>
+                                                <span class="text-muted">{{ object.sampling_confirmed_by.get_full_name|default:"Pendiente" }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                     <div class="card-footer d-flex justify-content-end">
@@ -173,6 +259,7 @@
                 modal.show();
             });
         }
+
         document.addEventListener('DOMContentLoaded', function () {
             const toggleButtons = document.querySelectorAll('.toggle-expand');
             toggleButtons.forEach(button => {
