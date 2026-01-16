@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, UpdateView, ListView, DetailView
 
 from core.mixins import ValidatePermissionRequiredMixin
+from core.product.models import SpecificationProduct
 from core.sampling.forms import SamplingProcessForm, SamplingProcessImageForm, SamplingProcessConfirmedForm
 from core.sampling.models import SamplingProcess
 from core.utils import format_form_errors
@@ -178,6 +179,19 @@ class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMi
         context = super().get_context_data(**kwargs)
         context['title'] = 'Detalle de Proceso de Muestreo'
         context['entity'] = self.object
+
+        # Obtener el punto de muestreo
+        sampling_point = (
+            self.object.group_sampling.sampling_point if self.object.group_sampling
+            else self.object.point_sampling
+        )
+
+        # Obtener especificaciones desde el ManyRelatedManager
+        context['specifications'] = (
+            sampling_point.specification.select_related('product', 'method_test').order_by('type_test', 'test_prod')
+            if sampling_point else SpecificationProduct.objects.none()
+        )
+
         context['icon'] = 'bi bi-file-earmark-ruled'
         context['back'] = reverse_lazy('sampling:list_sampling_process')
         return context
