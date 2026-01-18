@@ -4,8 +4,10 @@ from crum import get_current_user
 from django.db import models, transaction
 from django.utils import timezone
 
+from core.analytical_method.models import AnalyticalMethod
 from core.models import BaseModel
 from core.product.models import SamplePoint
+from core.solution.models import SolutionStd
 from core.user.models import User
 
 
@@ -139,3 +141,61 @@ class SamplingProcess(BaseModel):
             else:
                 # Primer registro del día
                 return f'{sufix_sample}-{today_str}-1'
+
+
+# Análisis de la Muestra
+class SamplingAnalysis(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    sampling_process = models.ForeignKey(SamplingProcess, verbose_name='Muestra', on_delete=models.CASCADE)
+    analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE)
+    average_concentration = models.FloatField(verbose_name='Resultado', null=True, blank=True)
+    standard_deviation = models.FloatField(verbose_name='Desviación Estándar', null=True, blank=True)
+    coefficient_variation = models.FloatField(verbose_name='Coeficiente de Variación', null=True, blank=True)
+    comply = models.CharField(max_length=10, verbose_name='Concepto', null=True, blank=True)
+
+    def __str__(self):
+        return str(self.sampling_process)
+
+    class Meta:
+        verbose_name = 'SamplingAnalysis'
+        verbose_name_plural = 'SamplingsAnalysis'
+        db_table = 'SamplingAnalysis'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(SamplingAnalysis, self).save(*args, **kwargs)
+
+
+# Procesamiento de la muestra
+class SamplingAnalysisProcessing(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    sample_analysis = models.ForeignKey(SamplingAnalysis, verbose_name='Análisis de la Muestra', on_delete=models.CASCADE)
+    standard_solution = models.ForeignKey(SolutionStd, verbose_name='Solución Estándar', on_delete=models.CASCADE)
+    quantity_standard = models.FloatField(verbose_name=' Cantidad de Estándar')
+    quantity_solution = models.FloatField(verbose_name='mL de Solución Muestra Gastados')
+    concentration_sln = models.FloatField(verbose_name='Concentración Sln')
+    analyzed_by = models.ForeignKey(User, verbose_name='Analizado por', on_delete=models.CASCADE)
+    analyzed_date = models.DateField(verbose_name='Fecha de Análisis')
+
+    def __str__(self):
+        return str(self.quantity_standard)
+
+    class Meta:
+        verbose_name = 'SamplingAnalysisProcessing'
+        verbose_name_plural = 'SamplingAnalysisProcessing'
+        db_table = 'SamplingAnalysisProcessing'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(SamplingAnalysisProcessing, self).save(*args, **kwargs)

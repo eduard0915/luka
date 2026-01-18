@@ -20,10 +20,12 @@ urlpatterns = [
     path('process/list/', SamplingProcessListView.as_view(), name='list_sampling_process'),
     path('process/list/scheduled/', SamplingProcessScheduledListView.as_view(), name='list_sampling_process_scheduled'),
     path('process/list/confirmed/', SamplingProcessConfirmedListView.as_view(), name='list_sampling_process_confirmed'),
+    path('process/list/in-process/', SamplingProcessInProcessListView.as_view(), name='list_sampling_process_in_process'),
     path('process/update/<uuid:pk>/', SamplingProcessUpdateView.as_view(), name='update_sampling_process'),
     path('process/detail/<uuid:pk>/', SamplingProcessDetailView.as_view(), name='detail_sampling_process'),
     path('process/update-image/<uuid:pk>/', SamplingProcessImageUpdateView.as_view(), name='update_image_sample'),
     path('process/confirmed/<uuid:pk>/', SamplingProcessConfirmedUpdateView.as_view(), name='confirmed_sampling_process'),
+    path('analysis/detail/<uuid:pk>/', SamplingAnalysisDetailView.as_view(), name='detail_sampling_analysis'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -109,10 +109,15 @@ class ProductListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
             action = request.POST['action']
             if action == 'searchdata':
                 data = []
-                prod = list(Product.objects.values(
-                    'id', 'code_product', 'description_product', 'enable_product', 'version'
-                ).order_by('-date_creation'))
-                return JsonResponse(prod, safe=False)
+                for i in Product.objects.all().order_by('-date_creation'):
+                    data.append({
+                        'id': i.id,
+                        'code_product': i.code_product,
+                        'description_product': i.description_product,
+                        'enable_product': i.enable_product,
+                        'version': i.version,
+                    })
+                return JsonResponse(data, safe=False)
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
@@ -124,7 +129,7 @@ class ProductListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
         context['title'] = 'Productos'
         context['create_url'] = reverse_lazy('product:create_product')
         context['entity'] = 'Productos'
-        context['div'] = '7'
+        context['div'] = '8'
         context['icon'] = 'fa-solid fa-vial-virus'
         return context
 

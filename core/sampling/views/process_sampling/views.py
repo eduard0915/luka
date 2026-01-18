@@ -10,7 +10,7 @@ from django.views.generic import CreateView, UpdateView, ListView, DetailView
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.models import SpecificationProduct
 from core.sampling.forms import SamplingProcessForm, SamplingProcessImageForm, SamplingProcessConfirmedForm
-from core.sampling.models import SamplingProcess
+from core.sampling.models import SamplingProcess, SamplingAnalysis
 from core.utils import format_form_errors
 
 
@@ -130,6 +130,7 @@ class SamplingProcessListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
                     'group_sampling',
                     'group_sampling__sampling_point__sample_point_code',
                     'group_sampling__sampling_point__sample_point_name',
+                    'group_sampling__sampling_point__product__description_product',
                     'date_sampling_scheduled',
                     'sampling_created_by__first_name',
                     'sampling_created_by__last_name',
@@ -138,6 +139,7 @@ class SamplingProcessListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
                     'point_sampling',
                     'point_sampling__sample_point_code',
                     'point_sampling__sample_point_name',
+                    'point_sampling__product__description_product',
                     'status_sampling'
                 ).order_by('-date_sampling'))
 
@@ -152,11 +154,13 @@ class SamplingProcessListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
                     if item['group_sampling']:
                         code_point = item.get('group_sampling__sampling_point__sample_point_code', '') or ''
                         name_point = item.get('group_sampling__sampling_point__sample_point_name', '') or ''
-                        item['group_sampling'] = f'{code_point} - {name_point}'.strip()
+                        prod = item.get('group_sampling__sampling_point__product__description_product', '') or ''
+                        item['group_sampling'] = f'{code_point} {name_point} - {prod}'.strip()
                     else:
                         code_point = item.get('point_sampling__sample_point_code', '') or ''
                         name_point = item.get('point_sampling__sample_point_name', '') or ''
-                        item['point_sampling'] = f'{code_point} - {name_point}'.strip()
+                        prod = item.get('point_sampling__product__description_product', '') or ''
+                        item['point_sampling'] = f'{code_point} {name_point} - {prod}'.strip()
                 return JsonResponse(data, safe=False)
             else:
                 data['error'] = 'Ha ocurrido un error'
@@ -195,6 +199,16 @@ class SamplingProcessConfirmedListView(SamplingProcessListView):
         return context
 
 
+# Listado de Muestreos en Proceso
+class SamplingProcessInProcessListView(SamplingProcessListView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Muestras En Proceso'
+        context['entity'] = 'Muestras En Proceso'
+        context['status_filter'] = 'En Proceso'
+        return context
+
+
 # Detalle de Proceso de Muestreo
 class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
     model = SamplingProcess
@@ -221,8 +235,27 @@ class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMi
             if sampling_point else SpecificationProduct.objects.none()
         )
 
+        context['sampling_analysis'] = SamplingAnalysis.objects.select_related('sampling_process').filter(
+            sampling_process_id=self.object.id)
+
         context['icon'] = 'bi bi-file-earmark-ruled'
         context['back'] = reverse_lazy('sampling:list_sampling_process')
+        return context
+
+
+# Detalle de Análisis de Muestra
+class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    model = SamplingAnalysis
+    template_name = 'process_sampling/detail_sampling_analysis.html'
+    permission_required = 'reagent.add_reagent'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Procesamiento de Análisis de Muestra'
+        context['entity'] = self.object
+        context['analysis_processing'] = self.object.samplinganalysisprocessing_set.all()
+        context['icon'] = 'bi bi-calculator'
+        context['back'] = reverse_lazy('sampling:detail_sampling_process', kwargs={'pk': self.object.sampling_process.id})
         return context
 
 
