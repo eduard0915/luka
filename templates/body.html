@@ -1,6 +1,68 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block head %}
+<style>
+    .info-card {
+        background: white;
+        border-radius: 8px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .info-card:hover {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .info-card-content {
+        flex: 1;
+    }
+
+    .info-card-title {
+        color: #6c757d;
+        font-size: 16px;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    .info-card-value {
+        color: #212529;
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .info-card-change {
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .info-card-change.positive {
+        color: #28a745;
+    }
+
+    .info-card-change.negative {
+        color: #dc3545;
+    }
+
+    .info-card-icon {
+        background: #2a383e;
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+    }
+</style>
+{% endblock %}
 
 {% block body %}
 
@@ -20,7 +82,6 @@
                 {% block buttons %}
 
                 {% endblock %}
-                {#                <li class="breadcrumb-item"><i class="bi bi-house-door fs-6"></i></li>#}
                 {% if back %}
                     <li class="breadcrumb-item">
                         <a class="btn btn-secondary icon-btn" href="{{ back }}"><i
@@ -57,35 +118,70 @@
         {% block content %}
 
             <div class="row">
+                <!-- Muestras por Recolectar Card -->
                 <div class="col-md-6 col-lg-3">
-                    <div class="widget-small warning coloured-icon"><i class="icon bi bi-people fs-1"></i>
-                        <div class="info">
-                            <h4>Muestras por Recoger</h4>
-                            <p><b>5</b></p>
+                    <div class="info-card">
+                        <div class="info-card-content">
+                            <div class="info-card-title">Muestras por Recolectar</div>
+                            <div class="info-card-value">{{ count_scheduled_sampling }}</div>
+                            <div class="info-card-change positive">
+                                55% <span style="color: #6c757d; font-weight: 400;">por Recoger</span>
+                            </div>
+                        </div>
+                        <div class="info-card-icon">
+                            <a href="{% url 'sampling:list_sampling_process_scheduled' %}" title="Ver Listado">
+                                <i class="bi bi-basket text-white"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
+
+                <!-- Muestras Confirmadas Card -->
                 <div class="col-md-6 col-lg-3">
-                    <div class="widget-small info coloured-icon"><i class="icon bi bi-folder2 fs-1"></i>
-                        <div class="info">
-                            <h4>Muestras Confirmadas</h4>
-                            <p><b>25</b></p>
+                    <div class="info-card">
+                        <div class="info-card-content">
+                            <div class="info-card-title">Muestras Confirmadas</div>
+                            <div class="info-card-value">{{ count_confirmed_sampling }}</div>
+                            <div class="info-card-change positive">
+                                3% <span style="color: #6c757d; font-weight: 400;">por Procesar</span>
+                            </div>
+                        </div>
+                        <div class="info-card-icon">
+                            <a href="{% url 'sampling:list_sampling_process_confirmed' %}" title="Ver Listado">
+                                <i class="bi bi-bag-check text-white"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
+
+                <!-- Ads Views Card -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="info-card">
+                        <div class="info-card-content">
+                            <div class="info-card-title">Muestras en Proceso</div>
+                            <div class="info-card-value">462</div>
+                            <div class="info-card-change negative">
+                                -2% <span style="color: #6c757d; font-weight: 400;">Finalizadas</span>
+                            </div>
+                        </div>
+                        <div class="info-card-icon">
+                            <i class="bi bi-measuring-cup"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sales Card -->
 {#                <div class="col-md-6 col-lg-3">#}
-{#                    <div class="widget-small warning coloured-icon"><i class="icon bi bi-folder2 fs-1"></i>#}
-{#                        <div class="info">#}
-{#                            <h4>Uploades</h4>#}
-{#                            <p><b>10</b></p>#}
+{#                    <div class="info-card">#}
+{#                        <div class="info-card-content">#}
+{#                            <div class="info-card-title">Sales</div>#}
+{#                            <div class="info-card-value">$103,430</div>#}
+{#                            <div class="info-card-change positive">#}
+{#                                +5% <span style="color: #6c757d; font-weight: 400;">than yesterday</span>#}
+{#                            </div>#}
 {#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
-{#                <div class="col-md-6 col-lg-3">#}
-{#                    <div class="widget-small danger coloured-icon"><i class="icon bi bi-star fs-1"></i>#}
-{#                        <div class="info">#}
-{#                            <h4>Stars</h4>#}
-{#                            <p><b>500</b></p>#}
+{#                        <div class="info-card-icon">#}
+{#                            <i class="bi bi-cart"></i>#}
 {#                        </div>#}
 {#                    </div>#}
 {#                </div>#}
@@ -124,3 +220,114 @@
     </body>
 
 {% endblock %}
+
+{#{% extends 'base.html' %}#}
+{#{% load static %}#}
+{##}
+{##}
+{#{% block body %}#}
+{##}
+{#    <body class="app sidebar-mini">#}
+{##}
+{#    {% include 'header.html' %}#}
+{##}
+{#    {% include 'sidebar.html' %}#}
+{##}
+{#    <main class="app-content">#}
+{#        <div class="app-title">#}
+{#            <div>#}
+{#                <h1><i class="{{ icon }}"></i> {{ entity }}</h1>#}
+{#                <p>{{ subentity }}</p>#}
+{#            </div>#}
+{#            <ul class="app-breadcrumb breadcrumb">#}
+{#                {% block buttons %}#}
+{##}
+{#                {% endblock %}#}
+                {#                <li class="breadcrumb-item"><i class="bi bi-house-door fs-6"></i></li>#}
+{#                {% if back %}#}
+{#                    <li class="breadcrumb-item">#}
+{#                        <a class="btn btn-secondary icon-btn" href="{{ back }}"><i#}
+{#                                class="bi bi-skip-backward-fill"></i> Atrás</a>#}
+{#                    </li>#}
+{#                {% endif %}#}
+{#            </ul>#}
+{#        </div>#}
+{##}
+{#        {% block notifications %}#}
+{#            {% if messages %}#}
+{#                {% for message in messages %}#}
+{#                    <div class="bs-component">#}
+{#                        <div id="message" class="alert alert-dismissible alert-{{ message.tags }}">#}
+{#                            <button class="btn-close" type="button" data-bs-dismiss="alert"#}
+{#                                    data-dashlane-label="true"#}
+{#                                    data-dashlane-rid="35c47206400a9024"></button>#}
+{#                            <strong>#}
+{#                                {% if message.tags == 'success' %}#}
+{#                                    Exito!#}
+{#                                {% elif message.tags == 'danger' %}#}
+{#                                    Error!#}
+{#                                {% elif message.tags == 'warning' %}#}
+{#                                    Precaución!#}
+{#                                {% endif %}#}
+{#                            </strong>#}
+{#                            {{ message }}.#}
+{#                        </div>#}
+{#                    </div>#}
+{#                {% endfor %}#}
+{#            {% endif %}#}
+{#        {% endblock %}#}
+{##}
+{#        {% block content %}#}
+{##}
+{#            <div class="row">#}
+{#                <div class="col-md-6 col-lg-3">#}
+{#                    <div class="widget-small warning coloured-icon"><i class="icon bi bi-people fs-1"></i>#}
+{#                        <div class="info">#}
+{#                            <h4>Muestras por Recoger</h4>#}
+{#                            <p><b>5</b></p>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <div class="col-md-6 col-lg-3">#}
+{#                    <div class="widget-small info coloured-icon"><i class="icon bi bi-folder2 fs-1"></i>#}
+{#                        <div class="info">#}
+{#                            <h4>Muestras Confirmadas</h4>#}
+{#                            <p><b>25</b></p>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{#        {% endblock %}#}
+{##}
+{#        <div class="modal" id="modal_template" role="dialog" aria-labelledby="modal" aria-hidden="true"></div>#}
+{##}
+{#    </main>#}
+{##}
+{#    <!-- Essential javascripts for application to work-->#}
+{#    <script src="{% static 'lib/vali-admin/js/jquery-3.7.0.min.js' %}"></script>#}
+{#    <script src="{% static 'lib/vali-admin/js/bootstrap.min.js' %}"></script>#}
+{#    <script src="{% static 'lib/vali-admin/js/main.js' %}"></script>#}
+{#    <!-- Select2 JS -->#}
+{#    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>#}
+{#    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/es.js"></script>#}
+{#    <script type="application/javascript">#}
+{#        function open_modal(url) {#}
+{#            $('#modal_template').load(url, function () {#}
+{#                $(this).modal('show');#}
+{#            });#}
+{#        }#}
+{#    </script>#}
+{##}
+{#    <!-- Page specific javascripts-->#}
+{#    {% block form_javascript %}#}
+{##}
+{#    {% endblock %}#}
+{##}
+{#    {% block scripts_detail %}#}
+{##}
+{#    {% endblock %}#}
+{##}
+{#    </body>#}
+{##}
+{#{% endblock %}#}

@@ -18,6 +18,8 @@ urlpatterns = [
     # Procesos de Muestreo
     path('process/add/', SamplingProcessCreateView.as_view(), name='create_sampling_process'),
     path('process/list/', SamplingProcessListView.as_view(), name='list_sampling_process'),
+    path('process/list/scheduled/', SamplingProcessScheduledListView.as_view(), name='list_sampling_process_scheduled'),
+    path('process/list/confirmed/', SamplingProcessConfirmedListView.as_view(), name='list_sampling_process_confirmed'),
     path('process/update/<uuid:pk>/', SamplingProcessUpdateView.as_view(), name='update_sampling_process'),
     path('process/detail/<uuid:pk>/', SamplingProcessDetailView.as_view(), name='detail_sampling_process'),
     path('process/update-image/<uuid:pk>/', SamplingProcessImageUpdateView.as_view(), name='update_image_sample'),

@@ -12,8 +12,9 @@ document.addEventListener('DOMContentLoaded', function () {
             ajax: {
                 url: window.location.pathname,
                 type: 'POST',
-                data: {
-                    'action': 'searchdata'
+                data: function (d) {
+                    d.action = 'searchdata';
+                    d.status_filter = typeof status_filter !== 'undefined' ? status_filter : '';
                 },
                 dataSrc: ""
             },
@@ -71,9 +72,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     orderable: false,
                     render: function (data, type, row) {
                         let actions = '';
-                        actions += '<a href="/sampling/process/detail/' + row['id'] + '/" type="button" title="Detalle"><i class="bi bi-info-square text-info"></i></a> &nbsp;';
-                        actions += '<a href="/sampling/process/update/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a> &nbsp;';
-                        actions += '<a onclick=open_modal("/sampling/process/confirmed/' + row['id'] + '/") type="button" title="Confirmar Muestra"><i class="bi bi-check-square text-success"></i></a>';
+                        actions += '<a href="/sampling/process/detail/' + row['id'] + '/" type="button" title="Detalle"><i class="bi bi-info-square text-info"></i></a>  &nbsp;';
+                        if (row['status_sampling'] === 'Programada') {
+                            actions += '<a href="/sampling/process/update/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a>  &nbsp;';
+                            actions += '<a onclick=open_modal("/sampling/process/confirmed/' + row['id'] + '/") type="button" title="Confirmar Muestra"><i class="bi bi-check-square text-success"></i></a>';
+                        }
                         return actions;
                     }
                 }

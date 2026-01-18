@@ -113,11 +113,19 @@ class SamplingProcessListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
         try:
             action = request.POST['action']
             if action == 'searchdata':
-                data = list(SamplingProcess.objects.select_related(
+                # Obtener el estado del filtro si existe
+                status_filter = request.POST.get('status_filter', None)
+                
+                qs = SamplingProcess.objects.select_related(
                     'group_sampling',
                     'point_sampling',
                     'sampling_created_by'
-                ).values(
+                )
+                
+                if status_filter:
+                    qs = qs.filter(status_sampling=status_filter)
+
+                data = list(qs.values(
                     'id',
                     'group_sampling',
                     'group_sampling__sampling_point__sample_point_code',
@@ -163,6 +171,27 @@ class SamplingProcessListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
         context['entity'] = 'Muestreos'
         context['div'] = '12'
         context['icon'] = 'fa-solid fa-vials'
+        context['status_filter'] = ''
+        return context
+
+
+# Listado de Muestreos Programados
+class SamplingProcessScheduledListView(SamplingProcessListView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Muestreos Programados'
+        context['entity'] = 'Muestreos Programados'
+        context['status_filter'] = 'Programada'
+        return context
+
+
+# Listado de Muestreos Confirmados
+class SamplingProcessConfirmedListView(SamplingProcessListView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Muestreos Confirmados'
+        context['entity'] = 'Muestreos Confirmados'
+        context['status_filter'] = 'Confirmada'
         return context
 
 
@@ -186,7 +215,7 @@ class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMi
             else self.object.point_sampling
         )
 
-        # Obtener especificaciones desde el ManyRelatedManager
+        # Obtener especificaciones
         context['specifications'] = (
             sampling_point.specification.select_related('product', 'method_test').order_by('type_test', 'test_prod')
             if sampling_point else SpecificationProduct.objects.none()
