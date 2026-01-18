@@ -159,13 +159,15 @@
                     <div class="info-card">
                         <div class="info-card-content">
                             <div class="info-card-title">Muestras en Proceso</div>
-                            <div class="info-card-value">462</div>
+                            <div class="info-card-value">{{ count_in_process_sampling }}</div>
                             <div class="info-card-change negative">
                                 -2% <span style="color: #6c757d; font-weight: 400;">Finalizadas</span>
                             </div>
                         </div>
                         <div class="info-card-icon">
-                            <i class="bi bi-measuring-cup"></i>
+                            <a href="{% url 'sampling:list_sampling_process_in_process' %}" title="Ver Listado">
+                                <i class="bi bi-measuring-cup text-white"></i>
+                            </a>
                         </div>
                     </div>
                 </div>

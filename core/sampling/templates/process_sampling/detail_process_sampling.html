@@ -153,7 +153,7 @@
                         </div>
 
                         <div class="row mt-2">
-                            <!-- Información de Tiempos -->
+                            <!-- Información de Métodos Analíticos -->
                             <div class="col-lg-8 col-md-6 mb-3">
                                 <div class="card h-100">
                                     <div class="card-body">
@@ -164,10 +164,9 @@
                                             <table class="table table-hover table-bordered">
                                                 <thead>
                                                 <tr>
-                                                    <th class="text-center align-middle" style="width:40%">Ensayo</th>
-                                                    <th class="text-center align-middle" style="width:25%">Especificación</th>
-                                                    <th class="text-center align-middle" style="width:20%">Método</th>
-                                                    <th class="text-center align-middle" style="width:15%">Acciones</th>
+                                                    <th class="text-center align-middle" style="width:50%">Ensayo</th>
+                                                    <th class="text-center align-middle" style="width:27%">Especificación</th>
+                                                    <th class="text-center align-middle" style="width:23%">Método</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
@@ -177,21 +176,75 @@
                                                         <td class="text-center align-middle">{{ foo.lower_limit_prod|default_if_none:"Menor que" }}
                                                             {{ foo.upper_limit_prod }} {{ foo.unit_measure|default_if_none:" " }}</td>
                                                         <td class="text-center align-middle">{{ foo.method_test.analytical_method.code_analytical_method }}</td>
-                                                        <td class="text-center align-middle">
-                                                            {% if object.status_sampling == 'Confirmada' %}
-                                                                <a onclick="open_modal('{% url 'user:create_update_training' foo.id %}')"
-                                                                   title="Procesar" class="btn btn-primary btn-sm">
-                                                                    <i class="bi bi-box-arrow-up-right m-0"></i>
-                                                                </a>
-                                                            {% else %}
-                                                                <i class="bi bi-question-square text-danger" title="Pendiente Recolección y Confirmación de Muestra"></i>
-                                                            {% endif %}
-                                                        </td>
                                                     </tr>
                                                 {% empty %}
                                                     <tr>
                                                         <td colspan="6" class="text-center">
                                                             No hay Métodos de Análisis asociados a esta Muestra.
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Responsables -->
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title mb-3">
+                                            <i class="bi bi-person-check me-2"></i> Responsables
+                                        </h5>
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                <span>Realizado por</span>
+                                                <span class="text-muted">{{ object.sampling_created_by.get_full_name|default:"N/A" }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                <span>Confirmado por</span>
+                                                <span class="text-muted">{{ object.sampling_confirmed_by.get_full_name|default:"Pendiente" }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-2">
+                            <!-- Análisis de Muestra -->
+                            <div class="col-lg-8 col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title mb-3">
+                                            <i class="bi bi-clock me-2"></i> Resultados de Análisis de Control de Calidad
+                                        </h5>
+                                        <div class="table-responsive">
+                                            <table class="table table-hover table-bordered">
+                                                <thead>
+                                                <tr>
+                                                    <th class="text-center align-middle" style="width:40%">Ensayo</th>
+                                                    <th class="text-center align-middle" style="width:25%">Resultado</th>
+                                                    <th class="text-center align-middle" style="width:20%">SD</th>
+                                                    <th class="text-center align-middle" style="width:20%">%CV</th>
+                                                    <th class="text-center align-middle" style="width:20%">Concepto</th>
+                                                    <th class="text-center align-middle" style="width:15%">Acciones</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for sa in sampling_analysis %}
+                                                    <tr>
+                                                        <td class="text-left align-middle">{{ sa.analytical_method.description_analytical_method }}</td>
+                                                        <td class="text-center align-middle">{{ sa.average_concentration|default_if_none:'Pendiente' }}</td>
+                                                        <td class="text-center align-middle">{{ sa.standard_deviation|default_if_none:'Pendiente' }}</td>
+                                                        <td class="text-center align-middle">{{ sa.coefficient_variation|default_if_none:"Pendiente" }}</td>
+                                                        <td class="text-center align-middle">{{ sa.comply|default_if_none:"Pendiente" }}</td>
+                                                        <td class="text-center align-middle">
+                                                            <a href="{% url 'sampling:detail_sampling_analysis' sa.id %}" title="Procesar" class="btn btn-primary btn-sm">
+                                                                <i class="bi bi-box-arrow-up-right m-0"></i>
+                                                            </a>
                                                         </td>
                                                     </tr>
                                                 {% endfor %}
