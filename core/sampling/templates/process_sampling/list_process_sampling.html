@@ -2,6 +2,9 @@
 {% load static %}
 
 {% block head_list %}
+    <script>
+        const status_filter = "{{ status_filter }}";
+    </script>
     <script src="{% static 'list_process_sampling.js' %}"></script>
 {% endblock %}
 

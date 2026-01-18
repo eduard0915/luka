@@ -164,33 +164,27 @@
                                             <table class="table table-hover table-bordered">
                                                 <thead>
                                                 <tr>
-                                                    <th style="width:40%">Ensayo</th>
-                                                    <th style="width:25%">Especificación</th>
-                                                    <th style="width:20%">Método</th>
-                                                    <th style="width:15%">Acciones</th>
+                                                    <th class="text-center align-middle" style="width:40%">Ensayo</th>
+                                                    <th class="text-center align-middle" style="width:25%">Especificación</th>
+                                                    <th class="text-center align-middle" style="width:20%">Método</th>
+                                                    <th class="text-center align-middle" style="width:15%">Acciones</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
                                                 {% for foo in specifications %}
                                                     <tr>
-                                                        <td>{{ foo.method_test.analytical_method.description_analytical_method }}</td>
-                                                        <td>{{ foo.lower_limit_prod|default_if_none:"Menor que" }}
+                                                        <td class="text-left align-middle">{{ foo.method_test.analytical_method.description_analytical_method }}</td>
+                                                        <td class="text-center align-middle">{{ foo.lower_limit_prod|default_if_none:"Menor que" }}
                                                             {{ foo.upper_limit_prod }} {{ foo.unit_measure|default_if_none:" " }}</td>
-                                                        <td>{{ foo.method_test.analytical_method.code_analytical_method }}</td>
-                                                        <td>
-                                                            <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
-                                                               title="Editar">
-                                                                <i class="bi bi-pencil-square text-warning me-2"></i>
-                                                            </a>
-                                                            <a onclick="open_modal('{% url 'user:delete_training' foo.id %}')"
-                                                               title="Eliminar">
-                                                                <i class="bi bi-trash text-danger me-2"></i>
-                                                            </a>
-                                                            {% if foo.training_status == 'Vencido' %}
+                                                        <td class="text-center align-middle">{{ foo.method_test.analytical_method.code_analytical_method }}</td>
+                                                        <td class="text-center align-middle">
+                                                            {% if object.status_sampling == 'Confirmada' %}
                                                                 <a onclick="open_modal('{% url 'user:create_update_training' foo.id %}')"
-                                                                   title="Actualizar">
-                                                                    <i class="bi bi-arrow-clockwise text-info me-2"></i>
+                                                                   title="Procesar" class="btn btn-primary btn-sm">
+                                                                    <i class="bi bi-box-arrow-up-right m-0"></i>
                                                                 </a>
+                                                            {% else %}
+                                                                <i class="bi bi-question-square text-danger" title="Pendiente Recolección y Confirmación de Muestra"></i>
                                                             {% endif %}
                                                         </td>
                                                     </tr>

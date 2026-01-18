@@ -28,6 +28,8 @@
         {% url 'analytical_method:list_method' as list_method %}
 
         {% url 'sampling:list_sampling_process' as list_sampling %}
+        {% url 'sampling:list_sampling_process_scheduled' as list_sampling_sch %}
+        {% url 'sampling:list_sampling_process_confirmed' as list_sampling_conf %}
         {% url 'sampling:create_sampling_process' as create_sampling %}
 
         {% is_expanded create_method list_method list_sampling create_sampling as analysis_expanded %}
@@ -46,8 +48,8 @@
                         <i class="icon bi bi-circle-fill"></i>Métodos
                     </a>
                 </li>
-                <li><a class="{{ sampling_active }}" href="{% url 'sampling:list_sampling_process' %}"><i class="icon bi bi-circle-fill"></i>
-                    Muestreo</a>
+                <li><a class="treeview-item {% if list_sampling in request.path %}active{% endif %}" href="{% url 'sampling:list_sampling_process' %}"><i class="icon bi bi-circle-fill"></i>
+                    Muestreos</a>
                 </li>
                 <li><a class="treeview-item" href="#" target="_blank" rel="noopener"><i
                         class="icon bi bi-circle-fill"></i> Procesamiento</a></li>
