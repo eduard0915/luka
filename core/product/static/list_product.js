@@ -31,8 +31,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     class: 'td-actions text-center align-middle',
                     orderable: false,
                     render: function (data, type, row) {
-                        let actions = '<a href="/product/detail/' + row.id + '/" class="btn btn-info btn-sm" title="Detalle"><i class="bi bi-info-square m-0"></i></a> &nbsp;';
-                        actions += '<a href="/product/update/' + row.id + '/" class="btn btn-warning btn-sm" title="Editar"><i class="bi bi-pencil-square m-0"></i></a>';
+                        let actions = '<a href="/product/detail/' + row.id + '/" type="button" title="Detalle"><i class="bi bi-info-square text-info m-0"></i></a> &nbsp;';
+                        actions += '<a href="/product/update/' + row.id + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning m-0"></i></a>';
                         return actions;
                     }
                 },
