@@ -6,6 +6,7 @@ from botocore.exceptions import ClientError
 from decouple import config
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
@@ -17,8 +18,10 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView, DetailView
 
 from core.mixins import ValidatePermissionRequiredMixin
-from core.reagent.forms import InventoryReagentForm
+from core.reagent.forms import InventoryReagentForm, InventoryReagentTransferForm
 from core.reagent.models import InventoryReagent, TransactionReagent, Reagent
+from core.solution.models import SolutionStd, code_solution_std_generator, TransactionSolutionStd, SolutionStdBase
+from core.solution.services import transfer_inventory_reagent_to_std
 
 
 # Registro de Entrada Inventario de Reactivo
@@ -209,6 +212,63 @@ class InventoryReagentDeleteView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['entity'] = 'Eliminar Inventario de Reactivo'
         context['delete'] = 'Está seguro de eliminar la entrada de inventario de reactivo?'
         context['info_delete'] = f'Lote: {ir.batch_number} - {ir.reagent.code_reagent} {ir.reagent.description_reagent}?'
+        return context
+
+
+# Traslado de InventoryReagent a SolutionStd
+class InventoryReagentTransferView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    model = InventoryReagent
+    form_class = InventoryReagentTransferForm
+    template_name = 'inventory_reagent/transfer_inventory_reagent.html'
+    success_url = reverse_lazy('reagent:list_inventory_reagent')
+    permission_required = 'reagent.change_inventoryreagent'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.object.reagent.ready_to_use:
+            messages.error(request, 'Este reactivo no está marcado como listo para usar.')
+            return redirect(self.success_url)
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'edit':
+                self.object = self.get_object()
+                form = self.get_form()
+                if form.is_valid():
+                    # Buscar SolutionStdBase automáticamente
+                    solution_std_base = SolutionStdBase.objects.filter(
+                        solute_std_base=self.object.reagent,
+                        enable_solution_std=True
+                    ).first()
+
+                    if not solution_std_base:
+                        data['error'] = 'No se encontró una Solución Estándar Base habilitada para este reactivo. Por favor, verifique la configuración.'
+                        return JsonResponse(data)
+
+                    solution = transfer_inventory_reagent_to_std(self.object.id, solution_std_base, request.user)
+
+                    messages.success(request, f'Traslado a Solución Estándar "{solution.code_solution_std}" realizado con éxito.')
+                    data['success'] = True
+                    data['redirect_url'] = self.success_url
+                else:
+                    messages.error(request, form.errors)
+            else:
+                data['error'] = 'No ha ingresado datos en los campos'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Traslado a Solución Estándar'
+        context['list_url'] = self.success_url
+        context['entity'] = 'Traslado a Solución Estándar'
+        context['action'] = 'edit'
+        context['div'] = '8'
+        context['icon'] = 'fa-solid fa-exchange-alt'
         return context
 
 

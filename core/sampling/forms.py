@@ -4,10 +4,74 @@ from django.forms import ModelForm, TextInput, Select, TimeInput, DateTimeInput
 from django.utils import timezone
 
 from core.product.models import SamplePoint
-from core.sampling.models import SamplingGroup, SamplingProcess
+from core.sampling.models import SamplingGroup, SamplingProcess, SamplingAnalysisProcessing
+from core.solution.models import SolutionStd
 
 
 TYPE_SAMPLING = [('En Proceso', 'En Proceso'), ('Producto Terminado', 'Producto Terminado')]
+
+
+# Registro de Procesamiento de Análisis
+class SamplingAnalysisProcessingForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analysis = kwargs.pop('analysis')
+        super().__init__(*args, **kwargs)
+        # Filtrar soluciones estándar asociadas al método de análisis y que tengan stock
+        std_bases = self.analysis.analytical_method.analyticalmethodsolutionstd_set.values_list('solution_std_id', flat=True)
+        self.fields['standard_solution'].queryset = SolutionStd.objects.select_related('solute_std').filter(
+            solution_std_base_id__in=std_bases,
+            preparation_confirmed=True,
+            quantity_solution_std__gt=0)
+
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+        col_classes = {
+            'standard_solution': 'col-md-7',
+            'quantity_standard': 'col-md-2',
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
+    class Meta:
+        model = SamplingAnalysisProcessing
+        fields = ['standard_solution', 'quantity_standard', 'quantity_sample']
+        widgets = {
+            'standard_solution': Select(attrs={
+                'class': 'form-control select2',
+                'required': True,
+                'style': 'width: 100%'
+            }),
+            'quantity_standard': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'quantity_sample': TextInput(attrs={'class': 'form-control', 'required': True}),
+        }
+
+    def save(self, commit=True):
+        user = get_current_user()
+        try:
+            instance = super().save(commit=False)
+            instance.sample_analysis_id = self.analysis.id
+            instance.analyzed_by_id = user.id
+            instance.analyzed_date = timezone.localtime()
+
+            # Cálculo de la concentración
+            qty_std = float(instance.quantity_standard)
+            qty_sample = float(instance.quantity_sample)
+            conc_std = instance.standard_solution.concentration_std
+
+            cifras_sign = instance.sample_analysis.analytical_method.sig_figs_result
+            
+            if qty_sample > 0:
+                instance.concentration_sample = round((qty_std * conc_std) / qty_sample, cifras_sign)
+            else:
+                instance.concentration_sample = 0
+
+            if commit:
+                instance.save()
+            return instance
+        except Exception as e:
+            raise ValidationError({'error': str(e)})
 
 
 # Creación de Grupos de Muestreo

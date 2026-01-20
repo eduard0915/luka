@@ -152,6 +152,8 @@ class SamplingAnalysis(BaseModel):
     standard_deviation = models.FloatField(verbose_name='Desviación Estándar', null=True, blank=True)
     coefficient_variation = models.FloatField(verbose_name='Coeficiente de Variación', null=True, blank=True)
     comply = models.CharField(max_length=10, verbose_name='Concepto', null=True, blank=True)
+    approved_by = models.ForeignKey(User, verbose_name='Aprobado por', on_delete=models.CASCADE, related_name='approved_by', null=True, blank=True)
+    date_approved = models.DateTimeField(verbose_name='Fecha de Aprobado', null=True, blank=True)
 
     def __str__(self):
         return str(self.sampling_process)
@@ -176,11 +178,11 @@ class SamplingAnalysisProcessing(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     sample_analysis = models.ForeignKey(SamplingAnalysis, verbose_name='Análisis de la Muestra', on_delete=models.CASCADE)
     standard_solution = models.ForeignKey(SolutionStd, verbose_name='Solución Estándar', on_delete=models.CASCADE)
-    quantity_standard = models.FloatField(verbose_name=' Cantidad de Estándar')
-    quantity_solution = models.FloatField(verbose_name='mL de Solución Muestra Gastados')
-    concentration_sln = models.FloatField(verbose_name='Concentración Sln')
+    quantity_standard = models.FloatField(verbose_name='Cant. Estándar')
+    quantity_sample = models.FloatField(verbose_name='mL Solución Muestra')
+    concentration_sample = models.FloatField(verbose_name='Concentración Muestra')
     analyzed_by = models.ForeignKey(User, verbose_name='Analizado por', on_delete=models.CASCADE)
-    analyzed_date = models.DateField(verbose_name='Fecha de Análisis')
+    analyzed_date = models.DateTimeField(verbose_name='Fecha de Análisis')
 
     def __str__(self):
         return str(self.quantity_standard)
