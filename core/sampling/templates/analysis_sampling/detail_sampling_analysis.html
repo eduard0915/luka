@@ -1,0 +1,335 @@
+{% extends 'body.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block head %}
+    <style>
+        .list-container {
+            max-height: 180px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            position: relative;
+        }
+
+        .list-container.expanded {
+            max-height: 1000px;
+            transition: max-height 0.5s ease-in;
+        }
+
+        .list-group-item {
+            font-size: 0.875rem;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 p-0">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="row">                            
+                            <div class="col-md-4">
+                                <b>Método Analítico</b><br>
+                                <p>{{ entity.analytical_method.description_analytical_method }}</p>
+                            </div>
+                            <div class="col-md-2">
+                                <b>Especificación</b><br>
+                                <p>
+                                    {% if specification %}
+                                        {{ specification.lower_limit_prod|default:"" }} - {{ specification.upper_limit_prod|default:"" }} {{ specification.unit_measure|default:"" }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="col-md-2">
+                                <b>Muestra</b><br>
+                                <p>{{ entity.sampling_process.number_sample }}</p>
+                            </div>
+                            <div class="col-md-2">
+                                <b>Resultado</b><br>
+                                <p>{{ entity.average_concentration|default_if_none:"Pendiente" }} {{ specification.unit_measure|default:"" }}</p>
+                            </div>
+                            <div class="col-md-2">
+                                <b>Concepto</b><br>
+                                <p>{{ entity.comply|default_if_none:"Pendiente" }}</p>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <!-- COLUMNA IZQUIERDA: Procesamiento y Procedimiento -->
+                            <div class="col-lg-8">
+                                <!-- Procesamiento de la muestra -->
+                                <div class="row">
+                                    <div class="col-12 mb-3">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                                    <h5 class="card-title mb-0">
+                                                        <i class="bi bi-list-check me-2"></i> Procesamiento de Análisis
+                                                    </h5>
+                                                    <a href="javascript:void(0);"
+                                                       onclick="open_modal('{{ create_processing_url }}')"
+                                                       class="btn btn-primary btn-sm">
+                                                        <i class="bi bi-plus-square me-1"></i> Agregar
+                                                    </a>
+                                                </div>
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover table-bordered">
+                                                        <thead>
+                                                        <tr>
+                                                            <th class="text-center align-middle" style="width: 35%">Solución Estándar</th>
+                                                            <th class="text-center align-middle" style="width: 12%">mL Estándar</th>
+                                                            <th class="text-center align-middle" style="width: 10%">mL Muestra</th>
+                                                            <th class="text-center align-middle" style="width: 10%">[{{ specification.unit_measure|default:"" }}]</th>
+                                                            <th class="text-center align-middle" style="width: 20%">Analizado por</th>
+                                                            <th class="text-center align-middle" style="width: 13%">Fecha</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        {% for ap in analysis_processing %}
+                                                            <tr>
+                                                                <td>
+                                                                    {{ ap.standard_solution.solute_std.reagent }}
+                                                                    {{ ap.standard_solution.concentration_std }}{{ ap.standard_solution.concentration_unit }}
+                                                                    - {{ ap.standard_solution.code_solution_std }}
+                                                                </td>
+                                                                <td class="text-center align-middle">{{ ap.quantity_standard }}</td>
+                                                                <td class="text-center align-middle">{{ ap.quantity_sample }}</td>
+                                                                <td class="text-center align-middle">{{ ap.concentration_sample }}</td>
+                                                                <td class="text-center align-middle">{{ ap.analyzed_by.get_full_name }}</td>
+                                                                <td class="text-center align-middle">{{ ap.analyzed_date|date:"Y-m-d H:i" }}</td>
+                                                            </tr>
+                                                        {% empty %}
+                                                            <tr>
+                                                                <td colspan="6" class="text-center">No hay registros de procesamiento</td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Procedimientos -->
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                                    <h5 class="card-title mb-0">
+                                                        <i class="bi bi-list me-2"></i> Procedimiento
+                                                    </h5>
+                                                </div>
+                                                <div class="list-container mb-3" id="procedures-container">
+                                                    <ol class="list-group list-group-numbered list-group-flush">
+                                                        {% for item in procedures %}
+                                                            <li class="list-group-item py-1 p-1 border-0 d-flex align-items-center">
+                                                                <span>{{ item.procedure }}</span>
+                                                            </li>
+                                                        {% empty %}
+                                                            <li class="list-group-item py-1 p-1 border-0 text-muted">No hay procedimientos registrados</li>
+                                                        {% endfor %}
+                                                    </ol>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- COLUMNA DERECHA: Cards de Soluciones, Reactivos, Materiales y Equipos -->
+                            <div class="col-lg-4">
+                                <!-- Soluciones -->
+                                {% if solutions %}
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <h5 class="card-title mb-0">
+                                                    <i class="bi bi-beaker me-2"></i> Soluciones
+                                                </h5>
+                                            </div>
+                                            <div class="list-container mb-3" id="solutions-container">
+                                                <ol class="list-group list-group-numbered list-group-flush">
+                                                    {% for item in solutions %}
+                                                        <li class="list-group-item py-1 p-1 border-0 d-flex align-items-center">
+                                                            <span>{{ item.solution }}</span>
+                                                        </li>
+                                                    {% empty %}
+                                                        <li class="py-1 border-0 text-muted">No hay soluciones registradas</li>
+                                                    {% endfor %}
+                                                </ol>
+                                            </div>
+                                            {% if solutions|length > 5 %}
+                                                <button class="btn btn-link btn-sm p-0 mb-3 toggle-expand"
+                                                        data-target="solutions-container">Ver más
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                <!-- Soluciones Estándar -->
+                                {% if std_solutions %}
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <h5 class="card-title mb-0">
+                                                    <i class="bi bi-flask me-2"></i> Soluciones Estándar
+                                                </h5>
+                                            </div>
+                                            <div class="list-container mb-3" id="std_solutions-container">
+                                                <ol class="list-group list-group-numbered list-group-flush">
+                                                    {% for item in std_solutions %}
+                                                        <li class="list-group-item py-1 p-1 border-0 d-flex align-items-center">
+                                                            <span>{{ item.solution_std }}</span>
+                                                        </li>
+                                                    {% empty %}
+                                                        <li class="py-1 border-0 text-muted">No hay soluciones estándar registradas</li>
+                                                    {% endfor %}
+                                                </ol>
+                                            </div>
+                                            {% if std_solutions|length > 5 %}
+                                                <button class="btn btn-link btn-sm p-0 mb-3 toggle-expand"
+                                                        data-target="std_solutions-container">Ver más
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                <!-- Reactivos -->
+                                {% if reagents %}
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <h5 class="card-title mb-0">
+                                                    <i class="bi bi-droplet-half me-2"></i> Reactivos
+                                                </h5>
+                                            </div>
+                                            <div class="list-container mb-3" id="reagents-container">
+                                                <ol class="list-group list-group-numbered list-group-flush">
+                                                    {% for item in reagents %}
+                                                        <li class="list-group-item py-1 p-1 border-0 d-flex align-items-center">
+                                                            <span>{{ item.reagent }}</span>
+                                                        </li>
+                                                    {% empty %}
+                                                        <li class="py-1 border-0 text-muted">No hay reactivos registrados</li>
+                                                    {% endfor %}
+                                                </ol>
+                                            </div>
+                                            {% if reagents|length > 5 %}
+                                                <button class="btn btn-link btn-sm p-0 mb-3 toggle-expand"
+                                                        data-target="reagents-container">Ver más
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                <!-- Materiales -->
+                                {% if materials %}
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <h5 class="card-title mb-0">
+                                                    <i class="bi bi-box-seam me-2"></i> Materiales
+                                                </h5>
+                                            </div>
+                                            <div class="list-container mb-3" id="materials-container">
+                                                <ol class="list-group list-group-numbered list-group-flush">
+                                                    {% for item in materials %}
+                                                        <li class="list-group-item py-1 p-1 border-0 d-flex align-items-center">
+                                                            <span>{{ item.material_instrumental }}</span>
+                                                        </li>
+                                                    {% empty %}
+                                                        <li class="py-1 border-0 text-muted">No hay materiales registrados</li>
+                                                    {% endfor %}
+                                                </ol>
+                                            </div>
+                                            {% if materials|length > 5 %}
+                                                <button class="btn btn-link btn-sm p-0 mb-3 toggle-expand"
+                                                        data-target="materials-container">Ver más
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                <!-- Equipos -->
+                                {% if equipments %}
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <h5 class="card-title mb-0">
+                                                    <i class="bi bi-cpu me-2"></i> Equipos
+                                                </h5>
+                                            </div>
+                                            <div class="list-container mb-3" id="equipments-container">
+                                                <ol class="list-group list-group-numbered list-group-flush">
+                                                    {% for item in equipments %}
+                                                        <li class="list-group-item py-1 p-1 border-0 d-flex align-items-center">
+                                                            <span>{{ item.equipment_instrumental }}</span>
+                                                        </li>
+                                                    {% empty %}
+                                                        <li class="list-group-item py-1 p-1 border-0 text-muted">No hay equipos registrados</li>
+                                                    {% endfor %}
+                                                </ol>
+                                            </div>
+                                            {% if equipments|length > 5 %}
+                                                <button class="btn btn-link btn-sm p-0 mb-3 toggle-expand"
+                                                        data-target="equipments-container">Ver más
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-end">
+                        <a href="{{ back }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Volver al detalle de muestra
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts_detail %}
+    {{ block.super }}
+    <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    </div>
+
+    <script>
+        function open_modal(url) {
+            $('#myModal').load(url, function () {
+                var modalElement = document.getElementById('myModal');
+                var modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+                modal.show();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleButtons = document.querySelectorAll('.toggle-expand');
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const targetId = this.getAttribute('data-target');
+                    const container = document.getElementById(targetId);
+                    if (container.classList.contains('expanded')) {
+                        container.classList.remove('expanded');
+                        this.textContent = 'Ver más';
+                    } else {
+                        container.classList.add('expanded');
+                        this.textContent = 'Ver menos';
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

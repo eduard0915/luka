@@ -30,16 +30,16 @@ document.addEventListener('DOMContentLoaded', function () {
             ],
             columnDefs: [
                 {
-                    targets: [0, 1, 2, 3],
-                    class: 'td-actions text-start'
+                    targets: [1],
+                    class: 'td-actions text-start align-middle'
                 },
                 {
-                    targets: [4, 5],
-                    class: 'td-actions text-center'
+                    targets: [0, 2, 3, 4, 5],
+                    class: 'td-actions text-center align-middle'
                 },
                 {
                     targets: [6],
-                    class: 'td-actions text-center',
+                    class: 'td-actions text-center align-middle',
                     render: function (data, type, row) {
                         if (row['enable_analytical_method']) {
                             return '<span class="badge bg-success">Sí</span>';
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 {
                     targets: [7],
-                    class: 'td-actions text-center',
+                    class: 'td-actions text-center align-middle',
                     orderable: false,
                     render: function (data, type, row) {
                         let actions = '';

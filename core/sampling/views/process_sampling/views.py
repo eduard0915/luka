@@ -9,8 +9,9 @@ from django.views.generic import CreateView, UpdateView, ListView, DetailView
 
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.models import SpecificationProduct
-from core.sampling.forms import SamplingProcessForm, SamplingProcessImageForm, SamplingProcessConfirmedForm
-from core.sampling.models import SamplingProcess, SamplingAnalysis
+from core.sampling.forms import SamplingProcessForm, SamplingProcessImageForm, SamplingProcessConfirmedForm, \
+    SamplingAnalysisProcessingForm
+from core.sampling.models import SamplingProcess, SamplingAnalysis, SamplingAnalysisProcessing
 from core.utils import format_form_errors
 
 
@@ -243,20 +244,6 @@ class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMi
         return context
 
 
-# Detalle de Análisis de Muestra
-class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
-    model = SamplingAnalysis
-    template_name = 'process_sampling/detail_sampling_analysis.html'
-    permission_required = 'reagent.add_reagent'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Procesamiento de Análisis de Muestra'
-        context['entity'] = self.object
-        context['analysis_processing'] = self.object.samplinganalysisprocessing_set.all()
-        context['icon'] = 'bi bi-calculator'
-        context['back'] = reverse_lazy('sampling:detail_sampling_process', kwargs={'pk': self.object.sampling_process.id})
-        return context
 
 
 # Actualización de Foto de la Muestra

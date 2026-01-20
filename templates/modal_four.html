@@ -1,3 +1,5 @@
+{% load static %}
+
 <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
         <div class="modal-header">
@@ -50,6 +52,11 @@
     </div>
 
     {% block scripts_detail %}
+
+        {% if entity == 'Registro de Procesamiento de Análisis' %}
+            <script src="{% static 'quantity_standard_label_toggle.js' %}"></script>
+        {% endif %}
+
         <script type="application/javascript">
 
             $('form').on('submit', function (e) {
@@ -88,5 +95,6 @@
             });
 
         </script>
+
     {% endblock %}
 </div>

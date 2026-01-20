@@ -84,10 +84,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'luka.wsgi.application'
 
-
 # Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     'dev': dj_database_url.config(
         default=config('DATABASE_TEST')
@@ -173,14 +170,14 @@ TIME_PASSWORD_EXPIRE = 90
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8000/',
     'http://localhost:8000/',
-    'https://*.lukalims.com',
+    'https://*.padlims.com',
     'https://*.herokuapp.com',
     'https://*.run.app',
 ]
 
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:8000',
-    'http://*.lukalims.com',
+    'http://*.padlims.com',
 ]
 
 # Conexión AWS S3
@@ -204,6 +201,15 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'filters': {
+        'skip_well_known_not_found': {
+            '()': 'django.utils.log.CallbackFilter',
+            'callback': lambda record: not (
+                record.levelname == 'WARNING' and 
+                'Not Found: /.well-known/appspecific/com.chrome.devtools.json' in record.getMessage()
+            ),
+        },
+    },
     'formatters': {
         'verbose': {
             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
@@ -216,6 +222,7 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': 'django_errors.log',
             'formatter': 'verbose',
+            'filters': ['skip_well_known_not_found'],
         },
     },
     'loggers': {

@@ -1,7 +1,9 @@
 from crum import get_current_user
+from django import forms
 from django.forms import ModelForm, TextInput, FileInput, Select, DateInput, NumberInput, CheckboxInput
 
 from core.reagent.models import Reagent, TransactionReagent, InventoryReagent
+from core.solution.models import SolutionStdBase
 
 
 UMB = [('', '-----'), ('mL', 'Mililitro'), ('g', 'Gramo')]
@@ -71,7 +73,13 @@ class InventoryReagentForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         user = get_current_user()
-        self.fields['reagent'].queryset = Reagent.objects.filter(enable_reagent=True, site_id=user.site.id)
+        if user and user.site:
+            self.fields['reagent'].queryset = Reagent.objects.filter(enable_reagent=True, site_id=user.site.id)
+
+        if self.instance and self.instance.pk and self.instance.reagent:
+            self.fields['quantity_stock'].label = f"Cantidad ({self.instance.reagent.umb})"
+            self.fields['purity'].label = f"Pureza ({self.instance.reagent.purity_unit})"
+
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
@@ -110,6 +118,42 @@ class InventoryReagentForm(ModelForm):
         except Exception as e:
             data['error'] = str(e)
         return data
+
+
+# Traslado de InventoryReagent a SolutionStd
+class InventoryReagentTransferForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.reagent:
+            self.fields['quantity_stock'].label = f"Cantidad ({self.instance.reagent.umb})"
+            self.fields['purity'].label = f"Pureza ({self.instance.reagent.purity_unit})"
+
+        for field_name, field in self.fields.items():
+            field.widget.attrs['autocomplete'] = 'off'
+            field.widget.attrs['readonly'] = True
+            if isinstance(field.widget, Select):
+                field.widget.attrs['style'] = 'pointer-events: none;'
+                field.widget.attrs['tabindex'] = '-1'
+
+        col_classes = {
+            'reagent': 'col-md-6',
+            'quantity_stock': 'col-md-2',
+            'purity': 'col-md-2',
+            'batch_number': 'col-md-2',
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
+    class Meta:
+        model = InventoryReagent
+        fields = ['reagent', 'quantity_stock', 'batch_number', 'purity']
+        widgets = {
+            'reagent': Select(attrs={'class': 'form-control', 'readonly': True}),
+            'quantity_stock': TextInput(attrs={'class': 'form-control', 'readonly': True}),
+            'batch_number': TextInput(attrs={'class': 'form-control', 'readonly': True}),
+            'purity': TextInput(attrs={'class': 'form-control', 'readonly': True}),
+        }
 
 
 # Edición de Registro de Entrada Inventario de Reactivo

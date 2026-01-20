@@ -50,6 +50,13 @@
                             <b>Pureza</b><br>
                             <p>{{ object.purity }} {{ object.reagent.purity_unit }}</p>
                         </div>
+                        <div class="col-md-4">
+                            {% if object.reagent.ready_to_use and object.quantity_stock > 0 %}
+                                <a href="{% url 'reagent:transfer_inventory_reagent' object.id %}" class="btn btn-info btn-sm">
+                                    <i class="fa-solid fa-exchange-alt me-1"></i>Trasladar a Soluciones Estándar
+                                </a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>

@@ -132,7 +132,7 @@ class SolutionForm(ModelForm):
 
             elif concentration_unit == 'M':
                 if not reagent.molecular_weight:
-                    self.add_error('solute_reagent', 'El reactivo seleccionado no tiene peso molecular registrado')
+                    self.add_error('solute_reagent', 'El reactivo de la solución no tiene peso molecular registrado')
                     return cleaned_data
                 factor = (concentration * reagent.molecular_weight) / (10 * purity)
                 quantity_reagent = round(base_calc * factor, sig_figs)

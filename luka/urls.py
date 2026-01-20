@@ -1,5 +1,6 @@
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.http import HttpResponse
 from django.urls import path, include
 
 from core.home.views import HomeView
@@ -7,6 +8,7 @@ from luka import settings as setting, settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path(".well-known/appspecific/com.chrome.devtools.json", lambda r: HttpResponse(status=204)),
     path("", HomeView.as_view(), name='home'),
     path('user/', include('core.user.urls')),
     path('start/', include('core.start.urls')),

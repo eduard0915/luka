@@ -3,6 +3,7 @@ from django.urls import path
 
 from core.sampling.views.group_sampling.views import *
 from core.sampling.views.process_sampling.views import *
+from core.sampling.views.analysis_sampling.views import *
 from luka import settings
 
 app_name = 'sampling'
@@ -26,6 +27,8 @@ urlpatterns = [
     path('process/update-image/<uuid:pk>/', SamplingProcessImageUpdateView.as_view(), name='update_image_sample'),
     path('process/confirmed/<uuid:pk>/', SamplingProcessConfirmedUpdateView.as_view(), name='confirmed_sampling_process'),
     path('analysis/detail/<uuid:pk>/', SamplingAnalysisDetailView.as_view(), name='detail_sampling_analysis'),
+    path('analysis/processing/add/<uuid:pk>/', SamplingAnalysisProcessingCreateView.as_view(), name='create_sampling_analysis_processing'),
+    path('get-solution-std-unit/', get_solution_std_unit, name='get_solution_std_unit'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

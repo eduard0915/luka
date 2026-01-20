@@ -76,9 +76,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     orderable: false,
                     render: function (data, type, row) {
                         let actions
-                        actions = '<a href="/reagent/inventory/detail/' + row['id'] + '/" type="button" title="Detalle de Movimientos"><i class="bi bi-info-square text-info"></i></a>&nbsp';
-                        actions += '<a href="/reagent/inventory/update/' + row['id'] + '/" type="button" title="Editar Entrada"><i class="bi bi-pencil-square text-warning"></i></a>&nbsp';
-                        actions += '<a onclick=open_modal("/reagent/inventory/delete/' + row['id'] + '/") type="button" title="Eliminar Entrada"><i class="bi bi-trash text-danger"></i></a>&nbsp';
+                        actions = '<a href="/reagent/inventory/detail/' + row['id'] + '/" type="button" title="Detalle de Movimientos"><i class="bi bi-info-square text-info"></i></a> &nbsp';
+                        actions += '<a href="/reagent/inventory/update/' + row['id'] + '/" type="button" title="Editar Entrada"><i class="bi bi-pencil-square text-warning"></i></a> &nbsp';
+                        actions += '<a onclick=open_modal("/reagent/inventory/delete/' + row['id'] + '/") type="button" title="Eliminar Entrada"><i class="bi bi-trash text-danger"></i></a> &nbsp';
                         actions += '<a href="/reagent/transaction_reagent/add/' + row['id'] + '/" type="button" title="Registrar Movimiento"><i class="bi bi-bag-plus text-primary"></i></a>';
                         return actions
                     }
