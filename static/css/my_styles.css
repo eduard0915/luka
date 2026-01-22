@@ -78,6 +78,13 @@
     border-width: 0.2em;
 }
 
+/* Extra small button */
+.btn-xs {
+    padding: 0.125rem 0.25rem;
+    font-size: 0.75rem;
+    border-radius: 0.2rem;
+}
+
 @-webkit-keyframes spinner-border {
     to { -webkit-transform: rotate(360deg); }
 }

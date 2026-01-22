@@ -228,3 +228,33 @@ class SamplingProcessConfirmedForm(ModelForm):
         except Exception as e:
             data['error'] = str(e)
         return data
+
+
+# Cambio de Estado de la Muestra a En Proceso
+class SamplingProcessInProcessForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['status_sampling'].label = ''
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = SamplingProcess
+        fields = ['status_sampling']
+        widgets = {
+            'status_sampling': TextInput(attrs={'class': 'form-control', 'hidden': 'true'}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        form = super()
+        try:
+            if form.is_valid():
+                data = form.save(commit=False)
+                data.status_sampling = 'En Proceso'
+                data.save()
+            else:
+                data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
