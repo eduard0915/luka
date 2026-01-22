@@ -7,21 +7,11 @@
 {% block head %}
     {% block head_list %}{% endblock %}
     <style>
-        .list-container {
-            max-height: 180px; /* Aproximadamente 5 items de ~35px cada uno */
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-            position: relative;
-        }
-
-        .list-container.expanded {
-            max-height: 1000px; /* O un valor lo suficientemente grande */
-            transition: max-height 0.5s ease-in;
-        }
 
         .list-group-item {
             font-size: 0.875rem;
         }
+
     </style>
 {% endblock %}
 
@@ -154,7 +144,7 @@
 
                         <div class="row mt-2">
                             <!-- Información de Métodos Analíticos -->
-                            <div class="col-lg-8 col-md-6 mb-3">
+                            <div class="col-lg-6 col-md-6 mb-3">
                                 <div class="card h-100">
                                     <div class="card-body">
                                         <h5 class="card-title mb-3">
@@ -190,32 +180,8 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Responsables -->
-                            <div class="col-lg-4 col-md-6 mb-3">
-                                <div class="card h-100">
-                                    <div class="card-body">
-                                        <h5 class="card-title mb-3">
-                                            <i class="bi bi-person-check me-2"></i> Responsables
-                                        </h5>
-                                        <ul class="list-group list-group-flush">
-                                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                                <span>Realizado por</span>
-                                                <span class="text-muted">{{ object.sampling_created_by.get_full_name|default:"N/A" }}</span>
-                                            </li>
-                                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                                <span>Confirmado por</span>
-                                                <span class="text-muted">{{ object.sampling_confirmed_by.get_full_name|default:"Pendiente" }}</span>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mt-2">
                             <!-- Análisis de Muestra -->
-                            <div class="col-lg-8 col-md-6 mb-3">
+                            <div class="col-lg-6 col-md-6 mb-3">
                                 <div class="card h-100">
                                     <div class="card-body">
                                         <h5 class="card-title mb-3">
@@ -225,10 +191,8 @@
                                             <table class="table table-hover table-bordered">
                                                 <thead>
                                                 <tr>
-                                                    <th class="text-center align-middle" style="width:40%">Ensayo</th>
-                                                    <th class="text-center align-middle" style="width:25%">Resultado</th>
-                                                    <th class="text-center align-middle" style="width:20%">SD</th>
-                                                    <th class="text-center align-middle" style="width:20%">%CV</th>
+                                                    <th class="text-center align-middle" style="width:45%">Ensayo</th>
+                                                    <th class="text-center align-middle" style="width:20%">Resultado</th>
                                                     <th class="text-center align-middle" style="width:20%">Concepto</th>
                                                     <th class="text-center align-middle" style="width:15%">Acciones</th>
                                                 </tr>
@@ -238,13 +202,20 @@
                                                     <tr>
                                                         <td class="text-left align-middle">{{ sa.analytical_method.description_analytical_method }}</td>
                                                         <td class="text-center align-middle">{{ sa.average_concentration|default_if_none:'Pendiente' }}</td>
-                                                        <td class="text-center align-middle">{{ sa.standard_deviation|default_if_none:'Pendiente' }}</td>
-                                                        <td class="text-center align-middle">{{ sa.coefficient_variation|default_if_none:"Pendiente" }}</td>
                                                         <td class="text-center align-middle">{{ sa.comply|default_if_none:"Pendiente" }}</td>
+
                                                         <td class="text-center align-middle">
-                                                            <a href="{% url 'sampling:detail_sampling_analysis' sa.id %}" title="Procesar" class="btn btn-primary btn-sm">
-                                                                <i class="bi bi-box-arrow-up-right m-0"></i>
-                                                            </a>
+                                                            {% if object.status_sampling == 'Confirmada' %}
+                                                                <a href="javascript:void(0);"
+                                                                   onclick="open_modal('{% url 'sampling:sampling_in_process' object.id %}')"
+                                                                   class="btn btn-primary btn-xs">
+                                                                    <i class="bi bi-box-arrow-up-right m-0"></i>
+                                                                </a>
+                                                            {% else %}
+                                                                <a href="{% url 'sampling:detail_sampling_analysis' sa.id %}" class="btn btn-info btn-xs" title="Ver Análisis">
+                                                                   <i class="bi bi-bookmark-check m-1"></i>
+                                                                </a>
+                                                            {% endif %}
                                                         </td>
                                                     </tr>
                                                 {% endfor %}
@@ -254,13 +225,16 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- Responsables -->
-                            <div class="col-lg-4 col-md-6 mb-3">
+                        <div class="row mt-2">
+
+                            <!-- Observaciones -->
+                            <div class="col-lg-6 col-md-6 mb-3">
                                 <div class="card h-100">
                                     <div class="card-body">
                                         <h5 class="card-title mb-3">
-                                            <i class="bi bi-person-check me-2"></i> Responsables
+                                            <i class="bi bi-person-check me-2"></i> Observaciones
                                         </h5>
                                         <ul class="list-group list-group-flush">
                                             <li class="list-group-item d-flex justify-content-between align-items-center px-0">

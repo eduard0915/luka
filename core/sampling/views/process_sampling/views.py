@@ -9,9 +9,8 @@ from django.views.generic import CreateView, UpdateView, ListView, DetailView
 
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.models import SpecificationProduct
-from core.sampling.forms import SamplingProcessForm, SamplingProcessImageForm, SamplingProcessConfirmedForm, \
-    SamplingAnalysisProcessingForm
-from core.sampling.models import SamplingProcess, SamplingAnalysis, SamplingAnalysisProcessing
+from core.sampling.forms import *
+from core.sampling.models import SamplingProcess, SamplingAnalysis
 from core.utils import format_form_errors
 
 
@@ -244,13 +243,11 @@ class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMi
         return context
 
 
-
-
 # Actualización de Foto de la Muestra
 class SamplingProcessImageUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
     model = SamplingProcess
     form_class = SamplingProcessImageForm
-    template_name = 'process_sampling/update_image_sample.html'
+    template_name = 'process_sampling/confirmation_sampling.html'
     permission_required = 'reagent.add_reagent'
 
     @method_decorator(csrf_exempt)
@@ -283,7 +280,7 @@ class SamplingProcessImageUpdateView(LoginRequiredMixin, ValidatePermissionRequi
 class SamplingProcessConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
     model = SamplingProcess
     form_class = SamplingProcessConfirmedForm
-    template_name = 'process_sampling/update_image_sample.html'
+    template_name = 'process_sampling/confirmation_sampling.html'
     permission_required = 'reagent.add_reagent'
 
     @method_decorator(csrf_exempt)
@@ -297,7 +294,7 @@ class SamplingProcessConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionR
             form = self.get_form()
             if form.is_valid():
                 form.save()
-                messages.success(request, f'Toma de Muestra Confirmada satisfactoriamente!')
+                messages.success(request, f'Muestra Confirmada satisfactoriamente!')
             else:
                 error_messages = format_form_errors(form)
                 messages.error(request, f'Por favor corrija los errores: {error_messages}')
@@ -309,5 +306,43 @@ class SamplingProcessConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionR
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Confirmación Toma de Muestra'
         context['info_form'] = mark_safe('<span class="text-danger me-2">¿Está seguro de confirmar la toma de la muestra?</span>')
+        context['action'] = 'edit'
+        return context
+
+
+# Cambio de Estado de la Muestra a En Proceso
+class SamplingProcessInProcessUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    model = SamplingProcess
+    form_class = SamplingProcessInProcessForm
+    template_name = 'process_sampling/confirmation_sampling.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            form = self.get_form()
+            if form.is_valid():
+                form.save()
+                messages.success(request, f'Inicio de Procesamiento de Muestra realizado satisfactoriamente!')
+                analysis = SamplingAnalysis.objects.select_related('sampling_process').filter(
+                    sampling_process_id=self.object.id).first()
+                if analysis:
+                    data['redirect_url'] = reverse_lazy('sampling:detail_sampling_analysis', kwargs={'pk': analysis.id})
+            else:
+                error_messages = format_form_errors(form)
+                messages.error(request, f'Por favor corrija los errores: {error_messages}')
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Inicio de Procesamiento de Muestra'
+        context['info_form'] = mark_safe('<span class="text-danger me-2">¿Está seguro de Iniciar Procesamiento de la Muestra?</span>')
         context['action'] = 'edit'
         return context

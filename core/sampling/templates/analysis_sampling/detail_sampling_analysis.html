@@ -29,7 +29,7 @@
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <div class="row">                            
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <b>Método Analítico</b><br>
                                 <p>{{ entity.analytical_method.description_analytical_method }}</p>
                             </div>
@@ -48,17 +48,29 @@
                                 <p>{{ entity.sampling_process.number_sample }}</p>
                             </div>
                             <div class="col-md-2">
-                                <b>Resultado</b><br>
-                                <p>{{ entity.average_concentration|default_if_none:"Pendiente" }} {{ specification.unit_measure|default:"" }}</p>
+                                <b>Cant. Muestra</b><br>
+                                <p>{{ entity.analytical_method.sample_size }} Gramos</p>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-2 px-0">
+                                <b>Resultado</b><br>
+                                <p>{{ entity.average_concentration|default_if_none:"Pendiente" }} {% if entity.comply %}{{ specification.unit_measure|default:"" }}{% endif %}</p>
+                            </div>
+                            <div class="col-md-1 px-0">
                                 <b>Concepto</b><br>
-                                <p>{{ entity.comply|default_if_none:"Pendiente" }}</p>
+                                <p>
+                                    {% if entity.comply %}
+                                        <b style="color: {% if entity.comply == 'Cumple' %}green{% elif entity.comply == 'No Cumple' %}red{% else %}black{% endif %};">
+                                            {{ entity.comply }}
+                                        </b>
+                                    {% else %}
+                                        Pendiente
+                                    {% endif %}
+                                </p>
                             </div>
                         </div>
 
                         <div class="row mt-3">
-                            <!-- COLUMNA IZQUIERDA: Procesamiento y Procedimiento -->
+                            <!-- Procesamiento y Procedimiento -->
                             <div class="col-lg-8">
                                 <!-- Procesamiento de la muestra -->
                                 <div class="row">
