@@ -1,7 +1,10 @@
+from random import choices
+
 from django.forms import ModelForm, TextInput, Select, NumberInput, Textarea
 
 from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodSolution, AnalyticalMethodSolutionStd, \
-    AnalyticalMethodReagent, AnalyticalMethodEquipment, AnalyticalMethodMaterial, AnalyticalMethodProcedure
+    AnalyticalMethodReagent, AnalyticalMethodEquipment, AnalyticalMethodMaterial, AnalyticalMethodProcedure, \
+    AnalyticalMethodCalculate
 from core.laboratory.models import Laboratory
 from core.solution.models import SolutionStdBase, SolutionBase
 
@@ -13,6 +16,15 @@ TYPE_METHOD = [
     ('Espectrofotometrico', 'Espectrofotométrico'),
     ('Espectroscopico', 'Espectroscópico')
 ]
+
+UNIT_CALCULATE = [
+    ('%p/p', '%p/p'),
+    ('%p/v', '%p/v'),
+    ('mg/L', 'mg/L'),
+    ('ppm', 'ppm')
+]
+
+POSITION = [('Numerador', 'Numerador'), ('Denominador', 'Denominador'), ('General', 'General')]
 
 
 # Creación de Métodos Analíticos
@@ -229,6 +241,7 @@ class AnalyticalMethodMaterialForm(ModelForm):
         return data
 
 
+# Creación de paso a paso o procedimiento
 class AnalyticalMethodProcedureForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.analytical_method = kwargs.pop('analytical_method', None)
@@ -242,6 +255,138 @@ class AnalyticalMethodProcedureForm(ModelForm):
         fields = ['procedure']
         widgets = {
             'procedure': Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Ingrese el procedimiento'}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Creación de descripción de cálculo
+class AnalyticalMethodCalculeDescriptionForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodCalculate
+        fields = ['calculate_description', 'unit_measure_calculate']
+        widgets = {
+            'calculate_description': TextInput(attrs={'class': 'form-control'}),
+            'unit_measure_calculate': Select(attrs={'class': 'form-control'}, choices=UNIT_CALCULATE),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Creación Volumen de Estándar
+class AnalyticalMethodVolumenStdForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodCalculate
+        fields = ['volumen_std', 'position']
+        widgets = {
+            'volumen_std': TextInput(attrs={'class': 'form-control'}),
+            'position': Select(attrs={'class': 'form-control'}, choices=POSITION)
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Creación Factor Denominador
+class AnalyticalMethodFactorForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodCalculate
+        fields = ['factor', 'position']
+        widgets = {
+            'factor': TextInput(attrs={'class': 'form-control'}),
+            'position': Select(attrs={'class': 'form-control'}, choices=POSITION),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Agregar Cantidad de Muestra
+class AnalyticalMethodSampleGramForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodCalculate
+        fields = ['sample_quantity', 'position']
+        widgets = {
+            'sample_quantity': TextInput(attrs={'class': 'form-control'}),
+            'position': Select(attrs={'class': 'form-control'}, choices=POSITION)
         }
 
     def save(self, commit=True):

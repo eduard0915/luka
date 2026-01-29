@@ -184,3 +184,32 @@ class AnalyticalMethodProcedure(BaseModel):
             else:
                 self.user_updated = user
         return super(AnalyticalMethodProcedure, self).save(*args, **kwargs)
+
+
+# Cálculo de concentración de muestra
+class AnalyticalMethodCalculate(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE)
+    calculate_description = models.CharField(max_length=100, verbose_name='Descripción del Cálculo')
+    unit_measure_calculate = models.CharField(max_length=10, verbose_name='Unidad a Calcular')
+    volumen_std = models.CharField(max_length=100, verbose_name='Volúmen Estándar', null=True, blank=True)
+    factor = models.FloatField(verbose_name='Factor', null=True, blank=True)
+    sample_quantity = models.CharField(max_length=50, verbose_name='Muestra')
+    position = models.CharField(max_length=15, verbose_name='Posición en Ecuación')
+
+    def __str__(self):
+        return str(self.calculate_description)
+
+    class Meta:
+        verbose_name = 'AnalyticalMethodCalculate'
+        verbose_name_plural = 'AnalyticalMethodCalculates'
+        db_table = 'AnalyticalMethodCalculate'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(AnalyticalMethodCalculate, self).save(*args, **kwargs)
