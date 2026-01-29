@@ -10,7 +10,7 @@ from django.views.generic import CreateView, UpdateView, DetailView, ListView
 from django import forms
 
 from core.mixins import ValidatePermissionRequiredMixin
-from core.analytical_method.models import AnalyticalMethod
+from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate
 from core.analytical_method.forms import AnalyticalMethodForm
 
 
@@ -196,4 +196,52 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['equipments'] = self.object.analyticalmethodequipment_set.all()
         context['materials'] = self.object.analyticalmethodmaterial_set.all()
         context['procedures'] = self.object.analyticalmethodprocedure_set.all()
+
+        calcules = AnalyticalMethodCalculate.objects.filter(analytical_method=self.object)
+
+        inst_desc = calcules.exclude(calculate_description__isnull=True).exclude(calculate_description="").first()
+        inst_unit = calcules.exclude(unit_measure_calculate__isnull=True).exclude(unit_measure_calculate="").first()
+
+        context['inst_desc'] = inst_desc
+
+        if inst_desc or calcules.exists():
+            desc = inst_desc.calculate_description if inst_desc else "Cálculo"
+            unit = inst_unit.unit_measure_calculate if inst_unit else ""
+
+            num_terms = []
+            den_terms = []
+            gen_terms = []
+
+            # 2. Iteramos TODAS las instancias para recolectar valores,
+            # sin importar si son la misma instancia que tiene la descripción
+            for c in calcules:
+                parts = []
+                if c.volumen_std: parts.append(str(c.volumen_std))
+                if c.factor: parts.append(str(c.factor))
+                if c.sample_quantity: parts.append(str(c.sample_quantity))
+                context['volumen_std'] = str(c.volumen_std)
+                context['sample_quantity'] = str(c.sample_quantity)
+
+                item_text = " \cdot ".join(parts)
+                if not item_text: continue
+
+                if c.position == 'Numerador':
+                    num_terms.append(item_text)
+                elif c.position == 'Denominador':
+                    den_terms.append(item_text)
+                elif c.position == 'General':
+                    gen_terms.append(item_text)
+
+            # 3. Construcción de la estructura LaTeX
+            str_num = " \cdot ".join(num_terms) if num_terms else "1"
+            str_den = " \cdot ".join(den_terms) if den_terms else "1"
+            str_gen = f" \cdot {' \cdot '.join(gen_terms)}" if gen_terms else ""
+
+            # Usamos \text{} para asegurar que espacios y tildes se vean bien
+            label = f"\\text{{{desc}}}"
+            if unit:
+                label += f" \\text{{ ({unit})}}"
+
+            context['final_equation'] = f"{label} = \\frac{{{str_num}}}{{{str_den}}}{str_gen}"
+
         return context
