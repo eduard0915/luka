@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import CreateView
+from django.views.generic import CreateView, UpdateView, DeleteView
 
 from core.analytical_method.forms import *
 from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate
@@ -59,6 +59,18 @@ class AnalyticalMethodCalculeDescriptionCreateView(LoginRequiredMixin, BaseAnaly
         return context
 
 
+# Edición de descripción de cálculo
+class AnalyticalMethodCalculeDescriptionUpdateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, UpdateView):
+    model = AnalyticalMethodCalculate
+    form_class = AnalyticalMethodCalculeDescriptionForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Editar Descripción de Cálculo a Realizar'
+        context['action'] = 'edit'
+        return context
+
+
 # Creación Volumen de Estándar
 class AnalyticalMethodVolumenStdCreateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, CreateView):
     model = AnalyticalMethodCalculate
@@ -68,6 +80,18 @@ class AnalyticalMethodVolumenStdCreateView(LoginRequiredMixin, BaseAnalyticalMet
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Agregar Volumen Estándar en la Ecuación'
         context['action'] = 'add'
+        return context
+
+
+# Edición Volumen de Estándar
+class AnalyticalMethodVolumenStdUpdateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, UpdateView):
+    model = AnalyticalMethodCalculate
+    form_class = AnalyticalMethodVolumenStdForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Editar Volumen Estándar en la Ecuación'
+        context['action'] = 'edit'
         return context
 
 
@@ -83,6 +107,18 @@ class AnalyticalMethodFactorCreateView(LoginRequiredMixin, BaseAnalyticalMethodD
         return context
 
 
+# Editar Factor
+class AnalyticalMethodFactorUpdateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, UpdateView):
+    model = AnalyticalMethodCalculate
+    form_class = AnalyticalMethodFactorForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Editar Factor en la Ecuación'
+        context['action'] = 'edit'
+        return context
+
+
 # Agregar Cantidad de Muestra
 class AnalyticalMethodSampleGramCreateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, CreateView):
     model = AnalyticalMethodCalculate
@@ -92,4 +128,42 @@ class AnalyticalMethodSampleGramCreateView(LoginRequiredMixin, BaseAnalyticalMet
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Descripción Cantidad de Muestra'
         context['action'] = 'add'
+        return context
+
+
+# Editar Cantidad de Muestra
+class AnalyticalMethodSampleGramUpdateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, UpdateView):
+    model = AnalyticalMethodCalculate
+    form_class = AnalyticalMethodSampleGramForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Editar Descripción Cantidad de Muestra'
+        context['action'] = 'edit'
+        return context
+
+
+# Eliminación de variable de calculo
+class AnalyticalMethodCalculateDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DeleteView):
+    model = AnalyticalMethodCalculate
+    template_name = 'method/delete_method_calcule.html'
+    permission_required = 'analytical_method.view_analyticalmethod'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            self.object.delete()
+            messages.success(self.request, 'Variable de Ecuación eliminada satisfactoriamente!')
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Eliminar Variable de Ecuación'
+        context['delete'] = 'Está seguro de eliminar la variable de la ecuación?'
         return context

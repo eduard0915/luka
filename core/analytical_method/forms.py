@@ -14,7 +14,8 @@ TYPE_METHOD = [
     ('Volumetrico', 'Volumétrico'),
     ('Gravimetrico', 'Gravimétrico'),
     ('Espectrofotometrico', 'Espectrofotométrico'),
-    ('Espectroscopico', 'Espectroscópico')
+    ('Espectroscopico', 'Espectroscópico'),
+    ('Lectura Directa', 'Lectura Directa')
 ]
 
 UNIT_CALCULATE = [
