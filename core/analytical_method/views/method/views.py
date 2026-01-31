@@ -198,6 +198,7 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['procedures'] = self.object.analyticalmethodprocedure_set.all()
 
         calcules = AnalyticalMethodCalculate.objects.filter(analytical_method=self.object)
+        context['calcules'] = calcules
 
         inst_desc = calcules.exclude(calculate_description__isnull=True).exclude(calculate_description="").first()
         inst_unit = calcules.exclude(unit_measure_calculate__isnull=True).exclude(unit_measure_calculate="").first()

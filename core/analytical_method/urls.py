@@ -42,9 +42,14 @@ urlpatterns = [
 
     # Cálculos
     path('detail/calculate/add_description/<uuid:pk>/', AnalyticalMethodCalculeDescriptionCreateView.as_view(), name='add_calc_description'),
+    path('detail/calculate/edit_description/<uuid:pk>/', AnalyticalMethodCalculeDescriptionUpdateView.as_view(), name='edit_calc_description'),
     path('detail/calculate/add_volumen_std_den/<uuid:pk>/', AnalyticalMethodVolumenStdCreateView.as_view(), name='add_volume_std'),
+    path('detail/calculate/edit_volumen_std_den/<uuid:pk>/', AnalyticalMethodVolumenStdUpdateView.as_view(), name='edit_volume_std'),
     path('detail/calculate/add_factor_den/<uuid:pk>/', AnalyticalMethodFactorCreateView.as_view(), name='add_factor'),
+    path('detail/calculate/edit_factor_den/<uuid:pk>/', AnalyticalMethodFactorUpdateView.as_view(), name='edit_factor'),
     path('detail/calculate/add_sample_gram/<uuid:pk>/', AnalyticalMethodSampleGramCreateView.as_view(), name='add_sample_gram'),
+    path('detail/calculate/edit_sample_gram/<uuid:pk>/', AnalyticalMethodSampleGramUpdateView.as_view(), name='edit_sample_gram'),
+    path('detail/calculate/delete/<uuid:pk>/', AnalyticalMethodCalculateDeleteView.as_view(), name='delete_analytical_method_calcule'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

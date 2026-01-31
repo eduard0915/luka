@@ -320,7 +320,7 @@
                         <div class="row mt-2">
 
                             <!-- Botones Cálculo -->
-                            <div class="col-lg-4 col-md-6 mb-3">
+                            <div class="col-lg-6 col-md-6 mb-3">
                                 <div class="card h-100">
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-start mb-3">
@@ -328,65 +328,129 @@
                                                 <i class="bi bi-calculator me-2"></i> Variables de Cálculo
                                             </h5>
                                         </div>
-                                        <div class="row g-2">
-                                            <!-- Primera fila -->
-                                            <div class="col-6">
-                                                {% if not inst_desc %}
-                                                    <button type="button"
-                                                            class="btn btn-outline-primary btn-sm w-100 text-start"
-                                                            onclick="open_modal('{% url 'analytical_method:add_calc_description' object.id %}')">
-                                                        <i class="bi bi-file-text me-2"></i>
-                                                        <small>Descripción Cálculo</small>
-                                                    </button>
-                                                {% endif %}
-                                            </div>
+                                        {% if object.type_method == 'Volumetrico' %}
+                                            <div class="row g-2">
+                                                <!-- Botones en una sola fila -->
+                                                <div class="col-12">
+                                                    <div class="d-flex gap-2 flex-wrap">
+                                                        {% if not inst_desc %}
+                                                            <button type="button"
+                                                                    class="btn btn-outline-primary btn-sm"
+                                                                    onclick="open_modal('{% url 'analytical_method:add_calc_description' object.id %}')">
+                                                                <i class="bi bi-file-text me-1"></i>
+                                                                <small>Descripción Cálculo</small>
+                                                            </button>
+                                                        {% endif %}
 
-                                            <!-- Segunda fila -->
-                                            <div class="col-6">
-                                                <button type="button"
-                                                        class="btn btn-outline-primary btn-sm w-100 text-start"
-                                                        onclick="open_modal('{% url 'analytical_method:add_factor' object.id %}')">
-                                                    <i class="bi bi-123 me-2"></i>
-                                                    <small>Factor</small>
-                                                </button>
-                                            </div>
-                                            <div class="col-6">
-                                                {% if not volumen_std %}
-                                                    <button type="button"
-                                                            class="btn btn-outline-primary btn-sm w-100 text-start"
-                                                            onclick="open_modal('{% url 'analytical_method:add_volume_std' object.id %}')">
-                                                        <i class="bi bi-droplet me-2"></i>
-                                                        <small>Volumen Estándar</small>
-                                                    </button>
-                                                {% endif %}
-                                            </div>
+                                                        <button type="button"
+                                                                class="btn btn-outline-primary btn-sm"
+                                                                onclick="open_modal('{% url 'analytical_method:add_factor' object.id %}')">
+                                                            <i class="bi bi-123 me-1"></i>
+                                                            <small>Factor</small>
+                                                        </button>
 
-                                            <!-- Tercera fila -->
-                                            <div class="col-6">
-                                                {% if not sample_quantity %}
-                                                    <button type="button"
-                                                            class="btn btn-outline-primary btn-sm w-100 text-start"
-                                                            onclick="open_modal('{% url 'analytical_method:add_sample_gram' object.id %}')">
-                                                        <i class="bi bi-droplet me-2"></i>
-                                                        <small>Gramos de Muestra</small>
-                                                    </button>
+                                                        {% if not volumen_std %}
+                                                            <button type="button"
+                                                                    class="btn btn-outline-primary btn-sm"
+                                                                    onclick="open_modal('{% url 'analytical_method:add_volume_std' object.id %}')">
+                                                                <i class="bi bi-droplet me-1"></i>
+                                                                <small>Volumen Estándar</small>
+                                                            </button>
+                                                        {% endif %}
+
+                                                        {% if not sample_quantity %}
+                                                            <button type="button"
+                                                                    class="btn btn-outline-primary btn-sm"
+                                                                    onclick="open_modal('{% url 'analytical_method:add_sample_gram' object.id %}')">
+                                                                <i class="bi bi-droplet me-1"></i>
+                                                                <small>Cantidad de Muestra</small>
+                                                            </button>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+
+                                                <!-- Tabla debajo de los botones -->
+                                                {% if calcules %}
+                                                    <div class="col-12 mt-3">
+                                                        <table class="table table-sm table-bordered">
+                                                            <thead>
+                                                            <tr>
+                                                                <th class="text-center" style="width: 59%;">Descripción</th>
+                                                                <th class="text-center" style="width: 24%;">Posición</th>
+                                                                <th class="text-center" style="width: 17%;">Acciones</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+
+                                                            {% for calc in calcules %}
+                                                            <tr>
+                                                                <td class="text-left align-middle">
+                                                                    {% if calc.calculate_description %}
+                                                                        Descripción: {{ calc.calculate_description }}
+                                                                    {% elif calc.volumen_std %}
+                                                                        Volumen STD: {{ calc.volumen_std }}
+                                                                    {% elif calc.factor %}
+                                                                        Factor: {{ calc.factor }}
+                                                                    {% elif calc.sample_quantity %}
+                                                                        Cant. Muestra: {{ calc.sample_quantity }}
+                                                                    {% endif %}
+                                                                </td>
+                                                                <td class="text-center">{{ calc.position|default:"No aplica" }}</td>
+                                                                <td class="text-center">
+                                                                    {% if calc.calculate_description %}
+                                                                        <a href="javascript:void(0);"
+                                                                           onclick="open_modal('{% url 'analytical_method:edit_calc_description' calc.id %}')"
+                                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                            <i class="bi bi-pencil text-warning"></i>
+                                                                        </a>
+                                                                    {% elif calc.volumen_std %}
+                                                                        <a href="javascript:void(0);"
+                                                                           onclick="open_modal('{% url 'analytical_method:edit_volume_std' calc.id %}')"
+                                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                            <i class="bi bi-pencil text-warning"></i>
+                                                                        </a>
+                                                                    {% elif calc.factor %}
+                                                                        <a href="javascript:void(0);"
+                                                                           onclick="open_modal('{% url 'analytical_method:edit_factor' calc.id %}')"
+                                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                            <i class="bi bi-pencil text-warning"></i>
+                                                                        </a>
+                                                                    {% elif calc.sample_quantity %}
+                                                                        <a href="javascript:void(0);"
+                                                                           onclick="open_modal('{% url 'analytical_method:edit_sample_gram' calc.id %}')"
+                                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                            <i class="bi bi-pencil text-warning"></i>
+                                                                        </a>
+                                                                    {% endif %}
+                                                                    <a href="javascript:void(0);"
+                                                                       onclick="open_modal('{% url 'analytical_method:delete_analytical_method_calcule' calc.id %}')"
+                                                                       class="btn btn-link btn-sm p-0 text-primary">
+                                                                        <i class="bi bi-trash-fill text-danger"></i>
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                            {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 {% endif %}
                                             </div>
-                                        </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Ecuación para Cálculo -->
-                            <div class="col-lg-8 col-md-6 mb-3">
+                            <div class="col-lg-6 col-md-6 mb-3">
                                 <div class="card h-100">
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-start mb-3">
                                             <h5 class="card-title mb-0">
-                                                <i class="bi bi-123 me-2"></i> Ecuación para Cálculo de Concentración de Muestra
+                                                <i class="bi bi-123 me-2"></i> Ecuación para Cálculo de Concentración de
+                                                Muestra
                                             </h5>
                                         </div>
-                                        <div class="col-md-9">
+                                        <div class="col-md-12">
                                             <div class="p-0 bg-light rounded text-center" id="equation-container">
                                                 {% if final_equation %}
                                                     <div style="font-size: 0.8rem; overflow-x: auto; font-family: 'Times New Roman', serif;">
@@ -401,11 +465,6 @@
                                                 {% endif %}
                                             </div>
                                         </div>
-                                    <div class="col-md-3">
-                                        <div class="p-0 bg-light rounded text-center" id="equation-container">
-                                            zxzxzxz
-                                        </div>
-                                    </div>
                                     </div>
                                 </div>
                             </div>
