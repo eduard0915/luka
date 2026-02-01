@@ -208,7 +208,6 @@ class InventoryReagentDeleteView(LoginRequiredMixin, ValidatePermissionRequiredM
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         ir = InventoryReagent.objects.get(pk=self.kwargs.get('pk'))
-        context['title'] = 'Eliminar Inventario de Reactivo'
         context['entity'] = 'Eliminar Inventario de Reactivo'
         context['delete'] = 'Está seguro de eliminar la entrada de inventario de reactivo?'
         context['info_delete'] = f'Lote: {ir.batch_number} - {ir.reagent.code_reagent} {ir.reagent.description_reagent}?'

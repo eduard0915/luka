@@ -328,7 +328,7 @@
                                                 <i class="bi bi-calculator me-2"></i> Variables de Cálculo
                                             </h5>
                                         </div>
-                                        {% if object.type_method == 'Volumetrico' %}
+                                        {% if not object.type_method == 'Lectura Directa' %}
                                             <div class="row g-2">
                                                 <!-- Botones en una sola fila -->
                                                 <div class="col-12">
@@ -383,52 +383,53 @@
                                                             <tbody>
 
                                                             {% for calc in calcules %}
-                                                            <tr>
-                                                                <td class="text-left align-middle">
-                                                                    {% if calc.calculate_description %}
-                                                                        Descripción: {{ calc.calculate_description }}
-                                                                    {% elif calc.volumen_std %}
-                                                                        Volumen STD: {{ calc.volumen_std }}
-                                                                    {% elif calc.factor %}
-                                                                        Factor: {{ calc.factor }}
-                                                                    {% elif calc.sample_quantity %}
-                                                                        Cant. Muestra: {{ calc.sample_quantity }}
-                                                                    {% endif %}
-                                                                </td>
-                                                                <td class="text-center">{{ calc.position|default:"No aplica" }}</td>
-                                                                <td class="text-center">
-                                                                    {% if calc.calculate_description %}
+                                                                <tr>
+                                                                    <td class="text-left align-middle">
+                                                                        {% if calc.calculate_description %}
+                                                                            Descripción:
+                                                                            {{ calc.calculate_description }}
+                                                                        {% elif calc.volumen_std %}
+                                                                            Volumen STD: {{ calc.volumen_std }}
+                                                                        {% elif calc.factor %}
+                                                                            Factor: {{ calc.factor }}
+                                                                        {% elif calc.sample_quantity %}
+                                                                            Cant. Muestra: {{ calc.sample_quantity }}
+                                                                        {% endif %}
+                                                                    </td>
+                                                                    <td class="text-center">{{ calc.position|default:"No aplica" }}</td>
+                                                                    <td class="text-center">
+                                                                        {% if calc.calculate_description %}
+                                                                            <a href="javascript:void(0);"
+                                                                               onclick="open_modal('{% url 'analytical_method:edit_calc_description' calc.id %}')"
+                                                                               class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                                <i class="bi bi-pencil text-warning"></i>
+                                                                            </a>
+                                                                        {% elif calc.volumen_std %}
+                                                                            <a href="javascript:void(0);"
+                                                                               onclick="open_modal('{% url 'analytical_method:edit_volume_std' calc.id %}')"
+                                                                               class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                                <i class="bi bi-pencil text-warning"></i>
+                                                                            </a>
+                                                                        {% elif calc.factor %}
+                                                                            <a href="javascript:void(0);"
+                                                                               onclick="open_modal('{% url 'analytical_method:edit_factor' calc.id %}')"
+                                                                               class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                                <i class="bi bi-pencil text-warning"></i>
+                                                                            </a>
+                                                                        {% elif calc.sample_quantity %}
+                                                                            <a href="javascript:void(0);"
+                                                                               onclick="open_modal('{% url 'analytical_method:edit_sample_gram' calc.id %}')"
+                                                                               class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                                <i class="bi bi-pencil text-warning"></i>
+                                                                            </a>
+                                                                        {% endif %}
                                                                         <a href="javascript:void(0);"
-                                                                           onclick="open_modal('{% url 'analytical_method:edit_calc_description' calc.id %}')"
-                                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
-                                                                            <i class="bi bi-pencil text-warning"></i>
+                                                                           onclick="open_modal('{% url 'analytical_method:delete_analytical_method_calcule' calc.id %}')"
+                                                                           class="btn btn-link btn-sm p-0 text-primary">
+                                                                            <i class="bi bi-trash-fill text-danger"></i>
                                                                         </a>
-                                                                    {% elif calc.volumen_std %}
-                                                                        <a href="javascript:void(0);"
-                                                                           onclick="open_modal('{% url 'analytical_method:edit_volume_std' calc.id %}')"
-                                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
-                                                                            <i class="bi bi-pencil text-warning"></i>
-                                                                        </a>
-                                                                    {% elif calc.factor %}
-                                                                        <a href="javascript:void(0);"
-                                                                           onclick="open_modal('{% url 'analytical_method:edit_factor' calc.id %}')"
-                                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
-                                                                            <i class="bi bi-pencil text-warning"></i>
-                                                                        </a>
-                                                                    {% elif calc.sample_quantity %}
-                                                                        <a href="javascript:void(0);"
-                                                                           onclick="open_modal('{% url 'analytical_method:edit_sample_gram' calc.id %}')"
-                                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
-                                                                            <i class="bi bi-pencil text-warning"></i>
-                                                                        </a>
-                                                                    {% endif %}
-                                                                    <a href="javascript:void(0);"
-                                                                       onclick="open_modal('{% url 'analytical_method:delete_analytical_method_calcule' calc.id %}')"
-                                                                       class="btn btn-link btn-sm p-0 text-primary">
-                                                                        <i class="bi bi-trash-fill text-danger"></i>
-                                                                    </a>
-                                                                </td>
-                                                            </tr>
+                                                                    </td>
+                                                                </tr>
                                                             {% endfor %}
                                                             </tbody>
                                                         </table>
