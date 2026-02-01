@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         actions += '<a onclick=open_modal("/reagent/detail/' + row['id'] + '/") type="button" title="Detalle"><i class="bi bi-info-square text-info"></i></a> &nbsp';
 
                         // Validar si puede tener estandarización
-                        if (row['standard'] === false && row['solvent'] === false) {
+                        if (row['standard'] === true && row['solvent'] === false) {
 
                             // Si NO tiene estandarización: mostrar botón para CREAR
                             if (row['has_standardization'] === false) {

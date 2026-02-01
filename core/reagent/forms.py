@@ -76,9 +76,13 @@ class InventoryReagentForm(ModelForm):
         if user and user.site:
             self.fields['reagent'].queryset = Reagent.objects.filter(enable_reagent=True, site_id=user.site.id)
 
-        if self.instance and self.instance.pk and self.instance.reagent:
-            self.fields['quantity_stock'].label = f"Cantidad ({self.instance.reagent.umb})"
-            self.fields['purity'].label = f"Pureza ({self.instance.reagent.purity_unit})"
+        if self.instance.pk:
+            try:
+                if self.instance.reagent:
+                    self.fields['quantity_stock'].label = f"Cantidad ({self.instance.reagent.umb})"
+                    self.fields['purity'].label = f"Pureza ({self.instance.reagent.purity_unit})"
+            except Reagent.DoesNotExist:
+                pass
 
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'

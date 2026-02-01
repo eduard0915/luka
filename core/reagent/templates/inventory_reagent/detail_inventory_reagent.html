@@ -90,20 +90,20 @@
                                         <td>{{ foo.user_transaction }}</td>
                                         <td>{{ foo.detail_transaction}}</td>
                                         <td>
-                                            <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
+                                            <a onclick="open_modal()"
                                                title="Editar">
                                                 <i class="bi bi-pencil-square text-warning me-2"></i>
                                             </a>
-                                            <a onclick="open_modal('{% url 'user:delete_training' foo.id %}')"
+                                            <a onclick="open_modal()"
                                                title="Eliminar">
                                                 <i class="bi bi-trash text-danger me-2"></i>
                                             </a>
-                                            {% if foo.training_status == 'Vencido' %}
-                                                <a onclick="open_modal('{% url 'user:create_update_training' foo.id %}')"
-                                                   title="Actualizar">
-                                                    <i class="bi bi-arrow-clockwise text-info me-2"></i>
-                                                </a>
-                                            {% endif %}
+{#                                            {% if foo.training_status == 'Vencido' %}#}
+{#                                                <a onclick="open_modal()"#}
+{#                                                   title="Actualizar">#}
+{#                                                    <i class="bi bi-arrow-clockwise text-info me-2"></i>#}
+{#                                                </a>#}
+{#                                            {% endif %}#}
                                         </td>
                                     </tr>
                                 {% empty %}
