@@ -176,7 +176,10 @@ class SolutionStd(BaseModel):
     preparation_confirmed = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'{self.solute_std.reagent} {self.concentration_std}{self.concentration_unit} - {self.code_solution_std} - {self.quantity_solution_std}{self.solute_std.reagent.umb}'
+        if not self.preparated_std_by:
+            return f'{self.solute_std.reagent} {self.concentration_std}{self.concentration_unit} - {self.code_solution_std} - {self.quantity_solution_std}{self.solute_std.reagent.umb}'
+        else:
+            return f'{self.solute_std.reagent} {self.concentration_std}{self.concentration_unit} - {self.code_solution_std} - {self.quantity_solution_std}mL'
 
     class Meta:
         verbose_name = 'SolutionStd'

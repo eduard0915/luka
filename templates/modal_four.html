@@ -53,10 +53,6 @@
 
     {% block scripts_detail %}
 
-        {% if entity == 'Registro de Procesamiento de Análisis' %}
-            <script src="{% static 'quantity_standard_label_toggle.js' %}"></script>
-        {% endif %}
-
         <script type="application/javascript">
 
             $('form').on('submit', function (e) {
