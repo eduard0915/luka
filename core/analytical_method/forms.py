@@ -12,6 +12,8 @@ BOOLEAN = [(True, 'Si'), (False, 'No')]
 
 TYPE_METHOD = [
     ('Volumetrico', 'Volumétrico'),
+    ('Volumetrico por Retroceso', 'Volumétrico por Retroceso'),
+    ('Volumetrico - Mezcla', 'Volumétrico - Mezcla'),
     ('Gravimetrico', 'Gravimétrico'),
     ('Espectrofotometrico', 'Espectrofotométrico'),
     ('Espectroscopico', 'Espectroscópico'),
@@ -25,7 +27,7 @@ UNIT_CALCULATE = [
     ('ppm', 'ppm')
 ]
 
-POSITION = [('Numerador', 'Numerador'), ('Denominador', 'Denominador'), ('General', 'General')]
+POSITION = [('Numerador', 'Numerador'), ('Denominador', 'Denominador')]
 
 
 # Creación de Métodos Analíticos

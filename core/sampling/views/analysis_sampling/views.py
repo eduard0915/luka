@@ -25,7 +25,8 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context = super().get_context_data(**kwargs)
         context['title'] = 'Procesamiento de Análisis de Muestra'
         context['entity'] = self.object
-        context['analysis_processing'] = self.object.samplinganalysisprocessing_set.all()
+        context['analysis_processing'] = self.object.samplinganalysisprocessing_set.all().order_by('-analyzed_date')
+        context['analysis_last'] = self.object.samplinganalysisprocessing_set.last()
 
         # Datos del método analítico
         method = self.object.analytical_method
@@ -54,8 +55,8 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['icon'] = 'bi bi-calculator'
         context['back'] = reverse_lazy('sampling:detail_sampling_process', kwargs={'pk': self.object.sampling_process.id})
         # URL para agregar procesamiento
-        context['create_processing_url'] = reverse_lazy('sampling:create_sampling_analysis_processing',
-                                                       kwargs={'pk': self.object.id})
+        context['create_processing_url'] = reverse_lazy(
+            'sampling:create_sampling_analysis_processing', kwargs={'pk': self.object.id})
         return context
 
 
@@ -101,24 +102,24 @@ class SamplingAnalysisProcessingCreateView(LoginRequiredMixin, ValidatePermissio
 
 
 # Vista para Obtener la unidad de medida del reactivo
-@login_required
-@require_GET
-def get_solution_std_unit(request):
-    """Obtiene la unidad de medida del reactivo de la solución estándar"""
-    try:
-        solution_id = request.GET.get('solution_id')
-        if not solution_id:
-            return JsonResponse({'unit': None})
-
-        solution = SolutionStd.objects.select_related(
-            'solute_std__reagent'
-        ).get(pk=solution_id)
-
-        # Obtener la unidad de medida del reactivo
-        unit = solution.solute_std.reagent.umb if solution.solute_std and solution.solute_std.reagent else None
-
-        return JsonResponse({'unit': unit})
-    except SolutionStd.DoesNotExist:
-        return JsonResponse({'unit': None})
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+# @login_required
+# @require_GET
+# def get_solution_std_unit(request):
+#     """Obtiene la unidad de medida del reactivo de la solución estándar"""
+#     try:
+#         solution_id = request.GET.get('solution_id')
+#         if not solution_id:
+#             return JsonResponse({'unit': None})
+#
+#         solution = SolutionStd.objects.select_related(
+#             'solute_std__reagent'
+#         ).get(pk=solution_id)
+#
+#         # Obtener la unidad de medida del reactivo
+#         unit = solution.solute_std.reagent.umb if solution.solute_std and solution.solute_std.reagent else None
+#
+#         return JsonResponse({'unit': unit})
+#     except SolutionStd.DoesNotExist:
+#         return JsonResponse({'unit': None})
+#     except Exception as e:
+#         return JsonResponse({'error': str(e)}, status=400)

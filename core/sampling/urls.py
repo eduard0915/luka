@@ -30,7 +30,7 @@ urlpatterns = [
     # Procesamiento de la muestra
     path('analysis/detail/<uuid:pk>/', SamplingAnalysisDetailView.as_view(), name='detail_sampling_analysis'),
     path('analysis/processing/add/<uuid:pk>/', SamplingAnalysisProcessingCreateView.as_view(), name='create_sampling_analysis_processing'),
-    path('get-solution-std-unit/', get_solution_std_unit, name='get_solution_std_unit'),
+    # path('get-solution-std-unit/', get_solution_std_unit, name='get_solution_std_unit'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

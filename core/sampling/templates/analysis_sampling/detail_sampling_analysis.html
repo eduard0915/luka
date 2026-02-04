@@ -53,7 +53,8 @@
                             </div>
                             <div class="col-md-2 px-0">
                                 <b>Resultado</b><br>
-                                <p>{{ entity.average_concentration|default_if_none:"Pendiente" }} {% if entity.comply %}{{ specification.unit_measure|default:"" }}{% endif %}</p>
+{#                                <p>{{ entity.average_concentration|default_if_none:"Pendiente" }} {% if entity.comply %}{{ specification.unit_measure|default:"" }}{% endif %}</p>#}
+                                <p>{{ analysis_last.concentration_sample|default:"Pendiente" }} {% if entity.comply %}{{ specification.unit_measure|default:"" }}{% endif %}</p>
                             </div>
                             <div class="col-md-1 px-0">
                                 <b>Concepto</b><br>
@@ -136,11 +137,11 @@
                                                         <i class="bi bi-list me-2"></i> Procedimiento
                                                     </h5>
                                                 </div>
-                                                <div class="list-container mb-3" id="procedures-container">
+                                                <div class="mb-3" id="procedures-container">
                                                     <ol class="list-group list-group-numbered list-group-flush">
                                                         {% for item in procedures %}
-                                                            <li class="list-group-item py-1 p-1 border-0 d-flex align-items-center">
-                                                                <span>{{ item.procedure }}</span>
+                                                            <li class="list-group-item py-1 p-1 border-0 d-flex align-items-start">
+                                                                <span class="flex-grow-1 text-justify" style="text-align: justify">{{ item.procedure }}</span>
                                                             </li>
                                                         {% empty %}
                                                             <li class="list-group-item py-1 p-1 border-0 text-muted">No hay procedimientos registrados</li>
