@@ -197,7 +197,7 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['materials'] = self.object.analyticalmethodmaterial_set.all()
         context['procedures'] = self.object.analyticalmethodprocedure_set.all()
 
-        calcules = AnalyticalMethodCalculate.objects.filter(analytical_method=self.object)
+        calcules = AnalyticalMethodCalculate.objects.select_related('analytical_method').filter(analytical_method=self.object).order_by('-date_creation')
         context['calcules'] = calcules
 
         inst_desc = calcules.exclude(calculate_description__isnull=True).exclude(calculate_description="").first()
@@ -220,8 +220,8 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                 if c.volumen_std: parts.append(str(c.volumen_std))
                 if c.factor: parts.append(str(c.factor))
                 if c.sample_quantity: parts.append(str(c.sample_quantity))
-                context['volumen_std'] = str(c.volumen_std)
-                context['sample_quantity'] = str(c.sample_quantity)
+                context['volumen_std'] = [c.volumen_std for c in calcules if c.volumen_std is not None]
+                context['sample_quantity'] = [c.sample_quantity for c in calcules if c.sample_quantity is not None]
 
                 item_text = " \cdot ".join(parts)
                 if not item_text: continue

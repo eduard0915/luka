@@ -71,10 +71,7 @@ def create_sampling_analysis(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=SamplingAnalysisProcessing)
-def update_sampling_analysis(sender, instance, created, **kwargs):
-
-    if not created:
-        return
+def update_sampling_analysis(sender, instance, **kwargs):
 
     with transaction.atomic():
         sampling_analysis = SamplingAnalysis.objects.select_related(
