@@ -54,7 +54,7 @@
                             <div class="col-md-2 px-0">
                                 <b>Resultado</b><br>
 {#                                <p>{{ entity.average_concentration|default_if_none:"Pendiente" }} {% if entity.comply %}{{ specification.unit_measure|default:"" }}{% endif %}</p>#}
-                                <p>{{ analysis_last.concentration_sample|default:"Pendiente" }} {% if entity.comply %}{{ specification.unit_measure|default:"" }}{% endif %}</p>
+                                <p>{{ entity.average_concentration|default:"Pendiente" }} {% if entity.comply %}{{ specification.unit_measure|default:"" }}{% endif %}</p>
                             </div>
                             <div class="col-md-1 px-0">
                                 <b>Concepto</b><br>
@@ -82,11 +82,13 @@
                                                     <h5 class="card-title mb-0">
                                                         <i class="bi bi-list-check me-2"></i> Procesamiento de Análisis
                                                     </h5>
-                                                    <a href="javascript:void(0);"
-                                                       onclick="open_modal('{{ create_processing_url }}')"
-                                                       class="btn btn-primary btn-sm">
-                                                        <i class="bi bi-plus-square me-1"></i> Agregar
-                                                    </a>
+                                                    {% if analysis_count < 3 %}
+                                                        <a href="javascript:void(0);"
+                                                           onclick="open_modal('{{ create_processing_url }}')"
+                                                           class="btn btn-primary btn-sm">
+                                                            <i class="bi bi-plus-square me-1"></i> Agregar
+                                                        </a>
+                                                    {% endif %}
                                                 </div>
                                                 <div class="table-responsive">
                                                     <table class="table table-hover table-bordered">

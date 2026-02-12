@@ -26,7 +26,7 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['title'] = 'Procesamiento de Análisis de Muestra'
         context['entity'] = self.object
         context['analysis_processing'] = self.object.samplinganalysisprocessing_set.all().order_by('-analyzed_date')
-        context['analysis_last'] = self.object.samplinganalysisprocessing_set.last()
+        context['analysis_count'] = self.object.samplinganalysisprocessing_set.count()
 
         # Datos del método analítico
         method = self.object.analytical_method

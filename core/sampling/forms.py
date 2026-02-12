@@ -63,36 +63,41 @@ class SamplingAnalysisProcessingForm(ModelForm):
             qty_std = float(instance.quantity_standard)
             qty_sample = float(instance.quantity_sample)
             cifras_sign = instance.sample_analysis.analytical_method.sig_figs_result
-            # conc_std = float(instance.standard_solution.concentration_std)
 
             if qty_sample > 0:
 
                 factor_num = 1
-                sample = 1
+                sample_num = 1
+                std_num = 1
 
                 for num in var_num:
-                    # Solo multiplicar si el factor no es None
                     if num.factor is not None:
                         factor_num *= float(num.factor)
 
                     if num.sample_quantity is not None:
-                        sample = float(qty_sample)
+                        sample_num = float(qty_sample)
 
-                print(qty_std, qty_sample, factor_num)
-                numerator = round((qty_std * factor_num * sample), cifras_sign)
+                    if num.volumen_std is not None:
+                        std_num = qty_std
+
+                numerator = std_num * factor_num * sample_num
 
                 factor_den = 1
+                sample_den = 1
+                std_den = 1
 
                 for den in var_den:
-                    # Solo multiplicar si el factor no es None
+
                     if den.factor is not None:
                         factor_den *= float(den.factor)
 
-                # El cálculo del denominador debe ir FUERA del bucle
-                denominator = round((qty_std * factor_den * qty_sample), cifras_sign)
+                    if den.sample_quantity is not None:
+                        sample_den = float(qty_sample)
 
-                print(factor_num, factor_den)
-                print(numerator, denominator)
+                    if den.volumen_std is not None:
+                        std_den = qty_std
+
+                denominator = std_den * factor_den * sample_den
 
                 instance.concentration_sample = round((numerator / denominator), cifras_sign)
             else:
