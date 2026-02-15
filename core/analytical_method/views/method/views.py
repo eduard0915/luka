@@ -10,7 +10,7 @@ from django.views.generic import CreateView, UpdateView, DetailView, ListView
 from django import forms
 
 from core.mixins import ValidatePermissionRequiredMixin
-from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate
+from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation
 from core.analytical_method.forms import AnalyticalMethodForm
 
 
@@ -200,10 +200,21 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         calcules = AnalyticalMethodCalculate.objects.select_related('analytical_method').filter(analytical_method=self.object).order_by('-date_creation')
         context['calcules'] = calcules
 
+        calcules_relation = AnalyticalMethodCalculateRelation.objects.select_related('analytical_method').filter(analytical_method=self.object).order_by('-date_creation')
+        context['calcules_relation'] = calcules_relation
+        context['has_relations'] = calcules_relation.exists()
+
         inst_desc = calcules.exclude(calculate_description__isnull=True).exclude(calculate_description="").first()
         inst_unit = calcules.exclude(unit_measure_calculate__isnull=True).exclude(unit_measure_calculate="").first()
 
         context['inst_desc'] = inst_desc
+
+        show_dependent_toggle = False
+        for calc in calcules:
+            if calc.volumen_std or calc.factor or calc.sample_quantity:
+                show_dependent_toggle = True
+                break
+        context['show_dependent_toggle'] = show_dependent_toggle or context['has_relations']
 
         if inst_desc or calcules.exists():
             desc = inst_desc.calculate_description if inst_desc else "Cálculo"
@@ -215,28 +226,65 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
 
             # 2. Iteramos TODAS las instancias para recolectar valores,
             # sin importar si son la misma instancia que tiene la descripción
-            for c in calcules:
+            for calc in calcules:
                 parts = []
-                if c.volumen_std: parts.append(str(c.volumen_std))
-                if c.factor: parts.append(str(c.factor))
-                if c.sample_quantity: parts.append(str(c.sample_quantity))
-                context['volumen_std'] = [c.volumen_std for c in calcules if c.volumen_std is not None]
-                context['sample_quantity'] = [c.sample_quantity for c in calcules if c.sample_quantity is not None]
+                if calc.volumen_std: parts.append(str(calc.volumen_std))
+                if calc.factor: parts.append(str(calc.factor))
+                if calc.sample_quantity: parts.append(str(calc.sample_quantity))
+                context['volumen_std'] = [calc.volumen_std for calc in calcules if calc.volumen_std is not None]
+                context['sample_quantity'] = [calc.sample_quantity for calc in calcules if calc.sample_quantity is not None]
 
                 item_text = " \cdot ".join(parts)
                 if not item_text: continue
 
-                if c.position == 'Numerador':
+                if calc.position == 'Numerador':
                     num_terms.append(item_text)
-                elif c.position == 'Denominador':
+                elif calc.position == 'Denominador':
                     den_terms.append(item_text)
-                elif c.position == 'General':
+                elif calc.position == 'General':
                     gen_terms.append(item_text)
 
             # 3. Construcción de la estructura LaTeX
             str_num = " \cdot ".join(num_terms) if num_terms else "1"
             str_den = " \cdot ".join(den_terms) if den_terms else "1"
             str_gen = f" \cdot {' \cdot '.join(gen_terms)}" if gen_terms else ""
+
+            # 4. Cálculos Relacionados
+            num_terms_rel = []
+            den_terms_rel = []
+            gen_terms_rel = []
+            rel_desc = ""
+            rel_unit = ""
+
+            for cr in calcules_relation:
+                parts_rel = []
+                if cr.calculate_description_relation:
+                    rel_desc = cr.calculate_description_relation
+                    rel_unit = cr.unit_measure_calculate
+                if cr.analytical_method_calculate: parts_rel.append(f"\\text{{{cr.analytical_method_calculate.calculate_description}}}")
+                if cr.volumen_std: parts_rel.append(str(cr.volumen_std))
+                if cr.factor: parts_rel.append(str(cr.factor))
+                if cr.sample_quantity: parts_rel.append(str(cr.sample_quantity))
+
+                item_text_rel = " \cdot ".join(parts_rel)
+                if not item_text_rel: continue
+
+                if cr.position == 'Numerador':
+                    num_terms_rel.append(item_text_rel)
+                elif cr.position == 'Denominador':
+                    den_terms_rel.append(item_text_rel)
+                elif cr.position == 'General':
+                    gen_terms_rel.append(item_text_rel)
+
+            str_num_rel = " \cdot ".join(num_terms_rel) if num_terms_rel else "1"
+            str_den_rel = " \cdot ".join(den_terms_rel) if den_terms_rel else "1"
+            str_gen_rel = f" \cdot {' \cdot '.join(gen_terms_rel)}" if gen_terms_rel else ""
+
+            if rel_desc:
+                label_rel = f"\\text{{{rel_desc}}}"
+                if rel_unit:
+                    label_rel += f" \\text{{ ({rel_unit})}}"
+                context['final_equation_relation'] = f"{label_rel} = \\frac{{{str_num_rel}}}{{{str_den_rel}}}{str_gen_rel}"
 
             # Usamos \text{} para asegurar que espacios y tildes se vean bien
             label = f"\\text{{{desc}}}"

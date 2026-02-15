@@ -8,9 +8,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET
 from django.views.generic import CreateView, DetailView
 
+from core.analytical_method.models import AnalyticalMethodCalculateRelation
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.models import SpecificationProduct
-from core.sampling.forms import SamplingAnalysisProcessingForm
+from core.sampling.forms import SamplingAnalysisProcessingForm, SamplingAnalysisProcessingRelationForm
 from core.sampling.models import SamplingAnalysis, SamplingAnalysisProcessing
 from core.solution.models import SolutionStd
 
@@ -36,6 +37,7 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['equipments'] = method.analyticalmethodequipment_set.all()
         context['materials'] = method.analyticalmethodmaterial_set.all()
         context['procedures'] = method.analyticalmethodprocedure_set.all()
+        context['calculate_relations'] = method.analyticalmethodcalculaterelation_set.all()
 
         # Obtener la especificación del producto para este análisis
         sampling_process = self.object.sampling_process
@@ -98,6 +100,52 @@ class SamplingAnalysisProcessingCreateView(LoginRequiredMixin, ValidatePermissio
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Registro de Procesamiento de Análisis'
+        return context
+
+
+# Registro de Procesamiento de Análisis Relacional
+class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    model = SamplingAnalysisProcessing
+    form_class = SamplingAnalysisProcessingRelationForm
+    template_name = 'analysis_sampling/create_sampling_analysis_processing.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'add':
+                form = self.get_form()
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, '¡Procesamiento Relacional Registrado Satisfactoriamente!')
+                else:
+                    data['error'] = form.errors
+            else:
+                data['error'] = 'No ha ingresado datos en los campos'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        analysis = SamplingAnalysis.objects.get(pk=self.kwargs.get('pk'))
+        relation = AnalyticalMethodCalculateRelation.objects.get(pk=self.kwargs.get('pk_relation'))
+        kwargs.update({
+            'analysis': analysis,
+            'relation': relation
+        })
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['action'] = 'add'
+        relation = AnalyticalMethodCalculateRelation.objects.get(pk=self.kwargs.get('pk_relation'))
+        context['entity'] = f'Calcular {relation.calculate_description_relation}'
         return context
 
 

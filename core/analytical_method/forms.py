@@ -4,7 +4,7 @@ from django.forms import ModelForm, TextInput, Select, NumberInput, Textarea
 
 from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodSolution, AnalyticalMethodSolutionStd, \
     AnalyticalMethodReagent, AnalyticalMethodEquipment, AnalyticalMethodMaterial, AnalyticalMethodProcedure, \
-    AnalyticalMethodCalculate
+    AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation
 from core.laboratory.models import Laboratory
 from core.solution.models import SolutionStdBase, SolutionBase
 
@@ -390,6 +390,173 @@ class AnalyticalMethodSampleGramForm(ModelForm):
         widgets = {
             'sample_quantity': TextInput(attrs={'class': 'form-control'}),
             'position': Select(attrs={'class': 'form-control'}, choices=POSITION)
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Relación de Cálculos
+class AnalyticalMethodCalculateRelationRelationForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        if self.analytical_method:
+            self.fields['analytical_method_calculate'].queryset = AnalyticalMethodCalculate.objects.filter(
+                analytical_method__analyticalmethodproduct__product__analyticalmethodproduct__analytical_method=self.analytical_method
+            ).exclude(calculate_description__isnull=True).exclude(
+                calculate_description__exact='').distinct()
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodCalculateRelation
+        fields = ['analytical_method_calculate', 'position']
+        widgets = {
+            'analytical_method_calculate': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+            'position': Select(attrs={'class': 'form-control'}, choices=POSITION),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Relación de Cálculos
+class AnalyticalMethodCalculeRelationDescriptionForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodCalculateRelation
+        fields = ['calculate_description_relation', 'unit_measure_calculate']
+        widgets = {
+            'calculate_description_relation': TextInput(attrs={'class': 'form-control'}),
+            'unit_measure_calculate': Select(attrs={'class': 'form-control'}, choices=UNIT_CALCULATE)
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+class AnalyticalMethodVolumenStdRelationForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodCalculateRelation
+        fields = ['volumen_std', 'position']
+        widgets = {
+            'volumen_std': TextInput(attrs={'class': 'form-control'}),
+            'position': Select(attrs={'class': 'form-control'}, choices=POSITION)
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+class AnalyticalMethodFactorRelationForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodCalculateRelation
+        fields = ['factor', 'position']
+        widgets = {
+            'factor': TextInput(attrs={'class': 'form-control'}),
+            'position': Select(attrs={'class': 'form-control'}, choices=POSITION),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+class AnalyticalMethodSampleGramRelationForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodCalculateRelation
+        fields = ['sample_quantity', 'position']
+        widgets = {
+            'sample_quantity': TextInput(attrs={'class': 'form-control'}),
+            'position': Select(attrs={'class': 'form-control'}, choices=POSITION),
         }
 
     def save(self, commit=True):

@@ -5,7 +5,7 @@ from crum import get_current_user
 from core.sampling.models import SamplingGroup, SamplingProcess, SamplingAnalysisProcessing
 from core.product.models import SamplePoint
 from core.solution.models import SolutionStd
-from core.analytical_method.models import AnalyticalMethodCalculate
+from core.analytical_method.models import AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation
 
 TYPE_SAMPLING = [('En Proceso', 'En Proceso'), ('Producto Terminado', 'Producto Terminado')]
 
@@ -74,7 +74,7 @@ class SamplingAnalysisProcessingForm(ModelForm):
                     if num.factor is not None:
                         factor_num *= float(num.factor)
 
-                    if num.sample_quantity is not None:
+                    if num.sample_quantity and num.sample_quantity.strip():
                         sample_num = float(qty_sample)
 
                     if num.volumen_std is not None:
@@ -91,7 +91,7 @@ class SamplingAnalysisProcessingForm(ModelForm):
                     if den.factor is not None:
                         factor_den *= float(den.factor)
 
-                    if den.sample_quantity is not None:
+                    if den.sample_quantity and den.sample_quantity.strip():
                         sample_den = float(qty_sample)
 
                     if den.volumen_std is not None:
@@ -108,6 +108,121 @@ class SamplingAnalysisProcessingForm(ModelForm):
             return instance
         except Exception as e:
             raise ValidationError({'error': str(e)})
+
+
+class SamplingAnalysisProcessingRelationForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analysis = kwargs.pop('analysis')
+        self.relation = kwargs.pop('relation')
+        super().__init__(*args, **kwargs)
+
+        calcs = AnalyticalMethodCalculateRelation.objects.select_related('analytical_method').filter(
+            analytical_method_id=self.analysis.analytical_method.id,
+            calculate_description_relation=self.relation.calculate_description_relation
+        )
+        calc_con_label = calcs.exclude(sample_quantity__in=[None, '', False]).first()
+
+        std_bases = self.analysis.analytical_method.analyticalmethodsolutionstd_set.values_list('solution_std_id',
+                                                                                               flat=True)
+        self.fields['standard_solution'].queryset = SolutionStd.objects.select_related('solute_std').filter(
+            solution_std_base_id__in=std_bases,
+            preparation_confirmed=True,
+            quantity_solution_std__gt=0)
+
+        if calc_con_label and calc_con_label.sample_quantity:
+            self.fields['quantity_sample'].label = str(calc_con_label.sample_quantity)
+
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+        col_classes = {
+            'standard_solution': 'col-md-7',
+            'quantity_standard': 'col-md-2',
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
+    class Meta:
+        model = SamplingAnalysisProcessing
+        fields = ['standard_solution', 'quantity_standard', 'quantity_sample']
+        widgets = {
+            'standard_solution': Select(
+                attrs={'class': 'form-control select2', 'required': True, 'style': 'width: 100%'}),
+            'quantity_standard': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'quantity_sample': TextInput(attrs={'class': 'form-control', 'required': True}),
+        }
+
+    def save(self, commit=True):
+        user = get_current_user()
+        var_num = AnalyticalMethodCalculateRelation.objects.select_related('analytical_method').filter(
+            analytical_method_id=self.analysis.analytical_method.id,
+            calculate_description_relation=self.relation.calculate_description_relation,
+            position='Numerador'
+        )
+        var_den = AnalyticalMethodCalculateRelation.objects.select_related('analytical_method').filter(
+            analytical_method_id=self.analysis.analytical_method.id,
+            calculate_description_relation=self.relation.calculate_description_relation,
+            position='Denominador'
+        )
+
+        try:
+            instance = super().save(commit=False)
+            instance.sample_analysis_id = self.analysis.id
+            instance.analyzed_by_id = user.id
+            instance.analyzed_date = timezone.localtime()
+
+            if instance.quantity_standard is None or instance.quantity_sample is None or instance.standard_solution.concentration_std is None:
+                raise ValidationError(
+                    "Los campos cantidad estándar, cantidad de muestra y concentración del estándar son obligatorios")
+
+            qty_std = float(instance.quantity_standard)
+            qty_sample = float(instance.quantity_sample)
+            cifras_sign = instance.sample_analysis.analytical_method.sig_figs_result
+
+            if qty_sample > 0:
+                factor_num = 1
+                sample_num = 1
+                std_num = 1
+
+                for num in var_num:
+                    if num.factor is not None:
+                        factor_num *= float(num.factor)
+
+                    if num.sample_quantity and num.sample_quantity.strip():
+                        sample_num = float(qty_sample)
+
+                    if num.volumen_std is not None:
+                        std_num = qty_std
+
+                numerator = std_num * factor_num * sample_num
+
+                factor_den = 1
+                sample_den = 1
+                std_den = 1
+
+                for den in var_den:
+                    if den.factor is not None:
+                        factor_den *= float(den.factor)
+
+                    if den.sample_quantity and den.sample_quantity.strip():
+                        sample_den = float(qty_sample)
+
+                    if den.volumen_std is not None:
+                        std_den = qty_std
+
+                denominator = std_den * factor_den * sample_den
+
+                instance.concentration_sample = round((numerator / denominator), cifras_sign)
+            else:
+                instance.concentration_sample = 0
+
+            if commit:
+                instance.save()
+            return instance
+        except Exception as e:
+            raise ValidationError({'error': str(e)})
+
 
 class SamplingGroupForm(ModelForm):
     def __init__(self, *args, **kwargs):
