@@ -21,14 +21,24 @@ class BaseAnalyticalMethodDetailView(ValidatePermissionRequiredMixin):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
+    def get(self, request, *args, **kwargs):
+        self.action = request.GET.get('action')
+        return super().get(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if isinstance(self, CreateView):
+            kwargs['analytical_method'] = AnalyticalMethod.objects.get(pk=self.kwargs.get('pk'))
+        else:
+            kwargs['analytical_method'] = self.get_object().analytical_method
+        return kwargs
+
     def post(self, request, *args, **kwargs):
         data = {}
         try:
-            action = request.POST.get('action')
-            if action == 'add':
-                analytical_method = AnalyticalMethod.objects.get(pk=self.kwargs.get('pk'))
-                form = self.get_form_class()(request.POST, analytical_method=analytical_method)
-            elif action == 'edit':
+            if isinstance(self, CreateView):
+                form = self.get_form()
+            elif isinstance(self, UpdateView):
                 self.object = self.get_object()
                 form = self.get_form()
             else:

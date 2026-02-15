@@ -30,6 +30,7 @@ urlpatterns = [
     # Procesamiento de la muestra
     path('analysis/detail/<uuid:pk>/', SamplingAnalysisDetailView.as_view(), name='detail_sampling_analysis'),
     path('analysis/processing/add/<uuid:pk>/', SamplingAnalysisProcessingCreateView.as_view(), name='create_sampling_analysis_processing'),
+    path('analysis/processing/relation/add/<uuid:pk>/<uuid:pk_relation>/', SamplingAnalysisProcessingRelationCreateView.as_view(), name='create_sampling_analysis_processing_relation'),
     # path('get-solution-std-unit/', get_solution_std_unit, name='get_solution_std_unit'),
 ]
 

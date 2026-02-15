@@ -193,7 +193,7 @@ class AnalyticalMethodCalculate(BaseModel):
     calculate_description = models.CharField(max_length=100, verbose_name='Descripción del Cálculo')
     unit_measure_calculate = models.CharField(max_length=10, verbose_name='Unidad a Calcular')
     volumen_std = models.CharField(max_length=100, verbose_name='Volúmen Estándar', null=True, blank=True)
-    factor = models.FloatField(verbose_name='Factor', null=True, blank=True)
+    factor = models.FloatField(verbose_name='Constante', null=True, blank=True)
     sample_quantity = models.CharField(max_length=50, verbose_name='Muestra')
     position = models.CharField(max_length=15, verbose_name='Posición en Ecuación')
 
@@ -213,3 +213,34 @@ class AnalyticalMethodCalculate(BaseModel):
             else:
                 self.user_updated = user
         return super(AnalyticalMethodCalculate, self).save(*args, **kwargs)
+
+
+# Calculos de Relacionados
+class AnalyticalMethodCalculateRelation(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE)
+    analytical_method_calculate = models.ForeignKey(
+        AnalyticalMethodCalculate, verbose_name='Calculo Relacionado', on_delete=models.CASCADE, null=True, blank=True)
+    calculate_description_relation = models.CharField(max_length=100, verbose_name='Descripción del Cálculo')
+    unit_measure_calculate = models.CharField(max_length=10, verbose_name='Unidad a Calcular')
+    volumen_std = models.CharField(max_length=100, verbose_name='Volúmen Estándar', null=True, blank=True)
+    factor = models.FloatField(verbose_name='Constante', null=True, blank=True)
+    sample_quantity = models.CharField(max_length=50, verbose_name='Muestra', null=True, blank=True)
+    position = models.CharField(max_length=15, verbose_name='Posición en Ecuación')
+
+    def __str__(self):
+        return str(self.calculate_description_relation)
+
+    class Meta:
+        verbose_name = 'AnalyticalMethodCalculateRelation'
+        verbose_name_plural = 'AnalyticalMethodCalculateRelations'
+        db_table = 'AnalyticalMethodCalculateRelation'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(AnalyticalMethodCalculateRelation, self).save(*args, **kwargs)
