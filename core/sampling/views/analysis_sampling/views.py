@@ -2,17 +2,18 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET
 from django.views.generic import CreateView, DetailView
 
-from core.analytical_method.models import AnalyticalMethodCalculateRelation
+from core.analytical_method.models import AnalyticalMethodCalculateRelation, AnalyticalMethodCalculate
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.models import SpecificationProduct
 from core.sampling.forms import SamplingAnalysisProcessingForm, SamplingAnalysisProcessingRelationForm
-from core.sampling.models import SamplingAnalysis, SamplingAnalysisProcessing
+from core.sampling.models import SamplingAnalysis, SamplingAnalysisProcessing, SamplingAnalysisProcessingRelation
 from core.solution.models import SolutionStd
 
 
@@ -26,8 +27,10 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context = super().get_context_data(**kwargs)
         context['title'] = 'Procesamiento de Análisis de Muestra'
         context['entity'] = self.object
-        context['analysis_processing'] = self.object.samplinganalysisprocessing_set.all().order_by('-analyzed_date')
-        context['analysis_count'] = self.object.samplinganalysisprocessing_set.count()
+        context['analysis_processing'] = self.object.samplinganalysisprocessing_set.filter(relational_calculation=False).order_by('-analyzed_date')
+        context['analysis_processing_relational'] = self.object.samplinganalysisprocessing_set.filter(relational_calculation=True).order_by('-analyzed_date')
+        context['analysis_processing_relational_new'] = self.object.samplinganalysisprocessingrelation_set.all().order_by('-date_creation')
+        context['analysis_count'] = self.object.samplinganalysisprocessing_set.filter(relational_calculation=False).count()
 
         # Datos del método analítico
         method = self.object.analytical_method
@@ -37,7 +40,15 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['equipments'] = method.analyticalmethodequipment_set.all()
         context['materials'] = method.analyticalmethodmaterial_set.all()
         context['procedures'] = method.analyticalmethodprocedure_set.all()
-        context['calculate_relations'] = method.analyticalmethodcalculaterelation_set.all()
+        # Agrupar relaciones de cálculo por descripción para evitar duplicados en el template
+        calculate_relations_all = method.analyticalmethodcalculaterelation_set.all()
+        unique_relations = []
+        descriptions_seen = set()
+        for rel in calculate_relations_all:
+            if rel.calculate_description_relation not in descriptions_seen:
+                unique_relations.append(rel)
+                descriptions_seen.add(rel.calculate_description_relation)
+        context['calculate_relations'] = unique_relations
 
         # Obtener la especificación del producto para este análisis
         sampling_process = self.object.sampling_process
@@ -105,7 +116,7 @@ class SamplingAnalysisProcessingCreateView(LoginRequiredMixin, ValidatePermissio
 
 # Registro de Procesamiento de Análisis Relacional
 class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
-    model = SamplingAnalysisProcessing
+    model = SamplingAnalysisProcessingRelation
     form_class = SamplingAnalysisProcessingRelationForm
     template_name = 'analysis_sampling/create_sampling_analysis_processing.html'
     permission_required = 'reagent.add_reagent'
@@ -133,19 +144,124 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        analysis = SamplingAnalysis.objects.get(pk=self.kwargs.get('pk'))
-        relation = AnalyticalMethodCalculateRelation.objects.get(pk=self.kwargs.get('pk_relation'))
+        analysis = get_object_or_404(SamplingAnalysis, pk=self.kwargs.get('pk'))
+        relation = get_object_or_404(
+            AnalyticalMethodCalculateRelation,
+            pk=self.kwargs.get('pk_relation'),
+            analytical_method=analysis.analytical_method
+        )
+
         kwargs.update({
             'analysis': analysis,
             'relation': relation
         })
         return kwargs
 
+    # def get_form_kwargs(self):
+    #     kwargs = super().get_form_kwargs()
+    #     analysis = SamplingAnalysis.objects.get(pk=self.kwargs.get('pk'))
+    #     calcule = AnalyticalMethodCalculate.objects.get(pk=self.kwargs.get('pk_calcule'))
+    #     relation = AnalyticalMethodCalculateRelation.objects.filter(analytical_method_calculate_id=analysis.analytical_method.id).first()
+    #
+    #     kwargs.update({
+    #         'analysis': analysis,
+    #         'relation': relation
+    #     })
+    #     return kwargs
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        analysis = get_object_or_404(SamplingAnalysis, pk=self.kwargs.get('pk'))
+        relation = get_object_or_404(
+            AnalyticalMethodCalculateRelation,
+            pk=self.kwargs.get('pk_relation'),
+            analytical_method=analysis.analytical_method
+        )
+
+        all_relations = AnalyticalMethodCalculateRelation.objects.select_related('analytical_method').filter(
+            analytical_method_id=analysis.analytical_method.id,
+            calculate_description_relation=relation.calculate_description_relation
+        )
+        var_num = all_relations.filter(position__iexact='Numerador')
+        var_den = all_relations.filter(position__iexact='Denominador')
+
+        base_processing = SamplingAnalysisProcessing.objects.filter(
+            sample_analysis_id=analysis.id,
+            relational_calculation=False
+        ).first()
+
+        if not base_processing:
+            base_processing = SamplingAnalysisProcessing.objects.filter(
+                sample_analysis__sampling_process_id=analysis.sampling_process_id,
+                relational_calculation=False
+            ).order_by('-analyzed_date').first()
+
+        if base_processing:
+            qty_std = float(base_processing.quantity_standard)
+            qty_sample = float(base_processing.quantity_sample)
+
+            def calculate_part(relations, target_pos=None):
+                factor = 1
+                sample = 1
+                std = 1
+                relation_val = 1
+                used_prev = False
+                for r in relations:
+                    if r.factor is not None:
+                        factor *= float(r.factor)
+                    if r.sample_quantity and r.sample_quantity.strip():
+                        sample = float(qty_sample)
+                    if r.volumen_std is not None:
+                        std = qty_std
+                    
+                    # 1. Prioridad: Cálculo específico definido en la relación
+                    if r.analytical_method_calculate is not None:
+                        prev_processing = SamplingAnalysisProcessing.objects.filter(
+                            sample_analysis__sampling_process_id=analysis.sampling_process_id,
+                            analytical_method_calculate=r.analytical_method_calculate,
+                            relational_calculation=False
+                        ).order_by('-analyzed_date').first()
+                        if prev_processing:
+                            relation_val *= prev_processing.concentration_sample
+                            used_prev = True
+                
+                # 2. Si no se encontró por cálculo específico, buscar por posición (ej. Denominador)
+                if not used_prev and target_pos:
+                    prev_processing_pos = SamplingAnalysisProcessing.objects.filter(
+                        sample_analysis__sampling_process_id=analysis.sampling_process_id,
+                        analytical_method_calculate__position__iexact=target_pos,
+                        relational_calculation=False
+                    ).order_by('-analyzed_date').first()
+                    if prev_processing_pos:
+                        relation_val = prev_processing_pos.concentration_sample
+                        used_prev = True
+
+                # 3. Fallback final al procesamiento base
+                if not used_prev:
+                    if base_processing:
+                        relation_val = base_processing.concentration_sample
+                
+                return std * factor * sample * relation_val
+
+            if 'numerator' in form.fields:
+                val_num = calculate_part(var_num, 'Numerador')
+                form.initial['numerator'] = val_num
+                form.fields['numerator'].initial = val_num
+            if 'denominator' in form.fields:
+                val_den = calculate_part(var_den, 'Denominador')
+                form.initial['denominator'] = val_den
+                form.fields['denominator'].initial = val_den
+
+        return form
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
-        relation = AnalyticalMethodCalculateRelation.objects.get(pk=self.kwargs.get('pk_relation'))
+        relation = get_object_or_404(AnalyticalMethodCalculateRelation, pk=self.kwargs.get('pk_relation'))
         context['entity'] = f'Calcular {relation.calculate_description_relation}'
+        # context['confirm_msg'] = '¿Está Seguro de Ejecutar el Calculo?'
+        context['detail_button'] = 'Si, Ejecutar'
+        context['relation'] = relation
         return context
 
 

@@ -13,6 +13,12 @@
             <div class="modal-body">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="{{ action }}">
+                {% if confirm_msg %}
+                    <div class="alert alert-warning text-center">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        {{ confirm_msg }}
+                    </div>
+                {% endif %}
                 <div class="row">
                     {% for field in form.visible_fields %}
                         <div class="
@@ -45,7 +51,13 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-primary" id="btnSubmit">Guardar</button>
+                <button type="submit" class="btn btn-primary" id="btnSubmit">
+                    {% if detail_button %}
+                    	{{ detail_button }}
+                    {% else %}
+                        Guardar
+                    {% endif %}
+                </button>
                 <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </form>

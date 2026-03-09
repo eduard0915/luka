@@ -96,11 +96,37 @@
                 </li>
             </ul>
         </li>
+
+        {% url 'condition:list_condition' as list_condition %}
+        {% url 'condition:list_condition_register' as list_condition_register %}
+        {% is_expanded list_condition list_condition_register as condition_expanded %}
+        {% is_active_section list_condition as condition_active %}
+        {% is_active_section list_condition_register as condition_register_active %}
+
+        <li class="{{ condition_expanded }}">
+            <a class="app-menu__item" href="#" data-toggle="treeview">
+                <i class="app-menu__icon bi bi-thermometer-half"></i>
+                <span class="app-menu__label">Cond. Ambientales</span><i
+                class="treeview-indicator bi bi-chevron-right"></i>
+            </a>
+            <ul class="treeview-menu">
+                <li>
+                    <a class="{{ condition_active }}" href="{{ list_condition }}">
+                        <i class="icon bi bi-circle-fill"></i> Areas y Condiciones
+                    </a>
+                </li>
+                <li>
+                    <a class="{{ condition_register_active }}" href="{{ list_condition_register }}">
+                        <i class="icon bi bi-circle-fill"></i> Registro de Datos
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i
                 class="app-menu__icon bi bi-table"></i><span class="app-menu__label">Laboratorios</span><i
                 class="treeview-indicator bi bi-chevron-right"></i></a>
             <ul class="treeview-menu">
-                <li><a class="treeview-item" href="#"><i class="icon bi bi-circle-fill"></i> Condiciones Ambientales</a></li>
                 <li><a class="treeview-item" href="#"><i class="icon bi bi-circle-fill"></i> Mantenimientos</a></li>
                 <li><a class="treeview-item" href="#"><i class="icon bi bi-circle-fill"></i> Calibraciones</a></li>
             </ul>

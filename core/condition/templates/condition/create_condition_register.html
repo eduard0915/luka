@@ -1,0 +1,9 @@
+{% extends 'create_two.html' %}
+{% load static %}
+
+{% block scripts_detail %}
+    {{ block.super }}
+    {% if entity == 'Registro de Condiciones Ambientales' or entity == 'Edición de Registro de Condición' %}
+        <script src="{% static 'create_condition_register.js' %}"></script>
+    {% endif %}
+{% endblock %}

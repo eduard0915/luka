@@ -140,10 +140,30 @@
                                                             {% if relation.calculate_description_relation %}
                                                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                                                     <b>{{ relation.calculate_description_relation }}</b>
-                                                                    <button class="btn btn-success btn-sm"
-                                                                            onclick="open_modal('{% url 'sampling:create_sampling_analysis_processing_relation' entity.id relation.id %}')">
-                                                                        <i class="bi bi-calculator me-1"></i> Calcular
-                                                                    </button>
+                                                                    <div class="d-flex align-items-center">
+                                                                        {% for ap_rel in analysis_processing_relational %}
+                                                                            {% if ap_rel.concentration_sample %}
+                                                                                 <span class="badge bg-info text-dark me-3">
+                                                                                     Resultado: {{ ap_rel.concentration_sample }}
+                                                                                 </span>
+                                                                            {% endif %}
+                                                                        {% endfor %}
+                                                                        {% for ap_rel_new in analysis_processing_relational_new %}
+                                                                            {% if ap_rel_new.analytical_method_calculate_relation.calculate_description_relation == relation.calculate_description_relation %}
+                                                                                <span class="badge bg-info text-dark me-3">
+                                                                                    {% if ap_rel_new.denominator %}
+                                                                                        {{ ap_rel_new.numerator }} / {{ ap_rel_new.denominator }} = {{ ap_rel_new.calcule }}
+                                                                                    {% else %}
+                                                                                        Resultado: {{ ap_rel_new.calcule }}
+                                                                                    {% endif %}
+                                                                                </span>
+                                                                            {% endif %}
+                                                                        {% endfor %}
+                                                                        <button class="btn btn-success btn-sm"
+                                                                                onclick="open_modal('{% url 'sampling:create_sampling_analysis_processing_relation' entity.id relation.id %}')">
+                                                                            <i class="bi bi-calculator me-1"></i> Calcular
+                                                                        </button>
+                                                                    </div>
                                                                 </div>
                                                             {% endif %}
                                                         {% endfor %}
