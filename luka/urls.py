@@ -21,6 +21,7 @@ urlpatterns = [
     path('analytical_method/', include('core.analytical_method.urls')),
     path('product/', include('core.product.urls')),
     path('sampling/', include('core.sampling.urls')),
+    path('condition/', include('core.condition.urls')),
     # path("__debug__/", include("debug_toolbar.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

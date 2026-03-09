@@ -177,12 +177,17 @@ class SamplingAnalysis(BaseModel):
 class SamplingAnalysisProcessing(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     sample_analysis = models.ForeignKey(SamplingAnalysis, verbose_name='Análisis de la Muestra', on_delete=models.CASCADE)
-    standard_solution = models.ForeignKey(SolutionStd, verbose_name='Solución Estándar', on_delete=models.CASCADE)
+    standard_solution = models.ForeignKey(SolutionStd, verbose_name='Solución Estándar', on_delete=models.CASCADE, null=True, blank=True)
     quantity_standard = models.FloatField(verbose_name='mL Estándar')
     quantity_sample = models.FloatField(verbose_name='Cant. de Muestra')
     concentration_sample = models.FloatField(verbose_name='Concentración Muestra')
     analyzed_by = models.ForeignKey(User, verbose_name='Analizado por', on_delete=models.CASCADE)
     analyzed_date = models.DateTimeField(verbose_name='Fecha de Análisis')
+    relational_calculation = models.BooleanField(default=False)
+    analytical_method_calculate = models.ForeignKey(
+        'analytical_method.AnalyticalMethodCalculate', on_delete=models.CASCADE, null=True, blank=True)
+    analytical_method_calculate_relation = models.ForeignKey(
+        'analytical_method.AnalyticalMethodCalculateRelation', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return str(self.quantity_standard)
@@ -194,10 +199,36 @@ class SamplingAnalysisProcessing(BaseModel):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
         user = get_current_user()
-
         if user:
             if not self.user_creation:
                 self.user_creation = user
             else:
                 self.user_updated = user
         return super(SamplingAnalysisProcessing, self).save(*args, **kwargs)
+
+
+class SamplingAnalysisProcessingRelation(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    sampling_analysis = models.ForeignKey(SamplingAnalysis, on_delete=models.CASCADE)
+    analytical_method_calculate_relation = models.ForeignKey(
+        'analytical_method.AnalyticalMethodCalculateRelation', on_delete=models.CASCADE, null=True, blank=True)
+    numerator = models.FloatField(verbose_name='Numerador')
+    denominator = models.FloatField(verbose_name='Denominador', null=True, blank=True)
+    calcule = models.FloatField(verbose_name='Resultado')
+
+    def __str__(self):
+        return str(self.calcule)
+
+    class Meta:
+        verbose_name = 'SamplingAnalysisProcessingRelation'
+        verbose_name_plural = 'SamplingAnalysisProcessingRelations'
+        db_table = 'SamplingAnalysisProcessingRelation'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(SamplingAnalysisProcessingRelation, self).save(*args, **kwargs)

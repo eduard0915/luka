@@ -1,0 +1,51 @@
+{% extends 'list_one.html' %}
+{% load static %}
+
+{% block head_list %}
+    <script src="{% static 'list_condition.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+    {{ block.super }}
+    <!-- Modal para la Gráfica -->
+    <div class="modal fade" id="myModalGraph" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel"><i class="bi bi-graph-up me-2"></i> Gráfica de últimos 20 registros</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <canvas id="myChart" style="width: 100%; height: 400px;"></canvas>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block buttons %}
+    <a href="{{ create_url }}" class="btn btn-primary me-2" type="button">
+        <i class="bi bi-plus-square me-2"></i> Nuevo
+    </a>
+{% endblock %}
+
+{% block columns %}
+    <tr>
+        <th class="text-md-center" style="width: 20%">Laboratorio</th>
+        <th class="text-md-center" style="width: 20%">Área</th>
+        <th class="text-md-center" style="width: 20%">Variable</th>
+        <th class="text-md-center" style="width: 10%">Límite Sup.</th>
+        <th class="text-md-center" style="width: 10%">Límite Inf.</th>
+        <th class="text-md-center" style="width: 10%">Activo</th>
+        <th class="text-md-center"style="width: 10%">Acciones</th>
+    </tr>
+{% endblock %}
+
+{% block rows %}
+{% endblock %}

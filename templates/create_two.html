@@ -20,13 +20,13 @@
                                 <div class="{% if field.field.col_class %}{{ field.field.col_class }}{% else %}col-md-3{% endif %}">
                                     <div class="form-group mb-2">
                                         {% if field.name == 'groups' or field.name == 'is_active' or field.name == 'site' or field.name == 'reagent' or field.name == 'reagent_liquid' %}
-                                            <label class="control-label">
+                                            <label class="control-label" for="{{ field.id_for_label }}">
                                                 {{ field.label }}{% if field.field.required %}*{% endif %}
                                             </label>
                                             {{ field }}
                                         {% else %}
                                             {% if field.field.widget.input_type == 'file' %}
-                                                <label class="control-label">
+                                                <label class="control-label" for="{{ field.id_for_label }}">
                                                     {{ field.label }}{% if field.field.required %}*{% endif %}
                                                 </label>
                                                 {{ field }}
@@ -34,7 +34,7 @@
                                                     <small class="form-text text-muted">{{ field.help_text }}</small>
                                                 {% endif %}
                                             {% else %}
-                                                <label class="control-label">
+                                                <label class="control-label" for="{{ field.id_for_label }}">
                                                     {{ field.label }}{% if field.field.required %}*{% endif %}
                                                 </label>
                                                 {{ field }}
