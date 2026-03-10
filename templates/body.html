@@ -204,6 +204,19 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/es.js"></script>
     <script type="application/javascript">
+        $(document).ready(function() {
+            $('.select2').each(function() {
+                if (!$(this).data('select2')) {
+                    $(this).select2({
+                        theme: 'bootstrap-5',
+                        width: '100%',
+                        language: 'es',
+                        placeholder: $(this).attr('placeholder') || 'Seleccione una opción'
+                    });
+                }
+            });
+        });
+
         function open_modal(url) {
             $('#modal_template').load(url, function () {
                 $(this).modal('show');

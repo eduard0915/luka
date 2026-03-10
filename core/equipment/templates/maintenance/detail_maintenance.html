@@ -1,0 +1,109 @@
+{% extends 'body.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="{{ icon }}"></i> {{ title }}
+                    </h5>
+                    <div>
+                        <a href="{{ pdf_url }}" class="btn btn-danger btn-sm" target="_blank">
+                            <i class="fas fa-file-pdf"></i> Descargar PDF
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <!-- Información del Mantenimiento -->
+                            <div class="mb-4">
+                                <h5 class="section-title border-bottom pb-2 mb-3">
+                                    <i class="fas fa-info-circle"></i> Información del Mantenimiento
+                                </h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover">
+                                        <tbody>
+                                            <tr>
+                                                <td class="bg-light" style="width: 30%"><strong>Equipo Instrumental:</strong></td>
+                                                <td>{{ object.equipment_instrumental }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light"><strong>Fecha:</strong></td>
+                                                <td>{{ object.date_maintenance|date:"d/m/Y" }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light"><strong>Tipo de Mantenimiento:</strong></td>
+                                                <td>{{ object.type_maintenance }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light"><strong>Realizado por:</strong></td>
+                                                <td>{{ object.maintenance_by }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light"><strong>Responsable:</strong></td>
+                                                <td>{{ object.responsible_user.get_full_name }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light"><strong>Registro Físico:</strong></td>
+                                                <td>
+                                                    {% if object.file_maintenance %}
+                                                        <a href="{{ object.file_maintenance.url }}" class="btn btn-info btn-xs" target="_blank">
+                                                            <i class="fas fa-download"></i> Descargar Registro Físico
+                                                        </a>
+                                                    {% else %}
+                                                        <span class="text-muted">Sin registro de físico adjunto</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Descripción -->
+                            <div class="mb-4">
+                                <h5 class="section-title border-bottom pb-2 mb-3">
+                                    <i class="fas fa-align-left"></i> Descripción del Mantenimiento
+                                </h5>
+                                <div class="p-3 border rounded bg-light">
+                                    {{ object.description_maintenance|linebreaks }}
+                                </div>
+                            </div>
+
+                            <!-- Partes Reemplazadas -->
+                            <div class="mb-4">
+                                <h5 class="section-title border-bottom pb-2 mb-3">
+                                    <i class="fas fa-tools"></i> Partes o Piezas Reemplazadas
+                                </h5>
+                                <div class="p-3 border rounded bg-light">
+                                    {{ object.parts_change_maintenance|linebreaks }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer con botones de acción -->
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <a href="{{ list_url }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Volver al Listado
+                            </a>
+                        </div>
+                        <div>
+                            <a href="{{ update_url }}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Editar Mantenimiento
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

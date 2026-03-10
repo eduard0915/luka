@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 {'data': 'registration_date'},
                 {'data': 'condition__area'},
                 {'data': 'condition__variable'},
-                {'data': 'registered_data'},
+                {'data': 'registered_data_formatted'},
                 {'data': 'registered_by'},
                 {'data': 'id'}
             ],
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     targets: [3],
                     class: 'td-actions text-center align-middle',
                     render: function (data, type, row) {
-                        let value = parseFloat(row.value);
+                        let value = parseFloat(row.registered_data);
                         let upper = parseFloat(row.condition__upper_limit);
                         let lower = parseFloat(row.condition__lower_limit);
                         if (value > upper || value < lower) {
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             actions += '<a href="/condition/register/detail/' + row['id'] + '/" title="Ver Acciones" class="me-2 btn-detail-modal"><i class="bi bi-eye-fill text-info"></i></a>';
                         }
                         actions += '<a href="/condition/register/update/' + row['id'] + '/" title="Editar" class="me-2"><i class="bi bi-pencil-square text-warning"></i></a>';
-                        let value = parseFloat(row.value);
+                        let value = parseFloat(row.registered_data);
                         let upper = parseFloat(row.condition__upper_limit);
                         let lower = parseFloat(row.condition__lower_limit);
                         if (value > upper || value < lower) {

@@ -1,14 +1,21 @@
+import os
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
+from django.template.loader import get_template
 from django.urls import reverse_lazy, reverse
+from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, ListView, UpdateView, DetailView
+from xhtml2pdf import pisa
 
+from core.company.models import Company
 from core.equipment.forms import EquipmentInstrumentalForm
 from core.equipment.models import EquipmentInstrumental
 from core.mixins import ValidatePermissionRequiredMixin
+from luka import settings
 
 
 # Creación de Equipos Instrumentales
@@ -198,9 +205,71 @@ class EquipmentInstrumentalDetailView(LoginRequiredMixin, ValidatePermissionRequ
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Detalle de Equipo Instrumental'
-        context['entity'] = 'Detalle de Equipo Instrumental'
+        context['title'] = 'Hoja de Vida de Equipo Instrumental'
+        context['entity'] = 'Hoja de Vida de Equipo Instrumental'
         context['icon'] = 'fa-solid fa-microscope'
         context['list_url'] = reverse_lazy('equipment:list_equipment_instrumental')
         context['update_url'] = reverse_lazy('equipment:update_equipment_instrumental', kwargs={'pk': self.object.pk})
+        # Mantenimientos del equipo
+        context['maintenances'] = self.object.maintenance_set.all().order_by('-date_maintenance')
+        context['pdf_url'] = reverse_lazy('equipment:equipment_instrumental_pdf', kwargs={'pk': self.object.pk})
         return context
+
+
+# Reporte PDF de Equipo Instrumental
+class EquipmentInstrumentalPDFView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    permission_required = 'equipment.view_equipmentinstrumental'
+
+    @staticmethod
+    def link_callback(uri, rel):
+        sUrl = settings.STATIC_URL
+        sRoot = settings.STATIC_ROOT
+        mUrl = settings.MEDIA_URL
+        mRoot = settings.MEDIA_ROOT
+
+        if uri.startswith(mUrl):
+            path = os.path.join(mRoot, uri.replace(mUrl, ""))
+        elif uri.startswith(sUrl):
+            path = os.path.join(sRoot, uri.replace(sUrl, ""))
+        else:
+            return uri
+
+        if not os.path.isfile(path):
+            return None
+        return path
+
+    def get(self, request, *args, **kwargs):
+        try:
+            template = get_template('equipment_instrumental/pdf_equipment.html')
+            object = EquipmentInstrumental.objects.get(pk=self.kwargs['pk'])
+            company = Company.objects.first()
+
+            context = {
+                'object': object,
+                'maintenances': object.maintenance_set.all().order_by('-date_maintenance'),
+                'company': company,
+                'title': f'Hoja de Vida de Equipo: {object.code_equipment}',
+                'today': timezone.now(),
+            }
+
+            html = template.render(context)
+            response = HttpResponse(content_type='application/pdf')
+            # response['Content-Disposition'] = f'attachment; filename="equipment_{object.code_equipment}.pdf"'
+
+            pisa_status = pisa.CreatePDF(
+                html,
+                dest=response,
+                link_callback=self.link_callback
+            )
+
+            if pisa_status.err:
+                raise Exception('Error al generar el PDF')
+
+            return response
+
+        except EquipmentInstrumental.DoesNotExist:
+            messages.error(request, 'El equipo no existe')
+        except Exception as error:
+            messages.error(request, f'Error al generar el PDF: {error}')
+
+        return HttpResponseRedirect(reverse_lazy('equipment:list_equipment_instrumental'))

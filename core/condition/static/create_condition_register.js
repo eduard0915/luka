@@ -11,6 +11,9 @@ $(function () {
         });
     }
 
+    let current_limits = {upper: null, lower: null};
+    const input_registered_data = $('input[name="registered_data"]');
+
     function updateLabel(condition_id) {
         if (condition_id) {
             $.ajax({
@@ -30,6 +33,9 @@ $(function () {
                     } else if (variable.includes('humedad relativa')) {
                         labelText = 'Registrar Lectura %HR';
                     }
+                    current_limits.upper = parseFloat(data.upper_limit);
+                    current_limits.lower = parseFloat(data.lower_limit);
+                    checkRange();
                 }
                 registered_data_label.text(labelText + (is_required ? '*' : ''));
             }).fail(function (jqXHR, textStatus, errorThrown) {
@@ -37,8 +43,32 @@ $(function () {
             });
         } else {
             registered_data_label.text('Dato Registrado' + (is_required ? '*' : ''));
+            current_limits = {upper: null, lower: null};
+            checkRange();
         }
     }
+
+    function checkRange() {
+        const value = parseFloat(input_registered_data.val());
+        if (!isNaN(value) && current_limits.upper !== null && current_limits.lower !== null) {
+            if (value > current_limits.upper || value < current_limits.lower) {
+                input_registered_data.addClass('is-invalid');
+                if (!$('#range-warning').length) {
+                    input_registered_data.after('<div id="range-warning" class="invalid-feedback">El dato está fuera de rango (' + current_limits.lower + ' - ' + current_limits.upper + ')</div>');
+                }
+            } else {
+                input_registered_data.removeClass('is-invalid');
+                $('#range-warning').remove();
+            }
+        } else {
+            input_registered_data.removeClass('is-invalid');
+            $('#range-warning').remove();
+        }
+    }
+
+    input_registered_data.on('input', function () {
+        checkRange();
+    });
 
     select_condition.on('change', function () {
         const id = $(this).val();

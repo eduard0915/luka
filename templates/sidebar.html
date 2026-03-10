@@ -132,6 +132,35 @@
             </ul>
         </li>
 
+        {% url 'equipment:list_equipment_instrumental' as list_eq %}
+        {% url 'equipment:create_equipment_instrumental' as create_eq %}
+        {% url 'equipment:list_maintenance' as list_maint %}
+        {% url 'equipment:create_maintenance' as create_maint %}
+
+        {% is_expanded list_eq create_eq list_maint create_maint as equipment_expanded %}
+        {% is_active_section list_eq create_eq as equipment_active %}
+        {% is_active_section list_maint create_maint as maintenance_active %}
+
+        <li class="{{ equipment_expanded }}">
+            <a class="app-menu__item" href="#" data-toggle="treeview">
+                <i class="app-menu__icon bi bi-tools"></i>
+                <span class="app-menu__label">Equipos</span><i
+                class="treeview-indicator bi bi-chevron-right"></i>
+            </a>
+            <ul class="treeview-menu">
+                <li>
+                    <a class="{{ equipment_active }}" href="{{ list_eq }}">
+                        <i class="icon bi bi-circle-fill"></i> Equipo Instrumental
+                    </a>
+                </li>
+                <li>
+                    <a class="{{ maintenance_active }}" href="{{ list_maint }}">
+                        <i class="icon bi bi-circle-fill"></i> Mantenimientos
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         {% url 'user:user_list' as list_user %}
         {% url 'user:user_create' as create_user %}
 
@@ -153,9 +182,6 @@
         {% url 'laboratory:list_laboratory' as list_lab %}
         {% url 'laboratory:create_laboratory' as create_lab %}
 
-        {% url 'equipment:list_equipment_instrumental' as list_eq %}
-        {% url 'equipment:create_equipment_instrumental' as create_eq %}
-
         {% url 'product:list_product' as list_prod %}
         {% url 'product:create_product' as create_prod %}
 
@@ -168,7 +194,7 @@
         {% url 'sampling:list_sampling_group' as list_group %}
         {% url 'sampling:create_sampling_group' as create_group %}
 
-        {% is_expanded list_lab create_lab list_eq create_eq list_sln_base add_sln_base list_std_base add_std_base list_prod create_prod list_group create_group as config_expanded %}
+        {% is_expanded list_lab create_lab list_sln_base add_sln_base list_std_base add_std_base list_prod create_prod list_group create_group as config_expanded %}
 
         {% if perms.company.add_company %}
             <li class="{{ config_expanded }}">
@@ -189,12 +215,9 @@
                         <i class="icon bi bi-circle-fill"></i> Soluciones Base</a></li>
                     <li><a class="treeview-item {% if list_std_base in request.path or add_std_base in request.path %}active{% endif %}" href="{% url 'solution:list_solution_std_base' %}">
                         <i class="icon bi bi-circle-fill"></i> Soluciones STD Base</a></li>
-                    <li><a class="treeview-item {% if list_eq in request.path or create_eq in request.path %}active{% endif %}" href="{% url 'equipment:list_equipment_instrumental' %}">
-                        <i class="icon bi bi-circle-fill"></i> Equipo Instrumental</a></li>
                     <li><a class="treeview-item {% if list_prod in request.path or create_prod in request.path %}active{% endif %}" href="{% url 'product:list_product' %}">
                         <i class="icon bi bi-circle-fill"></i> Productos</a></li>
-                    <li><a class="treeview-item {% if list_group in request.path or create_group in request.path %}active{% endif %}" href="{% url 'sampling:list_sampling_group' %}">
-                        <i class="icon bi bi-circle-fill"></i> Grupos de Muestreo</a></li>
+                    <li><a class="treeview-item {% if list_group in request.path or create_group in request.path %}active{% endif %}" href="{% url 'sampling:list_sampling_group' %}"><i class="icon bi bi-circle-fill"></i> Grupos de Muestreo</a></li>
                 </ul>
             </li>
         {% endif %}

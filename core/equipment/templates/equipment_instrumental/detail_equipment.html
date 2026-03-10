@@ -6,22 +6,22 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <div class="row">
-                        <!-- Columna izquierda: Información del equipo -->
-                        <div class="col-lg-8">
-                            <!-- Información General -->
-                            <div class="mb-4">
-                                <h5 class="section-title">
-                                    <i class="fas fa-info-circle"></i> Información General
-                                </h5>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-hover">
-                                        <tbody>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Columna izquierda: Información del equipo -->
+                            <div class="col-lg-8">
+                                <!-- Información General -->
+                                <div class="mb-4">
+                                    <h5 class="section-title">
+                                        <i class="fas fa-info-circle"></i> Información General
+                                    </h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-hover">
+                                            <tbody>
                                             <tr>
                                                 <td class="info-label" style="width: 30%">Código:</td>
                                                 <td class="info-value">
@@ -36,19 +36,19 @@
                                                 <td class="info-label">Proveedor:</td>
                                                 <td class="info-value">{{ object.supplier_equipment }}</td>
                                             </tr>
-                                        </tbody>
-                                    </table>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Especificaciones Técnicas -->
-                            <div class="mb-4">
-                                <h5 class="section-title">
-                                    <i class="fas fa-cogs"></i> Especificaciones Técnicas
-                                </h5>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-hover">
-                                        <tbody>
+                                <!-- Especificaciones Técnicas -->
+                                <div class="mb-4">
+                                    <h5 class="section-title">
+                                        <i class="fas fa-cogs"></i> Especificaciones Técnicas
+                                    </h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-hover">
+                                            <tbody>
                                             <tr>
                                                 <td class="info-label" style="width: 30%">Marca:</td>
                                                 <td class="info-value">{{ object.brand_equipment }}</td>
@@ -63,19 +63,19 @@
                                                     <span class="badge bg-info">{{ object.serie_equipment }}</span>
                                                 </td>
                                             </tr>
-                                        </tbody>
-                                    </table>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Ubicación y Responsabilidad -->
-                            <div class="mb-4">
-                                <h5 class="section-title">
-                                    <i class="fas fa-map-marker-alt"></i> Ubicación y Responsabilidad
-                                </h5>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-hover">
-                                        <tbody>
+                                <!-- Ubicación y Responsabilidad -->
+                                <div class="mb-4">
+                                    <h5 class="section-title">
+                                        <i class="fas fa-map-marker-alt"></i> Ubicación y Responsabilidad
+                                    </h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-hover">
+                                            <tbody>
                                             <tr>
                                                 <td class="info-label" style="width: 30%">Laboratorio:</td>
                                                 <td class="info-value">
@@ -100,19 +100,19 @@
                                                     {% endif %}
                                                 </td>
                                             </tr>
-                                        </tbody>
-                                    </table>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Fechas y Uso -->
-                            <div class="mb-4">
-                                <h5 class="section-title">
-                                    <i class="fas fa-calendar-alt"></i> Fechas y Uso
-                                </h5>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-hover">
-                                        <tbody>
+                                <!-- Fechas y Uso -->
+                                <div class="mb-4">
+                                    <h5 class="section-title">
+                                        <i class="fas fa-calendar-alt"></i> Fechas y Uso
+                                    </h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-hover">
+                                            <tbody>
                                             <tr>
                                                 <td class="info-label" style="width: 30%">Fecha Inicio de Uso:</td>
                                                 <td class="info-value">
@@ -152,131 +152,174 @@
                                                     {% endif %}
                                                 </td>
                                             </tr>
-                                        </tbody>
-                                    </table>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Estado y Documentación -->
-                            <div class="mb-4">
-                                <h5 class="section-title">
-                                    <i class="fas fa-file-alt"></i> Documentación
-                                </h5>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-hover">
-                                        <tbody>
-                                            <tr>
-                                                <td class="info-label">Manual de Operación:</td>
-                                                <td class="info-value">
-                                                    {% if object.manual_equipment %}
-                                                        <a href="{{ object.manual_equipment.url }}"
-                                                           target="_blank"
-                                                           download
-                                                           class="btn btn-sm btn-info download-btn">
-                                                            <i class="fas fa-file-download"></i> Descargar Manual (PDF)
-                                                        </a>
-                                                    {% else %}
-                                                        <span class="badge bg-warning text-dark">
-                                                            <i class="fas fa-exclamation-triangle"></i> Manual no disponible
-                                                        </span>
-                                                    {% endif %}
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Columna derecha: Foto del equipo -->
-                        <div class="col-lg-4">
-                            <div class="mb-4">
-                                <h5 class="section-title"><br></h5>
-                                <div class="photo-container">
-                                    {% if object.photo_equipment %}
-                                        <img src="{{ object.photo_equipment.url }}"
-                                             alt="Foto de {{ object.description_equipment }}"
-                                             class="equipment-photo">
+                                <!-- Historial de Mantenimientos -->
+                                <div class="mb-4">
+                                    <h5 class="section-title">
+                                        <i class="fas fa-tools"></i> Mantenimientos Realizados
+                                    </h5>
+                                    {% if maintenances %}
+                                        <div class="row">
+                                            {% for maintenance in maintenances %}
+                                                <div class="col-md-12 mb-3">
+                                                    <div class="card border-left-primary shadow-sm h-100 py-2">
+                                                        <div class="card-body">
+                                                            <div class="row no-gutters align-items-center">
+                                                                <div class="col mr-2">
+                                                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                                        {{ maintenance.type_maintenance }} - {{ maintenance.date_maintenance|date:"d/m/Y" }}
+                                                                    </div>
+                                                                    <div class="h6 mb-0 font-weight-bold text-gray-800">
+                                                                        Realizado por: {{ maintenance.maintenance_by }}
+                                                                    </div>
+                                                                    <div class="mt-2">
+                                                                        <strong>Descripción:</strong>
+                                                                        <p class="mb-1 text-muted">{{ maintenance.description_maintenance }}</p>
+                                                                    </div>
+                                                                    <div class="mt-2">
+                                                                        <strong>Repuestos/Cambios:</strong>
+                                                                        <p class="mb-1 text-muted">{{ maintenance.parts_change_maintenance|default:"Ninguno" }}</p>
+                                                                    </div>
+                                                                    {% if maintenance.file_maintenance %}
+                                                                        <div class="mt-3">
+                                                                            <a href="{{ maintenance.file_maintenance.url }}"
+                                                                               target="_blank"
+                                                                               download
+                                                                               class="btn btn-sm btn-outline-primary">
+                                                                                <i class="fas fa-file-download"></i> Descargar Registro
+                                                                            </a>
+                                                                        </div>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
                                     {% else %}
-                                        <div class="text-center">
-                                            <i class="fas fa-camera-retro no-photo-icon"></i>
-                                            <p class="text-muted mt-3">
-                                                <strong>Sin Imagen</strong>
-                                            </p>
-                                            <span class="badge bg-warning text-dark">
-                                                <i class="fas fa-exclamation-triangle"></i>
-                                                Foto pendiente
-                                            </span>
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle"></i> No se registran mantenimientos para este equipo.
                                         </div>
                                     {% endif %}
                                 </div>
+
                             </div>
 
-                            <!-- Información rápida en tarjetas -->
-                            <div class="row">
-                                <div class="col-12 mb-3">
-                                    <div class="card bg-light mb-2">
-                                        <div class="card-body text-center">
-                                            <h6 class="card-title text-muted mb-2">
-                                                <i class="fas fa-hashtag"></i> Código
-                                            </h6>
-                                            <h4 class="mb-0 text-primary">{{ object.code_equipment }}</h4>
-                                        </div>
+                            <!-- Columna derecha: Foto del equipo -->
+                            <div class="col-lg-4">
+                                <div class="mb-4">
+                                    <h5 class="section-title"><br></h5>
+                                    <div class="photo-container">
+                                        {% if object.photo_equipment %}
+                                            <img src="{{ object.photo_equipment.url }}"
+                                                 alt="Foto de {{ object.description_equipment }}"
+                                                 class="equipment-photo">
+                                        {% else %}
+                                            <div class="text-center">
+                                                <i class="fas fa-camera-retro no-photo-icon"></i>
+                                                <p class="text-muted mt-3">
+                                                    <strong>Sin Imagen</strong>
+                                                </p>
+                                                <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                Foto pendiente
+                                            </span>
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </div>
-                                <div class="col-12 mb-3">
-                                    <div class="card bg-light">
-                                        <div class="card-body text-center">
-                                            <h6 class="card-title text-muted mb-2">
-                                                <i class="fas fa-toggle-on"></i> Estado
-                                            </h6>
-                                            <h5 class="mb-0">
-                                                {% if object.enable_equipment %}
-                                                    <span class="badge bg-success">Habilitado</span>
-                                                {% else %}
-                                                    <span class="badge bg-danger">No Habilitado</span>
-                                                {% endif %}
-                                            </h5>
+
+                                <!-- Información rápida en tarjetas -->
+                                <div class="row">
+                                    <div class="col-12 mb-3">
+                                        <div class="card bg-light mb-2">
+                                            <div class="card-body text-center">
+                                                <h6 class="card-title text-muted mb-2">
+                                                    <i class="fas fa-hashtag"></i> Código
+                                                </h6>
+                                                <h4 class="mb-0 text-primary">{{ object.code_equipment }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <div class="card bg-light">
+                                            <div class="card-body text-center">
+                                                <h6 class="card-title text-muted mb-2">
+                                                    <i class="fas fa-toggle-on"></i> Estado
+                                                </h6>
+                                                <h5 class="mb-0">
+                                                    {% if object.enable_equipment %}
+                                                        <span class="badge bg-success">Habilitado</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger">No Habilitado</span>
+                                                    {% endif %}
+                                                </h5>
+                                                <div class="mt-3 row justify-content-center">
+                                                    <div class="col-md-7 text-center">
+                                                        {% if object.manual_equipment %}
+                                                            <a href="{{ object.manual_equipment.url }}"
+                                                               target="_blank"
+                                                               download
+                                                               class="btn btn-sm btn-info download-btn w-100 text-center">
+                                                                <i class="fas fa-file-download"></i> Manual de Operación
+                                                            </a>
+                                                        {% else %}
+                                                            <span class="badge bg-warning text-dark w-100 text-center">
+                                                                <i class="fas fa-exclamation-triangle"></i> Manual no disponible
+                                                            </span>
+                                                        {% endif %}
+                                                        <a href="{{ pdf_url }}"
+                                                           target="_blank"
+                                                           class="btn btn-sm btn-primary w-100 mt-2 text-center">
+                                                            <i class="fas fa-file-pdf"></i> Hoja de Vida
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Footer con botones de acción -->
-                <div class="card-footer bg-light">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <a href="{{ list_url }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Volver al Listado
-                            </a>
-                        </div>
-                        <div>
-                            <a href="{{ update_url }}" class="btn btn-warning">
-                                <i class="fas fa-edit"></i> Editar Equipo
-                            </a>
+                    <!-- Footer con botones de acción -->
+                    <div class="card-footer bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <a href="{{ list_url }}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Volver al Listado
+                                </a>
+                            </div>
+                            <div>
+                                <a href="{{ update_url }}" class="btn btn-warning">
+                                    <i class="fas fa-edit"></i> Editar Equipo
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 {% endblock %}
 
 {% block javascript %}
-<script>
-    // Agregar efecto de zoom a la imagen al hacer clic
-    document.addEventListener('DOMContentLoaded', function() {
-        const equipmentPhoto = document.querySelector('.equipment-photo');
-        if (equipmentPhoto) {
-            equipmentPhoto.style.cursor = 'pointer';
-            equipmentPhoto.addEventListener('click', function() {
-                // Crear modal para ver imagen en grande
-                const modal = document.createElement('div');
-                modal.style.cssText = `
+    <script>
+        // Agregar efecto de zoom a la imagen al hacer clic
+        document.addEventListener('DOMContentLoaded', function () {
+            const equipmentPhoto = document.querySelector('.equipment-photo');
+            if (equipmentPhoto) {
+                equipmentPhoto.style.cursor = 'pointer';
+                equipmentPhoto.addEventListener('click', function () {
+                    // Crear modal para ver imagen en grande
+                    const modal = document.createElement('div');
+                    modal.style.cssText = `
                     position: fixed;
                     top: 0;
                     left: 0;
@@ -290,18 +333,18 @@
                     cursor: pointer;
                 `;
 
-                const img = document.createElement('img');
-                img.src = this.src;
-                img.style.cssText = 'max-width: 90%; max-height: 90%; border-radius: 8px;';
+                    const img = document.createElement('img');
+                    img.src = this.src;
+                    img.style.cssText = 'max-width: 90%; max-height: 90%; border-radius: 8px;';
 
-                modal.appendChild(img);
-                document.body.appendChild(modal);
+                    modal.appendChild(img);
+                    document.body.appendChild(modal);
 
-                modal.addEventListener('click', function() {
-                    document.body.removeChild(modal);
+                    modal.addEventListener('click', function () {
+                        document.body.removeChild(modal);
+                    });
                 });
-            });
-        }
-    });
-</script>
+            }
+        });
+    </script>
 {% endblock %}
