@@ -73,3 +73,33 @@ class MaterialInstrumental(BaseModel):
             else:
                 self.user_updated = user
         return super(MaterialInstrumental, self).save(*args, **kwargs)
+
+
+# Mantenimiento
+class Maintenance(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    equipment_instrumental = models.ForeignKey(EquipmentInstrumental, verbose_name='Equipo Instrumental', on_delete=models.CASCADE)
+    date_maintenance = models.DateField(verbose_name='Fecha')
+    type_maintenance = models.CharField(max_length=50, verbose_name='Tipo de Mantenimiento')
+    maintenance_by = models.CharField(max_length=250, verbose_name='Realizado por')
+    description_maintenance = models.TextField(verbose_name='Descripción del Mantenimiento')
+    parts_change_maintenance = models.TextField(verbose_name='Partes o Piezas Reemplazadas')
+    responsible_user = models.ForeignKey(User, verbose_name='Responsable', on_delete=models.CASCADE)
+    file_maintenance = models.FileField(upload_to='maintenance/%Y%m%d', verbose_name='Registro Físico de Mantenimiento', null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.equipment_instrumental} - {self.date_maintenance} - {self.type_maintenance}'
+
+    class Meta:
+        verbose_name = 'Maintenance'
+        verbose_name_plural = 'Maintenances'
+        db_table = 'Maintenance'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(Maintenance, self).save(*args, **kwargs)

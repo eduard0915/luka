@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, CreateView, UpdateView, View, DetailView
 
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from core.condition.forms import ConditionForm, ConditionRegisterForm, ConditionRegisterActionsForm
 from core.condition.models import Condition, ConditionRegister
 from core.mixins import ValidatePermissionRequiredMixin
@@ -26,6 +27,8 @@ class ConditionVariableAPI(LoginRequiredMixin, View):
                 if condition_id:
                     condition = Condition.objects.get(pk=condition_id)
                     data['variable'] = condition.variable
+                    data['upper_limit'] = condition.upper_limit
+                    data['lower_limit'] = condition.lower_limit
                 else:
                     data['error'] = 'No se ha proporcionado el ID de la condición'
             else:
@@ -183,22 +186,35 @@ class ConditionRegisterListView(LoginRequiredMixin, ValidatePermissionRequiredMi
     def post(self, request, *args, **kwargs):
         data = {}
         try:
-            action = request.POST['action']
+            action = request.POST.get('action')
             if action == 'searchdata':
-                data = []
-                for i in ConditionRegister.objects.all():
-                    data.append({
-                        'id': i.id,
-                        'registration_date': timezone.localtime(i.registration_date).strftime('%Y-%m-%d %H:%M:%S'),
-                        'registered_by': str(i.registered_by),
-                        'registered_data': f"{i.registered_data}" '%' if i.condition.variable == 'Humedad Relativa' else f"{i.registered_data}" '°C',
-                        'condition__area': f"{i.condition.area}",
-                        'condition__variable': f"{i.condition.variable}",
-                        'condition__upper_limit': i.condition.upper_limit,
-                        'condition__lower_limit': i.condition.lower_limit,
-                        'actions_registered_by': i.actions_registered_by.id if i.actions_registered_by else None,
-                        'value': i.registered_data,
-                    })
+                registers = list(ConditionRegister.objects.select_related(
+                    'condition',
+                    'registered_by',
+                    'actions_registered_by'
+                ).values(
+                    'id',
+                    'registration_date',
+                    'registered_by__first_name',
+                    'registered_by__last_name',
+                    'registered_data',
+                    'condition__area',
+                    'condition__variable',
+                    'condition__upper_limit',
+                    'condition__lower_limit',
+                    'actions_registered_by__id'
+                ).order_by('-registration_date'))
+
+                for r in registers:
+                    r['registration_date'] = timezone.localtime(r['registration_date']).strftime('%Y-%m-%d %H:%M:%S')
+                    first_name = r.pop('registered_by__first_name') or ''
+                    last_name = r.pop('registered_by__last_name') or ''
+                    r['registered_by'] = f"{first_name} {last_name}".strip()
+                    unit = '%' if r['condition__variable'] == 'Humedad Relativa' else '°C'
+                    r['registered_data_formatted'] = f"{r['registered_data']}{unit}"
+                    r['actions_registered_by'] = r.pop('actions_registered_by__id')
+
+                return JsonResponse(registers, safe=False)
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
@@ -331,7 +347,16 @@ class ConditionRegisterActionsUpdateView(LoginRequiredMixin, ValidatePermissionR
         context = super().get_context_data(**kwargs)
         context['title'] = 'Registro de Acciones o Correcciones'
         context['entity'] = 'Registro de Acciones o Correcciones'
-        context['info_form'] = f"Condición: {self.object.condition} | Dato: {self.object.registered_data}"
+        
+        registered_data = self.object.registered_data
+        upper_limit = self.object.condition.upper_limit
+        lower_limit = self.object.condition.lower_limit
+        
+        info_text = f"Condición: {self.object.condition} | Dato: {registered_data}"
+        if registered_data > upper_limit or registered_data < lower_limit:
+            info_text = mark_safe(f"Condición: {self.object.condition} | <span style='color: red;'>Dato: {registered_data} (Fuera de rango)</span>")
+            
+        context['info_form'] = info_text
         context['action'] = 'edit'
         return context
 

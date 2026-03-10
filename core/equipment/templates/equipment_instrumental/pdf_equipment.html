@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        .header img {
+            max-height: 80px;
+            float: left;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 16pt;
+        }
+        .header p {
+            margin: 5px 0 0;
+            font-size: 10pt;
+            color: #666;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 12pt;
+            font-weight: bold;
+            background-color: #f0f0f0;
+            padding: 5px;
+            border-left: 5px solid #333;
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        table th {
+            background-color: #f9f9f9;
+            width: 30%;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 8pt;
+            color: #999;
+            border-top: 1px solid #ddd;
+            padding-top: 5px;
+        }
+        .text-justify {
+            text-align: justify;
+        }
+        .clear {
+            clear: both;
+        }
+        .photo-container {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .equipment-photo {
+            max-width: 300px;
+            max-height: 300px;
+            border: 1px solid #ddd;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        {% if company.image_company %}
+            <img src="{{ company.image_company.path }}" alt="Logo">
+        {% endif %}
+        <h1>{{ company.name_company|default:"Hoja de Vida de Equipo" }}</h1>
+        <p>{{ company.address_company }} | RUC: {{ company.ruc_company }}</p>
+        <div class="clear"></div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">INFORMACIÓN GENERAL</div>
+        <table>
+            <tr>
+                <th>Código:</th>
+                <td><strong>{{ object.code_equipment }}</strong></td>
+            </tr>
+            <tr>
+                <th>Descripción:</th>
+                <td>{{ object.description_equipment }}</td>
+            </tr>
+            <tr>
+                <th>Proveedor:</th>
+                <td>{{ object.supplier_equipment }}</td>
+            </tr>
+            <tr>
+                <th>Marca:</th>
+                <td>{{ object.brand_equipment }}</td>
+            </tr>
+            <tr>
+                <th>Modelo:</th>
+                <td>{{ object.model_equipment }}</td>
+            </tr>
+            <tr>
+                <th>Número de Serie:</th>
+                <td>{{ object.serie_equipment }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">UBICACIÓN Y RESPONSABILIDAD</div>
+        <table>
+            <tr>
+                <th>Laboratorio:</th>
+                <td>{{ object.laboratory.laboratory_name }}</td>
+            </tr>
+            <tr>
+                <th>Planta:</th>
+                <td>{{ object.laboratory.site.site_name }}</td>
+            </tr>
+            <tr>
+                <th>Responsable:</th>
+                <td>{{ object.responsible_user.get_full_name }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">FECHAS Y USO</div>
+        <table>
+            <tr>
+                <th>Fecha Inicio de Uso:</th>
+                <td>{{ object.date_start_use|date:"d/m/Y"|default:"N/A" }}</td>
+            </tr>
+            <tr>
+                <th>Fecha de Inactivación:</th>
+                <td>{{ object.date_disabled|date:"d/m/Y"|default:"Activo" }}</td>
+            </tr>
+            <tr>
+                <th>Tiempo de Uso:</th>
+                <td>{{ object.time_use|default:"0" }} horas</td>
+            </tr>
+        </table>
+    </div>
+
+    {% if object.photo_equipment %}
+    <div class="section">
+        <div class="section-title">FOTO DEL EQUIPO</div>
+        <div class="photo-container">
+            <img src="{{ object.photo_equipment.path }}" class="equipment-photo">
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="section">
+        <div class="section-title">HISTORIAL DE MANTENIMIENTOS</div>
+        {% if maintenances %}
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 15%">Fecha</th>
+                        <th style="width: 20%">Tipo</th>
+                        <th style="width: 25%">Realizado por</th>
+                        <th style="width: 40%">Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in maintenances %}
+                        <tr>
+                            <td>{{ m.date_maintenance|date:"d/m/Y" }}</td>
+                            <td>{{ m.type_maintenance }}</td>
+                            <td>{{ m.maintenance_by }}</td>
+                            <td class="text-justify">{{ m.description_maintenance }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No se registran mantenimientos para este equipo.</p>
+        {% endif %}
+    </div>
+
+    <div class="footer">
+        Generado el {{ today|date:"d/m/Y H:i" }} | Página <pdf:pagenumber/> de <pdf:pagecount/>
+    </div>
+</body>
+</html>

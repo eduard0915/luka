@@ -1,10 +1,38 @@
 from django import forms
 from django.forms import ModelForm, TextInput, Select, DateInput, FileInput, NumberInput
-from core.equipment.models import EquipmentInstrumental, MaterialInstrumental
+from core.equipment.models import EquipmentInstrumental, MaterialInstrumental, Maintenance
 from core.laboratory.models import Laboratory
 from core.user.views.user.views import User
 
 BOOLEAN = [(True, 'Si'), (False, 'No')]
+
+
+# Mantenimiento
+class MaintenanceForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['equipment_instrumental'].queryset = EquipmentInstrumental.objects.filter(enable_equipment=True)
+        self.fields['responsible_user'].queryset = User.objects.filter(is_active=True)
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = Maintenance
+        fields = [
+            'equipment_instrumental', 'date_maintenance', 'type_maintenance',
+            'maintenance_by', 'description_maintenance', 'parts_change_maintenance',
+            'responsible_user', 'file_maintenance'
+        ]
+        widgets = {
+            'equipment_instrumental': Select(attrs={'class': 'form-control', 'required': True, 'style': 'width: 100%'}),
+            'date_maintenance': DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'required': True, 'type': 'date'}),
+            'type_maintenance': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'maintenance_by': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'description_maintenance': forms.Textarea(attrs={'class': 'form-control', 'required': True, 'rows': 3}),
+            'parts_change_maintenance': forms.Textarea(attrs={'class': 'form-control', 'required': True, 'rows': 3}),
+            'responsible_user': Select(attrs={'class': 'form-control', 'required': True, 'style': 'width: 100%'}),
+            'file_maintenance': FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.doc,.docx,.jpg,.jpeg,.png'}),
+        }
 
 
 # Creación de Equipos Instrumentales
