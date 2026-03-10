@@ -54,6 +54,19 @@
     background-color: #dde0e3;
 }
 
+/* Select2 matching Bootstrap 5 form-control font size (Vali Admin 0.875rem) */
+.select2-container--bootstrap-5 .select2-selection {
+    font-size: 0.875rem;
+}
+
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+    font-size: 0.875rem;
+}
+
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__option {
+    font-size: 0.875rem;
+}
+
 /* Image helpers */
 .img-radius-10 {
     border-radius: 10%;

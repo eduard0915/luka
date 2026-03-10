@@ -1458,3 +1458,22 @@ hr {
 /*    height: 3rem;*/
 /*    color: #667eea;*/
 /*}*/
+.border-left-primary {
+    border-left: 0.25rem solid var(--primary-color) !important;
+}
+
+.text-xs {
+    font-size: .7rem;
+}
+
+.font-weight-bold {
+    font-weight: 700 !important;
+}
+
+.text-gray-800 {
+    color: #5a5c69 !important;
+}
+
+.text-gray-300 {
+    color: #dddfeb !important;
+}
