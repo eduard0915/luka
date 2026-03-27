@@ -113,7 +113,14 @@ class ConditionCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, C
                     data['success'] = True
                     data['redirect_url'] = self.get_success_url()
                 else:
-                    data['error'] = form.errors
+                    error_list = []
+                    for field, errors in form.errors.items():
+                        for error in errors:
+                            if field == '__all__':
+                                error_list.append(f"{error}")
+                            else:
+                                error_list.append(f"<b>{form.fields[field].label}</b>: {error}")
+                    data['error'] = "<br>".join(error_list)
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -155,7 +162,14 @@ class ConditionUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, U
                     data['success'] = True
                     data['redirect_url'] = self.get_success_url()
                 else:
-                    data['error'] = form.errors
+                    error_list = []
+                    for field, errors in form.errors.items():
+                        for error in errors:
+                            if field == '__all__':
+                                error_list.append(f"{error}")
+                            else:
+                                error_list.append(f"<b>{form.fields[field].label}</b>: {error}")
+                    data['error'] = "<br>".join(error_list)
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -246,14 +260,21 @@ class ConditionRegisterCreateView(LoginRequiredMixin, ValidatePermissionRequired
         try:
             action = request.POST['action']
             if action == 'add':
-                form = self.get_form()
+                form = ConditionRegisterForm(request.POST)
                 if form.is_valid():
                     form.save()
-                    messages.success(request, '¡Registro de condición guardado satisfactoriamente!')
+                    messages.success(request, 'Condiciones ambientales registradas satisfactoriamente!')
                     data['success'] = True
                     data['redirect_url'] = self.get_success_url()
                 else:
-                    data['error'] = form.errors
+                    error_list = []
+                    for field, errors in form.errors.items():
+                        for error in errors:
+                            if field == '__all__':
+                                error_list.append(f"{error}")
+                            else:
+                                error_list.append(f"<b>{form.fields[field].label}</b>: {error}")
+                    data['error'] = "<br>".join(error_list)
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -295,7 +316,14 @@ class ConditionRegisterUpdateView(LoginRequiredMixin, ValidatePermissionRequired
                     data['success'] = True
                     data['redirect_url'] = self.get_success_url()
                 else:
-                    data['error'] = form.errors
+                    error_list = []
+                    for field, errors in form.errors.items():
+                        for error in errors:
+                            if field == '__all__':
+                                error_list.append(f"{error}")
+                            else:
+                                error_list.append(f"<b>{form.fields[field].label}</b>: {error}")
+                    data['error'] = "<br>".join(error_list)
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -336,7 +364,14 @@ class ConditionRegisterActionsUpdateView(LoginRequiredMixin, ValidatePermissionR
                     messages.success(request, '¡Acciones registradas satisfactoriamente!')
                     data['success'] = True
                 else:
-                    data['error'] = form.errors
+                    error_list = []
+                    for field, errors in form.errors.items():
+                        for error in errors:
+                            if field == '__all__':
+                                error_list.append(f"{error}")
+                            else:
+                                error_list.append(f"<b>{form.fields[field].label}</b>: {error}")
+                    data['error'] = "<br>".join(error_list)
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:

@@ -1,9 +1,5 @@
 from django.urls import path
-from core.condition.views import (
-    ConditionListView, ConditionCreateView, ConditionUpdateView,
-    ConditionRegisterListView, ConditionRegisterCreateView, ConditionRegisterUpdateView,
-    ConditionRegisterActionsUpdateView, ConditionVariableAPI, ConditionRegisterDetailView
-)
+from core.condition.views import *
 
 app_name = 'condition'
 
