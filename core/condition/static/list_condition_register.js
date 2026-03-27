@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 dataSrc: ""
             },
+            order: [[0, 'desc']],
             columns: [
                 {'data': 'registration_date'},
                 {'data': 'condition__area'},

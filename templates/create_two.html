@@ -332,6 +332,7 @@
             e.preventDefault();
 
             const btnSubmit = document.getElementById('btnSubmit');
+            const originalBtnContent = btnSubmit.innerHTML;
             btnSubmit.disabled = true;
             btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
 
@@ -343,18 +344,42 @@
             })
             .then(function (response) {
                 console.log(response.data);
-                if (!response.data.hasOwnProperty('error')) {
-                    location.href = '{{ list_url }}';
-                    return false;
+                if (response.data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: 'Operación realizada satisfactoriamente',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        location.href = response.data.redirect_url || '{{ list_url }}';
+                    });
+                    return;
                 }
-                message_error(response.data.error);
+                
+                if (response.data.error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de Validación',
+                        html: response.data.error,
+                    });
+                }
                 btnSubmit.disabled = false;
-                btnSubmit.innerHTML = '<i class="fa fa-fw fa-lg fa-check-circle me-2"></i>Guardar';
+                btnSubmit.innerHTML = originalBtnContent;
             })
             .catch(function (error) {
-                alert(error.response.status + ': ' + error.message);
+                console.error(error);
+                let errorMsg = 'Error al procesar la solicitud';
+                if (error.response && error.response.data && error.response.data.error) {
+                    errorMsg = error.response.data.error;
+                }
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error del Sistema',
+                    text: errorMsg,
+                });
                 btnSubmit.disabled = false;
-                btnSubmit.innerHTML = '<i class="fa fa-fw fa-lg fa-check-circle me-2"></i>Guardar';
+                btnSubmit.innerHTML = originalBtnContent;
             });
         });
     </script>
