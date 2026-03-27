@@ -199,6 +199,36 @@
         {% endif %}
     </div>
 
+    <div class="section">
+        <div class="section-title">CALIBRACIONES</div>
+        {% if calibrations %}
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 15%">Fecha</th>
+                        <th style="width: 10%">Cumple</th>
+                        <th style="width: 25%">Realizado por</th>
+                        <th style="width: 25%">Parámetro</th>
+                        <th style="width: 25%">Responsable</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cal in calibrations %}
+                        <tr>
+                            <td>{{ cal.date_calibration|date:"d/m/Y" }}</td>
+                            <td style="text-align: center;">{{ cal.comply|yesno:"Sí,No" }}</td>
+                            <td>{{ cal.calibrated_by }}</td>
+                            <td>{{ cal.parameter|default:"-" }}</td>
+                            <td>{{ cal.responsible_user.get_full_name }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No se registran calibraciones para este equipo.</p>
+        {% endif %}
+    </div>
+
     <div class="footer">
         Generado el {{ today|date:"d/m/Y H:i" }} | Página <pdf:pagenumber/> de <pdf:pagecount/>
     </div>

@@ -208,6 +208,63 @@
                                     {% endif %}
                                 </div>
 
+                                <!-- Historial de Calibraciones -->
+                                <div class="mb-4">
+                                    <h5 class="section-title">
+                                        <i class="fas fa-balance-scale"></i> Calibraciones Realizadas
+                                    </h5>
+                                    {% if calibrations %}
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Fecha</th>
+                                                        <th>Cumple</th>
+                                                        <th>Realizado por</th>
+                                                        <th>Parámetro</th>
+                                                        <th>Responsable</th>
+                                                        <th class="text-center">Certificado</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for cal in calibrations %}
+                                                        <tr>
+                                                            <td>{{ cal.date_calibration|date:"d/m/Y" }}</td>
+                                                            <td class="text-center">
+                                                                {% if cal.comply %}
+                                                                    <span class="badge bg-success">Sí</span>
+                                                                {% else %}
+                                                                    <span class="badge bg-danger">No</span>
+                                                                {% endif %}
+                                                            </td>
+                                                            <td>{{ cal.calibrated_by }}</td>
+                                                            <td>{{ cal.parameter|default:"-" }}</td>
+                                                            <td>{{ cal.responsible_user.get_full_name }}</td>
+                                                            <td class="text-center">
+                                                                {% if cal.certificate_calibration %}
+                                                                    <a href="{{ cal.certificate_calibration.url }}"
+                                                                       target="_blank"
+                                                                       download
+                                                                       class="btn btn-sm btn-outline-primary"
+                                                                       title="Descargar Certificado">
+                                                                        <i class="fas fa-file-download"></i>
+                                                                    </a>
+                                                                {% else %}
+                                                                    <span class="text-muted">-</span>
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle"></i> No se registran calibraciones para este equipo.
+                                        </div>
+                                    {% endif %}
+                                </div>
+
                             </div>
 
                             <!-- Columna derecha: Foto del equipo -->

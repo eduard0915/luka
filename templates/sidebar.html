@@ -136,10 +136,13 @@
         {% url 'equipment:create_equipment_instrumental' as create_eq %}
         {% url 'equipment:list_maintenance' as list_maint %}
         {% url 'equipment:create_maintenance' as create_maint %}
+        {% url 'equipment:list_calibration' as list_calib %}
+        {% url 'equipment:create_calibration' as create_calib %}
 
-        {% is_expanded list_eq create_eq list_maint create_maint as equipment_expanded %}
+        {% is_expanded list_eq create_eq list_maint create_maint list_calib create_calib as equipment_expanded %}
         {% is_active_section list_eq create_eq as equipment_active %}
         {% is_active_section list_maint create_maint as maintenance_active %}
+        {% is_active_section list_calib create_calib as calibration_active %}
 
         <li class="{{ equipment_expanded }}">
             <a class="app-menu__item" href="#" data-toggle="treeview">
@@ -156,6 +159,11 @@
                 <li>
                     <a class="{{ maintenance_active }}" href="{{ list_maint }}">
                         <i class="icon bi bi-circle-fill"></i> Mantenimientos
+                    </a>
+                </li>
+                <li>
+                    <a class="{{ calibration_active }}" href="{{ list_calib }}">
+                        <i class="icon bi bi-circle-fill"></i> Calibraciones
                     </a>
                 </li>
             </ul>

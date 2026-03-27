@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block head_list %}
-    <script src="{% static 'js/list_maintenance.js' %}"></script>
+    <script src="{% static 'js/list_calibration.js' %}"></script>
 {% endblock %}
 
 {% block buttons %}
@@ -15,10 +15,11 @@
     <tr>
         <th>Equipo</th>
         <th>Fecha</th>
-        <th>Tipo</th>
-        <th>Realizado por</th>
+        <th>Próxima Calib.</th>
+        <th>Calibrado por</th>
+        <th>Parámetro</th>
+        <th>Cumple</th>
         <th>Responsable</th>
-        <th>Adjunto</th>
         <th>Acciones</th>
     </tr>
 {% endblock %}

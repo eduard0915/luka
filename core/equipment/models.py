@@ -25,6 +25,7 @@ class EquipmentInstrumental(BaseModel):
     photo_equipment = models.FileField(upload_to='equipment/instrumental/%Y%m%d', verbose_name='Foto del Equipo', null=True, blank=True)
     manual_equipment = models.FileField(upload_to='equipment/instrumental/%Y%m%d', verbose_name='Manual de Operación', null=True, blank=True)
     enable_equipment = models.BooleanField(default=True, verbose_name='Habilitado')
+    frequency_calibration = models.PositiveSmallIntegerField(verbose_name='Frecuencia de Calibración (Meses)', default=12)
 
     def __str__(self):
         return f'{self.code_equipment} - {self.description_equipment}, {self.brand_equipment} - {self.model_equipment}'
@@ -103,3 +104,34 @@ class Maintenance(BaseModel):
             else:
                 self.user_updated = user
         return super(Maintenance, self).save(*args, **kwargs)
+
+
+# Calibración
+class Calibration(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    equipment_instrumental = models.ForeignKey(EquipmentInstrumental, verbose_name='Equipo Instrumental', on_delete=models.CASCADE)
+    date_calibration = models.DateField(verbose_name='Fecha')
+    date_calibration_next = models.DateField(verbose_name='Próxima Calibración')
+    calibrated_by = models.CharField(max_length=250, verbose_name='Calibrado por')
+    parameter = models.CharField(max_length=250, verbose_name='Parametro', null=True, blank=True)
+    observation_calibration = models.TextField(verbose_name='Observaciones', default='No aplica')
+    comply = models.BooleanField(verbose_name='Cumple')
+    responsible_user = models.ForeignKey(User, verbose_name='Responsable', on_delete=models.CASCADE)
+    certificate_calibration = models.FileField(upload_to='calibration/%Y%m%d', verbose_name='Certificado de Calibración', null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.equipment_instrumental} - {self.date_calibration} - Calibración: {"Cumple" if self.comply else "No cumple"}'
+
+    class Meta:
+        verbose_name = 'Calibration'
+        verbose_name_plural = 'Calibrations'
+        db_table = 'Calibration'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(Calibration, self).save(*args, **kwargs)

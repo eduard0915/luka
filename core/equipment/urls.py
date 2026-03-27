@@ -4,6 +4,7 @@ from django.urls import path
 from core.equipment.views.equipment_instrumental.views import *
 from core.equipment.views.material_instrumental.views import *
 from core.equipment.views.maintenance.views import *
+from core.equipment.views.calibration.views import *
 
 from luka import settings
 
@@ -29,6 +30,13 @@ urlpatterns = [
     path('maintenance/update/<uuid:pk>/', MaintenanceUpdateView.as_view(), name='update_maintenance'),
     path('maintenance/detail/<uuid:pk>/', MaintenanceDetailView.as_view(), name='detail_maintenance'),
     path('maintenance/pdf/<uuid:pk>/', MaintenancePDFView.as_view(), name='maintenance_pdf'),
+
+    # Calibraciones
+    path('calibration/add/', CalibrationCreateView.as_view(), name='create_calibration'),
+    path('calibration/list/', CalibrationListView.as_view(), name='list_calibration'),
+    path('calibration/update/<uuid:pk>/', CalibrationUpdateView.as_view(), name='update_calibration'),
+    path('calibration/detail/<uuid:pk>/', CalibrationDetailView.as_view(), name='detail_calibration'),
+    path('calibration/pdf/<uuid:pk>/', CalibrationPDFView.as_view(), name='calibration_pdf'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
