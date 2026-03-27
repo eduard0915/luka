@@ -140,12 +140,15 @@
         {% url 'equipment:create_calibration' as create_calib %}
         {% url 'equipment:list_verification' as list_verif %}
         {% url 'equipment:create_verification' as create_verif %}
+        {% url 'equipment:list_daily_verification' as list_daily_verif %}
+        {% url 'equipment:create_daily_verification' as create_daily_verif %}
 
-        {% is_expanded list_eq create_eq list_maint create_maint list_calib create_calib list_verif create_verif as equipment_expanded %}
+        {% is_expanded list_eq create_eq list_maint create_maint list_calib create_calib list_verif create_verif list_daily_verif create_daily_verif as equipment_expanded %}
         {% is_active_section list_eq create_eq as equipment_active %}
         {% is_active_section list_maint create_maint as maintenance_active %}
         {% is_active_section list_calib create_calib as calibration_active %}
         {% is_active_section list_verif create_verif as verification_active %}
+        {% is_active_section list_daily_verif create_daily_verif as daily_verification_active %}
 
         <li class="{{ equipment_expanded }}">
             <a class="app-menu__item" href="#" data-toggle="treeview">
@@ -172,6 +175,11 @@
                 <li>
                     <a class="{{ verification_active }}" href="{{ list_verif }}">
                         <i class="icon bi bi-circle-fill"></i> Verificaciones Intermedias
+                    </a>
+                </li>
+                <li>
+                    <a class="{{ daily_verification_active }}" href="{{ list_daily_verif }}">
+                        <i class="icon bi bi-circle-fill"></i> Verificaciones Diarias
                     </a>
                 </li>
             </ul>
@@ -220,11 +228,10 @@
                         class="treeview-indicator bi bi-chevron-right"></i></a>
                 <ul class="treeview-menu">
                     {% if company %}
-                        <li><a class="treeview-item" href="{% url 'company:company_detail' company.id %}">
+                        <li><a class="treeview-item" href="{% url 'company:company_detail' company.id %}"><i class="icon bi bi-circle-fill"></i> Empresa</a></li>
                     {% else %}
-                        <li><a class="treeview-item" href="{% url 'company:company_create' %}">
+                        <li><a class="treeview-item" href="{% url 'company:company_create' %}"><i class="icon bi bi-circle-fill"></i> Empresa</a></li>
                     {% endif %}
-                    <i class="icon bi bi-circle-fill"></i> Empresa</a></li>
                     <li><a class="treeview-item {% if list_lab in request.path or create_lab in request.path %}active{% endif %}" href="{% url 'laboratory:list_laboratory' %}">
                         <i class="icon bi bi-circle-fill"></i> Laboratorios</a></li>
                     <li><a class="treeview-item {% if list_sln_base in request.path or add_sln_base in request.path %}active{% endif %}" href="{% url 'solution:list_solution_base' %}">

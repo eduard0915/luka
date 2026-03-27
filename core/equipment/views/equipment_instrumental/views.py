@@ -214,6 +214,8 @@ class EquipmentInstrumentalDetailView(LoginRequiredMixin, ValidatePermissionRequ
         context['maintenances'] = self.object.maintenance_set.all().order_by('-date_maintenance')
         # Calibraciones del equipo
         context['calibrations'] = self.object.calibration_set.all().order_by('-date_calibration')
+        # Verificaciones del equipo
+        context['verifications'] = self.object.verification_set.all().order_by('-date_verification')
         context['pdf_url'] = reverse_lazy('equipment:equipment_instrumental_pdf', kwargs={'pk': self.object.pk})
         return context
 
@@ -250,6 +252,7 @@ class EquipmentInstrumentalPDFView(LoginRequiredMixin, ValidatePermissionRequire
                 'object': object,
                 'maintenances': object.maintenance_set.all().order_by('-date_maintenance'),
                 'calibrations': object.calibration_set.all().order_by('-date_calibration'),
+                'verifications': object.verification_set.all().order_by('-date_verification'),
                 'company': company,
                 'title': f'Hoja de Vida de Equipo: {object.code_equipment}',
                 'today': timezone.now(),

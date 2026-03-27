@@ -6,6 +6,7 @@ from core.equipment.views.material_instrumental.views import *
 from core.equipment.views.maintenance.views import *
 from core.equipment.views.calibration.views import *
 from core.equipment.views.verification.views import *
+from core.equipment.views.daily_verification.views import *
 
 from luka import settings
 
@@ -45,6 +46,13 @@ urlpatterns = [
     path('verification/update/<uuid:pk>/', VerificationUpdateView.as_view(), name='update_verification'),
     path('verification/detail/<uuid:pk>/', VerificationDetailView.as_view(), name='detail_verification'),
     path('verification/pdf/<uuid:pk>/', VerificationPDFView.as_view(), name='verification_pdf'),
+
+    # Verificaciones Diarias
+    path('daily_verification/add/', DailyVerificationCreateView.as_view(), name='create_daily_verification'),
+    path('daily_verification/list/', DailyVerificationListView.as_view(), name='list_daily_verification'),
+    path('daily_verification/update/<uuid:pk>/', DailyVerificationUpdateView.as_view(), name='update_daily_verification'),
+    path('daily_verification/detail/<uuid:pk>/', DailyVerificationDetailView.as_view(), name='detail_daily_verification'),
+    path('daily_verification/pdf/<uuid:pk>/', DailyVerificationPDFView.as_view(), name='daily_verification_pdf'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

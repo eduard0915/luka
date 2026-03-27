@@ -1,15 +1,15 @@
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.forms import ModelForm, TextInput, Select, DateInput, FileInput, NumberInput
-from core.equipment.models import EquipmentInstrumental, MaterialInstrumental, Maintenance, Calibration, Verification
+from core.equipment.models import EquipmentInstrumental, MaterialInstrumental, Maintenance, Calibration, Verification, DailyVerification
 from core.laboratory.models import Laboratory
 from core.user.views.user.views import User
 
 BOOLEAN = [(True, 'Si'), (False, 'No')]
 
-
 PARAMETER = [('Temperatura', 'Temperatura'), ('Humedad', 'Humedad'), ('Masa', 'Masa'), ('Presión', 'Presión'), ('No aplica', 'No aplica')]
 
+UNIT_TOLERANCE = [('No aplica', 'No aplica'), ('Kg', 'Kg'), ('g', 'g'), ('mg', 'mg'), ('mL', 'mL'), ('%v/v', '%v/v')]
 
 # Verificaciones
 class VerificationForm(ModelForm):
@@ -145,6 +145,35 @@ class CalibrationForm(ModelForm):
 
 
 
+class DailyVerificationForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['equipment_instrumental'].queryset = EquipmentInstrumental.objects.filter(enable_equipment=True)
+        self.fields['responsible_user'].queryset = User.objects.filter(is_active=True)
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = DailyVerification
+        fields = [
+            'equipment_instrumental', 'date_verification_daily', 'verified_by',
+            'parameter_verified', 'reference_pattern_daily', 'verification_result_daily',
+            'error', 'observation_verification', 'comply', 'responsible_user'
+        ]
+        widgets = {
+            'equipment_instrumental': Select(attrs={'class': 'form-control', 'required': True, 'style': 'width: 100%'}),
+            'date_verification_daily': forms.DateTimeInput(format='%Y-%m-%dT%H:%M', attrs={'class': 'form-control', 'required': True, 'type': 'datetime-local'}),
+            'verified_by': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'parameter_verified': Select(attrs={'class': 'form-control', 'required': True}, choices=PARAMETER),
+            'reference_pattern_daily': NumberInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
+            'verification_result_daily': NumberInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
+            'error': NumberInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
+            'observation_verification': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'comply': Select(choices=BOOLEAN, attrs={'class': 'form-control', 'required': True}),
+            'responsible_user': Select(attrs={'class': 'form-control', 'required': True, 'style': 'width: 100%'}),
+        }
+
+
 # Creación de Equipos Instrumentales
 class EquipmentInstrumentalForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -158,7 +187,8 @@ class EquipmentInstrumentalForm(ModelForm):
         model = EquipmentInstrumental
         fields = [
             'code_equipment', 'description_equipment', 'supplier_equipment',
-            'brand_equipment', 'model_equipment', 'serie_equipment',
+            'brand_equipment', 'model_equipment', 'serie_equipment', 'frequency_calibration',
+            'intermediate_verification', 'tolerance', 'unit_tolerance',
             'laboratory', 'responsible_user', 'photo_equipment', 'manual_equipment'
         ]
         widgets = {
@@ -168,7 +198,11 @@ class EquipmentInstrumentalForm(ModelForm):
             'brand_equipment': TextInput(attrs={'class': 'form-control', 'required': True}),
             'model_equipment': TextInput(attrs={'class': 'form-control', 'required': True}),
             'serie_equipment': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'frequency_calibration': TextInput(attrs={'class': 'form-control'}),
+            'intermediate_verification': TextInput(attrs={'class': 'form-control'}),
+            'tolerance': TextInput(attrs={'class': 'form-control'}),
             'laboratory': Select(attrs={'class': 'form-control', 'required': True, 'style': 'width: 100%'}),
+            'unit_tolerance': Select(attrs={'class': 'form-control', 'style': 'width: 100%'}, choices=UNIT_TOLERANCE),
             'responsible_user': Select(attrs={'class': 'form-control', 'required': True, 'style': 'width: 100%'}),
             'photo_equipment': FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
             'manual_equipment': FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.doc,.docx'})
