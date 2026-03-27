@@ -138,11 +138,14 @@
         {% url 'equipment:create_maintenance' as create_maint %}
         {% url 'equipment:list_calibration' as list_calib %}
         {% url 'equipment:create_calibration' as create_calib %}
+        {% url 'equipment:list_verification' as list_verif %}
+        {% url 'equipment:create_verification' as create_verif %}
 
-        {% is_expanded list_eq create_eq list_maint create_maint list_calib create_calib as equipment_expanded %}
+        {% is_expanded list_eq create_eq list_maint create_maint list_calib create_calib list_verif create_verif as equipment_expanded %}
         {% is_active_section list_eq create_eq as equipment_active %}
         {% is_active_section list_maint create_maint as maintenance_active %}
         {% is_active_section list_calib create_calib as calibration_active %}
+        {% is_active_section list_verif create_verif as verification_active %}
 
         <li class="{{ equipment_expanded }}">
             <a class="app-menu__item" href="#" data-toggle="treeview">
@@ -164,6 +167,11 @@
                 <li>
                     <a class="{{ calibration_active }}" href="{{ list_calib }}">
                         <i class="icon bi bi-circle-fill"></i> Calibraciones
+                    </a>
+                </li>
+                <li>
+                    <a class="{{ verification_active }}" href="{{ list_verif }}">
+                        <i class="icon bi bi-circle-fill"></i> Verificaciones Intermedias
                     </a>
                 </li>
             </ul>
