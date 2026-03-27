@@ -229,6 +229,36 @@
         {% endif %}
     </div>
 
+    <div class="section">
+        <div class="section-title">VERIFICACIONES INTERMEDIAS</div>
+        {% if verifications %}
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 15%">Fecha</th>
+                        <th style="width: 10%">Cumple</th>
+                        <th style="width: 25%">Realizado por</th>
+                        <th style="width: 25%">Parámetro</th>
+                        <th style="width: 25%">Responsable</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ver in verifications %}
+                        <tr>
+                            <td>{{ ver.date_verification|date:"d/m/Y" }}</td>
+                            <td style="text-align: center;">{{ ver.comply|yesno:"Sí,No" }}</td>
+                            <td>{{ ver.verified_by }}</td>
+                            <td>{{ ver.parameter_verified|default:"-" }}</td>
+                            <td>{{ ver.responsible_user.get_full_name }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No se registran verificaciones intermedias para este equipo.</p>
+        {% endif %}
+    </div>
+
     <div class="footer">
         Generado el {{ today|date:"d/m/Y H:i" }} | Página <pdf:pagenumber/> de <pdf:pagecount/>
     </div>

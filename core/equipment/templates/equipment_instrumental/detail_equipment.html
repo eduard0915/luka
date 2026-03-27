@@ -215,7 +215,7 @@
                                     </h5>
                                     {% if calibrations %}
                                         <div class="table-responsive">
-                                            <table class="table table-bordered table-hover">
+                                            <table class="table table-bordered table-hover" id="tblCalibrations">
                                                 <thead class="table-light">
                                                     <tr>
                                                         <th>Fecha</th>
@@ -261,6 +261,63 @@
                                     {% else %}
                                         <div class="alert alert-info">
                                             <i class="fas fa-info-circle"></i> No se registran calibraciones para este equipo.
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Historial de Verificaciones Intermedias -->
+                                <div class="mb-4">
+                                    <h5 class="section-title">
+                                        <i class="fas fa-check-double"></i> Verificaciones Intermedias
+                                    </h5>
+                                    {% if verifications %}
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover" id="tblVerifications">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Fecha</th>
+                                                        <th>Cumple</th>
+                                                        <th>Realizado por</th>
+                                                        <th>Parámetro</th>
+                                                        <th>Responsable</th>
+                                                        <th class="text-center">Reporte</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for ver in verifications %}
+                                                        <tr>
+                                                            <td>{{ ver.date_verification|date:"d/m/Y" }}</td>
+                                                            <td class="text-center">
+                                                                {% if ver.comply %}
+                                                                    <span class="badge bg-success">Sí</span>
+                                                                {% else %}
+                                                                    <span class="badge bg-danger">No</span>
+                                                                {% endif %}
+                                                            </td>
+                                                            <td>{{ ver.verified_by }}</td>
+                                                            <td>{{ ver.parameter_verified|default:"-" }}</td>
+                                                            <td>{{ ver.responsible_user.get_full_name }}</td>
+                                                            <td class="text-center">
+                                                                {% if ver.report_verification %}
+                                                                    <a href="{{ ver.report_verification.url }}"
+                                                                       target="_blank"
+                                                                       download
+                                                                       class="btn btn-sm btn-outline-primary"
+                                                                       title="Descargar Reporte">
+                                                                        <i class="fas fa-file-download"></i>
+                                                                    </a>
+                                                                {% else %}
+                                                                    <span class="text-muted">-</span>
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle"></i> No se registran verificaciones intermedias para este equipo.
                                         </div>
                                     {% endif %}
                                 </div>
@@ -367,7 +424,45 @@
 {% endblock %}
 
 {% block javascript %}
+    <!-- Data table plugin-->
+    <script src="{% static 'lib/vali-admin/js/plugins/jquery.dataTables.min.js' %}"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-1.13.4/datatables.min.css">
     <script>
+        $(document).ready(function() {
+            if ($('#tblCalibrations').length > 0) {
+                $('#tblCalibrations').DataTable({
+                    responsive: true,
+                    autoWidth: false,
+                    destroy: true,
+                    deferRender: true,
+                    pageLength: 10,
+                    paging: true,
+                    info: true,
+                    searching: false,
+                    lengthChange: false,
+                    language: {
+                        url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
+                    }
+                });
+            }
+            if ($('#tblVerifications').length > 0) {
+                $('#tblVerifications').DataTable({
+                    responsive: true,
+                    autoWidth: false,
+                    destroy: true,
+                    deferRender: true,
+                    pageLength: 10,
+                    paging: true,
+                    info: true,
+                    searching: false,
+                    lengthChange: false,
+                    language: {
+                        url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
+                    }
+                });
+            }
+        });
+
         // Agregar efecto de zoom a la imagen al hacer clic
         document.addEventListener('DOMContentLoaded', function () {
             const equipmentPhoto = document.querySelector('.equipment-photo');
