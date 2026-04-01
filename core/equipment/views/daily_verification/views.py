@@ -38,26 +38,35 @@ class DailyVerificationListView(LoginRequiredMixin, ValidatePermissionRequiredMi
             if action == 'searchdata':
                 verifications = list(DailyVerification.objects.select_related(
                     'equipment_instrumental',
-                    'responsible_user'
+                    'responsible_user',
+                    'verified_by'
                 ).values(
                     'id',
                     'equipment_instrumental__code_equipment',
                     'equipment_instrumental__description_equipment',
+                    'equipment_instrumental__tolerance',
                     'date_verification_daily',
-                    'verified_by',
+                    # 'verified_by__first_name',
+                    # 'verified_by__last_name',
                     'parameter_verified',
                     'comply',
                     'responsible_user__first_name',
                     'responsible_user__last_name',
+                    'reference_pattern_daily',
+                    'verification_result_daily',
+                    'error'
                 ).order_by('-date_verification_daily'))
 
                 for v in verifications:
+                    # first_name_ = v.get('verified_by__first_name', '') or ''
+                    # last_name_ = v.get('verified_by__last_name', '') or ''
                     first_name = v.get('responsible_user__first_name', '') or ''
                     last_name = v.get('responsible_user__last_name', '') or ''
                     code_eq = v.get('equipment_instrumental__code_equipment', '') or ''
                     description_eq = v.get('equipment_instrumental__description_equipment', '') or ''
                     v['equipment'] = f"{code_eq} - {description_eq}"
                     v['responsible_user__full_name'] = f"{first_name} {last_name}".strip()
+                    # v['verified_by__full_name'] = f"{first_name_} {last_name_}".strip()
                     if v['date_verification_daily']:
                         v['date_verification_daily'] = v['date_verification_daily'].strftime('%Y-%m-%d %H:%M')
 
