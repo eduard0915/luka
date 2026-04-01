@@ -20,19 +20,22 @@ document.addEventListener('DOMContentLoaded', function () {
             columns: [
                 {'data': 'equipment'},
                 {'data': 'date_verification_daily'},
-                {'data': 'verified_by'},
                 {'data': 'parameter_verified'},
+                {'data': 'reference_pattern_daily'},
+                {'data': 'verification_result_daily'},
+                {'data': 'equipment_instrumental__tolerance'},
+                {'data': 'error'},
                 {'data': 'comply'},
                 {'data': 'responsible_user__full_name'},
                 {'data': 'id'}
             ],
             columnDefs: [
                 {
-                    targets: [0, 1, 2, 3, 5],
+                    targets: [0, 1, 2, 3, 4, 5, 6, 8],
                     class: 'td-actions text-center'
                 },
                 {
-                    targets: [4],
+                    targets: [7],
                     class: 'td-actions text-center',
                     render: function (data, type, row) {
                         if (data) {
@@ -43,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 {
-                    targets: [6],
+                    targets: [9],
                     class: 'td-actions text-center',
                     orderable: false,
                     render: function (data, type, row) {
