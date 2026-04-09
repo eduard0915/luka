@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
@@ -157,33 +157,33 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
         })
         return kwargs
 
-    # def get_form_kwargs(self):
-    #     kwargs = super().get_form_kwargs()
-    #     analysis = SamplingAnalysis.objects.get(pk=self.kwargs.get('pk'))
-    #     calcule = AnalyticalMethodCalculate.objects.get(pk=self.kwargs.get('pk_calcule'))
-    #     relation = AnalyticalMethodCalculateRelation.objects.filter(analytical_method_calculate_id=analysis.analytical_method.id).first()
-    #
-    #     kwargs.update({
-    #         'analysis': analysis,
-    #         'relation': relation
-    #     })
-    #     return kwargs
-
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        analysis = get_object_or_404(SamplingAnalysis, pk=self.kwargs.get('pk'))
+        # analysis = get_object_or_404(SamplingAnalysis, pk=self.kwargs.get('pk'))
+        analysis = SamplingAnalysis.objects.filter(pk=self.kwargs.get('pk')).order_by('-date_creation').first()
         relation = get_object_or_404(
             AnalyticalMethodCalculateRelation,
             pk=self.kwargs.get('pk_relation'),
-            analytical_method=analysis.analytical_method
+            analytical_method=analysis.analytical_method,
         )
 
-        all_relations = AnalyticalMethodCalculateRelation.objects.select_related('analytical_method').filter(
+        # Asignar a variables usadas en calculate_part
+        var_num_rel = AnalyticalMethodCalculateRelation.objects.filter(
             analytical_method_id=analysis.analytical_method.id,
-            calculate_description_relation=relation.calculate_description_relation
-        )
-        var_num = all_relations.filter(position__iexact='Numerador')
-        var_den = all_relations.filter(position__iexact='Denominador')
+            position__iexact='Numerador'
+        ).order_by('date_creation')
+
+        var_den_rel = AnalyticalMethodCalculateRelation.objects.filter(
+            analytical_method_id=analysis.analytical_method.id,
+            position__iexact='Denominador'
+        ).order_by('date_creation')
+
+        all_base_calculates = AnalyticalMethodCalculate.objects.filter(
+            analytical_method_id=analysis.analytical_method.id
+        ).order_by('date_creation')
+
+        var_num_base = all_base_calculates.filter(position__iexact='Numerador')
+        var_den_base = all_base_calculates.filter(position__iexact='Denominador')
 
         base_processing = SamplingAnalysisProcessing.objects.filter(
             sample_analysis_id=analysis.id,
@@ -197,60 +197,125 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
             ).order_by('-analyzed_date').first()
 
         if base_processing:
-            qty_std = float(base_processing.quantity_standard)
+            qty_std = float(base_processing.concentration_sample)
             qty_sample = float(base_processing.quantity_sample)
 
-            def calculate_part(relations, target_pos=None):
-                factor = 1
-                sample = 1
-                std = 1
-                relation_val = 1
-                used_prev = False
-                for r in relations:
+            def calculate_part(relations_rel, relations_base, target_pos=None):
+                total_product = 1.0
+                has_elements = False
+
+                # Procesar Relaciones (AMCR)
+                for r in relations_rel:
+                    has_elements = True
+                    factor = 1.0
+                    sample = 1.0
+                    std = 1.0
+                    relation_val = 1.0
+                    used_prev = False
+
                     if r.factor is not None:
-                        factor *= float(r.factor)
+                        factor = float(r.factor)
                     if r.sample_quantity and r.sample_quantity.strip():
                         sample = float(qty_sample)
                     if r.volumen_std is not None:
                         std = qty_std
                     
-                    # 1. Prioridad: Cálculo específico definido en la relación
+                    # 1. Prioridad: Cálculo específico definido en la relación (misma muestra)
                     if r.analytical_method_calculate is not None:
                         prev_processing = SamplingAnalysisProcessing.objects.filter(
-                            sample_analysis__sampling_process_id=analysis.sampling_process_id,
+                            sample_analysis_id=analysis.id,
                             analytical_method_calculate=r.analytical_method_calculate,
                             relational_calculation=False
-                        ).order_by('-analyzed_date').first()
-                        if prev_processing:
-                            relation_val *= prev_processing.concentration_sample
-                            used_prev = True
-                
-                # 2. Si no se encontró por cálculo específico, buscar por posición (ej. Denominador)
-                if not used_prev and target_pos:
-                    prev_processing_pos = SamplingAnalysisProcessing.objects.filter(
-                        sample_analysis__sampling_process_id=analysis.sampling_process_id,
-                        analytical_method_calculate__position__iexact=target_pos,
-                        relational_calculation=False
-                    ).order_by('-analyzed_date').first()
-                    if prev_processing_pos:
-                        relation_val = prev_processing_pos.concentration_sample
-                        used_prev = True
+                        ).first()
+                        
+                        # Si no se encuentra en la misma muestra, buscar en el proceso de muestreo
+                        if not prev_processing:
+                            prev_processing = SamplingAnalysisProcessing.objects.filter(
+                                sample_analysis__sampling_process_id=analysis.sampling_process_id,
+                                analytical_method_calculate=r.analytical_method_calculate,
+                                relational_calculation=False
+                            ).order_by('-analyzed_date').first()
 
-                # 3. Fallback final al procesamiento base
-                if not used_prev:
-                    if base_processing:
-                        relation_val = base_processing.concentration_sample
-                
-                return std * factor * sample * relation_val
+                        if prev_processing:
+                            relation_val = prev_processing.concentration_sample
+                            used_prev = True
+                    
+                    # 2. Búsqueda por posición en la misma muestra
+                    if not used_prev and target_pos:
+                        prev_processing_pos = SamplingAnalysisProcessing.objects.filter(
+                            sample_analysis_id=analysis.id,
+                            analytical_method_calculate__position__iexact=target_pos,
+                            relational_calculation=False
+                        ).first()
+
+                        # Si no se encuentra, buscar en el proceso de muestreo
+                        if not prev_processing_pos:
+                            prev_processing_pos = SamplingAnalysisProcessing.objects.filter(
+                                sample_analysis__sampling_process_id=analysis.sampling_process_id,
+                                analytical_method_calculate__position__iexact=target_pos,
+                                relational_calculation=False
+                            ).order_by('-analyzed_date').first()
+
+                        if prev_processing_pos:
+                            relation_val = prev_processing_pos.concentration_sample
+                            used_prev = True
+
+                    # 3. Fallback final al procesamiento base
+                    if not used_prev:
+                        if base_processing:
+                            relation_val = base_processing.concentration_sample
+                    
+                    total_product *= (std * factor * sample * relation_val)
+
+                # Procesar Cálculos Base (AMC)
+                for b in relations_base:
+                    has_elements = True
+                    factor = 1.0
+                    sample = 1.0
+                    std = 1.0
+                    
+                    if b.factor is not None:
+                        factor = float(b.factor)
+                    if b.sample_quantity and b.sample_quantity.strip():
+                        sample = float(qty_sample)
+                    if b.volumen_std is not None:
+                        std = qty_std
+                    
+                    # Para el cálculo base, el valor es el del procesamiento base actual o último
+                    val = 1.0
+                    
+                    # Buscar primero en la misma muestra
+                    prev_base = SamplingAnalysisProcessing.objects.filter(
+                        sample_analysis_id=analysis.id,
+                        analytical_method_calculate=b,
+                        relational_calculation=False
+                    ).first()
+
+                    # Si no se encuentra, buscar en el proceso de muestreo
+                    if not prev_base:
+                        prev_base = SamplingAnalysisProcessing.objects.filter(
+                            sample_analysis__sampling_process_id=analysis.sampling_process_id,
+                            analytical_method_calculate=b,
+                            relational_calculation=False
+                        ).order_by('-analyzed_date').first()
+
+                    if prev_base:
+                        val = float(prev_base.concentration_sample)
+                    elif base_processing:
+                        val = float(base_processing.concentration_sample)
+
+                    total_product *= (std * factor * sample * val)
+
+                return total_product if has_elements else 0.0
 
             if 'numerator' in form.fields:
-                val_num = calculate_part(var_num, 'Numerador')
+                val_num = calculate_part(var_num_rel, var_num_base, 'Numerador')
                 form.initial['numerator'] = val_num
-                form.fields['numerator'].initial = val_num
+                # form.fields['numerator'].initial = val_num
             if 'denominator' in form.fields:
-                val_den = calculate_part(var_den, 'Denominador')
+                val_den = calculate_part(var_den_rel, var_den_base, 'Denominador')
                 form.initial['denominator'] = val_den
-                form.fields['denominator'].initial = val_den
+                # form.fields['denominator'].initial = val_den
 
         return form
 
@@ -263,27 +328,3 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
         context['detail_button'] = 'Si, Ejecutar'
         context['relation'] = relation
         return context
-
-
-# Vista para Obtener la unidad de medida del reactivo
-# @login_required
-# @require_GET
-# def get_solution_std_unit(request):
-#     """Obtiene la unidad de medida del reactivo de la solución estándar"""
-#     try:
-#         solution_id = request.GET.get('solution_id')
-#         if not solution_id:
-#             return JsonResponse({'unit': None})
-#
-#         solution = SolutionStd.objects.select_related(
-#             'solute_std__reagent'
-#         ).get(pk=solution_id)
-#
-#         # Obtener la unidad de medida del reactivo
-#         unit = solution.solute_std.reagent.umb if solution.solute_std and solution.solute_std.reagent else None
-#
-#         return JsonResponse({'unit': unit})
-#     except SolutionStd.DoesNotExist:
-#         return JsonResponse({'unit': None})
-#     except Exception as e:
-#         return JsonResponse({'error': str(e)}, status=400)

@@ -222,6 +222,41 @@
                                                 </tbody>
                                             </table>
                                         </div>
+
+                                        {% if analysis_relations %}
+                                            <div class="mt-3 border-top pt-3">
+                                                <h6 class="mb-3"><i class="bi bi-diagram-2 me-2"></i> Cálculos Relacionales</h6>
+                                                {% for item in analysis_relations %}
+                                                    <div class="mb-2">
+                                                        <div class="fw-bold mb-2">{{ item.analysis.analytical_method.description_analytical_method }}</div>
+                                                        {% for relation in item.relations %}
+                                                            {% if relation.calculate_description_relation %}
+                                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                                    <span>{{ relation.calculate_description_relation }}</span>
+                                                                    <div class="d-flex align-items-center">
+                                                                        {% for res in item.results %}
+                                                                            {% if res.analytical_method_calculate_relation.id == relation.id %}
+                                                                                <span class="badge bg-info text-dark me-3">
+                                                                                    {% if res.denominator %}
+                                                                                        {{ res.numerator }} / {{ res.denominator }} = {{ res.calcule }}
+                                                                                    {% else %}
+                                                                                        Resultado: {{ res.calcule }}
+                                                                                    {% endif %}
+                                                                                </span>
+                                                                            {% endif %}
+                                                                        {% endfor %}
+                                                                        <button class="btn btn-success btn-xs"
+                                                                                onclick="open_modal('{% url 'sampling:create_sampling_analysis_processing_relation' item.analysis.id relation.id %}')">
+                                                                            <i class="bi bi-calculator m-0"></i> Calcular
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
