@@ -10,8 +10,9 @@ from django.views.generic import CreateView, UpdateView, ListView, DetailView
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.models import SpecificationProduct
 from core.sampling.forms import *
-from core.sampling.models import SamplingProcess, SamplingAnalysis
+from core.sampling.models import SamplingProcess, SamplingAnalysis, SamplingAnalysisProcessingRelation
 from core.utils import format_form_errors
+from core.analytical_method.models import AnalyticalMethodCalculateRelation
 
 
 # Creación de Proceso de Muestreo
@@ -235,8 +236,31 @@ class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMi
             if sampling_point else SpecificationProduct.objects.none()
         )
 
-        context['sampling_analysis'] = SamplingAnalysis.objects.select_related('sampling_process').filter(
+        context['sampling_analysis'] = SamplingAnalysis.objects.select_related('sampling_process', 'analytical_method').filter(
             sampling_process_id=self.object.id)
+
+        # Preparar relaciones de cálculo y resultados por análisis para el template
+        analysis_relations = []
+        for sa in context['sampling_analysis']:
+            # Relaciones únicas por descripción
+            rels_all = AnalyticalMethodCalculateRelation.objects.filter(analytical_method=sa.analytical_method)
+            unique_rels = []
+            seen_descriptions = set()
+            for rel in rels_all:
+                if rel.calculate_description_relation not in seen_descriptions:
+                    unique_rels.append(rel)
+                    seen_descriptions.add(rel.calculate_description_relation)
+
+            results = SamplingAnalysisProcessingRelation.objects.filter(
+                sampling_analysis=sa
+            ).order_by('-date_creation')
+
+            analysis_relations.append({
+                'analysis': sa,
+                'relations': unique_rels,
+                'results': results,
+            })
+        context['analysis_relations'] = analysis_relations
 
         context['icon'] = 'bi bi-file-earmark-ruled'
         context['back'] = reverse_lazy('sampling:list_sampling_process')

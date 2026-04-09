@@ -27,8 +27,8 @@ class EquipmentInstrumental(BaseModel):
     enable_equipment = models.BooleanField(default=True, verbose_name='Habilitado')
     frequency_calibration = models.PositiveSmallIntegerField(verbose_name='Frecuencia de Calibración (Meses)', default=12)
     intermediate_verification = models.PositiveSmallIntegerField(verbose_name='Verificación Intermedia (Meses)', default=1)
-    tolerance = models.FloatField(verbose_name='Tolerancia', null=True, blank=True)
-    unit_tolerance = models.CharField(verbose_name='Unidad de Tolerancia', max_length=10, null=True, blank=True)
+    tolerance = models.FloatField(verbose_name='Error Máximo Permitido', null=True, blank=True)
+    unit_tolerance = models.CharField(verbose_name='Unidad Error Máximo', max_length=10, null=True, blank=True)
 
     def __str__(self):
         return f'{self.code_equipment} - {self.description_equipment}, {self.brand_equipment} - {self.model_equipment}'

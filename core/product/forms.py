@@ -2,7 +2,8 @@ from crum import get_current_user
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm, TextInput, Select, SelectMultiple
 
-from core.analytical_method.models import AnalyticalMethod
+from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation
+from core.analytical_method.forms import UNIT_CALCULATE, POSITION
 from core.product.models import SamplePoint, Product, AnalyticalMethodProduct, SpecificationProduct
 
 
@@ -235,6 +236,171 @@ class AnalyticalMethodProductForm(ModelForm):
         fields = ['analytical_method']
         widgets = {
             'analytical_method': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.product:
+                    instance.product = self.product
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Formularios para Cálculos Dependientes de Productos
+class ProductCalculateRelationDescriptionForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.product = kwargs.pop('product', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodCalculateRelation
+        fields = ['calculate_description_relation', 'unit_measure_calculate']
+        widgets = {
+            'calculate_description_relation': TextInput(attrs={'class': 'form-control'}),
+            'unit_measure_calculate': Select(attrs={'class': 'form-control'}, choices=UNIT_CALCULATE)
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.product:
+                    instance.product = self.product
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+class ProductCalculateRelationForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.product = kwargs.pop('product', None)
+        super().__init__(*args, **kwargs)
+        if self.product:
+            self.fields['analytical_method_calculate'].queryset = AnalyticalMethodCalculate.objects.filter(
+                analytical_method__analyticalmethodproduct__product=self.product
+            ).distinct()
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodCalculateRelation
+        fields = ['analytical_method_calculate', 'position']
+        widgets = {
+            'analytical_method_calculate': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+            'position': Select(attrs={'class': 'form-control'}, choices=POSITION)
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.product:
+                    instance.product = self.product
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+class ProductVolumenStdRelationForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.product = kwargs.pop('product', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodCalculateRelation
+        fields = ['volumen_std', 'position']
+        widgets = {
+            'volumen_std': TextInput(attrs={'class': 'form-control'}),
+            'position': Select(attrs={'class': 'form-control'}, choices=POSITION)
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.product:
+                    instance.product = self.product
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+class ProductFactorRelationForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.product = kwargs.pop('product', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodCalculateRelation
+        fields = ['factor', 'position']
+        widgets = {
+            'factor': TextInput(attrs={'class': 'form-control'}),
+            'position': Select(attrs={'class': 'form-control'}, choices=POSITION),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.product:
+                    instance.product = self.product
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+class ProductSampleGramRelationForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.product = kwargs.pop('product', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodCalculateRelation
+        fields = ['sample_quantity', 'position']
+        widgets = {
+            'sample_quantity': TextInput(attrs={'class': 'form-control'}),
+            'position': Select(attrs={'class': 'form-control'}, choices=POSITION),
         }
 
     def save(self, commit=True):

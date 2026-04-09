@@ -162,7 +162,7 @@ class AnalyticalMethodMaterial(BaseModel):
         return super(AnalyticalMethodMaterial, self).save(*args, **kwargs)
 
 
-# Procedimiento de Metodos Analítico
+# Procedimiento de metodos Analítico
 class AnalyticalMethodProcedure(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE)
@@ -189,7 +189,7 @@ class AnalyticalMethodProcedure(BaseModel):
 # Cálculo de concentración de muestra
 class AnalyticalMethodCalculate(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE)
+    analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analítico', on_delete=models.CASCADE)
     calculate_description = models.CharField(max_length=100, verbose_name='Descripción del Cálculo')
     unit_measure_calculate = models.CharField(max_length=10, verbose_name='Unidad a Calcular')
     volumen_std = models.CharField(max_length=100, verbose_name='Volúmen Estándar', null=True, blank=True)
@@ -215,10 +215,11 @@ class AnalyticalMethodCalculate(BaseModel):
         return super(AnalyticalMethodCalculate, self).save(*args, **kwargs)
 
 
-# Calculos de Relacionados
+# Cálculos de Relacionados
 class AnalyticalMethodCalculateRelation(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE)
+    product = models.ForeignKey('product.Product', verbose_name='Producto', on_delete=models.CASCADE, null=True, blank=True)
+    analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE, null=True, blank=True)
     analytical_method_calculate = models.ForeignKey(
         AnalyticalMethodCalculate, verbose_name='Calculo Relacionado', on_delete=models.CASCADE, null=True, blank=True)
     calculate_description_relation = models.CharField(max_length=100, verbose_name='Descripción del Cálculo')
