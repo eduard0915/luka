@@ -26,9 +26,11 @@ class EquipmentInstrumental(BaseModel):
     manual_equipment = models.FileField(upload_to='equipment/instrumental/%Y%m%d', verbose_name='Manual de Operación', null=True, blank=True)
     enable_equipment = models.BooleanField(default=True, verbose_name='Habilitado')
     frequency_calibration = models.PositiveSmallIntegerField(verbose_name='Frecuencia de Calibración (Meses)', default=12)
+    frequency_maintenance = models.PositiveSmallIntegerField(verbose_name='Frecuencia de Mantenimiento (Meses)', default=12)
     intermediate_verification = models.PositiveSmallIntegerField(verbose_name='Verificación Intermedia (Meses)', default=1)
     tolerance = models.FloatField(verbose_name='Error Máximo Permitido', null=True, blank=True)
-    unit_tolerance = models.CharField(verbose_name='Unidad Error Máximo', max_length=10, null=True, blank=True)
+    unit_tolerance = models.CharField(verbose_name='Unidad de Medida', max_length=10, null=True, blank=True)
+    Verification_pattern = models.FloatField(verbose_name='Patrón de Verificación', null=True, blank=True)
 
     def __str__(self):
         return f'{self.code_equipment} - {self.description_equipment}, {self.brand_equipment} - {self.model_equipment}'
@@ -84,6 +86,7 @@ class Maintenance(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     equipment_instrumental = models.ForeignKey(EquipmentInstrumental, verbose_name='Equipo Instrumental', on_delete=models.CASCADE)
     date_maintenance = models.DateField(verbose_name='Fecha')
+    next_date_maintenance = models.DateField(verbose_name='Fecha Próximo Mantenimiento:')
     type_maintenance = models.CharField(max_length=50, verbose_name='Tipo de Mantenimiento')
     maintenance_by = models.CharField(max_length=250, verbose_name='Realizado por')
     description_maintenance = models.TextField(verbose_name='Descripción del Mantenimiento')

@@ -1,11 +1,14 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, CreateView, UpdateView, View, DetailView
 
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+from datetime import datetime, timedelta
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from core.condition.forms import ConditionForm, ConditionRegisterForm, ConditionRegisterActionsForm
@@ -240,9 +243,88 @@ class ConditionRegisterListView(LoginRequiredMixin, ValidatePermissionRequiredMi
         context['title'] = 'Registros de Condiciones Ambientales'
         context['create_url'] = reverse_lazy('condition:create_condition_register')
         context['list_url'] = reverse_lazy('condition:list_condition_register')
+        context['export_url'] = reverse_lazy('condition:export_condition_register_excel')
         context['entity'] = 'Registros de Condiciones Ambientales'
         context['div'] = '12'
         return context
+
+
+class ConditionRegisterExportExcelView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    permission_required = 'condition.view_conditionregister'
+
+    def get(self, request, *args, **kwargs):
+        try:
+            # Filtrar registros de los últimos 3 años
+            three_years_ago = timezone.now() - timedelta(days=3 * 365)
+            registers = ConditionRegister.objects.filter(
+                registration_date__gte=three_years_ago
+            ).select_related('condition', 'registered_by', 'actions_registered_by').order_by('-registration_date')
+
+            # Crear libro y hoja de Excel
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Registros Condiciones"
+
+            # Estilos
+            header_font = Font(bold=True, color="FFFFFF")
+            header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+            alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            border = Border(
+                left=Side(style='thin'),
+                right=Side(style='thin'),
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
+
+            # Encabezados
+            headers = [
+                'Fecha de Registro', 'Registrado por', 'Área', 'Variable',
+                'Dato Registrado', 'Límite Inferior', 'Límite Superior',
+                'Acciones', 'Acciones Registradas por'
+            ]
+
+            for col_num, header in enumerate(headers, 1):
+                cell = ws.cell(row=1, column=col_num)
+                cell.value = header
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.alignment = alignment
+                cell.border = border
+                # Ajustar ancho de columna (aproximado)
+                ws.column_dimensions[cell.column_letter].width = 20
+
+            # Datos
+            for row_num, r in enumerate(registers, 2):
+                data = [
+                    timezone.localtime(r.registration_date).strftime('%Y-%m-%d %H:%M:%S'),
+                    r.registered_by.get_full_name(),
+                    r.condition.area,
+                    r.condition.variable,
+                    r.registered_data,
+                    r.condition.lower_limit,
+                    r.condition.upper_limit,
+                    r.actions or '',
+                    r.actions_registered_by.get_full_name() if r.actions_registered_by else ''
+                ]
+
+                for col_num, value in enumerate(data, 1):
+                    cell = ws.cell(row=row_num, column=col_num)
+                    cell.value = value
+                    cell.alignment = alignment
+                    cell.border = border
+
+            # Preparar respuesta
+            response = HttpResponse(
+                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            )
+            response['Content-Disposition'] = f'attachment; filename="Registros_Condiciones_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
+            
+            wb.save(response)
+            return response
+
+        except Exception as e:
+            messages.error(request, f'Error al generar el Excel: {str(e)}')
+            return HttpResponseRedirect(reverse_lazy('condition:list_condition_register'))
 
 
 class ConditionRegisterCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
