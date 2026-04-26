@@ -40,12 +40,60 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['equipments'] = method.analyticalmethodequipment_set.all()
         context['materials'] = method.analyticalmethodmaterial_set.all()
         context['procedures'] = method.analyticalmethodprocedure_set.all()
-        # Agrupar relaciones de cálculo por descripción para evitar duplicados en el template
-        calculate_relations_all = method.analyticalmethodcalculaterelation_set.all()
+        # Agrupar relaciones de cálculo por descripción y generar LaTeX
+        calculate_relations_all = method.analyticalmethodcalculaterelation_set.select_related(
+            'analytical_method_calculate'
+        ).all().order_by('date_creation')
+
+        equations_data = {}
+        current_desc = None
+        for cr in calculate_relations_all:
+            if cr.calculate_description_relation:
+                current_desc = cr.calculate_description_relation
+                if current_desc not in equations_data:
+                    equations_data[current_desc] = {'num': [], 'den': [], 'gen': [], 'unit': cr.unit_measure_calculate}
+
+            if not current_desc:
+                continue
+
+            parts = []
+            if cr.analytical_method_calculate:
+                parts.append(rf"\text{{{cr.analytical_method_calculate.calculate_description}}}")
+            if cr.volumen_std:
+                parts.append(str(cr.volumen_std))
+            if cr.factor:
+                parts.append(str(cr.factor))
+            if cr.sample_quantity:
+                parts.append(str(cr.sample_quantity))
+
+            term = r" \cdot ".join(parts)
+            if term:
+                if cr.position == 'Numerador':
+                    equations_data[current_desc]['num'].append(term)
+                elif cr.position == 'Denominador':
+                    equations_data[current_desc]['den'].append(term)
+                elif cr.position == 'General':
+                    equations_data[current_desc]['gen'].append(term)
+
+        final_equations = []
+        for desc, data in equations_data.items():
+            str_num = r" \cdot ".join(data['num']) if data['num'] else "1"
+            str_den = r" \cdot ".join(data['den']) if data['den'] else "1"
+            str_gen = rf" \cdot {r' \cdot '.join(data['gen'])}" if data['gen'] else ""
+
+            label = rf"\text{{{desc}}}"
+            if data['unit']:
+                label += rf" \text{{ ({data['unit']})}}"
+
+            final_equations.append(rf"{label} = \frac{{{str_num}}}{{{str_den}}}{str_gen}")
+
+        context['final_equations'] = final_equations
+
+        # Mantener calculate_relations original para compatibilidad con botones de 'Calcular' si es necesario
         unique_relations = []
         descriptions_seen = set()
         for rel in calculate_relations_all:
-            if rel.calculate_description_relation not in descriptions_seen:
+            if rel.calculate_description_relation and rel.calculate_description_relation not in descriptions_seen:
                 unique_relations.append(rel)
                 descriptions_seen.add(rel.calculate_description_relation)
         context['calculate_relations'] = unique_relations
@@ -159,164 +207,57 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        # analysis = get_object_or_404(SamplingAnalysis, pk=self.kwargs.get('pk'))
-        analysis = SamplingAnalysis.objects.filter(pk=self.kwargs.get('pk')).order_by('-date_creation').first()
+        analysis = SamplingAnalysis.objects.filter(pk=self.kwargs.get('pk')).first()
         relation = get_object_or_404(
             AnalyticalMethodCalculateRelation,
             pk=self.kwargs.get('pk_relation'),
             analytical_method=analysis.analytical_method,
         )
 
-        # Asignar a variables usadas en calculate_part
-        var_num_rel = AnalyticalMethodCalculateRelation.objects.filter(
-            analytical_method_id=analysis.analytical_method.id,
-            position__iexact='Numerador'
-        ).order_by('date_creation')
+        all_rels = AnalyticalMethodCalculateRelation.objects.filter(
+            product=relation.product,
+            calculate_description_relation=relation.calculate_description_relation
+        )
 
-        var_den_rel = AnalyticalMethodCalculateRelation.objects.filter(
-            analytical_method_id=analysis.analytical_method.id,
-            position__iexact='Denominador'
-        ).order_by('date_creation')
+        numerator = 1.0
+        denominator = 1.0
+        has_num = False
+        has_den = False
 
-        all_base_calculates = AnalyticalMethodCalculate.objects.filter(
-            analytical_method_id=analysis.analytical_method.id
-        ).order_by('date_creation')
+        for r in all_rels:
+            if r.analytical_method_calculate:
+                # Buscar el análisis del mismo proceso con el método correspondiente
+                target_analysis = SamplingAnalysis.objects.filter(
+                    sampling_process=analysis.sampling_process,
+                    analytical_method=r.analytical_method_calculate.analytical_method
+                ).first()
+                
+                # Usar average_concentration
+                val = target_analysis.average_concentration if target_analysis and target_analysis.average_concentration else 0.0
+                
+                # Aplicar factor
+                if r.factor:
+                    val *= r.factor
+                
+                if r.position.lower() == 'numerador':
+                    numerator *= val
+                    has_num = True
+                elif r.position.lower() == 'denominador':
+                    denominator *= val
+                    has_den = True
 
-        var_num_base = all_base_calculates.filter(position__iexact='Numerador')
-        var_den_base = all_base_calculates.filter(position__iexact='Denominador')
+        if not has_num: numerator = 0.0
+        if not has_den: denominator = 1.0
 
-        base_processing = SamplingAnalysisProcessing.objects.filter(
-            sample_analysis_id=analysis.id,
-            relational_calculation=False
-        ).first()
-
-        if not base_processing:
-            base_processing = SamplingAnalysisProcessing.objects.filter(
-                sample_analysis__sampling_process_id=analysis.sampling_process_id,
-                relational_calculation=False
-            ).order_by('-analyzed_date').first()
-
-        if base_processing:
-            qty_std = float(base_processing.concentration_sample)
-            qty_sample = float(base_processing.quantity_sample)
-
-            def calculate_part(relations_rel, relations_base, target_pos=None):
-                total_product = 1.0
-                has_elements = False
-
-                # Procesar Relaciones (AMCR)
-                for r in relations_rel:
-                    has_elements = True
-                    factor = 1.0
-                    sample = 1.0
-                    std = 1.0
-                    relation_val = 1.0
-                    used_prev = False
-
-                    if r.factor is not None:
-                        factor = float(r.factor)
-                    if r.sample_quantity and r.sample_quantity.strip():
-                        sample = float(qty_sample)
-                    if r.volumen_std is not None:
-                        std = qty_std
-                    
-                    # 1. Prioridad: Cálculo específico definido en la relación (misma muestra)
-                    if r.analytical_method_calculate is not None:
-                        prev_processing = SamplingAnalysisProcessing.objects.filter(
-                            sample_analysis_id=analysis.id,
-                            analytical_method_calculate=r.analytical_method_calculate,
-                            relational_calculation=False
-                        ).first()
-                        
-                        # Si no se encuentra en la misma muestra, buscar en el proceso de muestreo
-                        if not prev_processing:
-                            prev_processing = SamplingAnalysisProcessing.objects.filter(
-                                sample_analysis__sampling_process_id=analysis.sampling_process_id,
-                                analytical_method_calculate=r.analytical_method_calculate,
-                                relational_calculation=False
-                            ).order_by('-analyzed_date').first()
-
-                        if prev_processing:
-                            relation_val = prev_processing.concentration_sample
-                            used_prev = True
-                    
-                    # 2. Búsqueda por posición en la misma muestra
-                    if not used_prev and target_pos:
-                        prev_processing_pos = SamplingAnalysisProcessing.objects.filter(
-                            sample_analysis_id=analysis.id,
-                            analytical_method_calculate__position__iexact=target_pos,
-                            relational_calculation=False
-                        ).first()
-
-                        # Si no se encuentra, buscar en el proceso de muestreo
-                        if not prev_processing_pos:
-                            prev_processing_pos = SamplingAnalysisProcessing.objects.filter(
-                                sample_analysis__sampling_process_id=analysis.sampling_process_id,
-                                analytical_method_calculate__position__iexact=target_pos,
-                                relational_calculation=False
-                            ).order_by('-analyzed_date').first()
-
-                        if prev_processing_pos:
-                            relation_val = prev_processing_pos.concentration_sample
-                            used_prev = True
-
-                    # 3. Fallback final al procesamiento base
-                    if not used_prev:
-                        if base_processing:
-                            relation_val = base_processing.concentration_sample
-                    
-                    total_product *= (std * factor * sample * relation_val)
-
-                # Procesar Cálculos Base (AMC)
-                for b in relations_base:
-                    has_elements = True
-                    factor = 1.0
-                    sample = 1.0
-                    std = 1.0
-                    
-                    if b.factor is not None:
-                        factor = float(b.factor)
-                    if b.sample_quantity and b.sample_quantity.strip():
-                        sample = float(qty_sample)
-                    if b.volumen_std is not None:
-                        std = qty_std
-                    
-                    # Para el cálculo base, el valor es el del procesamiento base actual o último
-                    val = 1.0
-                    
-                    # Buscar primero en la misma muestra
-                    prev_base = SamplingAnalysisProcessing.objects.filter(
-                        sample_analysis_id=analysis.id,
-                        analytical_method_calculate=b,
-                        relational_calculation=False
-                    ).first()
-
-                    # Si no se encuentra, buscar en el proceso de muestreo
-                    if not prev_base:
-                        prev_base = SamplingAnalysisProcessing.objects.filter(
-                            sample_analysis__sampling_process_id=analysis.sampling_process_id,
-                            analytical_method_calculate=b,
-                            relational_calculation=False
-                        ).order_by('-analyzed_date').first()
-
-                    if prev_base:
-                        val = float(prev_base.concentration_sample)
-                    elif base_processing:
-                        val = float(base_processing.concentration_sample)
-
-                    total_product *= (std * factor * sample * val)
-
-                return total_product if has_elements else 0.0
-
-            if 'numerator' in form.fields:
-                val_num = calculate_part(var_num_rel, var_num_base, 'Numerador')
-                form.initial['numerator'] = val_num
-                # form.fields['numerator'].initial = val_num
-            if 'denominator' in form.fields:
-                val_den = calculate_part(var_den_rel, var_den_base, 'Denominador')
-                form.initial['denominator'] = val_den
-                # form.fields['denominator'].initial = val_den
-
+        form.initial['numerator'] = round(numerator, 4)
+        form.initial['denominator'] = round(denominator, 4)
+        
+        sig_figs = analysis.analytical_method.sig_figs_result or 4
+        if denominator != 0:
+            form.initial['calcule'] = round(numerator / denominator, sig_figs)
+        else:
+            form.initial['calcule'] = 0
+            
         return form
 
     def get_context_data(self, **kwargs):
