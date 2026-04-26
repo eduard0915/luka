@@ -14,6 +14,8 @@ PARAMETER = [('Temperatura', 'Temperatura'), ('Humedad', 'Humedad'), ('Masa', 'M
 
 UNIT_TOLERANCE = [('No aplica', 'No aplica'), ('Kg', 'Kg'), ('g', 'g'), ('mg', 'mg'), ('mL', 'mL'), ('%v/v', '%v/v')]
 
+TYPE_MAINTENANCE = [('Preventivo', 'Preventivo'), ('Correctivo', 'Correctivo')]
+
 # Verificaciones
 class VerificationForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -86,13 +88,28 @@ class MaintenanceForm(ModelForm):
         widgets = {
             'equipment_instrumental': Select(attrs={'class': 'form-control', 'required': True, 'style': 'width: 100%'}),
             'date_maintenance': DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'required': True, 'data-datepicker': '1', 'autocomplete': 'off'}),
-            'type_maintenance': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'type_maintenance': Select(attrs={'class': 'form-control', 'required': True}, choices=TYPE_MAINTENANCE),
             'maintenance_by': TextInput(attrs={'class': 'form-control', 'required': True}),
             'description_maintenance': forms.Textarea(attrs={'class': 'form-control', 'required': True, 'rows': 3}),
             'parts_change_maintenance': forms.Textarea(attrs={'class': 'form-control', 'required': True, 'rows': 3}),
             'responsible_user': Select(attrs={'class': 'form-control', 'required': True, 'style': 'width: 100%'}),
             'file_maintenance': FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.doc,.docx,.jpg,.jpeg,.png'}),
         }
+
+    def save(self, commit=True):
+        data = {}
+        form = super()
+        try:
+            if form.is_valid():
+                data = form.save(commit=False)
+                data.next_date_maintenance = data.date_maintenance + relativedelta(
+                    months=data.equipment_instrumental.frequency_maintenance)
+                data.save()
+            else:
+                data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
 
 
 # Calibración

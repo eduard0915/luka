@@ -186,7 +186,7 @@ class MaintenanceDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Detalle de Mantenimiento'
-        context['entity'] = 'Detalle de Mantenimiento'
+        context['entity'] = 'Detalle Registro de Mantenimiento'
         context['icon'] = 'fa-solid fa-tools'
         context['list_url'] = reverse_lazy('equipment:list_maintenance')
         context['update_url'] = reverse_lazy('equipment:update_maintenance', kwargs={'pk': self.object.pk})

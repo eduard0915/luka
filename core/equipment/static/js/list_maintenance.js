@@ -28,12 +28,8 @@ document.addEventListener('DOMContentLoaded', function () {
             ],
             columnDefs: [
                 {
-                    targets: [0],
+                    targets: [0, 1, 2, 3, 4],
                     class: 'td-actions text-center'
-                },
-                {
-                    targets: [1, 2, 3, 4],
-                    class: 'td-actions text-start'
                 },
                 {
                     targets: [5],
@@ -46,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 {
-                    targets: [-1],
+                    targets: [6],
                     class: 'td-actions text-center',
                     orderable: false,
                     render: function (data, type, row) {

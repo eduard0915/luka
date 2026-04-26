@@ -8,7 +8,7 @@
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
-                        <i class="{{ icon }}"></i> {{ title }}
+                        <i class="{{ icon }}"></i> Registro de Mantenimiento
                     </h5>
                     <div>
                         <a href="{{ pdf_url }}" class="btn btn-danger btn-sm" target="_blank">
@@ -58,6 +58,10 @@
                                                         <span class="text-muted">Sin registro de físico adjunto</span>
                                                     {% endif %}
                                                 </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light"><strong>Próximo Mantenimiento:</strong></td>
+                                                <td>{{ object.next_date_maintenance|date:"d/m/Y" }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
