@@ -7,6 +7,7 @@ from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, UpdateView, ListView, DetailView
 
+from django.db.models import Q
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.models import SpecificationProduct
 from core.sampling.forms import *
@@ -224,11 +225,12 @@ class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMi
         context['title'] = 'Detalle de Proceso de Muestreo'
         context['entity'] = self.object
 
-        # Obtener el punto de muestreo
+        # Obtener el punto de muestreo y el producto asociado
         sampling_point = (
             self.object.group_sampling.sampling_point if self.object.group_sampling
             else self.object.point_sampling
         )
+        product = sampling_point.product if sampling_point else None
 
         # Obtener especificaciones
         context['specifications'] = (
@@ -239,28 +241,54 @@ class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMi
         context['sampling_analysis'] = SamplingAnalysis.objects.select_related('sampling_process', 'analytical_method').filter(
             sampling_process_id=self.object.id)
 
-        # Preparar relaciones de cálculo y resultados por análisis para el template
-        analysis_relations = []
-        for sa in context['sampling_analysis']:
-            # Relaciones únicas por descripción
-            rels_all = AnalyticalMethodCalculateRelation.objects.filter(analytical_method=sa.analytical_method)
-            unique_rels = []
-            seen_descriptions = set()
-            for rel in rels_all:
-                if rel.calculate_description_relation not in seen_descriptions:
-                    unique_rels.append(rel)
-                    seen_descriptions.add(rel.calculate_description_relation)
+        # Obtener los cálculos relacionales y generar la ecuación LaTeX siguiendo la lógica de ProductDetailView
+        calcules_relation = AnalyticalMethodCalculateRelation.objects.select_related(
+            'product', 'analytical_method_calculate'
+        ).filter(product_id=product).order_by('date_creation')
 
-            results = SamplingAnalysisProcessingRelation.objects.filter(
-                sampling_analysis=sa
-            ).order_by('-date_creation')
+        equations_data = {}
+        current_desc = None
+        for cr in calcules_relation:
+            if cr.calculate_description_relation:
+                current_desc = cr.calculate_description_relation
+                if current_desc not in equations_data:
+                    equations_data[current_desc] = {'num': [], 'den': [], 'gen': [], 'unit': cr.unit_measure_calculate}
+            
+            if not current_desc:
+                continue
+                
+            parts = []
+            if cr.analytical_method_calculate:
+                parts.append(rf"\text{{{cr.analytical_method_calculate.calculate_description}}}")
+            if cr.volumen_std:
+                parts.append(str(cr.volumen_std))
+            if cr.factor:
+                parts.append(str(cr.factor))
+            if cr.sample_quantity:
+                parts.append(str(cr.sample_quantity))
+            
+            term = r" \cdot ".join(parts)
+            if term:
+                if cr.position == 'Numerador':
+                    equations_data[current_desc]['num'].append(term)
+                elif cr.position == 'Denominador':
+                    equations_data[current_desc]['den'].append(term)
+                elif cr.position == 'General':
+                    equations_data[current_desc]['gen'].append(term)
 
-            analysis_relations.append({
-                'analysis': sa,
-                'relations': unique_rels,
-                'results': results,
-            })
-        context['analysis_relations'] = analysis_relations
+        final_equations = []
+        for desc, data in equations_data.items():
+            str_num = r" \cdot ".join(data['num']) if data['num'] else "1"
+            str_den = r" \cdot ".join(data['den']) if data['den'] else "1"
+            str_gen = rf" \cdot {r' \cdot '.join(data['gen'])}" if data['gen'] else ""
+            
+            label = rf"\text{{{desc}}}"
+            if data['unit']:
+                label += rf" \text{{ ({data['unit']})}}"
+            
+            final_equations.append(rf"{label} = \frac{{{str_num}}}{{{str_den}}}{str_gen}")
+
+        context['final_equations'] = final_equations
 
         context['icon'] = 'bi bi-file-earmark-ruled'
         context['back'] = reverse_lazy('sampling:list_sampling_process')

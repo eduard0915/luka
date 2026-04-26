@@ -3,6 +3,18 @@
 {% load humanize %}
 
 {% block head %}
+    {% block head_list %}
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>
+            window.MathJax = {
+                tex: {
+                    inlineMath: [['$', '$'], ['\\(', '\\)']],
+                    displayMath: [['$$', '$$'], ['\\[', '\\]']]
+                }
+            };
+        </script>
+    {% endblock %}
     <style>
         .list-container {
             max-height: 180px;
@@ -134,6 +146,17 @@
                                                         </tbody>
                                                     </table>
                                                 </div>
+                                                {% if final_equations %}
+                                                    <div class="mt-3 border-top pt-3">
+                                                        {% for equation in final_equations %}
+                                                            <div class="mb-3">
+                                                                <div class="d-flex justify-content-center align-items-center mb-1" style="font-size: 1.1rem; overflow-x: auto;">
+                                                                    $${{ equation }}$$
+                                                                </div>
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
                                                 {% if calculate_relations %}
                                                     <div class="mt-3 border-top pt-3">
                                                         {% for relation in calculate_relations %}

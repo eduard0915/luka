@@ -5,7 +5,18 @@
 {% load l10n %}
 
 {% block head %}
-    {% block head_list %}{% endblock %}
+    {% block head_list %}
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>
+            window.MathJax = {
+                tex: {
+                    inlineMath: [['$', '$'], ['\\(', '\\)']],
+                    displayMath: [['$$', '$$'], ['\\[', '\\]']]
+                }
+            };
+        </script>
+    {% endblock %}
     <style>
 
         .list-group-item {
@@ -148,14 +159,17 @@
                                 <div class="card h-100">
                                     <div class="card-body">
                                         <h5 class="card-title mb-3">
-                                            <i class="bi bi-clock me-2"></i> Métodos Analíticos y Especificaciones de Calidad
+                                            <i class="bi bi-clock me-2"></i> Métodos Analíticos y Especificaciones de
+                                            Calidad
                                         </h5>
                                         <div class="table-responsive">
                                             <table class="table table-hover table-bordered">
                                                 <thead>
                                                 <tr>
                                                     <th class="text-center align-middle" style="width:50%">Ensayo</th>
-                                                    <th class="text-center align-middle" style="width:27%">Especificación</th>
+                                                    <th class="text-center align-middle" style="width:27%">
+                                                        Especificación
+                                                    </th>
                                                     <th class="text-center align-middle" style="width:23%">Método</th>
                                                 </tr>
                                                 </thead>
@@ -185,14 +199,16 @@
                                 <div class="card h-100">
                                     <div class="card-body">
                                         <h5 class="card-title mb-3">
-                                            <i class="bi bi-clock me-2"></i> Resultados de Análisis de Control de Calidad
+                                            <i class="bi bi-clock me-2"></i> Resultados de Análisis de Control de
+                                            Calidad
                                         </h5>
                                         <div class="table-responsive">
                                             <table class="table table-hover table-bordered">
                                                 <thead>
                                                 <tr>
                                                     <th class="text-center align-middle" style="width:45%">Ensayo</th>
-                                                    <th class="text-center align-middle" style="width:20%">Resultado</th>
+                                                    <th class="text-center align-middle" style="width:20%">Resultado
+                                                    </th>
                                                     <th class="text-center align-middle" style="width:20%">Concepto</th>
                                                     <th class="text-center align-middle" style="width:15%">Acciones</th>
                                                 </tr>
@@ -212,8 +228,9 @@
                                                                     <i class="bi bi-box-arrow-up-right m-0"></i>
                                                                 </a>
                                                             {% else %}
-                                                                <a href="{% url 'sampling:detail_sampling_analysis' sa.id %}" class="btn btn-info btn-xs" title="Ver Análisis">
-                                                                   <i class="bi bi-bookmark-check m-1"></i>
+                                                                <a href="{% url 'sampling:detail_sampling_analysis' sa.id %}"
+                                                                   class="btn btn-info btn-xs" title="Ver Análisis">
+                                                                    <i class="bi bi-bookmark-check m-1"></i>
                                                                 </a>
                                                             {% endif %}
                                                         </td>
@@ -223,40 +240,24 @@
                                             </table>
                                         </div>
 
-                                        {% if analysis_relations %}
-                                            <div class="mt-3 border-top pt-3">
-                                                <h6 class="mb-3"><i class="bi bi-diagram-2 me-2"></i> Cálculos Relacionales</h6>
-                                                {% for item in analysis_relations %}
-                                                    <div class="mb-2">
-                                                        <div class="fw-bold mb-2">{{ item.analysis.analytical_method.description_analytical_method }}</div>
-                                                        {% for relation in item.relations %}
-                                                            {% if relation.calculate_description_relation %}
-                                                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                                                    <span>{{ relation.calculate_description_relation }}</span>
-                                                                    <div class="d-flex align-items-center">
-                                                                        {% for res in item.results %}
-                                                                            {% if res.analytical_method_calculate_relation.id == relation.id %}
-                                                                                <span class="badge bg-info text-dark me-3">
-                                                                                    {% if res.denominator %}
-                                                                                        {{ res.numerator }} / {{ res.denominator }} = {{ res.calcule }}
-                                                                                    {% else %}
-                                                                                        Resultado: {{ res.calcule }}
-                                                                                    {% endif %}
-                                                                                </span>
-                                                                            {% endif %}
-                                                                        {% endfor %}
-                                                                        <button class="btn btn-success btn-xs"
-                                                                                onclick="open_modal('{% url 'sampling:create_sampling_analysis_processing_relation' item.analysis.id relation.id %}')">
-                                                                            <i class="bi bi-calculator m-0"></i> Calcular
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                            {% endif %}
-                                                        {% endfor %}
+                                        <div class="mt-3 border-top pt-3">
+                                            <h6 class="mb-3"><i class="bi bi-diagram-2 me-2"></i> Cálculos Relacionales
+                                            </h6>
+                                            <div class="mb-2">
+                                                {% for equation in final_equations %}
+                                                    <div class="mb-3">
+                                                        <div class="d-flex justify-content-center align-items-center mb-1" style="font-size: 1.1rem; overflow-x: auto;">
+                                                            $${{ equation }}$$
+                                                        </div>
+                                                    </div>
+                                                {% empty %}
+                                                    <div class="text-muted text-center py-2">
+                                                        <i class="bi bi-inbox me-1"></i> No hay cálculos relacionales asociados.
                                                     </div>
                                                 {% endfor %}
                                             </div>
-                                        {% endif %}
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>

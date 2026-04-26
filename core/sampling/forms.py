@@ -1,9 +1,9 @@
-from django.forms import ModelForm, TextInput, Select, TimeInput, DateTimeInput
+from django.forms import ModelForm, TextInput, Select, TimeInput, DateTimeInput, FloatField
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from crum import get_current_user
 from core.sampling.models import SamplingGroup, SamplingProcess, SamplingAnalysisProcessing, \
-    SamplingAnalysisProcessingRelation
+    SamplingAnalysisProcessingRelation, SamplingAnalysis
 from core.product.models import SamplePoint
 from core.solution.models import SolutionStd
 from core.analytical_method.models import AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation
@@ -121,6 +121,8 @@ class SamplingAnalysisProcessingForm(ModelForm):
 
 
 class SamplingAnalysisProcessingRelationForm(ModelForm):
+    calcule = FloatField(label='Resultado', widget=TextInput(attrs={'readonly': 'readonly'}), required=False)
+
     def __init__(self, *args, **kwargs):
         self.analysis = kwargs.pop('analysis')
         self.relation = kwargs.pop('relation')
@@ -147,185 +149,68 @@ class SamplingAnalysisProcessingRelationForm(ModelForm):
         for field in self.visible_fields():
             field.field.widget.attrs['autocomplete'] = 'off'
             field.field.widget.attrs['class'] = 'form-control'
-            if field.name in ['numerator', 'denominator']:
+            if field.name in ['numerator', 'denominator', 'calcule']:
                 field.field.widget.attrs['readonly'] = 'readonly'
 
     class Meta:
         model = SamplingAnalysisProcessingRelation
-        fields = ['numerator', 'denominator']
+        fields = ['numerator', 'denominator', 'calcule']
         widgets = {
             'numerator': TextInput(attrs={'readonly': 'readonly'}),
             'denominator': TextInput(attrs={'readonly': 'readonly'}),
+            'calcule': TextInput(attrs={'readonly': 'readonly'}),
         }
 
     def save(self, commit=True):
-        all_relations = AnalyticalMethodCalculateRelation.objects.select_related('analytical_method').filter(
-            analytical_method_id=self.analysis.analytical_method.id,
+        instance = super().save(commit=False)
+        instance.sampling_analysis_id = self.analysis.id
+        instance.analytical_method_calculate_relation = self.relation
+
+        # Recalcular valores para asegurar integridad al guardar
+        all_rels = AnalyticalMethodCalculateRelation.objects.filter(
+            product=self.relation.product,
+            calculate_description_relation=self.relation.calculate_description_relation
         )
 
-        all_base_calculates = AnalyticalMethodCalculate.objects.filter(
-            analytical_method_id=self.analysis.analytical_method.id
-        )
+        numerator = 1.0
+        denominator = 1.0
+        has_num = False
+        has_den = False
 
-        var_num_rel = all_relations.filter(position__iexact='Numerador').order_by('date_creation')
-        var_den_rel = all_relations.filter(position__iexact='Denominador').order_by('date_creation')
-        var_num_base = all_base_calculates.filter(position__iexact='Numerador').order_by('date_creation')
-        var_den_base = all_base_calculates.filter(position__iexact='Denominador').order_by('date_creation')
+        for r in all_rels:
+            if r.analytical_method_calculate:
+                target_analysis = SamplingAnalysis.objects.filter(
+                    sampling_process=self.analysis.sampling_process,
+                    analytical_method=r.analytical_method_calculate.analytical_method
+                ).first()
 
-        try:
-            # Obtener el procesamiento base (priorizando el análisis actual, luego el proceso en común)
-            base_processing = SamplingAnalysisProcessing.objects.filter(
-                sample_analysis_id=self.analysis.id,
-                relational_calculation=False
-            ).first()
+                val = target_analysis.average_concentration if target_analysis and target_analysis.average_concentration else 0.0
 
-            if not base_processing:
-                base_processing = SamplingAnalysisProcessing.objects.filter(
-                    sample_analysis__sampling_process_id=self.analysis.sampling_process_id,
-                    relational_calculation=False
-                ).order_by('-analyzed_date').first()
+                if r.factor:
+                    val *= r.factor
 
-            if not base_processing:
-                raise ValidationError("No existe un procesamiento base registrado para esta muestra (SamplingProcess).")
+                if r.position.lower() == 'numerador':
+                    numerator *= val
+                    has_num = True
+                elif r.position.lower() == 'denominador':
+                    denominator *= val
+                    has_den = True
 
-            instance = super().save(commit=False)
-            instance.sampling_analysis_id = self.analysis.id
-            instance.analytical_method_calculate_relation = self.relation
+        if not has_num: numerator = 0.0
+        if not has_den: denominator = 1.0
 
-            qty_std = float(base_processing.quantity_standard)
-            qty_sample = float(base_processing.quantity_sample)
-            cifras_sign = instance.sampling_analysis.analytical_method.sig_figs_result
+        instance.numerator = round(numerator, 4)
+        instance.denominator = round(denominator, 4)
 
-            if qty_sample > 0:
-                def calculate_part(relations_rel, relations_base, target_pos=None):
-                    total_product = 1.0
-                    has_elements = False
+        sig_figs = self.analysis.analytical_method.sig_figs_result or 4
+        if denominator != 0:
+            instance.calcule = round(numerator / denominator, sig_figs)
+        else:
+            instance.calcule = 0
 
-                    # Procesar Relaciones (AMCR)
-                    for r in relations_rel:
-                        has_elements = True
-                        factor = 1.0
-                        sample = 1.0
-                        std = 1.0
-                        relation_val = 1.0
-                        used_prev = False
-
-                        if r.factor is not None:
-                            factor = float(r.factor)
-                        if r.sample_quantity and r.sample_quantity.strip():
-                            sample = float(qty_sample)
-                        if r.volumen_std is not None:
-                            std = qty_std
-                        
-                        # 1. Prioridad: Cálculo específico definido en la relación (misma muestra)
-                        if r.analytical_method_calculate is not None:
-                            prev_processing = SamplingAnalysisProcessing.objects.filter(
-                                sample_analysis_id=self.analysis.id,
-                                analytical_method_calculate=r.analytical_method_calculate,
-                                relational_calculation=False
-                            ).first()
-
-                            # Si no se encuentra en la misma muestra, buscar en el proceso de muestreo
-                            if not prev_processing:
-                                prev_processing = SamplingAnalysisProcessing.objects.filter(
-                                    sample_analysis__sampling_process_id=self.analysis.sampling_process_id,
-                                    analytical_method_calculate=r.analytical_method_calculate,
-                                    relational_calculation=False
-                                ).order_by('-analyzed_date').first()
-
-                            if prev_processing:
-                                relation_val = prev_processing.concentration_sample
-                                used_prev = True
-                        
-                        # 2. Búsqueda por posición en la misma muestra
-                        if not used_prev and target_pos:
-                            prev_processing_pos = SamplingAnalysisProcessing.objects.filter(
-                                sample_analysis_id=self.analysis.id,
-                                analytical_method_calculate__position__iexact=target_pos,
-                                relational_calculation=False
-                            ).first()
-
-                            # Si no se encuentra, buscar en el proceso de muestreo
-                            if not prev_processing_pos:
-                                prev_processing_pos = SamplingAnalysisProcessing.objects.filter(
-                                    sample_analysis__sampling_process_id=self.analysis.sampling_process_id,
-                                    analytical_method_calculate__position__iexact=target_pos,
-                                    relational_calculation=False
-                                ).order_by('-analyzed_date').first()
-
-                            if prev_processing_pos:
-                                relation_val = prev_processing_pos.concentration_sample
-                                used_prev = True
-
-                        # 3. Fallback final al procesamiento base
-                        if not used_prev:
-                            if base_processing:
-                                relation_val = base_processing.concentration_sample
-                        
-                        total_product *= (std * factor * sample * relation_val)
-
-                    # Procesar Cálculos Base (AMC)
-                    for b in relations_base:
-                        has_elements = True
-                        factor = 1.0
-                        sample = 1.0
-                        std = 1.0
-                        
-                        if b.factor is not None:
-                            factor = float(b.factor)
-                        if b.sample_quantity and b.sample_quantity.strip():
-                            sample = float(qty_sample)
-                        if b.volumen_std is not None:
-                            std = qty_std
-                        
-                        # Para el cálculo base, el valor es el del procesamiento base actual o último
-                        val = 1.0
-
-                        # Buscar primero en la misma muestra
-                        prev_base = SamplingAnalysisProcessing.objects.filter(
-                            sample_analysis_id=self.analysis.id,
-                            analytical_method_calculate=b,
-                            relational_calculation=False
-                        ).first()
-
-                        # Si no se encuentra, buscar en el proceso de muestreo
-                        if not prev_base:
-                            prev_base = SamplingAnalysisProcessing.objects.filter(
-                                sample_analysis__sampling_process_id=self.analysis.sampling_process_id,
-                                analytical_method_calculate=b,
-                                relational_calculation=False
-                            ).order_by('-analyzed_date').first()
-
-                        if prev_base:
-                            val = float(prev_base.concentration_sample)
-                        elif base_processing:
-                            val = float(base_processing.concentration_sample)
-
-                        total_product *= (std * factor * sample * val)
-
-                    return total_product if has_elements else 0.0
-
-                numerator = calculate_part(var_num_rel, var_num_base, 'Numerador')
-                instance.numerator = numerator
-
-                denominator = calculate_part(var_den_rel, var_den_base, 'Denominador')
-                instance.denominator = denominator
-
-                if denominator != 0:
-                    instance.calcule = round((numerator / denominator), cifras_sign)
-                else:
-                    instance.calcule = 0
-            else:
-                instance.numerator = 0
-                instance.denominator = 0
-                instance.calcule = 0
-
-            if commit:
-                instance.save()
-            return instance
-        except Exception as e:
-            raise ValidationError({'error': str(e)})
-
+        if commit:
+            instance.save()
+        return instance
 
 class SamplingGroupForm(ModelForm):
     def __init__(self, *args, **kwargs):
