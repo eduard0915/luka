@@ -38,7 +38,6 @@ class DailyVerificationListView(LoginRequiredMixin, ValidatePermissionRequiredMi
             if action == 'searchdata':
                 verifications = list(DailyVerification.objects.select_related(
                     'equipment_instrumental',
-                    'responsible_user',
                     'verified_by'
                 ).values(
                     'id',
@@ -46,27 +45,22 @@ class DailyVerificationListView(LoginRequiredMixin, ValidatePermissionRequiredMi
                     'equipment_instrumental__description_equipment',
                     'equipment_instrumental__tolerance',
                     'date_verification_daily',
-                    # 'verified_by__first_name',
-                    # 'verified_by__last_name',
                     'parameter_verified',
                     'comply',
-                    'responsible_user__first_name',
-                    'responsible_user__last_name',
                     'reference_pattern_daily',
+                    'verified_by__first_name',
+                    'verified_by__last_name',
                     'verification_result_daily',
                     'error'
                 ).order_by('-date_verification_daily'))
 
                 for v in verifications:
-                    # first_name_ = v.get('verified_by__first_name', '') or ''
-                    # last_name_ = v.get('verified_by__last_name', '') or ''
-                    first_name = v.get('responsible_user__first_name', '') or ''
-                    last_name = v.get('responsible_user__last_name', '') or ''
+                    first_name = v.get('verified_by__first_name', '') or ''
+                    last_name = v.get('verified_by__last_name', '') or ''
                     code_eq = v.get('equipment_instrumental__code_equipment', '') or ''
                     description_eq = v.get('equipment_instrumental__description_equipment', '') or ''
                     v['equipment'] = f"{code_eq} - {description_eq}"
-                    v['responsible_user__full_name'] = f"{first_name} {last_name}".strip()
-                    # v['verified_by__full_name'] = f"{first_name_} {last_name_}".strip()
+                    v['verified_by__full_name'] = f"{first_name} {last_name}".strip()
                     if v['date_verification_daily']:
                         v['date_verification_daily'] = v['date_verification_daily'].strftime('%Y-%m-%d %H:%M')
 
@@ -81,9 +75,69 @@ class DailyVerificationListView(LoginRequiredMixin, ValidatePermissionRequiredMi
         context = super().get_context_data(**kwargs)
         context['title'] = 'Listado de Verificaciones Diarias'
         context['create_url'] = reverse_lazy('equipment:create_daily_verification')
+        context['chart_url'] = reverse_lazy('equipment:chart_daily_verification')
         context['entity'] = 'Verificaciones Diarias'
         context['div'] = '12'
         context['icon'] = 'fa-solid fa-calendar-check'
+        return context
+
+
+# Gráfico de Verificaciones Diarias
+class DailyVerificationChartView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    model = DailyVerification
+    template_name = 'daily_verification/chart_daily_verification.html'
+    permission_required = 'equipment.view_verification'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action')
+            if action == 'get_graph_data':
+                data = {
+                    'categories': [],
+                    'series': [
+                        {
+                            'name': 'Resultado',
+                            'data': []
+                        },
+                        {
+                            'name': 'Referencia',
+                            'data': []
+                        }
+                    ],
+                    'min_y': 0,
+                    'max_y': 100
+                }
+                # Podríamos filtrar por equipo si se pasa un ID, pero por ahora todos
+                qs = DailyVerification.objects.all().order_by('date_verification_daily')
+                ref_values = []
+                for v in qs:
+                    data['categories'].append(v.date_verification_daily.strftime('%Y-%m-%d %H:%M'))
+                    data['series'][0]['data'].append(float(v.verification_result_daily))
+                    data['series'][1]['data'].append(float(v.reference_pattern_daily))
+                    ref_values.append(float(v.reference_pattern_daily))
+                
+                if ref_values:
+                    min_ref = min(ref_values)
+                    max_ref = max(ref_values)
+                    data['min_y'] = min_ref * 0.98
+                    data['max_y'] = max_ref * 1.02
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Gráfico de Verificaciones Diarias'
+        context['entity'] = 'Verificaciones Diarias'
+        context['list_url'] = reverse_lazy('equipment:list_daily_verification')
+        context['icon'] = 'fa-solid fa-chart-line'
         return context
 
 

@@ -25,7 +25,7 @@ class EquipmentInstrumental(BaseModel):
     photo_equipment = models.FileField(upload_to='equipment/instrumental/%Y%m%d', verbose_name='Foto del Equipo', null=True, blank=True)
     manual_equipment = models.FileField(upload_to='equipment/instrumental/%Y%m%d', verbose_name='Manual de Operación', null=True, blank=True)
     enable_equipment = models.BooleanField(default=True, verbose_name='Habilitado')
-    frequency_calibration = models.PositiveSmallIntegerField(verbose_name='Frecuencia de Calibración (Meses)', default=12)
+    frequency_calibration = models.FloatField(verbose_name='Frecuencia de Calibración (Meses)', default=12)
     frequency_maintenance = models.PositiveSmallIntegerField(verbose_name='Frecuencia de Mantenimiento (Meses)', default=12)
     intermediate_verification = models.PositiveSmallIntegerField(verbose_name='Verificación Intermedia (Meses)', default=1)
     tolerance = models.FloatField(verbose_name='Error Máximo Permitido', null=True, blank=True)
@@ -182,14 +182,13 @@ class DailyVerification(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     equipment_instrumental = models.ForeignKey(EquipmentInstrumental, verbose_name='Equipo Instrumental', on_delete=models.CASCADE)
     date_verification_daily = models.DateTimeField(verbose_name='Fecha y Hora')
-    verified_by = models.CharField(max_length=250, verbose_name='Verificado por')
     parameter_verified = models.CharField(max_length=250, verbose_name='Parametro')
     reference_pattern_daily = models.FloatField(verbose_name='Patrón de Referencia')
     verification_result_daily = models.FloatField(verbose_name='Resultado')
     error = models.FloatField(verbose_name='Error')
     observation_verification = models.TextField(verbose_name='Observaciones', default='No aplica')
     comply = models.BooleanField(verbose_name='Cumple')
-    responsible_user = models.ForeignKey(User, verbose_name='Responsable', on_delete=models.CASCADE)
+    verified_by = models.ForeignKey(User, verbose_name='Responsable', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return f'{self.equipment_instrumental} - {self.date_verification_daily} - Verificación: {"Cumple" if self.comply else "No cumple"}'

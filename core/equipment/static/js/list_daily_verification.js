@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 {'data': 'equipment_instrumental__tolerance'},
                 {'data': 'error'},
                 {'data': 'comply'},
-                {'data': 'responsible_user__full_name'},
+                {'data': 'verified_by__full_name'},
                 {'data': 'id'}
             ],
             columnDefs: [

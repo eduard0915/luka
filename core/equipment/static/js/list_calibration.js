@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
             autoWidth: false,
             destroy: true,
             deferRender: true,
-            order: [[ 1, "desc" ]],
+            order: [[ 8, "asc" ], [ 2, "asc" ]],
             language: {
                 url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
             },
@@ -25,12 +25,37 @@ document.addEventListener('DOMContentLoaded', function () {
                 {'data': 'parameter'},
                 {'data': 'comply'},
                 {'data': 'responsible_user__full_name'},
-                {'data': 'id'}
+                {'data': 'id'},
+                {'data': 'calibration_next_completed'}
             ],
             columnDefs: [
                 {
-                    targets: [0, 1, 2, 3, 4, 6],
+                    targets: [0, 1, 3, 4, 6],
                     class: 'td-actions text-center'
+                },
+                {
+                    targets: [2],
+                    class: 'td-actions text-center',
+                    render: function (data, type, row) {
+                        return data;
+                    },
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        let today = new Date();
+                        today.setHours(0, 0, 0, 0);
+
+                        let parts = cellData.split('-');
+                        let next_date = new Date(parts[0], parts[1] - 1, parts[2]);
+                        next_date.setHours(0, 0, 0, 0);
+
+                        let diffTime = next_date - today;
+                        let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+                        if (next_date < today && !rowData.calibration_next_completed) {
+                            $(td).addClass('bg-danger text-white');
+                        } else if (diffDays === 1 || diffDays === 2) {
+                            $(td).addClass('bg-warning text-dark');
+                        }
+                    }
                 },
                 {
                     targets: [5],
@@ -54,6 +79,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         return actions;
                     }
                 },
+                {
+                    targets: [8],
+                    visible: false
+                }
             ],
             initComplete: function (settings, json) {
             }
