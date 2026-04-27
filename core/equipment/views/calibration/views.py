@@ -15,6 +15,7 @@ from core.company.models import Company
 from core.equipment.forms import CalibrationForm
 from core.equipment.models import Calibration
 from core.mixins import ValidatePermissionRequiredMixin
+from core.user.models import User
 from luka import settings
 
 
@@ -49,6 +50,64 @@ class CalibrationListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, L
                     'responsible_user__last_name',
                     'certificate_calibration',
                 ).order_by('-date_calibration'))
+
+                for c in calibrations:
+                    first_name = c.get('responsible_user__first_name', '') or ''
+                    last_name = c.get('responsible_user__last_name', '') or ''
+                    code_eq = c.get('equipment_instrumental__code_equipment', '') or ''
+                    description_eq = c.get('equipment_instrumental__description_equipment', '') or ''
+                    c['equipment'] = f"{code_eq} - {description_eq}"
+                    c['responsible_user__full_name'] = f"{first_name} {last_name}".strip()
+                    c['has_file'] = bool(c.get('certificate_calibration'))
+
+                return JsonResponse(calibrations, safe=False)
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Listado de Calibraciones'
+        context['create_url'] = reverse_lazy('equipment:create_calibration')
+        context['entity'] = 'Calibraciones'
+        context['div'] = '12'
+        context['icon'] = 'fa-solid fa-gauge-high'
+        return context
+
+
+# Listado de Calibraciones Vencidas
+class CalibrationExpireListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    model = Calibration
+    template_name = 'calibration/list_calibration.html'
+    permission_required = 'equipment.view_calibration'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action')
+            if action == 'searchdata':
+                calibrations = list(Calibration.objects.select_related(
+                    'equipment_instrumental',
+                    'responsible_user'
+                ).values(
+                    'id',
+                    'equipment_instrumental__code_equipment',
+                    'equipment_instrumental__description_equipment',
+                    'date_calibration',
+                    'date_calibration_next',
+                    'calibrated_by',
+                    'parameter',
+                    'comply',
+                    'responsible_user__first_name',
+                    'responsible_user__last_name',
+                    'certificate_calibration',
+                ).filter(responsible_user=request.user.slug, calibration_next_completed=False).order_by('-date_calibration'))
 
                 for c in calibrations:
                     first_name = c.get('responsible_user__first_name', '') or ''

@@ -27,6 +27,7 @@ urlpatterns = [
     # Mantenimientos
     path('maintenance/add/', MaintenanceCreateView.as_view(), name='create_maintenance'),
     path('maintenance/list/', MaintenanceListView.as_view(), name='list_maintenance'),
+    path('maintenance/list_expire/', MaintenanceExpireListView.as_view(), name='list_maintenance_expire'),
     path('maintenance/update/<uuid:pk>/', MaintenanceUpdateView.as_view(), name='update_maintenance'),
     path('maintenance/detail/<uuid:pk>/', MaintenanceDetailView.as_view(), name='detail_maintenance'),
     path('maintenance/pdf/<uuid:pk>/', MaintenancePDFView.as_view(), name='maintenance_pdf'),

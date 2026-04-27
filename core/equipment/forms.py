@@ -168,7 +168,6 @@ class DailyVerificationForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['equipment_instrumental'].queryset = EquipmentInstrumental.objects.filter(enable_equipment=True)
-        self.fields['responsible_user'].queryset = User.objects.filter(is_active=True)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
@@ -177,8 +176,7 @@ class DailyVerificationForm(ModelForm):
             'equipment_instrumental': 'col-md-5',
             'observation_verification': 'col-md-5',
             'reference_pattern_daily': 'col-md-2',
-            'parameter_verified': 'col-md-2',
-            'responsible_user': 'col-md-4',
+            'parameter_verified': 'col-md-2'
         }
 
         for field_name, field in self.fields.items():
@@ -188,7 +186,7 @@ class DailyVerificationForm(ModelForm):
         model = DailyVerification
         fields = [
             'equipment_instrumental', 'parameter_verified', 'reference_pattern_daily', 'verification_result_daily',
-            'responsible_user', 'observation_verification'
+            'observation_verification'
         ]
         widgets = {
             'equipment_instrumental': Select(attrs={'class': 'form-control', 'required': True, 'style': 'width: 100%'}),
@@ -236,7 +234,7 @@ class EquipmentInstrumentalForm(ModelForm):
         fields = [
             'code_equipment', 'description_equipment', 'supplier_equipment',
             'brand_equipment', 'model_equipment', 'serie_equipment', 'frequency_calibration',
-            'intermediate_verification', 'tolerance', 'unit_tolerance',
+            'intermediate_verification', 'verification_pattern', 'unit_tolerance', 'tolerance',
             'laboratory', 'responsible_user', 'photo_equipment', 'manual_equipment'
         ]
         widgets = {
@@ -246,6 +244,7 @@ class EquipmentInstrumentalForm(ModelForm):
             'brand_equipment': TextInput(attrs={'class': 'form-control', 'required': True}),
             'model_equipment': TextInput(attrs={'class': 'form-control', 'required': True}),
             'serie_equipment': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'verification_pattern': TextInput(attrs={'class': 'form-control', 'required': True}),
             'frequency_calibration': TextInput(attrs={'class': 'form-control'}),
             'intermediate_verification': TextInput(attrs={'class': 'form-control'}),
             'tolerance': TextInput(attrs={'class': 'form-control'}),
