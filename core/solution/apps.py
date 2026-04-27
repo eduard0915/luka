@@ -6,7 +6,6 @@ class SolutionConfig(AppConfig):
     name = 'core.solution'
 
     def ready(self):
-        # Importing signals to ensure they are registered when the app is ready
         try:
             import core.solution.signals
         except ImportError as e:

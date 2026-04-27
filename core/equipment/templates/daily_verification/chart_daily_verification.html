@@ -1,0 +1,113 @@
+{% extends 'body.html' %}
+{% load static %}
+
+{% block head %}
+    <script src="{% static 'lib/vali-admin/js/plugins/chart.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tile">
+                <div class="tile-title-w-btn">
+                    <h3 class="title"><i class="fa-solid fa-chart-line"></i> {{ title }}</h3>
+                    <p>
+                        <a class="btn btn-primary icon-btn" href="{{ list_url }}">
+                            <i class="bi bi-list-ul me-2"></i>Volver al Listado
+                        </a>
+                    </p>
+                </div>
+                <div class="tile-body">
+                    <canvas id="myLineChart" style="width: 100%; height: 400px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts_detail %}
+    <script type="text/javascript">
+        $(function () {
+            function get_graph_data() {
+                $.ajax({
+                    url: window.location.pathname,
+                    type: 'POST',
+                    data: {
+                        'action': 'get_graph_data'
+                    },
+                    dataType: 'json',
+                }).done(function (data) {
+                    if (!data.hasOwnProperty('error')) {
+                        const ctx = document.getElementById('myLineChart').getContext('2d');
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: data.categories,
+                                datasets: [
+                                    {
+                                        label: 'Resultado (verification_result_daily)',
+                                        data: data.series[0].data,
+                                        borderColor: 'rgb(75, 192, 192)',
+                                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                        tension: 0.1,
+                                        fill: false
+                                    },
+                                    {
+                                        label: 'Referencia (reference_pattern_daily)',
+                                        data: data.series[1].data,
+                                        borderColor: 'rgb(255, 99, 132)',
+                                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                        borderDash: [5, 5],
+                                        tension: 0.1,
+                                        fill: false
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: {
+                                        beginAtZero: false,
+                                        min: data.min_y,
+                                        max: data.max_y,
+                                        ticks: {
+                                            stepSize: 0.5
+                                        },
+                                        title: {
+                                            display: true,
+                                            text: 'Valor'
+                                        }
+                                    },
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Fecha y Hora'
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    legend: {
+                                        position: 'top',
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Verificaciones Diarias'
+                                    }
+                                }
+                            }
+                        });
+                        return false;
+                    }
+                    alert(data.error);
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    alert(textStatus + ': ' + errorThrown);
+                }).always(function (data) {
+
+                });
+            }
+
+            get_graph_data();
+        });
+    </script>
+{% endblock %}

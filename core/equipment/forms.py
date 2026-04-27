@@ -10,7 +10,9 @@ from core.user.views.user.views import User
 
 BOOLEAN = [(True, 'Si'), (False, 'No')]
 
-PARAMETER = [('Temperatura', 'Temperatura'), ('Humedad', 'Humedad'), ('Masa', 'Masa'), ('Presión', 'Presión'), ('No aplica', 'No aplica')]
+PARAMETER = [
+    ('Temperatura', 'Temperatura'), ('Humedad', 'Humedad'), ('Masa', 'Masa'), ('Presión', 'Presión'), ('pH', 'pH'), ('No aplica', 'No aplica')
+]
 
 UNIT_TOLERANCE = [('No aplica', 'No aplica'), ('Kg', 'Kg'), ('g', 'g'), ('mg', 'mg'), ('mL', 'mL'), ('%v/v', '%v/v')]
 
@@ -117,7 +119,6 @@ class CalibrationForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['equipment_instrumental'].queryset = EquipmentInstrumental.objects.filter(enable_equipment=True)
-        self.fields['responsible_user'].queryset = User.objects.filter(is_active=True)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
@@ -134,18 +135,16 @@ class CalibrationForm(ModelForm):
     class Meta:
         model = Calibration
         fields = [
-            'equipment_instrumental', 'date_calibration',
-            'calibrated_by', 'comply', 'parameter', 'responsible_user', 'observation_calibration',
-            'certificate_calibration'
+            'equipment_instrumental', 'date_calibration', 'calibrated_by', 'comply', 'parameter',
+            'observation_calibration', 'certificate_calibration'
         ]
         widgets = {
             'equipment_instrumental': Select(attrs={'class': 'form-control', 'required': True, 'style': 'width: 100%'}),
             'date_calibration': DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'required': True, 'data-datepicker': '1', 'autocomplete': 'off'}),
             'calibrated_by': TextInput(attrs={'class': 'form-control', 'required': True}),
             'parameter': Select(attrs={'class': 'form-control', 'required': True}, choices=PARAMETER),
-            'observation_calibration': forms.Textarea(attrs={'class': 'form-control', 'rows': 1}),
+            'observation_calibration': Textarea(attrs={'class': 'form-control', 'rows': 1}),
             'comply': Select(choices=BOOLEAN, attrs={'class': 'form-control', 'required': True}),
-            'responsible_user': Select(attrs={'class': 'form-control', 'required': True, 'style': 'width: 100%'}),
             'certificate_calibration': FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.doc,.docx,.jpg,.jpeg,.png'}),
         }
 
@@ -156,6 +155,7 @@ class CalibrationForm(ModelForm):
             if form.is_valid():
                 data = form.save(commit=False)
                 data.date_calibration_next = data.date_calibration + relativedelta(months=data.equipment_instrumental.frequency_calibration)
+                data.responsible_user_id = get_current_user().id
                 data.save()
             else:
                 data['error'] = form.errors
