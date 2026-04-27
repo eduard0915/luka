@@ -23,8 +23,8 @@ def extras_processor(request):
         context['count_scheduled_sampling'] = SamplingProcess.objects.filter(status_sampling='Programada').count()
         context['count_confirmed_sampling'] = SamplingProcess.objects.filter(status_sampling='Confirmada').count()
         context['count_in_process_sampling'] = SamplingProcess.objects.filter(status_sampling='En Proceso').count()
-        context['count_mtto_expire'] = Maintenance.objects.filter(next_date_maintenance__lt=timezone.localtime()).count()
-        context['count_mtto_expire_responsible'] = Maintenance.objects.select_related('responsible_user').filter(next_date_maintenance__lt=timezone.localtime(), responsible_user__slug=request.user.slug).count()
+        context['count_mtto_expire'] = Maintenance.objects.filter(next_date_maintenance__lt=timezone.localtime(), maintenance_next_completed=False).count()
+        context['count_mtto_expire_responsible'] = Maintenance.objects.select_related('responsible_user').filter(next_date_maintenance__lt=timezone.localtime(), responsible_user__slug=request.user.slug, maintenance_next_completed=False).count()
         context['count_calibration_expire'] = Calibration.objects.filter(date_calibration_next__lt=timezone.localtime()).count()
         context['count_calibration_expire_responsible'] = Calibration.objects.select_related('responsible_user').filter(date_calibration_next__lt=timezone.localtime(), responsible_user__slug=request.user.slug).count()
         context['count_total_alarm'] = context['training_expire_count'] + context['count_calibration_expire_responsible'] + context['count_mtto_expire_responsible']

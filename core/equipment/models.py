@@ -30,7 +30,7 @@ class EquipmentInstrumental(BaseModel):
     intermediate_verification = models.PositiveSmallIntegerField(verbose_name='Verificación Intermedia (Meses)', default=1)
     tolerance = models.FloatField(verbose_name='Error Máximo Permitido', null=True, blank=True)
     unit_tolerance = models.CharField(verbose_name='Unidad de Medida', max_length=10, null=True, blank=True)
-    Verification_pattern = models.FloatField(verbose_name='Patrón de Verificación', null=True, blank=True)
+    verification_pattern = models.FloatField(verbose_name='Patrón de Verificación', null=True, blank=True)
 
     def __str__(self):
         return f'{self.code_equipment} - {self.description_equipment}, {self.brand_equipment} - {self.model_equipment}'
@@ -93,6 +93,7 @@ class Maintenance(BaseModel):
     parts_change_maintenance = models.TextField(verbose_name='Partes o Piezas Reemplazadas')
     responsible_user = models.ForeignKey(User, verbose_name='Responsable', on_delete=models.CASCADE)
     file_maintenance = models.FileField(upload_to='maintenance/%Y%m%d', verbose_name='Registro Físico de Mantenimiento', null=True, blank=True)
+    maintenance_next_completed = models.BooleanField(verbose_name='Próximo Mtto Completado', default=False)
 
     def __str__(self):
         return f'{self.equipment_instrumental} - {self.date_maintenance} - {self.type_maintenance}'
@@ -124,6 +125,7 @@ class Calibration(BaseModel):
     comply = models.BooleanField(verbose_name='Cumple')
     responsible_user = models.ForeignKey(User, verbose_name='Responsable', on_delete=models.CASCADE)
     certificate_calibration = models.FileField(upload_to='calibration/%Y%m%d', verbose_name='Certificado de Calibración', null=True, blank=True)
+    calibration_next_completed = models.BooleanField(verbose_name='Próxima Calibración completada', default=False)
 
     def __str__(self):
         return f'{self.equipment_instrumental} - {self.date_calibration} - Calibración: {"Cumple" if self.comply else "No cumple"}'

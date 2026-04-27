@@ -45,7 +45,7 @@
                         {% endif %}
                         {% if count_mtto_expire_responsible > 0 %}
                             <li>
-                                <a class="app-notification__item" href="#"><span class="app-notification__icon"><i
+                                <a class="app-notification__item" href="{% url 'equipment:list_maintenance_expire' %}"><span class="app-notification__icon"><i
                                         class="fa-solid fa-tools text-danger"></i></span>
                                     <div>
                                         <p class="app-notification__message">Mantenimientos Vencidos <span class="badge bg-danger">{{ count_mtto_expire_responsible }}</span></p>

@@ -72,6 +72,59 @@ class MaintenanceListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, L
         return context
 
 
+# Listado de Mantenimientos Vencidos sin Completar
+class MaintenanceExpireListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    model = Maintenance
+    template_name = 'maintenance/list_maintenance.html'
+    permission_required = 'equipment.view_maintenance'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action')
+            if action == 'searchdata':
+                maintenances = list(Maintenance.objects.select_related(
+                    'equipment_instrumental',
+                    'responsible_user'
+                ).values(
+                    'id',
+                    'equipment_instrumental__code_equipment',
+                    'equipment_instrumental__description_equipment',
+                    'date_maintenance',
+                    'type_maintenance',
+                    'maintenance_by',
+                    'responsible_user__first_name',
+                    'responsible_user__last_name',
+                    'file_maintenance',
+                ).filter(maintenance_next_completed=False, responsible_user__slug=request.user.slug).order_by('-date_maintenance'))
+
+                for m in maintenances:
+                    first_name = m.get('responsible_user__first_name', '') or ''
+                    last_name = m.get('responsible_user__last_name', '') or ''
+                    m['responsible_user__full_name'] = f"{first_name} {last_name}".strip()
+                    m['has_file'] = bool(m.get('file_maintenance'))
+
+                return JsonResponse(maintenances, safe=False)
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Mantenimientos Vencidos'
+        context['create_url'] = reverse_lazy('equipment:create_maintenance')
+        context['entity'] = 'Mantenimientos Vencidos'
+        context['div'] = '12'
+        context['icon'] = 'fa-solid fa-tools'
+        return context
+
+
 # Creación de Mantenimiento
 class MaintenanceCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
     model = Maintenance
