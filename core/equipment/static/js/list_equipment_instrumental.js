@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     render: function (data, type, row) {
                         let actions = '';
                         actions += '<a href="/equipment/instrumental/detail/' + row['id'] + '/" type="button" title="Detalle"><i class="bi bi-info-square text-info"></i></a> &nbsp;';
+                        actions += '<a href="/equipment/daily_verification/chart/' + row['id'] + '/" type="button" title="Gráfico Verificación Diaria"><i class="bi bi-graph-up-arrow text-success"></i></a> &nbsp;';
                         actions += '<a href="/equipment/instrumental/update/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a>';
                         return actions;
                     }

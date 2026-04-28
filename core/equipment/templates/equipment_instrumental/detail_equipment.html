@@ -66,7 +66,13 @@
                                             <tr>
                                                 <td class="info-label">Patrón de Referencia:</td>
                                                 <td class="info-value">
-                                                    {{ object.verification_pattern}}{{ object.unit_tolerance }}
+                                                    {{ object.verification_pattern }}{{ object.unit_tolerance }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="info-label">Error Máximo Permitido:</td>
+                                                <td class="info-value">
+                                                    {{ object.tolerance }}{{ object.unit_tolerance }}
                                                 </td>
                                             </tr>
                                             </tbody>

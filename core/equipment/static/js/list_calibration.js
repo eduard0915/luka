@@ -30,7 +30,11 @@ document.addEventListener('DOMContentLoaded', function () {
             ],
             columnDefs: [
                 {
-                    targets: [0, 1, 3, 4, 6],
+                    targets: [0],
+                    class: 'td-actions text-left'
+                },
+                {
+                    targets: [1, 3, 4, 6],
                     class: 'td-actions text-center'
                 },
                 {
