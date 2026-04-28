@@ -46,7 +46,7 @@ urlpatterns = [
     # Verificaciones Diarias
     path('daily_verification/add/', DailyVerificationCreateView.as_view(), name='create_daily_verification'),
     path('daily_verification/list/', DailyVerificationListView.as_view(), name='list_daily_verification'),
-    path('daily_verification/chart/', DailyVerificationChartView.as_view(), name='chart_daily_verification'),
+    path('daily_verification/chart/<uuid:pk>/', DailyVerificationChartView.as_view(), name='chart_daily_verification_filter'),
     path('daily_verification/update/<uuid:pk>/', DailyVerificationUpdateView.as_view(), name='update_daily_verification'),
     path('daily_verification/detail/<uuid:pk>/', DailyVerificationDetailView.as_view(), name='detail_daily_verification'),
     path('daily_verification/pdf/<uuid:pk>/', DailyVerificationPDFView.as_view(), name='daily_verification_pdf'),

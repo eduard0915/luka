@@ -47,11 +47,16 @@ class MaintenanceListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, L
                     'responsible_user__first_name',
                     'responsible_user__last_name',
                     'file_maintenance',
+                    'next_date_maintenance',
+                    'maintenance_next_completed'
                 ).order_by('-date_maintenance'))
 
                 for m in maintenances:
                     first_name = m.get('responsible_user__first_name', '') or ''
                     last_name = m.get('responsible_user__last_name', '') or ''
+                    code_eq = m.get('equipment_instrumental__code_equipment', '') or ''
+                    description_eq = m.get('equipment_instrumental__description_equipment', '') or ''
+                    m['equipment'] = f"{code_eq} - {description_eq}"
                     m['responsible_user__full_name'] = f"{first_name} {last_name}".strip()
                     m['has_file'] = bool(m.get('file_maintenance'))
 
@@ -100,6 +105,8 @@ class MaintenanceExpireListView(LoginRequiredMixin, ValidatePermissionRequiredMi
                     'responsible_user__first_name',
                     'responsible_user__last_name',
                     'file_maintenance',
+                    'next_date_maintenance',
+                    'maintenance_next_completed'
                 ).filter(maintenance_next_completed=False, responsible_user__slug=request.user.slug).order_by('-date_maintenance'))
 
                 for m in maintenances:
@@ -171,7 +178,7 @@ class MaintenanceCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         context['title'] = 'Registrar Mantenimiento'
         context['action'] = 'add'
         context['entity'] = 'Mantenimientos'
-        context['div'] = '10'
+        context['div'] = '12'
         context['icon'] = 'fa-solid fa-tools'
         context['list_url'] = reverse_lazy('equipment:list_maintenance')
         return context

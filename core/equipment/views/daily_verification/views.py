@@ -13,7 +13,7 @@ from xhtml2pdf import pisa
 
 from core.company.models import Company
 from core.equipment.forms import DailyVerificationForm
-from core.equipment.models import DailyVerification
+from core.equipment.models import DailyVerification, EquipmentInstrumental
 from core.mixins import ValidatePermissionRequiredMixin
 from luka import settings
 
@@ -112,20 +112,27 @@ class DailyVerificationChartView(LoginRequiredMixin, ValidatePermissionRequiredM
                     'min_y': 0,
                     'max_y': 100
                 }
-                # Podríamos filtrar por equipo si se pasa un ID, pero por ahora todos
-                qs = DailyVerification.objects.all().order_by('date_verification_daily')
+
+                # Filtrar por equipo si se pasa un ID
+                equipment_id = self.kwargs.get('pk')
+                qs = DailyVerification.objects.all()
+                if equipment_id:
+                    qs = qs.filter(equipment_instrumental_id=equipment_id)
+
+                qs = qs.order_by('date_verification_daily')
                 ref_values = []
                 for v in qs:
                     data['categories'].append(v.date_verification_daily.strftime('%Y-%m-%d %H:%M'))
                     data['series'][0]['data'].append(float(v.verification_result_daily))
                     data['series'][1]['data'].append(float(v.reference_pattern_daily))
                     ref_values.append(float(v.reference_pattern_daily))
-                
+                    ref_values.append(float(v.verification_result_daily))
+
                 if ref_values:
                     min_ref = min(ref_values)
                     max_ref = max(ref_values)
-                    data['min_y'] = min_ref * 0.98
-                    data['max_y'] = max_ref * 1.02
+                    data['min_y'] = min_ref * 0.99
+                    data['max_y'] = max_ref * 1.01
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
@@ -135,8 +142,14 @@ class DailyVerificationChartView(LoginRequiredMixin, ValidatePermissionRequiredM
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Gráfico de Verificaciones Diarias'
-        context['entity'] = 'Verificaciones Diarias'
-        context['list_url'] = reverse_lazy('equipment:list_daily_verification')
+
+        equipment_id = self.kwargs.get('pk')
+        if equipment_id:
+            equipment = EquipmentInstrumental.objects.filter(id=equipment_id).first()
+            if equipment:
+                context['title'] = f'Gráfico de Verificaciones Diarias - {equipment.code_equipment}'
+                context['entity'] = f'Gráfico de Verificaciones Diarias - {equipment.code_equipment} {equipment.description_equipment}'
+        context['back'] = reverse_lazy('equipment:list_equipment_instrumental')
         context['icon'] = 'fa-solid fa-chart-line'
         return context
 
