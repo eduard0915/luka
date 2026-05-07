@@ -216,7 +216,7 @@ class EquipmentInstrumentalDetailView(LoginRequiredMixin, ValidatePermissionRequ
         context['calibrations'] = self.object.calibration_set.all().order_by('-date_calibration')
         # Verificaciones del equipo
         context['verifications'] = self.object.verification_set.all().order_by('-date_verification')
-        context['pdf_url'] = reverse_lazy('equipment:equipment_instrumental_pdf', kwargs={'pk': self.object.pk})
+        context['pdf_url'] = reverse('equipment:equipment_instrumental_pdf', kwargs={'pk': self.object.pk})
         return context
 
 

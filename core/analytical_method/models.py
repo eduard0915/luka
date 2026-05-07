@@ -227,7 +227,7 @@ class AnalyticalMethodCalculateRelation(BaseModel):
     volumen_std = models.CharField(max_length=100, verbose_name='Volúmen Estándar', null=True, blank=True)
     factor = models.FloatField(verbose_name='Constante', null=True, blank=True)
     sample_quantity = models.CharField(max_length=50, verbose_name='Muestra', null=True, blank=True)
-    position = models.CharField(max_length=15, verbose_name='Posición en Ecuación')
+    position = models.CharField(max_length=15, verbose_name='Posición en Ecuación', null=True, blank=True)
 
     def __str__(self):
         return str(self.calculate_description_relation)

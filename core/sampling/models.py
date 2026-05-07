@@ -209,7 +209,7 @@ class SamplingAnalysisProcessing(BaseModel):
 
 class SamplingAnalysisProcessingRelation(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    sampling_analysis = models.ForeignKey(SamplingAnalysis, on_delete=models.CASCADE)
+    sampling_analysis = models.ForeignKey(SamplingAnalysis, on_delete=models.CASCADE, null=True, blank=True)
     analytical_method_calculate_relation = models.ForeignKey(
         'analytical_method.AnalyticalMethodCalculateRelation', on_delete=models.CASCADE, null=True, blank=True)
     numerator = models.FloatField(verbose_name='Numerador')

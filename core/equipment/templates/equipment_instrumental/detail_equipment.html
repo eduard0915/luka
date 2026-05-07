@@ -391,19 +391,22 @@
                                                             <a href="{{ object.manual_equipment.url }}"
                                                                target="_blank"
                                                                download
-                                                               class="btn btn-sm btn-info download-btn w-100 text-center">
+                                                               class="btn btn-sm btn-info download-btn text-center">
                                                                 <i class="fas fa-file-download"></i> Manual de Operación
                                                             </a>
                                                         {% else %}
-                                                            <span class="badge bg-warning text-dark w-100 text-center">
+                                                            <span class="badge bg-warning text-dark text-center">
                                                                 <i class="fas fa-exclamation-triangle"></i> Manual no disponible
                                                             </span>
                                                         {% endif %}
                                                         <a href="{{ pdf_url }}"
                                                            target="_blank"
-                                                           class="btn btn-sm btn-primary w-100 mt-2 text-center">
+                                                           class="btn btn-sm btn-primary mt-2 text-center">
                                                             <i class="fas fa-file-pdf"></i> Hoja de Vida
                                                         </a>
+                                                        <button type="button" class="btn btn-sm btn-success mt-2 text-center btnGraph">
+                                                            <i class="fas fa-chart-line"></i> Ver Gráfica
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -439,76 +442,118 @@
     <!-- Data table plugin-->
     <script src="{% static 'lib/vali-admin/js/plugins/jquery.dataTables.min.js' %}"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-1.13.4/datatables.min.css">
-    <script>
-        $(document).ready(function() {
-            if ($('#tblCalibrations').length > 0) {
-                $('#tblCalibrations').DataTable({
-                    responsive: true,
-                    autoWidth: false,
-                    destroy: true,
-                    deferRender: true,
-                    pageLength: 10,
-                    paging: true,
-                    info: true,
-                    searching: false,
-                    lengthChange: false,
-                    language: {
-                        url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
+    <script src="{% static 'lib/vali-admin/js/plugins/chart.js' %}"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('.btnGraph').on('click', function () {
+                $.ajax({
+                    url: '{% url "equipment:list_daily_verification" %}',
+                    type: 'POST',
+                    data: {
+                        'action': 'get_graph_data',
+                        'equipment_id': '{{ object.id }}'
+                    },
+                    dataType: 'json',
+                }).done(function (data) {
+                    if (!data.hasOwnProperty('error')) {
+                        $('#modalGraph').modal('show');
+                        const ctx = document.getElementById('myLineChart').getContext('2d');
+                        
+                        // Destruir gráfico anterior si existe
+                        let chartStatus = Chart.getChart("myLineChart");
+                        if (chartStatus != undefined) {
+                            chartStatus.destroy();
+                        }
+
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: data.categories,
+                                datasets: [
+                                    {
+                                        label: 'Error (' + data.unit_tolerance + ')',
+                                        data: data.series[0].data,
+                                        borderColor: 'rgb(75, 192, 192)',
+                                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                        pointRadius: 5,
+                                        pointHoverRadius: 7,
+                                        tension: 0.1,
+                                        fill: false
+                                    },
+                                    {
+                                        label: 'Tolerancia (' + data.unit_tolerance + ')',
+                                        data: data.series[1].data,
+                                        borderColor: 'rgb(255, 99, 132)',
+                                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                        borderDash: [5, 5],
+                                        pointRadius: 0,
+                                        tension: 0.1,
+                                        fill: false
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: {
+                                        beginAtZero: false,
+                                        title: {
+                                            display: true,
+                                            text: 'Valor (' + data.unit_tolerance + ')'
+                                        }
+                                    },
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Fecha y Hora'
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function (context) {
+                                                let label = context.dataset.label || '';
+                                                if (label) {
+                                                    label = label.split(' (')[0] + ': ';
+                                                }
+                                                if (context.parsed.y !== null) {
+                                                    label += context.parsed.y + ' ' + data.unit_tolerance;
+                                                }
+                                                return label;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        return false;
                     }
+                    alert(data.error);
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    alert(textStatus + ': ' + errorThrown);
                 });
-            }
-            if ($('#tblVerifications').length > 0) {
-                $('#tblVerifications').DataTable({
-                    responsive: true,
-                    autoWidth: false,
-                    destroy: true,
-                    deferRender: true,
-                    pageLength: 10,
-                    paging: true,
-                    info: true,
-                    searching: false,
-                    lengthChange: false,
-                    language: {
-                        url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
-                    }
-                });
-            }
-        });
-
-        // Agregar efecto de zoom a la imagen al hacer clic
-        document.addEventListener('DOMContentLoaded', function () {
-            const equipmentPhoto = document.querySelector('.equipment-photo');
-            if (equipmentPhoto) {
-                equipmentPhoto.style.cursor = 'pointer';
-                equipmentPhoto.addEventListener('click', function () {
-                    // Crear modal para ver imagen en grande
-                    const modal = document.createElement('div');
-                    modal.style.cssText = `
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: rgba(0,0,0,0.9);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 9999;
-                    cursor: pointer;
-                `;
-
-                    const img = document.createElement('img');
-                    img.src = this.src;
-                    img.style.cssText = 'max-width: 90%; max-height: 90%; border-radius: 8px;';
-
-                    modal.appendChild(img);
-                    document.body.appendChild(modal);
-
-                    modal.addEventListener('click', function () {
-                        document.body.removeChild(modal);
-                    });
-                });
-            }
+            });
         });
     </script>
+    <!-- Modal para el gráfico -->
+    <div class="modal fade" id="modalGraph" tabindex="-1" aria-labelledby="modalGraphLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalGraphLabel">Gráfica de Verificaciones (Últimos 12 meses)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <canvas id="myLineChart" style="width: 100%; height: 400px;"></canvas>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

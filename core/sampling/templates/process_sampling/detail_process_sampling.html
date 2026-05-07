@@ -243,7 +243,7 @@
                                         <div class="mt-3 border-top pt-3">
                                             <h6 class="mb-3"><i class="bi bi-diagram-2 me-2"></i> Cálculos Relacionales
                                                 <a href="javascript:void(0);"
-                                                   onclick="open_modal()"
+                                                   onclick="open_modal('{% url 'sampling:create_sampling_analysis_processing_relation' object.id %}')"
                                                    class="btn btn-primary btn-sm ms-lg-5">
                                                     <i class="bi bi-calculator"></i> Calcular
                                                 </a>

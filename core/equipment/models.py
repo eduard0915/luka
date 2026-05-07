@@ -31,6 +31,7 @@ class EquipmentInstrumental(BaseModel):
     tolerance = models.FloatField(verbose_name='Error Máximo Permitido', null=True, blank=True)
     unit_tolerance = models.CharField(verbose_name='Unidad de Medida', max_length=10, null=True, blank=True)
     verification_pattern = models.FloatField(verbose_name='Patrón de Verificación', null=True, blank=True)
+    date_calibration_fix = models.DateField(verbose_name='Fecha de Calibración Inicial', null=True, blank=True)
 
     def __str__(self):
         return f'{self.code_equipment} - {self.description_equipment}, {self.brand_equipment} - {self.model_equipment}'

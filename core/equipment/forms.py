@@ -14,7 +14,7 @@ PARAMETER = [
     ('Temperatura', 'Temperatura'), ('Humedad', 'Humedad'), ('Masa', 'Masa'), ('Presión', 'Presión'), ('pH', 'pH'), ('No aplica', 'No aplica')
 ]
 
-UNIT_TOLERANCE = [('No aplica', 'No aplica'), ('Kg', 'Kg'), ('g', 'g'), ('mg', 'mg'), ('mL', 'mL'), ('%v/v', '%v/v')]
+UNIT_TOLERANCE = [('No aplica', 'No aplica'), ('Kg', 'Kg'), ('g', 'g'), ('mg', 'mg'), ('mL', 'mL'), ('%v/v', '%v/v'), ('nm', 'nm')]
 
 TYPE_MAINTENANCE = [('Preventivo', 'Preventivo'), ('Correctivo', 'Correctivo')]
 
@@ -246,7 +246,7 @@ class EquipmentInstrumentalForm(ModelForm):
             'code_equipment', 'description_equipment', 'supplier_equipment',
             'brand_equipment', 'model_equipment', 'serie_equipment', 'frequency_calibration',
             'intermediate_verification', 'verification_pattern', 'unit_tolerance', 'tolerance',
-            'laboratory', 'responsible_user', 'photo_equipment', 'manual_equipment'
+            'laboratory', 'responsible_user', 'photo_equipment', 'manual_equipment', 'date_calibration_fix'
         ]
         widgets = {
             'code_equipment': TextInput(attrs={'class': 'form-control', 'required': True}),
@@ -263,7 +263,8 @@ class EquipmentInstrumentalForm(ModelForm):
             'unit_tolerance': Select(attrs={'class': 'form-control', 'style': 'width: 100%'}, choices=UNIT_TOLERANCE),
             'responsible_user': Select(attrs={'class': 'form-control', 'required': True, 'style': 'width: 100%'}),
             'photo_equipment': FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
-            'manual_equipment': FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.doc,.docx'})
+            'manual_equipment': FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.doc,.docx'}),
+            'date_calibration_fix': DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'required': True, 'data-datepicker': '1', 'autocomplete': 'off'}),
         }
 
     def clean_code_equipment(self):

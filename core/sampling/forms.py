@@ -120,97 +120,139 @@ class SamplingAnalysisProcessingForm(ModelForm):
             raise ValidationError({'error': str(e)})
 
 
+# class SamplingAnalysisProcessingRelationForm(ModelForm):
+#     calcule = FloatField(label='Resultado', widget=TextInput(attrs={'readonly': 'readonly'}), required=False)
+#
+#     def __init__(self, *args, **kwargs):
+#         self.analysis = kwargs.pop('analysis')
+#         self.relation = kwargs.pop('relation')
+#         super().__init__(*args, **kwargs)
+#
+#         # Determinar qué campos mostrar basados en position de AnalyticalMethodCalculateRelation
+#         all_relations = AnalyticalMethodCalculateRelation.objects.filter(
+#             analytical_method_id=self.analysis.analytical_method.id
+#         )
+#
+#         var_num = all_relations.filter(position__iexact='Numerador').exists()
+#         var_den = all_relations.filter(position__iexact='Denominador').exists()
+#
+#         if not var_num:
+#             self.fields.pop('numerator', None)
+#         else:
+#             self.fields['numerator'].label = 'Numerador'
+#
+#         if not var_den:
+#             self.fields.pop('denominator', None)
+#         else:
+#             self.fields['denominator'].label = 'Denominador'
+#
+#         for field in self.visible_fields():
+#             field.field.widget.attrs['autocomplete'] = 'off'
+#             field.field.widget.attrs['class'] = 'form-control'
+#             if field.name in ['numerator', 'denominator', 'calcule']:
+#                 field.field.widget.attrs['readonly'] = 'readonly'
+#
+#     class Meta:
+#         model = SamplingAnalysisProcessingRelation
+#         fields = ['numerator', 'denominator', 'calcule']
+#         widgets = {
+#             'numerator': TextInput(attrs={'readonly': 'readonly'}),
+#             'denominator': TextInput(attrs={'readonly': 'readonly'}),
+#             'calcule': TextInput(attrs={'readonly': 'readonly'}),
+#         }
+#
+#     def save(self, commit=True):
+#         instance = super().save(commit=False)
+#         instance.sampling_analysis_id = self.analysis.id
+#         instance.analytical_method_calculate_relation = self.relation
+#
+#         # Recalcular valores para asegurar integridad al guardar
+#         all_rels = AnalyticalMethodCalculateRelation.objects.filter(
+#             product=self.relation.product,
+#             calculate_description_relation=self.relation.calculate_description_relation
+#         )
+#
+#         numerator = 1.0
+#         denominator = 1.0
+#         has_num = False
+#         has_den = False
+#
+#         for r in all_rels:
+#             if r.analytical_method_calculate:
+#                 target_analysis = SamplingAnalysis.objects.filter(
+#                     sampling_process=self.analysis.sampling_process,
+#                     analytical_method=r.analytical_method_calculate.analytical_method
+#                 ).first()
+#
+#                 val = target_analysis.average_concentration if target_analysis and target_analysis.average_concentration else 0.0
+#
+#                 if r.factor:
+#                     val *= r.factor
+#
+#                 if r.position.lower() == 'numerador':
+#                     numerator *= val
+#                     has_num = True
+#                 elif r.position.lower() == 'denominador':
+#                     denominator *= val
+#                     has_den = True
+#
+#         if not has_num: numerator = 0.0
+#         if not has_den: denominator = 1.0
+#
+#         instance.numerator = round(numerator, 4)
+#         instance.denominator = round(denominator, 4)
+#
+#         sig_figs = self.analysis.analytical_method.sig_figs_result or 4
+#         if denominator != 0:
+#             instance.calcule = round(numerator / denominator, sig_figs)
+#         else:
+#             instance.calcule = 0
+#
+#         if commit:
+#             instance.save()
+#         return instance
+
 class SamplingAnalysisProcessingRelationForm(ModelForm):
-    calcule = FloatField(label='Resultado', widget=TextInput(attrs={'readonly': 'readonly'}), required=False)
-
     def __init__(self, *args, **kwargs):
-        self.analysis = kwargs.pop('analysis')
-        self.relation = kwargs.pop('relation')
+        self.analysis = kwargs.pop('analysis', None)
+        self.sampling = kwargs.pop('sampling', None)
+        # print(self.analysis.id)
+        # self.relation = kwargs.pop('relation', None)
         super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
 
-        # Determinar qué campos mostrar basados en position de AnalyticalMethodCalculateRelation
-        all_relations = AnalyticalMethodCalculateRelation.objects.filter(
-            analytical_method_id=self.analysis.analytical_method.id
-        )
+        col_classes = {
+            'standard_solution': 'col-md-7',
+            'quantity_standard': 'col-md-2',
+        }
 
-        var_num = all_relations.filter(position__iexact='Numerador').exists()
-        var_den = all_relations.filter(position__iexact='Denominador').exists()
-
-        if not var_num:
-            self.fields.pop('numerator', None)
-        else:
-            self.fields['numerator'].label = 'Numerador'
-
-        if not var_den:
-            self.fields.pop('denominator', None)
-        else:
-            self.fields['denominator'].label = 'Denominador'
-
-        for field in self.visible_fields():
-            field.field.widget.attrs['autocomplete'] = 'off'
-            field.field.widget.attrs['class'] = 'form-control'
-            if field.name in ['numerator', 'denominator', 'calcule']:
-                field.field.widget.attrs['readonly'] = 'readonly'
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
 
     class Meta:
         model = SamplingAnalysisProcessingRelation
-        fields = ['numerator', 'denominator', 'calcule']
+        fields = ['numerator', 'denominator']
         widgets = {
-            'numerator': TextInput(attrs={'readonly': 'readonly'}),
-            'denominator': TextInput(attrs={'readonly': 'readonly'}),
-            'calcule': TextInput(attrs={'readonly': 'readonly'}),
+            'numerator': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'denominator': TextInput(attrs={'class': 'form-control', 'required': True}),
         }
 
     def save(self, commit=True):
-        instance = super().save(commit=False)
-        instance.sampling_analysis_id = self.analysis.id
-        instance.analytical_method_calculate_relation = self.relation
+        data = {}
+        form = super()
+        try:
+            if form.is_valid():
+                data = form.save(commit=False)
+                data.calcule = float(data.numerator / data.denominator)
+                # data.sampling_analysis_id = self.analysis.id
+                data.save()
+            else:
+                data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
 
-        # Recalcular valores para asegurar integridad al guardar
-        all_rels = AnalyticalMethodCalculateRelation.objects.filter(
-            product=self.relation.product,
-            calculate_description_relation=self.relation.calculate_description_relation
-        )
-
-        numerator = 1.0
-        denominator = 1.0
-        has_num = False
-        has_den = False
-
-        for r in all_rels:
-            if r.analytical_method_calculate:
-                target_analysis = SamplingAnalysis.objects.filter(
-                    sampling_process=self.analysis.sampling_process,
-                    analytical_method=r.analytical_method_calculate.analytical_method
-                ).first()
-
-                val = target_analysis.average_concentration if target_analysis and target_analysis.average_concentration else 0.0
-
-                if r.factor:
-                    val *= r.factor
-
-                if r.position.lower() == 'numerador':
-                    numerator *= val
-                    has_num = True
-                elif r.position.lower() == 'denominador':
-                    denominator *= val
-                    has_den = True
-
-        if not has_num: numerator = 0.0
-        if not has_den: denominator = 1.0
-
-        instance.numerator = round(numerator, 4)
-        instance.denominator = round(denominator, 4)
-
-        sig_figs = self.analysis.analytical_method.sig_figs_result or 4
-        if denominator != 0:
-            instance.calcule = round(numerator / denominator, sig_figs)
-        else:
-            instance.calcule = 0
-
-        if commit:
-            instance.save()
-        return instance
 
 class SamplingGroupForm(ModelForm):
     def __init__(self, *args, **kwargs):
