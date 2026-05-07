@@ -37,7 +37,7 @@
                                 labels: data.categories,
                                 datasets: [
                                     {
-                                        label: 'Resultado Verificación',
+                                        label: 'Error (' + data.unit_tolerance + ')',
                                         data: data.series[0].data,
                                         borderColor: 'rgb(75, 192, 192)',
                                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
@@ -47,7 +47,7 @@
                                         fill: false
                                     },
                                     {
-                                        label: 'Patrón de Referencia',
+                                        label: 'Tolerancia (' + data.unit_tolerance + ')',
                                         data: data.series[1].data,
                                         borderColor: 'rgb(255, 99, 132)',
                                         backgroundColor: 'rgba(255, 99, 132, 0.2)',
@@ -71,7 +71,7 @@
                                         },
                                         title: {
                                             display: true,
-                                            text: 'Valor (Resultado)'
+                                            text: 'Resultado (' + data.unit_tolerance + ')'
                                         }
                                     },
                                     x: {
@@ -81,15 +81,22 @@
                                         }
                                     }
                                 },
-                                {#plugins: {#}
-                                {#    legend: {#}
-                                {#        position: 'top',#}
-                                {#    },#}
-                                {#    title: {#}
-                                {#        display: true,#}
-                                {#        text: 'Verificaciones Diarias'#}
-                                {#    }#}
-                                {# }#}
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function (context) {
+                                                let label = context.dataset.label || '';
+                                                if (label) {
+                                                    label = label.split(' (')[0] + ': ';
+                                                }
+                                                if (context.parsed.y !== null) {
+                                                    label += context.parsed.y + ' ' + data.unit_tolerance;
+                                                }
+                                                return label;
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         });
                         return false;

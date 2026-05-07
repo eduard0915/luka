@@ -44,6 +44,7 @@ class DailyVerificationListView(LoginRequiredMixin, ValidatePermissionRequiredMi
                     'equipment_instrumental__code_equipment',
                     'equipment_instrumental__description_equipment',
                     'equipment_instrumental__tolerance',
+                    'equipment_instrumental__unit_tolerance',
                     'date_verification_daily',
                     'parameter_verified',
                     'comply',
@@ -65,6 +66,46 @@ class DailyVerificationListView(LoginRequiredMixin, ValidatePermissionRequiredMi
                         v['date_verification_daily'] = v['date_verification_daily'].strftime('%Y-%m-%d %H:%M')
 
                 return JsonResponse(verifications, safe=False)
+            elif action == 'get_graph_data':
+                from datetime import timedelta
+                twelve_months_ago = timezone.now() - timedelta(days=365)
+                equipment_id = request.POST.get('equipment_id')
+                qs = DailyVerification.objects.filter(date_verification_daily__gte=twelve_months_ago)
+                if equipment_id:
+                    qs = qs.filter(equipment_instrumental_id=equipment_id)
+                qs = qs.order_by('date_verification_daily')
+                
+                data = {
+                    'categories': [],
+                    'series': [
+                        {
+                            'name': 'Error',
+                            'data': [],
+                            'units': []
+                        },
+                        {
+                            'name': 'Tolerancia',
+                            'data': [],
+                            'units': []
+                        }
+                    ],
+                    'unit_tolerance': ''
+                }
+
+                if equipment_id:
+                    equipment = EquipmentInstrumental.objects.filter(id=equipment_id).first()
+                    if equipment:
+                        data['unit_tolerance'] = equipment.unit_tolerance
+                
+                for v in qs:
+                    unit = v.equipment_instrumental.unit_tolerance or ""
+                    data['categories'].append(v.date_verification_daily.strftime('%Y-%m-%d %H:%M'))
+                    data['series'][0]['data'].append(v.error)
+                    data['series'][0]['units'].append(unit)
+                    data['series'][1]['data'].append(v.equipment_instrumental.tolerance)
+                    data['series'][1]['units'].append(unit)
+                
+                return JsonResponse(data, safe=False)
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
@@ -75,7 +116,6 @@ class DailyVerificationListView(LoginRequiredMixin, ValidatePermissionRequiredMi
         context = super().get_context_data(**kwargs)
         context['title'] = 'Listado de Verificaciones Diarias'
         context['create_url'] = reverse_lazy('equipment:create_daily_verification')
-        context['chart_url'] = reverse_lazy('equipment:chart_daily_verification')
         context['entity'] = 'Verificaciones Diarias'
         context['div'] = '12'
         context['icon'] = 'fa-solid fa-calendar-check'
@@ -110,23 +150,28 @@ class DailyVerificationChartView(LoginRequiredMixin, ValidatePermissionRequiredM
                         }
                     ],
                     'min_y': 0,
-                    'max_y': 100
+                    'max_y': 3,
+                    'unit_tolerance': ''
                 }
 
                 # Filtrar por equipo si se pasa un ID
                 equipment_id = self.kwargs.get('pk')
+                equipment = None
                 qs = DailyVerification.objects.all()
                 if equipment_id:
-                    qs = qs.filter(equipment_instrumental_id=equipment_id)
+                    equipment = EquipmentInstrumental.objects.filter(id=equipment_id).first()
+                    if equipment:
+                        data['unit_tolerance'] = equipment.unit_tolerance
+                    qs = qs.select_related('equipment_instrumental').filter(equipment_instrumental_id=equipment_id)
 
                 qs = qs.order_by('date_verification_daily')
                 ref_values = []
                 for v in qs:
                     data['categories'].append(v.date_verification_daily.strftime('%Y-%m-%d %H:%M'))
-                    data['series'][0]['data'].append(float(v.verification_result_daily))
-                    data['series'][1]['data'].append(float(v.reference_pattern_daily))
-                    ref_values.append(float(v.reference_pattern_daily))
-                    ref_values.append(float(v.verification_result_daily))
+                    data['series'][0]['data'].append(float(v.error))
+                    data['series'][1]['data'].append(float(v.equipment_instrumental.tolerance))
+                    ref_values.append(float(v.equipment_instrumental.tolerance))
+                    ref_values.append(float(v.error))
 
                 if ref_values:
                     min_ref = min(ref_values)

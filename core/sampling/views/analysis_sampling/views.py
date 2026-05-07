@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Model
 from django.http import JsonResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
@@ -13,7 +14,8 @@ from core.analytical_method.models import AnalyticalMethodCalculateRelation, Ana
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.models import SpecificationProduct
 from core.sampling.forms import SamplingAnalysisProcessingForm, SamplingAnalysisProcessingRelationForm
-from core.sampling.models import SamplingAnalysis, SamplingAnalysisProcessing, SamplingAnalysisProcessingRelation
+from core.sampling.models import SamplingAnalysis, SamplingAnalysisProcessing, SamplingAnalysisProcessingRelation, \
+    SamplingProcess
 from core.solution.models import SolutionStd
 
 
@@ -192,80 +194,151 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        analysis = get_object_or_404(SamplingAnalysis, pk=self.kwargs.get('pk'))
-        relation = get_object_or_404(
-            AnalyticalMethodCalculateRelation,
-            pk=self.kwargs.get('pk_relation'),
-            analytical_method=analysis.analytical_method
-        )
+        analysis = SamplingAnalysis.objects.filter(sampling_process=self.kwargs.get('pk'))
+        sampling = SamplingProcess.objects.get(pk=self.kwargs.get('pk'))
+
+        # product = None
+        # if sampling.point_sampling:
+        #     product = sampling.point_sampling.product
+        # elif sampling.group_sampling:
+        #     product = sampling.group_sampling.sampling_point.product
+
+        # Solo filtrar si tenemos un producto válido
+        # if product:
+        #     relation = AnalyticalMethodCalculateRelation.objects.filter(product=product, calculate_description_relation__isnull=False).first()
+        # else:
+        #     relation = AnalyticalMethodCalculateRelation.objects.none()
+
+
+        # for a in analysis:
+        #     print(a.average_concentration)
+        #
+        # print(sampling.id)
+        #
+        # for r in relation:
+        #     print(r.product.id)
 
         kwargs.update({
             'analysis': analysis,
-            'relation': relation
+            # 'relation': relation,
+            'sampling': sampling
         })
         return kwargs
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        analysis = SamplingAnalysis.objects.filter(pk=self.kwargs.get('pk')).first()
-        relation = get_object_or_404(
-            AnalyticalMethodCalculateRelation,
-            pk=self.kwargs.get('pk_relation'),
-            analytical_method=analysis.analytical_method,
+        analysis_qs = SamplingAnalysis.objects.filter(sampling_process=self.kwargs.get('pk'))
+        sampling = SamplingProcess.objects.get(pk=self.kwargs.get('pk'))
+
+        product = None
+        if sampling.point_sampling:
+            product = sampling.point_sampling.product
+        elif sampling.group_sampling:
+            product = sampling.group_sampling.sampling_point.product
+
+        # Validar que existe un producto
+        if not product:
+            return form
+
+        # Obtener relaciones de cálculo como QuerySet
+        relation_num_qs = AnalyticalMethodCalculateRelation.objects.select_related(
+            'analytical_method_calculate'
+        ).filter(
+            product=product,
+            position='Numerador',
+            analytical_method_calculate__isnull=False
         )
 
-        all_rels = AnalyticalMethodCalculateRelation.objects.filter(
-            product=relation.product,
-            calculate_description_relation=relation.calculate_description_relation
+        relation_den_qs = AnalyticalMethodCalculateRelation.objects.select_related(
+            'analytical_method_calculate'
+        ).filter(
+            product=product,
+            position='Denominador',
+            analytical_method_calculate__isnull=False
         )
 
+        # Inicializar variables
         numerator = 1.0
         denominator = 1.0
         has_num = False
         has_den = False
 
-        for r in all_rels:
-            if r.analytical_method_calculate:
-                # Buscar el análisis del mismo proceso con el método correspondiente
-                target_analysis = SamplingAnalysis.objects.filter(
-                    sampling_process=analysis.sampling_process,
-                    analytical_method=r.analytical_method_calculate.analytical_method
+        # Procesar numerador
+        for relation_num in relation_num_qs:
+            if relation_num.analytical_method_calculate:
+                # Obtener el análisis correspondiente
+                target_analysis = analysis_qs.filter(
+                    analytical_method=relation_num.analytical_method_calculate.analytical_method
                 ).first()
-                
-                # Usar average_concentration
-                val = target_analysis.average_concentration if target_analysis and target_analysis.average_concentration else 0.0
-                
-                # Aplicar factor
-                if r.factor:
-                    val *= r.factor
-                
-                if r.position.lower() == 'numerador':
+
+                if target_analysis and target_analysis.average_concentration:
+                    val = float(target_analysis.average_concentration)
+                    if relation_num.factor:
+                        val *= relation_num.factor
                     numerator *= val
                     has_num = True
-                elif r.position.lower() == 'denominador':
+
+        # Procesar denominador
+        for relation_den in relation_den_qs:
+            if relation_den.analytical_method_calculate:
+                # Obtener el análisis correspondiente
+                target_analysis = analysis_qs.filter(
+                    analytical_method=relation_den.analytical_method_calculate.analytical_method
+                ).first()
+
+                if target_analysis and target_analysis.average_concentration:
+                    val = float(target_analysis.average_concentration)
+                    if relation_den.factor:
+                        val *= relation_den.factor
                     denominator *= val
                     has_den = True
 
-        if not has_num: numerator = 0.0
-        if not has_den: denominator = 1.0
+        # Establecer valores por defecto si no se encontraron
+        if not has_num:
+            numerator = 0.0
+        if not has_den:
+            denominator = 1.0
 
+        # Asignar valores al formulario
         form.initial['numerator'] = round(numerator, 4)
         form.initial['denominator'] = round(denominator, 4)
-        
-        sig_figs = analysis.analytical_method.sig_figs_result or 4
+
+        # Calcular el resultado
+        sig_figs = analysis_qs.first().analytical_method.sig_figs_result if analysis_qs.exists() else 4
         if denominator != 0:
             form.initial['calcule'] = round(numerator / denominator, sig_figs)
         else:
             form.initial['calcule'] = 0
-            
+
         return form
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
-        relation = get_object_or_404(AnalyticalMethodCalculateRelation, pk=self.kwargs.get('pk_relation'))
-        context['entity'] = f'Calcular {relation.calculate_description_relation}'
-        # context['confirm_msg'] = '¿Está Seguro de Ejecutar el Calculo?'
+
+        sampling = SamplingProcess.objects.get(pk=self.kwargs.get('pk'))
+
+        product = None
+        if sampling.point_sampling:
+            product = sampling.point_sampling.product
+        elif sampling.group_sampling:
+            product = sampling.group_sampling.sampling_point.product
+
+        # Obtener la primera relación de cálculo si existe
+        relation = None
+        print(product.id)
+        if product:
+            relation = AnalyticalMethodCalculateRelation.objects.filter(
+                product_id=product.id,
+                analytical_method_calculate__isnull=False
+            ).first()
+
+        # Usar la relación solo si existe
+        if relation:
+            context['entity'] = f'Calcular {relation.calculate_description_relation}'
+        else:
+            context['entity'] = 'Cálculo Relacional'
+
+        context['confirm_msg'] = '¿Está Seguro de Ejecutar el Calculo?'
         context['detail_button'] = 'Si, Ejecutar'
-        context['relation'] = relation
         return context
