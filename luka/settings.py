@@ -93,20 +93,6 @@ DATABASES = {
         conn_health_checks=True,
     )
 }
-# DATABASES = {
-#     'dev': dj_database_url.config(
-#         default=config('DATABASE_URL')
-#     ),
-#     'production': dj_database_url.config(
-#         default=config('DATABASE_URL')
-#     )
-# }
-
-# DATABASES['default'] = DATABASES['dev' if DEBUG else 'production']
-# DATABASES = config('DATABASE_URL')
-#
-# db_from_env = dj_database_url.config()
-# DATABASES.update(db_from_env)
 
 AUTH_PASSWORD_VALIDATORS = [
     {
