@@ -194,29 +194,8 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        analysis = SamplingAnalysis.objects.filter(sampling_process=self.kwargs.get('pk'))
+        analysis = SamplingAnalysis.objects.filter(sampling_process=self.kwargs.get('pk')).first()
         sampling = SamplingProcess.objects.get(pk=self.kwargs.get('pk'))
-
-        # product = None
-        # if sampling.point_sampling:
-        #     product = sampling.point_sampling.product
-        # elif sampling.group_sampling:
-        #     product = sampling.group_sampling.sampling_point.product
-
-        # Solo filtrar si tenemos un producto válido
-        # if product:
-        #     relation = AnalyticalMethodCalculateRelation.objects.filter(product=product, calculate_description_relation__isnull=False).first()
-        # else:
-        #     relation = AnalyticalMethodCalculateRelation.objects.none()
-
-
-        # for a in analysis:
-        #     print(a.average_concentration)
-        #
-        # print(sampling.id)
-        #
-        # for r in relation:
-        #     print(r.product.id)
 
         kwargs.update({
             'analysis': analysis,

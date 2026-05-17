@@ -216,7 +216,8 @@ class SamplingAnalysisProcessingRelationForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.analysis = kwargs.pop('analysis', None)
         self.sampling = kwargs.pop('sampling', None)
-        # print(self.analysis.id)
+        if self.analysis:
+            print(self.analysis.id)
         # self.relation = kwargs.pop('relation', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -245,7 +246,8 @@ class SamplingAnalysisProcessingRelationForm(ModelForm):
             if form.is_valid():
                 data = form.save(commit=False)
                 data.calcule = float(data.numerator / data.denominator)
-                # data.sampling_analysis_id = self.analysis.id
+                if self.analysis:
+                    data.sampling_analysis_id = self.analysis.id
                 data.save()
             else:
                 data['error'] = form.errors
