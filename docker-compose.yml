@@ -1,35 +1,48 @@
 services:
   db-luka:
     image: postgres:16-alpine
+    restart: unless-stopped
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
-      - POSTGRES_DB=luka_db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    ports:
-      - "5432:5432"
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   web-luka:
     build:
       context: .
       args:
-        - SECRET_KEY=django-insecure-local-key
-        - DATABASE_URL=postgres://postgres:postgres@db:5432/luka_db
-        - MEDIA_URL=/media/
+        - MEDIA_URL=${MEDIA_URL}   # ✅ Solo lo que se necesita en build time
+    restart: unless-stopped
     volumes:
-      - .:/app
       - static_volume:/app/static
       - media_volume:/app/media
     environment:
-      - SECRET_KEY=django-insecure-local-key
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/luka_db
-      - DEBUG=True
-      - PORT=8000
-    ports:
-      - "8000:8000"
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - DEBUG=${DEBUG}
+      - MEDIA=${MEDIA}
+      - REGION_NAME=${REGION_NAME}
+      - BUCKET=${BUCKET}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - MEDIA_URL=${MEDIA_URL}
+      - USER_MAIL=${USER_MAIL}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS}
     depends_on:
-      - db
+      db-luka:
+        condition: service_healthy
 
 volumes:
   postgres_data:

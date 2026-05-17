@@ -86,19 +86,20 @@ TEMPLATES = [
 WSGI_APPLICATION = 'luka.wsgi.application'
 
 # Database
-DATABASES = {
-    'dev': dj_database_url.config(
-        default=config('DATABASE_TEST')
-    ),
-    'production': dj_database_url.config(
-        default=config('DATABASE_URL')
-    )
-}
+# DATABASES = {
+#     'dev': dj_database_url.config(
+#         default=config('DATABASE_URL')
+#     ),
+#     'production': dj_database_url.config(
+#         default=config('DATABASE_URL')
+#     )
+# }
 
-DATABASES['default'] = DATABASES['dev' if DEBUG else 'production']
+# DATABASES['default'] = DATABASES['dev' if DEBUG else 'production']
+DATABASES = config('DATABASE_URL')
 
 db_from_env = dj_database_url.config()
-DATABASES['default'].update(db_from_env)
+DATABASES.update(db_from_env)
 
 AUTH_PASSWORD_VALIDATORS = [
     {
