@@ -18,7 +18,7 @@ SECRET_KEY = config('SECRET_KEY')
 
 DEBUG = config('DEBUG')
 
-ALLOWED_HOSTS = ['127.0.0.1', '.herokuapp.com', 'localhost', '.run.app']
+ALLOWED_HOSTS = ['127.0.0.1', '.herokuapp.com', 'localhost', '.run.app', '.padlims.cloud']
 
 # Application definition
 INSTALLED_APPS = [
@@ -168,6 +168,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.padlims.com',
     'https://*.herokuapp.com',
     'https://*.run.app',
+    'https://*.padlims.cloud',
 ]
 
 CORS_ORIGIN_WHITELIST = [
