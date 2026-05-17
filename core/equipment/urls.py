@@ -7,6 +7,7 @@ from core.equipment.views.maintenance.views import *
 from core.equipment.views.calibration.views import *
 from core.equipment.views.verification.views import *
 from core.equipment.views.daily_verification.views import *
+from core.equipment.views.reference_pattern.views import *
 
 from luka import settings
 
@@ -50,6 +51,10 @@ urlpatterns = [
     path('daily_verification/update/<uuid:pk>/', DailyVerificationUpdateView.as_view(), name='update_daily_verification'),
     path('daily_verification/detail/<uuid:pk>/', DailyVerificationDetailView.as_view(), name='detail_daily_verification'),
     path('daily_verification/pdf/<uuid:pk>/', DailyVerificationPDFView.as_view(), name='daily_verification_pdf'),
+    # Patrones de Referencia
+    path('reference_pattern/add/<uuid:pk>/', ReferencePatternCreateView.as_view(), name='create_reference_pattern'),
+    path('reference_pattern/update/<uuid:pk>/', ReferencePatternUpdateView.as_view(), name='update_reference_pattern'),
+    path('reference_pattern/delete/<uuid:pk>/', ReferencePatternDeleteView.as_view(), name='delete_reference_pattern'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

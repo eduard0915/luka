@@ -268,35 +268,35 @@
 }
 
 /* Badges estilo Vali */
-.badge {
+.equipment-detail-view .badge {
     font-weight: 500;
     padding: 0.4rem 0.75rem;
     font-size: 0.8125rem;
     border-radius: 3px;
 }
 
-.badge.bg-success {
+.equipment-detail-view .badge.bg-success {
     background-color: var(--success-color) !important;
 }
 
-.badge.bg-danger {
+.equipment-detail-view .badge.bg-danger {
     background-color: var(--danger-color) !important;
 }
 
-.badge.bg-warning {
+.equipment-detail-view .badge.bg-warning {
     background-color: var(--warning-color) !important;
     color: var(--text-primary) !important;
 }
 
-.badge.bg-info {
+.equipment-detail-view .badge.bg-info {
     background-color: var(--info-color) !important;
 }
 
-.badge.bg-secondary {
+.equipment-detail-view .badge.bg-secondary {
     background-color: var(--gray-400) !important;
 }
 
-.badge i {
+.equipment-detail-view .badge i {
     margin-right: 3px;
 }
 

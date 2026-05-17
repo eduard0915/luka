@@ -207,3 +207,43 @@ class DailyVerification(BaseModel):
             else:
                 self.user_updated = user
         return super(DailyVerification, self).save(*args, **kwargs)
+
+
+# Patrones de Referencia
+class ReferencePattern(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    equipment_instrumental = models.ForeignKey(EquipmentInstrumental, verbose_name='Instrumento', on_delete=models.CASCADE)
+    description_pattern = models.CharField(max_length=150, verbose_name='Descripción del Patrón', null=True, blank=True)
+    magnitude_pattern = models.FloatField(verbose_name='Magnitud del Patrón', null=True, blank=True)
+    unit_pattern = models.CharField(verbose_name='Unidad del Patrón', max_length=50, null=True, blank=True)
+    date_expire_calibration = models.DateField(verbose_name='Fecha de Expiración', null=True, blank=True)
+    certificate_calibration = models.FileField(verbose_name='Certificado de Calibración', upload_to='calibration_certificates_pattern/', null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.description_pattern} - {self.magnitude_pattern} {self.unit_pattern}'
+
+    class Meta:
+        verbose_name = 'ReferencePattern'
+        verbose_name_plural = 'ReferencePatterns'
+        db_table = 'ReferencePattern'
+
+    def toJSON(self):
+        item = {
+            'id': str(self.id),
+            'equipment_instrumental': self.equipment_instrumental.toJSON() if hasattr(self.equipment_instrumental, 'toJSON') else str(self.equipment_instrumental),
+            'description_pattern': self.description_pattern,
+            'magnitude_pattern': self.magnitude_pattern,
+            'unit_pattern': self.unit_pattern,
+            'date_expire_calibration': self.date_expire_calibration.strftime('%Y-%m-%d') if self.date_expire_calibration else None,
+            'certificate_calibration': self.certificate_calibration.url if self.certificate_calibration else None,
+        }
+        return item
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(ReferencePattern, self).save(*args, **kwargs)
