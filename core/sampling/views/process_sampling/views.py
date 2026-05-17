@@ -217,6 +217,16 @@ class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMi
     template_name = 'process_sampling/detail_process_sampling.html'
     permission_required = 'reagent.add_reagent'
 
+    def get_object(self, queryset=None):
+        """Optimizar queryset del objeto principal"""
+        if queryset is None:
+            queryset = self.get_queryset()
+        # Cargar relaciones críticas para evitar queries adicionales
+        return queryset.select_related(
+            'group_sampling__sampling_point__product',
+            'point_sampling__product'
+        ).get(pk=self.kwargs['pk'])
+
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
@@ -234,7 +244,7 @@ class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMi
 
         # Obtener especificaciones
         context['specifications'] = (
-            sampling_point.specification.select_related('product', 'method_test').order_by('type_test', 'test_prod')
+            sampling_point.specification.select_related('product', 'method_test__analytical_method').order_by('type_test', 'test_prod')
             if sampling_point else SpecificationProduct.objects.none()
         )
 
@@ -289,6 +299,8 @@ class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMi
             final_equations.append(rf"{label} = \frac{{{str_num}}}{{{str_den}}}{str_gen}")
 
         context['final_equations'] = final_equations
+
+        # context['result_calcule_relation'] = SamplingAnalysisProcessingRelation.objects.filter()
 
         context['icon'] = 'bi bi-file-earmark-ruled'
         context['back'] = reverse_lazy('sampling:list_sampling_process')
