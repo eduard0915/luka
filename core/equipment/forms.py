@@ -4,7 +4,7 @@ from django import forms
 from django.forms import ModelForm, TextInput, Select, DateInput, FileInput, NumberInput, Textarea
 from django.utils import timezone
 
-from core.equipment.models import EquipmentInstrumental, MaterialInstrumental, Maintenance, Calibration, Verification, DailyVerification
+from core.equipment.models import EquipmentInstrumental, MaterialInstrumental, Maintenance, Calibration, Verification, DailyVerification, ReferencePattern
 from core.laboratory.models import Laboratory
 from core.user.views.user.views import User
 
@@ -326,3 +326,90 @@ class MaterialInstrumentalForm(ModelForm):
             if qs.exists():
                 raise forms.ValidationError('Ya existe un material con este código')
         return code_instrumental
+
+
+# Registrar Patrones de Referencia
+class ReferencePatternForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.equipment_instrumental = kwargs.pop('equipment_instrumental', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+        col_classes = {
+            'description_pattern': 'col-md-6',
+            'magnitude_pattern': 'col-md-3',
+            'unit_pattern': 'col-md-3',
+            'date_expire_calibration': 'col-md-5',
+            'certificate_calibration': 'col-md-7'
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
+    class Meta:
+        model = ReferencePattern
+        fields = ['description_pattern', 'magnitude_pattern', 'unit_pattern', 'date_expire_calibration', 'certificate_calibration']
+        widgets = {
+            'description_pattern': TextInput(attrs={'class': 'form-control'}),
+            'magnitude_pattern': NumberInput(attrs={'class': 'form-control', 'step': '0.0001'}),
+            'unit_pattern': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}, choices=UNIT_TOLERANCE),
+            'date_expire_calibration': DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'data-datepicker': '1', 'autocomplete': 'off'}),
+            'certificate_calibration': FileInput(attrs={'class': 'form-control', 'accept': '.pdf'}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        form = super()
+        try:
+            if form.is_valid():
+                data = form.save(commit=False)
+                data.equipment_instrumental_id = self.equipment_instrumental.id
+                data.save()
+            else:
+                data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Editar Patrones de Referencia
+class ReferencePatternUpdateForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+        col_classes = {
+            'description_pattern': 'col-md-6',
+            'magnitude_pattern': 'col-md-3',
+            'unit_pattern': 'col-md-3',
+            'date_expire_calibration': 'col-md-5',
+            'certificate_calibration': 'col-md-7'
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
+    class Meta:
+        model = ReferencePattern
+        fields = ['description_pattern', 'magnitude_pattern', 'unit_pattern', 'date_expire_calibration', 'certificate_calibration']
+        widgets = {
+            'description_pattern': TextInput(attrs={'class': 'form-control'}),
+            'magnitude_pattern': NumberInput(attrs={'class': 'form-control', 'step': '0.0001'}),
+            'unit_pattern': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}, choices=UNIT_TOLERANCE),
+            'date_expire_calibration': DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'data-datepicker': '1', 'autocomplete': 'off'}),
+            'certificate_calibration': FileInput(attrs={'class': 'form-control', 'accept': '.pdf'}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        form = super()
+        try:
+            if form.is_valid():
+                data = form.save()
+            else:
+                data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
