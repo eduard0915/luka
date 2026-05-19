@@ -155,6 +155,7 @@ class SamplingAnalysis(BaseModel):
     standard_deviation = models.FloatField(verbose_name='Desviación Estándar', null=True, blank=True)
     coefficient_variation = models.FloatField(verbose_name='Coeficiente de Variación', null=True, blank=True)
     comply = models.CharField(max_length=10, verbose_name='Concepto', null=True, blank=True)
+    date_analysis = models.DateTimeField(verbose_name='Fecha de Análisis', null=True, blank=True)
     verified_by = models.ForeignKey(User, verbose_name='Aprobado por', on_delete=models.CASCADE, related_name='verified_by', null=True, blank=True)
     date_verified= models.DateTimeField(verbose_name='Fecha de Aprobado', null=True, blank=True)
 
