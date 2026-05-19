@@ -57,7 +57,7 @@ def create_sampling_analysis(sender, instance, created, **kwargs):
     new_analyses = [
         SamplingAnalysis(
             sampling_process=instance,
-            analytical_method=method
+            analytical_method=method,
         )
         for method in analytical_methods
         if method.id not in existing_methods
@@ -87,6 +87,9 @@ def update_sampling_analysis(sender, instance, **kwargs):
         # Actualizar concentración promedio
         sampling_analysis.average_concentration = instance.concentration_sample
 
+        # Actualizar fecha y hora de analisis
+        sampling_analysis.date_analysis = timezone.localtime()
+
         # Determinar cumplimiento
         sampling_point = _get_sampling_point(sampling_analysis.sampling_process)
 
@@ -98,7 +101,7 @@ def update_sampling_analysis(sender, instance, **kwargs):
             )
 
         # Guardar análisis
-        sampling_analysis.save(update_fields=['average_concentration', 'comply'])
+        sampling_analysis.save(update_fields=['average_concentration', 'comply', 'date_analysis'])
 
         # Actualizar inventario
         _update_solution_inventory(instance)

@@ -23,6 +23,7 @@ urlpatterns = [
     path('sampling/', include('core.sampling.urls')),
     path('observation/', include('core.observation.urls')),
     path('condition/', include('core.condition.urls')),
+    path('report/', include('core.report.urls')),
     # path("__debug__/", include("debug_toolbar.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
