@@ -10,6 +10,7 @@ from core.mixins import ValidatePermissionRequiredMixin
 from core.product.forms import ProductForm
 from core.product.models import Product, SamplePoint, AnalyticalMethodProduct, SpecificationProduct
 from core.analytical_method.models import AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation
+from core.utils import format_form_errors
 
 
 # Creación de Productos
@@ -34,9 +35,12 @@ class ProductCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
                 form = self.get_form()
                 if form.is_valid():
                     form.save()
-                    messages.success(request, f'Punto de Muestreo creado satisfactoriamente!')
+                    data['success'] = True
+                    data['redirect_url'] = str(self.success_url)
+                    messages.success(request, f'Producto creado satisfactoriamente!')
                 else:
-                    messages.error(request, 'Por favor corrija los errores: {}'.format(form.errors.as_json()))
+                    data['error'] = format_form_errors(form)
+                    messages.error(request, f'Por favor corrija los errores: {data["error"]}')
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -75,9 +79,12 @@ class ProductUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
                 form = self.get_form()
                 if form.is_valid():
                     form.save()
-                    messages.success(request, f'Punto de Muestreo editado satisfactoriamente!')
+                    data['success'] = True
+                    data['redirect_url'] = str(self.success_url)
+                    messages.success(request, f'Producto editado satisfactoriamente!')
                 else:
-                    messages.error(request, 'Por favor corrija los errores: {}'.format(form.errors.as_json()))
+                    data['error'] = format_form_errors(form)
+                    messages.error(request, f'Por favor corrija los errores: {data["error"]}')
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:

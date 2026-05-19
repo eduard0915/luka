@@ -1,3 +1,6 @@
+from datetime import date
+
+import dateutil.utils
 from crum import get_current_user
 from dateutil.relativedelta import relativedelta
 from django import forms
@@ -165,7 +168,8 @@ class CalibrationForm(ModelForm):
         try:
             if form.is_valid():
                 data = form.save(commit=False)
-                data.date_calibration_next = data.date_calibration + relativedelta(months=data.equipment_instrumental.frequency_calibration)
+                years= relativedelta(date.today(), data.equipment_instrumental.date_calibration_fix).years
+                data.date_calibration_next = data.equipment_instrumental.date_calibration_fix + relativedelta(years=1 if years == 0 else years)
                 data.responsible_user_id = get_current_user().id
                 data.save()
             else:

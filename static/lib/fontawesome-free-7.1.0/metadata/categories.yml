@@ -334,7 +334,7 @@ buildings:
     - toilet-portable
     - toilets-portable
     - torii-gate
-    - tower-observation
+    - tower-templates
     - tree-city
     - vihara
     - warehouse
@@ -1644,7 +1644,7 @@ humanitarian:
     - tornado
     - tower-broadcast
     - tower-cell
-    - tower-observation
+    - tower-templates
     - train-subway
     - trash-can
     - tree-city
@@ -2490,7 +2490,7 @@ security:
     - shield-heart
     - skull-crossbones
     - square-person-confined
-    - tower-observation
+    - tower-templates
     - unlock
     - unlock-keyhole
     - user-lock

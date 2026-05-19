@@ -13,7 +13,7 @@ from core.product.models import SpecificationProduct
 from core.sampling.forms import *
 from core.sampling.models import SamplingProcess, SamplingAnalysis, SamplingAnalysisProcessingRelation
 from core.utils import format_form_errors
-from core.analytical_method.models import AnalyticalMethodCalculateRelation
+from core.analytical_method.models import AnalyticalMethodCalculateRelation, AnalyticalMethodCalculate
 
 
 # Creación de Proceso de Muestreo
@@ -38,6 +38,8 @@ class SamplingProcessCreateView(LoginRequiredMixin, ValidatePermissionRequiredMi
                 form = self.get_form()
                 if form.is_valid():
                     form.save()
+                    data['success'] = True
+                    data['redirect_url'] = str(self.success_url)
                     messages.success(request, f'Proceso de Muestreo creado satisfactoriamente!')
                 else:
                     error_messages = format_form_errors(form)
@@ -80,6 +82,8 @@ class SamplingProcessUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMi
                 form = self.get_form()
                 if form.is_valid():
                     form.save()
+                    data['success'] = True
+                    data['redirect_url'] = str(self.success_url)
                     messages.success(request, f'Proceso de Muestreo editado satisfactoriamente!')
                 else:
                     error_messages = format_form_errors(form)
@@ -248,13 +252,36 @@ class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMi
             if sampling_point else SpecificationProduct.objects.none()
         )
 
-        context['sampling_analysis'] = SamplingAnalysis.objects.select_related('sampling_process', 'analytical_method').filter(
+        # Obtener análisis y enriquecer con unidades de medida de SpecificationProduct
+        sampling_analysis = SamplingAnalysis.objects.select_related('sampling_process', 'analytical_method').filter(
             sampling_process_id=self.object.id)
+        
+        # Mapear unidades de SpecificationProduct
+        if sampling_point:
+            specs = sampling_point.specification.all()
+            spec_units = {spec.method_test.analytical_method_id: spec.unit_measure for spec in specs}
+            
+            # También intentar obtener unidades de AnalyticalMethodCalculate si no están en SpecificationProduct
+            method_ids = [sa.analytical_method_id for sa in sampling_analysis]
+            calculates = AnalyticalMethodCalculate.objects.filter(analytical_method_id__in=method_ids)
+            calculate_units = {c.analytical_method_id: c.unit_measure_calculate for c in calculates}
+            
+            for sa in sampling_analysis:
+                sa.unit_measure_prod = spec_units.get(sa.analytical_method_id) or calculate_units.get(sa.analytical_method_id)
+        
+        context['sampling_analysis'] = sampling_analysis
 
         # Obtener los cálculos relacionales y generar la ecuación LaTeX siguiendo la lógica de ProductDetailView
         calcules_relation = AnalyticalMethodCalculateRelation.objects.select_related(
             'product', 'analytical_method_calculate'
         ).filter(product_id=product).order_by('date_creation')
+
+        context['calcules_relation'] = calcules_relation
+
+        # Obtener los cálculos realizados para esta muestra para filtrar las ecuaciones visibles
+        processed_relations = SamplingAnalysisProcessingRelation.objects.filter(
+            sampling_process_id=self.object.id
+        ).values_list('analytical_method_calculate_relation__calculate_description_relation', flat=True)
 
         equations_data = {}
         current_desc = None
@@ -262,9 +289,14 @@ class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMi
             if cr.calculate_description_relation:
                 current_desc = cr.calculate_description_relation
                 if current_desc not in equations_data:
-                    equations_data[current_desc] = {'num': [], 'den': [], 'gen': [], 'unit': cr.unit_measure_calculate}
+                    # Solo incluir si no ha sido procesado
+                    if current_desc not in processed_relations:
+                        equations_data[current_desc] = {'num': [], 'den': [], 'gen': [], 'unit': cr.unit_measure_calculate}
+                    else:
+                        # Si ya está procesado, marcar para saltar sus componentes
+                        equations_data[current_desc] = None
             
-            if not current_desc:
+            if not current_desc or equations_data.get(current_desc) is None:
                 continue
                 
             parts = []
@@ -288,6 +320,8 @@ class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMi
 
         final_equations = []
         for desc, data in equations_data.items():
+            if data is None:
+                continue
             str_num = r" \cdot ".join(data['num']) if data['num'] else "1"
             str_den = r" \cdot ".join(data['den']) if data['den'] else "1"
             str_gen = rf" \cdot {r' \cdot '.join(data['gen'])}" if data['gen'] else ""
@@ -300,7 +334,11 @@ class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMi
 
         context['final_equations'] = final_equations
 
-        # context['result_calcule_relation'] = SamplingAnalysisProcessingRelation.objects.filter()
+        context['result_calcule_relation'] = SamplingAnalysisProcessingRelation.objects.select_related(
+            'analytical_method_calculate_relation'
+        ).filter(
+            sampling_process_id=self.kwargs.get('pk')
+        )
 
         context['icon'] = 'bi bi-file-earmark-ruled'
         context['back'] = reverse_lazy('sampling:list_sampling_process')
@@ -408,5 +446,39 @@ class SamplingProcessInProcessUpdateView(LoginRequiredMixin, ValidatePermissionR
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Inicio de Procesamiento de Muestra'
         context['info_form'] = mark_safe('<span class="text-danger me-2">¿Está seguro de Iniciar Procesamiento de la Muestra?</span>')
+        context['action'] = 'edit'
+        return context
+
+
+# Aprobación del procesamiento de la muestra o control de calidad
+class SamplingProcessApprovedUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    model = SamplingProcess
+    form_class = SamplingProcessApprovedForm
+    template_name = 'process_sampling/confirmation_sampling.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            form = self.get_form()
+            if form.is_valid():
+                form.save()
+                messages.success(request, f'Control de Calidad Aprobado satisfactoriamente!')
+            else:
+                error_messages = format_form_errors(form)
+                messages.error(request, f'Por favor corrija los errores: {error_messages}')
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Aprobación de Control de Calidad Muestra'
+        context['info_form'] = mark_safe('<span class="text-danger me-2">¿Está seguro de aprobar el control de calidad de la muestra?</span>')
         context['action'] = 'edit'
         return context

@@ -36,6 +36,8 @@ class SamplingGroupCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixi
                 form = self.get_form()
                 if form.is_valid():
                     form.save()
+                    data['success'] = True
+                    data['redirect_url'] = str(self.success_url)
                     messages.success(request, f'Grupo de Muestreo creado satisfactoriamente!')
                 else:
                     error_messages = format_form_errors(form)
@@ -78,6 +80,8 @@ class SamplingGroupUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixi
                 form = self.get_form()
                 if form.is_valid():
                     form.save()
+                    data['success'] = True
+                    data['redirect_url'] = str(self.success_url)
                     messages.success(request, f'Grupo de Muestreo editado satisfactoriamente!')
                 else:
                     error_messages = format_form_errors(form)

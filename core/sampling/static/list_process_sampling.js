@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             badge_class = 'bg-info';
                         } else if (status === 'En Proceso') {
                             badge_class = 'bg-primary';
-                        } else if (status === 'Procesada') {
+                        } else if (status === 'Aprobada') {
                             badge_class = 'bg-success';
                         } else if (status === 'Cancelada') {
                             badge_class = 'bg-secondary';

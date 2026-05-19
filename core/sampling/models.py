@@ -77,6 +77,9 @@ class SamplingProcess(BaseModel):
     status_sampling = models.CharField(verbose_name='Estado de la Muestra', max_length=20, default='Programada')
     image_sample = models.FileField(upload_to='sampling/%Y%m%d', verbose_name='Foto de la Muestra', null=True, blank=True)
     batch_number = models.CharField(verbose_name='N° de Lote', max_length=20, blank=True, null=True)
+    approved_by = models.ForeignKey(User, verbose_name='Aprobado por', on_delete=models.CASCADE, related_name='approved_by', null=True, blank=True)
+    date_approved = models.DateTimeField(verbose_name='Fecha de Aprobado', null=True, blank=True)
+    approved = models.BooleanField(verbose_name='Aprobado', default=False)
 
     def __str__(self):
         return str(self.number_sample)
@@ -152,8 +155,8 @@ class SamplingAnalysis(BaseModel):
     standard_deviation = models.FloatField(verbose_name='Desviación Estándar', null=True, blank=True)
     coefficient_variation = models.FloatField(verbose_name='Coeficiente de Variación', null=True, blank=True)
     comply = models.CharField(max_length=10, verbose_name='Concepto', null=True, blank=True)
-    approved_by = models.ForeignKey(User, verbose_name='Aprobado por', on_delete=models.CASCADE, related_name='approved_by', null=True, blank=True)
-    date_approved = models.DateTimeField(verbose_name='Fecha de Aprobado', null=True, blank=True)
+    verified_by = models.ForeignKey(User, verbose_name='Aprobado por', on_delete=models.CASCADE, related_name='verified_by', null=True, blank=True)
+    date_verified= models.DateTimeField(verbose_name='Fecha de Aprobado', null=True, blank=True)
 
     def __str__(self):
         return str(self.sampling_process)
@@ -215,6 +218,7 @@ class SamplingAnalysisProcessingRelation(BaseModel):
     numerator = models.FloatField(verbose_name='Numerador')
     denominator = models.FloatField(verbose_name='Denominador', null=True, blank=True)
     calcule = models.FloatField(verbose_name='Resultado')
+    sampling_process = models.ForeignKey(SamplingProcess, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return str(self.calcule)
@@ -231,4 +235,6 @@ class SamplingAnalysisProcessingRelation(BaseModel):
                 self.user_creation = user
             else:
                 self.user_updated = user
+        if self.calcule:
+            self.calcule = round(self.calcule, 6)
         return super(SamplingAnalysisProcessingRelation, self).save(*args, **kwargs)

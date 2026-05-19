@@ -54,7 +54,7 @@
                                     <b>N° de Lote</b><br>
                                     <p>{{ object.batch_number|default_if_none:"No Aplica" }}</p>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <b>Estado</b><br>
                                     {% if object.status_sampling == 'Programada' %}
                                         <span class="badge bg-warning text-dark">{{ object.status_sampling }}</span>
@@ -62,13 +62,13 @@
                                         <span class="badge bg-info">{{ object.status_sampling }}</span>
                                     {% elif object.status_sampling == 'En Proceso' %}
                                         <span class="badge bg-primary">{{ object.status_sampling }}</span>
-                                    {% elif object.status_sampling == 'Procesada' %}
+                                    {% elif object.status_sampling == 'Aprobado' %}
                                         <span class="badge bg-success">{{ object.status_sampling }}</span>
                                     {% else %}
                                         <span class="badge bg-secondary">{{ object.status_sampling }}</span>
                                     {% endif %}
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-1">
                                     <b>Automático</b><br>
                                     {% if object.automatic_sampling %}
                                         <span class="badge bg-info">Sí</span>
@@ -76,6 +76,15 @@
                                         <span class="badge bg-dark">No</span>
                                     {% endif %}
                                 </div>
+                                {% if object.status_sampling == 'En Proceso' or object.status_sampling == 'Procesada' %}
+                                    <div class="col-md-2">
+                                        <a href="javascript:void(0);"
+                                           onclick="open_modal('{% url 'sampling:approved_sampling_process' object.id %}')"
+                                           class="btn btn-primary btn-sm ms-lg-5 mt-2">
+                                            <i class="bi bi-check-lg"></i> Aprobar
+                                        </a>
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
 
@@ -143,7 +152,7 @@
                                                      alt="Foto de la muestra">
                                             </a>
                                         {% else %}
-                                            <div class="py-4 text-muted">
+                                            <div class="py-1 text-muted">
                                                 <i class="bi bi-image" style="font-size: 2rem;"></i>
                                                 <p class="mb-0">Sin imagen</p>
                                             </div>
@@ -178,7 +187,7 @@
                                                     <tr>
                                                         <td class="text-left align-middle">{{ foo.method_test.analytical_method.description_analytical_method }}</td>
                                                         <td class="text-center align-middle">{{ foo.lower_limit_prod|default_if_none:"Menor que" }}
-                                                            {{ foo.upper_limit_prod }} {{ foo.unit_measure|default_if_none:" " }}</td>
+                                                            {% if foo.lower_limit_prod %} - {% endif %}{{ foo.upper_limit_prod }} {{ foo.unit_measure|default_if_none:" " }}</td>
                                                         <td class="text-center align-middle">{{ foo.method_test.analytical_method.code_analytical_method }}</td>
                                                     </tr>
                                                 {% empty %}
@@ -217,7 +226,7 @@
                                                 {% for sa in sampling_analysis %}
                                                     <tr>
                                                         <td class="text-left align-middle">{{ sa.analytical_method.description_analytical_method }}</td>
-                                                        <td class="text-center align-middle">{{ sa.average_concentration|default_if_none:'Pendiente' }}</td>
+                                                        <td class="text-center align-middle">{{ sa.average_concentration|default_if_none:'Pendiente' }} {% if sa.average_concentration %}{{ sa.unit_measure_prod|default_if_none:"" }}{% endif %}</td>
                                                         <td class="text-center align-middle">{{ sa.comply|default_if_none:"Pendiente" }}</td>
 
                                                         <td class="text-center align-middle">
@@ -240,85 +249,91 @@
                                             </table>
                                         </div>
                                     </div>
-                                    <div class="card-body">
-                                        <h5 class="card-title mb-3">
-                                            <i class="bi bi-clock me-2"></i> Resultados Calculos Relacionales
-                                        </h5>
-                                        <div class="table-responsive">
-                                            <table class="table table-hover table-bordered">
-                                                <thead>
-                                                <tr>
-                                                    <th class="text-center align-middle" style="width:45%">Parametro</th>
-                                                    <th class="text-center align-middle" style="width:20%">Resultado</th>
-                                                    <th class="text-center align-middle" style="width:20%">Concepto</th>
-                                                    <th class="text-center align-middle" style="width:15%">Acciones</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                {% for sa in sampling_analysis %}
+                                    {% if calcules_relation %}
+                                        <div class="card-body">
+                                            <h5 class="card-title mb-3">
+                                                <i class="bi bi-clock me-2"></i> Resultados Calculos Relacionales
+                                            </h5>
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-bordered">
+                                                    <thead>
                                                     <tr>
-                                                        <td class="text-left align-middle">{{ sa.analytical_method.description_analytical_method }}</td>
-                                                        <td class="text-center align-middle">{{ sa.average_concentration|default_if_none:'Pendiente' }}</td>
-                                                        <td class="text-center align-middle">{{ sa.comply|default_if_none:"Pendiente" }}</td>
-
-                                                        <td class="text-center align-middle">
-                                                            {% if object.status_sampling == 'Confirmada' %}
-                                                                <a href="javascript:void(0);"
-                                                                   onclick="open_modal('{% url 'sampling:sampling_in_process' object.id %}')"
-                                                                   class="btn btn-primary btn-xs">
-                                                                    <i class="bi bi-box-arrow-up-right m-0"></i>
-                                                                </a>
-                                                            {% else %}
-                                                                <a href="{% url 'sampling:detail_sampling_analysis' sa.id %}"
-                                                                   class="btn btn-info btn-xs" title="Ver Análisis">
-                                                                    <i class="bi bi-bookmark-check m-1"></i>
-                                                                </a>
-                                                            {% endif %}
-                                                        </td>
+                                                        <th class="text-center align-middle" style="width:55%">
+                                                            Parametro
+                                                        </th>
+                                                        <th class="text-center align-middle" style="width:25%">
+                                                            Resultado
+                                                        </th>
+                                                        <th class="text-center align-middle" style="width:20%">
+                                                            Acciones
+                                                        </th>
                                                     </tr>
-                                                {% endfor %}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="mt-3 border-top pt-3">
-                                            <h6 class="mb-3"><i class="bi bi-diagram-2 me-2"></i> Cálculos Relacionales
-                                                <a href="javascript:void(0);"
-                                                   onclick="open_modal('{% url 'sampling:create_sampling_analysis_processing_relation' object.id %}')"
-                                                   class="btn btn-primary btn-sm ms-lg-5">
-                                                    <i class="bi bi-calculator"></i> Calcular
-                                                </a>
-                                            </h6>
-                                            <div class="mb-2">
-                                                {% for equation in final_equations %}
-                                                    <div class="mb-3">
-                                                        <div class="d-flex justify-content-center align-items-center mb-1"
-                                                             style="font-size: 1.1rem; overflow-x: auto;">
-                                                            $${{ equation }}$$
-                                                        </div>
-                                                    </div>
-                                                {% empty %}
-                                                    <div class="text-muted text-center py-2">
-                                                        <i class="bi bi-inbox me-1"></i> No hay cálculos relacionales
-                                                        asociados.
-                                                    </div>
-                                                {% endfor %}
+                                                    </thead>
+                                                    <tbody>
+                                                    {% for cr in result_calcule_relation %}
+                                                        <tr>
+                                                            <td class="text-left align-middle">{{ cr.analytical_method_calculate_relation.calculate_description_relation }}</td>
+                                                            <td class="text-center align-middle">{{ cr.calcule }} {{ cr.analytical_method_calculate_relation.unit_measure_calculate|default_if_none:"" }}</td>
+                                                            <td class="text-center align-middle">
+                                                                    <a href="javascript:void(0);"
+                                                                       onclick="open_modal('{% url 'sampling:delete_sampling_analysis_processing_relation' cr.id %}')"
+                                                                       class="btn btn-danger btn-xs">
+                                                                        <i class="bi bi-trash m-0"></i>
+                                                                    </a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </div>
-                                    </div>
+                                    {% endif %}
+                                    {% if final_equations or not result_calcule_relation %}
+                                        {% if not object.status_sampling == 'Programada' %}
+                                            <div class="card-body">
+                                                <div class="mt-3 border-top pt-3">
+                                                    <h6 class="mb-3"><i class="bi bi-diagram-2 me-2"></i> Cálculos
+                                                        Relacionales
+                                                        <a href="javascript:void(0);"
+                                                           onclick="open_modal('{% url 'sampling:create_sampling_analysis_processing_relation' object.id %}')"
+                                                           class="btn btn-primary btn-sm ms-lg-5">
+                                                            <i class="bi bi-calculator"></i> Calcular
+                                                        </a>
+                                                    </h6>
+                                                    <div class="mb-2">
+                                                        {% for equation in final_equations %}
+                                                            <div class="mb-3">
+                                                                <div class="d-flex justify-content-center align-items-center mb-1"
+                                                                     style="font-size: 1.1rem; overflow-x: auto;">
+                                                                    $${{ equation }}$$
+                                                                </div>
+                                                            </div>
+                                                        {% empty %}
+                                                            {% if not result_calcule_relation %}
+                                                                <div class="text-muted text-center py-2">
+                                                                    <i class="bi bi-inbox me-1"></i> No hay cálculos
+                                                                    relacionales
+                                                                    asociados.
+                                                                </div>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
 
                         <div class="row mt-2">
 
-                            <!-- Observaciones -->
+                            <!-- Registros -->
                             <div class="col-lg-6 col-md-6 mb-3">
                                 <div class="card h-100">
                                     <div class="card-body">
                                         <h5 class="card-title mb-3">
-                                            <i class="bi bi-person-check me-2"></i> Observaciones
+                                            <i class="bi bi-person-check me-2"></i> Registros
                                         </h5>
                                         <ul class="list-group list-group-flush">
                                             <li class="list-group-item d-flex justify-content-between align-items-center px-0">
@@ -329,7 +344,57 @@
                                                 <span>Confirmado por</span>
                                                 <span class="text-muted">{{ object.sampling_confirmed_by.get_full_name|default:"Pendiente" }}</span>
                                             </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                <span>Aprobado por</span>
+                                                <span class="text-muted">{{ object.approved_by.get_full_name|default:"Pendiente" }}</span>
+                                            </li>
                                         </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                             <!-- Observaciones -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title mb-3">
+                                            <i class="bi bi-chat-right-text me-2"></i> Observaciones
+                                            <a href="javascript:void(0);"
+                                               onclick="open_modal('{% url 'observation:observation_create' object.id %}')"
+                                               class="btn btn-primary btn-xs float-end">
+                                                <i class="bi bi-plus-lg"></i> Agregar
+                                            </a>
+                                        </h5>
+                                        <div class="table-responsive">
+                                            <table class="table table-hover table-sm">
+                                                <thead>
+                                                <tr>
+                                                    <th>Fecha</th>
+                                                    <th>Observación</th>
+                                                    <th class="text-center">Acciones</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for obs in object.observation_set.all %}
+                                                    <tr>
+                                                        <td class="align-middle small">{{ obs.comment_date|date:"Y-m-d H:i" }}</td>
+                                                        <td class="align-middle small text-wrap" style="max-width: 250px;">{{ obs.comment }}. {{ obs.comment_by.get_full_name|default:obs.comment_by.username }}</td>
+                                                        <td class="text-center align-middle">
+                                                            <a href="javascript:void(0);"
+                                                               onclick="open_modal('{% url 'observation:observation_update' obs.id %}')"
+                                                               class="btn btn-warning btn-xs">
+                                                                <i class="bi bi-pencil m-0"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                {% empty %}
+                                                    <tr>
+                                                        <td colspan="4" class="text-center text-muted small">No hay observaciones registradas</td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
