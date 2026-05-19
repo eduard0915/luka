@@ -18,7 +18,7 @@ SECRET_KEY = config('SECRET_KEY')
 
 DEBUG = config('DEBUG')
 
-ALLOWED_HOSTS = ['127.0.0.1', '.herokuapp.com', 'localhost', '.run.app', '.padlims.cloud']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.run.app', '.padlims.cloud']
 
 # Application definition
 INSTALLED_APPS = [
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'core.analytical_method',
     'core.sampling',
     'core.condition',
+    'core.observation',
     # Libs
     'widget_tweaks',
     'django_password_history',
@@ -165,15 +166,13 @@ TIME_PASSWORD_EXPIRE = 90
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8000/',
     'http://localhost:8000/',
-    'https://*.padlims.com',
-    'https://*.herokuapp.com',
     'https://*.run.app',
     'https://*.padlims.cloud',
 ]
 
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:8000',
-    'http://*.padlims.com',
+    'http://*.padlims.cloud',
 ]
 
 # Conexión AWS S3

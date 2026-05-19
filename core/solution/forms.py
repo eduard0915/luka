@@ -208,7 +208,7 @@ class SolutionForm(ModelForm):
         return instance
 
 
-# Creación de Soluciones Estándar
+# Creación de soluciones Estándar
 class SolutionStandardForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

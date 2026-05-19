@@ -25,12 +25,13 @@ urlpatterns = [
     path('process/detail/<uuid:pk>/', SamplingProcessDetailView.as_view(), name='detail_sampling_process'),
     path('process/update-image/<uuid:pk>/', SamplingProcessImageUpdateView.as_view(), name='update_image_sample'),
     path('process/confirmed/<uuid:pk>/', SamplingProcessConfirmedUpdateView.as_view(), name='confirmed_sampling_process'),
+    path('process/approved/<uuid:pk>/', SamplingProcessApprovedUpdateView.as_view(), name='approved_sampling_process'),
     path('analysis/inprocess/<uuid:pk>/', SamplingProcessInProcessUpdateView.as_view(), name='sampling_in_process'),
     # Procesamiento de la muestra
     path('analysis/detail/<uuid:pk>/', SamplingAnalysisDetailView.as_view(), name='detail_sampling_analysis'),
     path('analysis/processing/add/<uuid:pk>/', SamplingAnalysisProcessingCreateView.as_view(), name='create_sampling_analysis_processing'),
     path('analysis/processing/relation/add/<uuid:pk>/', SamplingAnalysisProcessingRelationCreateView.as_view(), name='create_sampling_analysis_processing_relation'),
-    # path('analysis/processing/relation/add/<uuid:pk>/<uuid:pk_relation>/', SamplingAnalysisProcessingRelationCreateView.as_view(), name='create_sampling_analysis_processing_relation'),
+    path('analysis/processing/relation/delete/<uuid:pk>/', SamplingAnalysisProcessingRelationDeleteView.as_view(), name='delete_sampling_analysis_processing_relation'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

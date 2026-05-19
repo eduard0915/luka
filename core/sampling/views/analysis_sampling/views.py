@@ -1,22 +1,16 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Model
-from django.http import JsonResponse, Http404
-from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_GET
-from django.views.generic import CreateView, DetailView
+from django.views.generic import CreateView, DetailView, DeleteView
 
-from core.analytical_method.models import AnalyticalMethodCalculateRelation, AnalyticalMethodCalculate
+from core.analytical_method.models import AnalyticalMethodCalculateRelation
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.models import SpecificationProduct
 from core.sampling.forms import SamplingAnalysisProcessingForm, SamplingAnalysisProcessingRelationForm
-from core.sampling.models import SamplingAnalysis, SamplingAnalysisProcessing, SamplingAnalysisProcessingRelation, \
-    SamplingProcess
-from core.solution.models import SolutionStd
+from core.sampling.models import *
 
 
 # Detalle de Análisis de Muestra
@@ -183,7 +177,7 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
                 form = self.get_form()
                 if form.is_valid():
                     form.save()
-                    messages.success(request, '¡Procesamiento Relacional Registrado Satisfactoriamente!')
+                    messages.success(request, '¡Procesamiento de Calculo de Variables Realizado Satisfactoriamente!')
                 else:
                     data['error'] = form.errors
             else:
@@ -197,10 +191,24 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
         analysis = SamplingAnalysis.objects.filter(sampling_process=self.kwargs.get('pk')).first()
         sampling = SamplingProcess.objects.get(pk=self.kwargs.get('pk'))
 
+        product = None
+        if sampling.point_sampling:
+            product = sampling.point_sampling.product
+        elif sampling.group_sampling:
+            product = sampling.group_sampling.sampling_point.product
+
+        relation = AnalyticalMethodCalculateRelation.objects.select_related(
+            'analytical_method_calculate'
+        ).filter(
+            product=product,
+            calculate_description_relation__isnull=False,
+            analytical_method_calculate__isnull=True
+        ).first()
+
         kwargs.update({
             'analysis': analysis,
-            # 'relation': relation,
-            'sampling': sampling
+            'sampling': sampling,
+            'relation': relation
         })
         return kwargs
 
@@ -320,4 +328,32 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
 
         context['confirm_msg'] = '¿Está Seguro de Ejecutar el Calculo?'
         context['detail_button'] = 'Si, Ejecutar'
+        return context
+
+
+# Eliminación de cálculo de variables relacionadas
+class SamplingAnalysisProcessingRelationDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DeleteView):
+    model = SamplingAnalysisProcessingRelation
+    template_name = 'analysis_sampling/delete_analysis.html'
+    permission_required = 'reagent.add_reagent'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            detail = self.object.analytical_method_calculate_relation.calculate_description_relation
+            self.object.delete()
+            messages.success(request, f'Cálculo de {detail} eliminado satisfactoriamente!')
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Eliminar de Calculo'
+        context['delete'] = 'Está seguro de eliminar calculo de parametro?'
+        context['info_delete'] = f'{self.object.analytical_method_calculate_relation.calculate_description_relation}'
         return context

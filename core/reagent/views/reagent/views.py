@@ -17,6 +17,7 @@ from django.views.generic import CreateView, ListView, UpdateView, DetailView
 from core.mixins import ValidatePermissionRequiredMixin
 from core.reagent.forms import ReagentForm
 from core.reagent.models import Reagent
+from core.utils import format_form_errors
 
 
 # Creación de reactivo
@@ -41,11 +42,13 @@ class ReagentCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
                 form = self.get_form()
                 if form.is_valid():
                     form.save()
+                    data['success'] = True
+                    data['redirect_url'] = str(self.success_url)
                     description_reagent = form.cleaned_data.get('description_reagent')
                     messages.success(request, f'Reactivo "{description_reagent}" creado satisfactoriamente!')
                 else:
-                    messages.error(request, form.errors)
-                return redirect(self.get_context_data()['list_url'])
+                    data['error'] = format_form_errors(form)
+                    messages.error(request, f'Por favor corrija los errores: {data["error"]}')
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -142,11 +145,13 @@ class ReagentUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
                 form = self.get_form()
                 if form.is_valid():
                     form.save()
+                    data['success'] = True
+                    data['redirect_url'] = str(self.success_url)
                     description_reagent = form.cleaned_data.get('description_reagent')
                     messages.success(request, f'Reactivo "{description_reagent}" actualizado satisfactoriamente!')
                 else:
-                    messages.error(request, form.errors)
-                return redirect(self.get_context_data()['list_url'])
+                    data['error'] = format_form_errors(form)
+                    messages.error(request, f'Por favor corrija los errores: {data["error"]}')
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:

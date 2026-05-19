@@ -57,7 +57,7 @@ def code_solution_std_generator():
         return f'STD-{today_str}-{new_number}'
 
 
-# Soluciones Base
+# soluciones Base
 class SolutionBase(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     solute_reagent_base = models.ForeignKey(Reagent, verbose_name='Reactivo', on_delete=models.CASCADE, related_name='solute_base')

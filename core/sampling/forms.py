@@ -8,7 +8,11 @@ from core.product.models import SamplePoint
 from core.solution.models import SolutionStd
 from core.analytical_method.models import AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation
 
+
 TYPE_SAMPLING = [('En Proceso', 'En Proceso'), ('Producto Terminado', 'Producto Terminado')]
+
+SELECT = [(True, 'Si'), (False, 'No')]
+
 
 class SamplingAnalysisProcessingForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -22,7 +26,7 @@ class SamplingAnalysisProcessingForm(ModelForm):
             solution_std_base_id__in=std_bases,
             preparation_confirmed=True,
             quantity_solution_std__gt=0)
-        
+
         if calc_con_label and calc_con_label.sample_quantity:
             self.fields['quantity_sample'].label = str(calc_con_label.sample_quantity)
 
@@ -120,105 +124,14 @@ class SamplingAnalysisProcessingForm(ModelForm):
             raise ValidationError({'error': str(e)})
 
 
-# class SamplingAnalysisProcessingRelationForm(ModelForm):
-#     calcule = FloatField(label='Resultado', widget=TextInput(attrs={'readonly': 'readonly'}), required=False)
-#
-#     def __init__(self, *args, **kwargs):
-#         self.analysis = kwargs.pop('analysis')
-#         self.relation = kwargs.pop('relation')
-#         super().__init__(*args, **kwargs)
-#
-#         # Determinar qué campos mostrar basados en position de AnalyticalMethodCalculateRelation
-#         all_relations = AnalyticalMethodCalculateRelation.objects.filter(
-#             analytical_method_id=self.analysis.analytical_method.id
-#         )
-#
-#         var_num = all_relations.filter(position__iexact='Numerador').exists()
-#         var_den = all_relations.filter(position__iexact='Denominador').exists()
-#
-#         if not var_num:
-#             self.fields.pop('numerator', None)
-#         else:
-#             self.fields['numerator'].label = 'Numerador'
-#
-#         if not var_den:
-#             self.fields.pop('denominator', None)
-#         else:
-#             self.fields['denominator'].label = 'Denominador'
-#
-#         for field in self.visible_fields():
-#             field.field.widget.attrs['autocomplete'] = 'off'
-#             field.field.widget.attrs['class'] = 'form-control'
-#             if field.name in ['numerator', 'denominator', 'calcule']:
-#                 field.field.widget.attrs['readonly'] = 'readonly'
-#
-#     class Meta:
-#         model = SamplingAnalysisProcessingRelation
-#         fields = ['numerator', 'denominator', 'calcule']
-#         widgets = {
-#             'numerator': TextInput(attrs={'readonly': 'readonly'}),
-#             'denominator': TextInput(attrs={'readonly': 'readonly'}),
-#             'calcule': TextInput(attrs={'readonly': 'readonly'}),
-#         }
-#
-#     def save(self, commit=True):
-#         instance = super().save(commit=False)
-#         instance.sampling_analysis_id = self.analysis.id
-#         instance.analytical_method_calculate_relation = self.relation
-#
-#         # Recalcular valores para asegurar integridad al guardar
-#         all_rels = AnalyticalMethodCalculateRelation.objects.filter(
-#             product=self.relation.product,
-#             calculate_description_relation=self.relation.calculate_description_relation
-#         )
-#
-#         numerator = 1.0
-#         denominator = 1.0
-#         has_num = False
-#         has_den = False
-#
-#         for r in all_rels:
-#             if r.analytical_method_calculate:
-#                 target_analysis = SamplingAnalysis.objects.filter(
-#                     sampling_process=self.analysis.sampling_process,
-#                     analytical_method=r.analytical_method_calculate.analytical_method
-#                 ).first()
-#
-#                 val = target_analysis.average_concentration if target_analysis and target_analysis.average_concentration else 0.0
-#
-#                 if r.factor:
-#                     val *= r.factor
-#
-#                 if r.position.lower() == 'numerador':
-#                     numerator *= val
-#                     has_num = True
-#                 elif r.position.lower() == 'denominador':
-#                     denominator *= val
-#                     has_den = True
-#
-#         if not has_num: numerator = 0.0
-#         if not has_den: denominator = 1.0
-#
-#         instance.numerator = round(numerator, 4)
-#         instance.denominator = round(denominator, 4)
-#
-#         sig_figs = self.analysis.analytical_method.sig_figs_result or 4
-#         if denominator != 0:
-#             instance.calcule = round(numerator / denominator, sig_figs)
-#         else:
-#             instance.calcule = 0
-#
-#         if commit:
-#             instance.save()
-#         return instance
-
+# Cálculo de parámetros con variables relacionadas
 class SamplingAnalysisProcessingRelationForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.analysis = kwargs.pop('analysis', None)
         self.sampling = kwargs.pop('sampling', None)
-        if self.analysis:
-            print(self.analysis.id)
-        # self.relation = kwargs.pop('relation', None)
+        self.relation= kwargs.pop('relation', None)
+        # print(self.relation.id)
+
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -246,8 +159,9 @@ class SamplingAnalysisProcessingRelationForm(ModelForm):
             if form.is_valid():
                 data = form.save(commit=False)
                 data.calcule = float(data.numerator / data.denominator)
-                if self.analysis:
-                    data.sampling_analysis_id = self.analysis.id
+                data.sampling_analysis_id = self.analysis.id
+                data.sampling_process_id = self.sampling.id
+                data.analytical_method_calculate_relation_id = self.relation.id
                 data.save()
             else:
                 data['error'] = form.errors
@@ -286,6 +200,7 @@ class SamplingGroupForm(ModelForm):
         except Exception as e:
             data['error'] = str(e)
         return data
+
 
 class SamplingProcessForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -334,6 +249,7 @@ class SamplingProcessForm(ModelForm):
             data['error'] = str(e)
         return data
 
+
 class SamplingProcessImageForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -356,6 +272,7 @@ class SamplingProcessImageForm(ModelForm):
         except Exception as e:
             data['error'] = str(e)
         return data
+
 
 class SamplingProcessConfirmedForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -384,6 +301,7 @@ class SamplingProcessConfirmedForm(ModelForm):
             data['error'] = str(e)
         return data
 
+
 class SamplingProcessInProcessForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -403,6 +321,35 @@ class SamplingProcessInProcessForm(ModelForm):
             if form.is_valid():
                 data = form.save(commit=False)
                 data.status_sampling = 'En Proceso'
+                data.save()
+            else:
+                data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+class SamplingProcessApprovedForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['approved'].label = ''
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = SamplingProcess
+        fields = ['approved']
+        widgets = {'approved': Select(attrs={'class': 'form-control'}, choices=SELECT)}
+
+    def save(self, commit=True):
+        data = {}
+        form = super()
+        try:
+            if form.is_valid():
+                data = form.save(commit=False)
+                data.approved_by_id = get_current_user().id
+                data.date_approved = timezone.localtime()
+                data.status_sampling = 'Aprobado'
                 data.save()
             else:
                 data['error'] = form.errors
