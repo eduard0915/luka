@@ -87,23 +87,36 @@ class DailyVerificationListView(LoginRequiredMixin, ValidatePermissionRequiredMi
                             'name': 'Tolerancia',
                             'data': [],
                             'units': []
+                        },
+                        {
+                            'name': 'Tolerancia Negativa',
+                            'data': [],
+                            'units': []
                         }
                     ],
-                    'unit_tolerance': ''
+                    'unit_tolerance': '',
+                    'min_y': 0,
+                    'max_y': 0
                 }
 
                 if equipment_id:
                     equipment = EquipmentInstrumental.objects.filter(id=equipment_id).first()
                     if equipment:
                         data['unit_tolerance'] = equipment.unit_tolerance
+                        tolerance = float(equipment.tolerance) if equipment.tolerance else 0.0
+                        data['max_y'] = round(tolerance * 1.1, 2)
+                        data['min_y'] = round(-tolerance * 1.1, 2)
                 
                 for v in qs:
                     unit = v.equipment_instrumental.unit_tolerance or ""
+                    tolerance = float(v.equipment_instrumental.tolerance) if v.equipment_instrumental.tolerance else 0.0
                     data['categories'].append(v.date_verification_daily.strftime('%Y-%m-%d %H:%M'))
-                    data['series'][0]['data'].append(v.error)
+                    data['series'][0]['data'].append(float(v.error) if v.error else 0.0)
                     data['series'][0]['units'].append(unit)
-                    data['series'][1]['data'].append(v.equipment_instrumental.tolerance)
+                    data['series'][1]['data'].append(tolerance)
                     data['series'][1]['units'].append(unit)
+                    data['series'][2]['data'].append(-tolerance)
+                    data['series'][2]['units'].append(unit)
                 
                 return JsonResponse(data, safe=False)
             else:
@@ -141,16 +154,20 @@ class DailyVerificationChartView(LoginRequiredMixin, ValidatePermissionRequiredM
                     'categories': [],
                     'series': [
                         {
-                            'name': 'Resultado',
+                            'name': 'Error',
                             'data': []
                         },
                         {
-                            'name': 'Referencia',
+                            'name': 'Tolerancia',
+                            'data': []
+                        },
+                        {
+                            'name': 'Tolerancia Negativa',
                             'data': []
                         }
                     ],
                     'min_y': 0,
-                    'max_y': 3,
+                    'max_y': 0,
                     'unit_tolerance': ''
                 }
 
@@ -162,22 +179,18 @@ class DailyVerificationChartView(LoginRequiredMixin, ValidatePermissionRequiredM
                     equipment = EquipmentInstrumental.objects.filter(id=equipment_id).first()
                     if equipment:
                         data['unit_tolerance'] = equipment.unit_tolerance
+                        tolerance = float(equipment.tolerance) if equipment.tolerance else 0.0
+                        data['max_y'] = round(tolerance * 1.1, 2)
+                        data['min_y'] = round(-tolerance * 1.1, 2)
                     qs = qs.select_related('equipment_instrumental').filter(equipment_instrumental_id=equipment_id)
 
                 qs = qs.order_by('date_verification_daily')
-                ref_values = []
                 for v in qs:
+                    tolerance = float(v.equipment_instrumental.tolerance) if v.equipment_instrumental.tolerance else 0.0
                     data['categories'].append(v.date_verification_daily.strftime('%Y-%m-%d %H:%M'))
-                    data['series'][0]['data'].append(float(v.error))
-                    data['series'][1]['data'].append(float(v.equipment_instrumental.tolerance))
-                    ref_values.append(float(v.equipment_instrumental.tolerance))
-                    ref_values.append(float(v.error))
-
-                if ref_values:
-                    min_ref = min(ref_values)
-                    max_ref = max(ref_values)
-                    data['min_y'] = min_ref * 0.99
-                    data['max_y'] = max_ref * 1.01
+                    data['series'][0]['data'].append(float(v.error) if v.error else 0.0)
+                    data['series'][1]['data'].append(tolerance)
+                    data['series'][2]['data'].append(-tolerance)
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:

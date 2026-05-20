@@ -55,8 +55,9 @@
         </li>
 
         {% url 'report:sampling_analysis_list' as sampling_analysis_report %}
+        {% url 'report:sampling_analysis_list_point' as sampling_analysis_report_point %}
 
-        {% is_expanded sampling_analysis_report as report_expanded %}
+        {% is_expanded sampling_analysis_report sampling_analysis_report_point as report_expanded %}
 
         <li class="{{ report_expanded }}">
             <a class="app-menu__item" href="#" data-toggle="treeview"><i
@@ -65,7 +66,12 @@
             <ul class="treeview-menu">
                 <li>
                     <a class="treeview-item {% if sampling_analysis_report in request.path %}active{% endif %}" href="{% url 'report:sampling_analysis_list' %}">
-                        <i class="icon bi bi-circle-fill"></i>Análisis Diario
+                        <i class="icon bi bi-circle-fill"></i>Análisis Diario - Método
+                    </a>
+                </li>
+                <li>
+                    <a class="treeview-item {% if sampling_analysis_report_point in request.path %}active{% endif %}" href="{% url 'report:sampling_analysis_list_point' %}">
+                        <i class="icon bi bi-circle-fill"></i>Análisis Diario - Punto
                     </a>
                 </li>
             </ul>
