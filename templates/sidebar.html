@@ -56,8 +56,9 @@
 
         {% url 'report:sampling_analysis_list' as sampling_analysis_report %}
         {% url 'report:sampling_analysis_list_point' as sampling_analysis_report_point %}
+        {% url 'report:sampling_analysis_chart' as sampling_analysis_chart %}
 
-        {% is_expanded sampling_analysis_report sampling_analysis_report_point as report_expanded %}
+        {% is_expanded sampling_analysis_report sampling_analysis_report_point sampling_analysis_chart as report_expanded %}
 
         <li class="{{ report_expanded }}">
             <a class="app-menu__item" href="#" data-toggle="treeview"><i
@@ -72,6 +73,11 @@
                 <li>
                     <a class="treeview-item {% if sampling_analysis_report_point in request.path %}active{% endif %}" href="{% url 'report:sampling_analysis_list_point' %}">
                         <i class="icon bi bi-circle-fill"></i>Análisis Diario - Punto
+                    </a>
+                </li>
+                <li>
+                    <a class="treeview-item {% if sampling_analysis_chart in request.path %}active{% endif %}" href="{% url 'report:sampling_analysis_chart' %}">
+                        <i class="icon bi bi-circle-fill"></i>Análisis Diario - Gráfico
                     </a>
                 </li>
             </ul>

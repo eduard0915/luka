@@ -1,0 +1,60 @@
+{% extends 'list_one.html' %}
+{% load static %}
+
+{% block head_list %}
+    <script src="{% static 'lib/vali-admin/js/plugins/chart.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="card card-default">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="form-group">
+                    <label for="id_product">Producto:</label>
+                    <select class="form-control select2" name="product" id="id_product">
+                        <option value="">---------</option>
+                        {% for p in products %}
+                            <option value="{{ p.id }}">{{ p.description_product }} (V{{ p.version }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="form-group">
+                    <label for="id_analytical_method">Método Analítico:</label>
+                    <select class="form-control select2" name="analytical_method" id="id_analytical_method" disabled>
+                        <option value="">---------</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="form-group">
+                    <label for="id_sample_point">Punto de Muestreo:</label>
+                    <select class="form-control select2" name="sample_point" id="id_sample_point" disabled>
+                        <option value="">---------</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div id="chart-placeholder" class="text-center text-muted py-5">
+            <i class="fa-solid fa-chart-line fa-2x mb-2"></i>
+            <p>Seleccione un producto, método y punto de muestreo para ver el gráfico.</p>
+        </div>
+        <div id="chart-container" style="width:100%; height:400px; display:none;">
+            <canvas id="myChart"></canvas>
+        </div>
+    </div>
+    <div class="card-footer">
+        <a href="{{ list_url }}" class="btn btn-success btn-flat">
+            <i class="fas fa-sync"></i> Actualizar
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts_detail %}
+    {{ block.super }}
+    <script src="{% static 'js/chart_sampling_analysis.js' %}"></script>
+{% endblock %}
