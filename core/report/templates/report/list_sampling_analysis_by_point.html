@@ -1,0 +1,36 @@
+{% extends 'list_one.html' %}
+{% load static %}
+
+{% block scripts_detail %}
+    {{ block.super }}
+    <script src="{% static 'js/list_sampling_analysis_by_point.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label>Producto:</label>
+            <select class="form-control select2" name="product" id="id_product">
+                <option value="">---------</option>
+                {% for p in products %}
+                    <option value="{{ p.id }}">{{ p.description_product }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label>Punto de Muestreo:</label>
+            <select class="form-control select2" name="sample_point" id="id_sample_point">
+                <option value="">---------</option>
+            </select>
+        </div>
+    </div>
+
+    {{ block.super }}
+{% endblock %}
+
+{% block columns %}
+    <th>Fecha y Hora</th>
+{% endblock %}
+
+{% block rows %}
+{% endblock %}

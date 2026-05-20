@@ -41,9 +41,10 @@ class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMix
                         )
 
                     analyses = SamplingAnalysis.objects.filter(filters).select_related(
+                        'sampling_process',
                         'sampling_process__point_sampling',
                         'sampling_process__group_sampling__sampling_point'
-                    ).order_by('date_analysis')
+                    ).order_by('sampling_process__date_sampling')
 
                     # Obtener todos los puntos de muestreo asociados al producto
                     sample_points_query = SamplePoint.objects.filter(product_id=product_id).order_by('sequence')
@@ -64,7 +65,7 @@ class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMix
                     # Agrupar datos por fecha y hora
                     rows = {}
                     for a in analyses:
-                        dt_str = a.date_analysis.strftime('%Y-%m-%d %H:%M:%S') if a.date_analysis else 'N/A'
+                        dt_str = a.sampling_process.date_sampling.strftime('%Y-%m-%d %H:%M:%S') if a.sampling_process.date_sampling else 'N/A'
                         if dt_str not in rows:
                             rows[dt_str] = {'date_analysis': dt_str}
                             # Inicializar todos los puntos conocidos con vacío o N/A para esta fila
@@ -104,6 +105,16 @@ class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMix
                             'id': m.analytical_method.id,
                             'text': f"{m.analytical_method.description_analytical_method}"
                         })
+            elif action == 'search_sample_point':
+                data = []
+                product_id = request.POST.get('id')
+                if product_id:
+                    points = SamplePoint.objects.filter(product_id=product_id).order_by('sequence')
+                    for p in points:
+                        data.append({
+                            'id': p.id,
+                            'text': p.sample_point_name
+                        })
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
@@ -112,8 +123,100 @@ class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMix
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Reporte de Análisis de Muestreo'
-        context['entity'] = 'Reporte de Análisis de Muestreo'
+        context['title'] = 'Reporte de Análisis por Método'
+        context['entity'] = 'Reporte de Análisis por Método de Análisis'
+        context['div'] = '12'
+        context['products'] = Product.objects.filter(enable_product=True)
+        return context
+
+
+class SamplingAnalysisByPointListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    model = SamplingAnalysis
+    template_name = 'report/list_sampling_analysis_by_point.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action')
+            if action == 'searchdata':
+                product_id = request.POST.get('product')
+                sample_point_id = request.POST.get('sample_point')
+
+                if not sample_point_id:
+                    data = {
+                        'columns': [],
+                        'data': []
+                    }
+                else:
+                    filters = (
+                        Q(sampling_process__point_sampling_id=sample_point_id) |
+                        Q(sampling_process__group_sampling__sampling_point_id=sample_point_id)
+                    )
+                    
+                    analyses = SamplingAnalysis.objects.filter(filters).select_related(
+                        'sampling_process',
+                        'analytical_method'
+                    ).order_by('sampling_process__date_sampling')
+
+                    # Obtener métodos analíticos asociados al producto
+                    from core.product.models import AnalyticalMethodProduct
+                    methods_query = AnalyticalMethodProduct.objects.filter(product_id=product_id).select_related('analytical_method')
+                    methods = [m.analytical_method.description_analytical_method for m in methods_query]
+
+                    # Si no hay métodos explícitos, usar los encontrados en los análisis
+                    if not methods:
+                        found_methods = set()
+                        for a in analyses:
+                            found_methods.add(a.analytical_method.description_analytical_method)
+                        methods = sorted(list(found_methods))
+
+                    # Agrupar datos por fecha y hora
+                    rows = {}
+                    for a in analyses:
+                        dt_str = a.sampling_process.date_sampling.strftime('%Y-%m-%d %H:%M:%S') if a.sampling_process.date_sampling else 'N/A'
+                        if dt_str not in rows:
+                            rows[dt_str] = {'date_analysis': dt_str}
+                            for m in methods:
+                                rows[dt_str][m] = '-'
+                        
+                        method_name = a.analytical_method.description_analytical_method
+                        if method_name not in methods:
+                            methods.append(method_name)
+                            for r_key in rows:
+                                if method_name not in rows[r_key]:
+                                    rows[r_key][method_name] = '-'
+                        
+                        rows[dt_str][method_name] = a.average_concentration
+
+                    data = {
+                        'columns': methods,
+                        'data': list(rows.values())
+                    }
+            elif action == 'search_sample_point':
+                data = []
+                product_id = request.POST.get('id')
+                if product_id:
+                    points = SamplePoint.objects.filter(product_id=product_id).order_by('sequence')
+                    for p in points:
+                        data.append({
+                            'id': p.id,
+                            'text': p.sample_point_name
+                        })
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Reporte de Análisis por Punto de Muestreo'
+        context['entity'] = 'Reporte de Análisis por Punto de Muestreo'
         context['div'] = '12'
         context['products'] = Product.objects.filter(enable_product=True)
         return context
