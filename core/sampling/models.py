@@ -128,8 +128,8 @@ class SamplingProcess(BaseModel):
                 last_sample_point = None
                 if last_sample.group_sampling:
                     last_sample_point = last_sample.group_sampling.sampling_point
-                elif last_sample.sampling_point:
-                    last_sample_point = last_sample.sampling_point
+                elif last_sample.point_sampling:
+                    last_sample_point = last_sample.point_sampling
 
                 # Si no es del mismo punto o no hay muestra previa, empezar desde 1
                 if not last_sample_point or last_sample_point.id != sampling_point.id:
