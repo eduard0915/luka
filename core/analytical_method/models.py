@@ -16,7 +16,7 @@ from core.user.models import User
 class AnalyticalMethod(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     description_analytical_method = models.CharField(max_length=250, verbose_name='Descripción')
-    code_analytical_method  = models.CharField(max_length=20, verbose_name='Código')
+    code_analytical_method  = models.CharField(max_length=20, verbose_name='Id')
     enable_analytical_method = models.BooleanField(default=True, verbose_name='Habilitado')
     sample_size = models.FloatField(verbose_name='Tamaño de Muestra (g)')
     type_method = models.CharField(verbose_name='Tipo de Método', max_length=100)

@@ -1,10 +1,13 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q, Avg
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import ListView, TemplateView
+from django.views.generic import ListView, TemplateView, View
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+from datetime import datetime
 
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.models import Product, SamplePoint, AnalyticalMethodProduct
@@ -359,3 +362,120 @@ class SamplingAnalysisByPointListView(LoginRequiredMixin, ValidatePermissionRequ
         context['div'] = '12'
         context['products'] = Product.objects.filter(enable_product=True)
         return context
+
+
+class SamplingAnalysisByPointExcelView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    permission_required = 'reagent.add_reagent'
+
+    def get(self, request, *args, **kwargs):
+        try:
+            product_id = request.GET.get('product')
+            sample_point_id = request.GET.get('sample_point')
+
+            if not sample_point_id:
+                return HttpResponse("Debe seleccionar un punto de muestreo", status=400)
+
+            filters = (
+                Q(sampling_process__point_sampling_id=sample_point_id) |
+                Q(sampling_process__group_sampling__sampling_point_id=sample_point_id)
+            )
+
+            analyses = SamplingAnalysis.objects.filter(filters).select_related(
+                'sampling_process',
+                'analytical_method'
+            ).order_by('sampling_process__date_sampling')
+
+            # Obtener métodos analíticos asociados al producto
+            methods_query = AnalyticalMethodProduct.objects.filter(product_id=product_id).select_related(
+                'analytical_method')
+            methods = [m.analytical_method.description_analytical_method for m in methods_query]
+
+            # Si no hay métodos explícitos, usar los encontrados en los análisis
+            if not methods:
+                found_methods = set()
+                for a in analyses:
+                    found_methods.add(a.analytical_method.description_analytical_method)
+                methods = sorted(list(found_methods))
+
+            # Agrupar datos por fecha y hora
+            rows = {}
+            for a in analyses:
+                dt_str = a.sampling_process.date_sampling.strftime(
+                    '%Y-%m-%d %H:%M:%S') if a.sampling_process.date_sampling else 'N/A'
+                if dt_str not in rows:
+                    rows[dt_str] = {'date_analysis': dt_str}
+                    for m in methods:
+                        rows[dt_str][m] = '-'
+
+                method_name = a.analytical_method.description_analytical_method
+                if method_name not in methods:
+                    methods.append(method_name)
+                    for r_key in rows:
+                        if method_name not in rows[r_key]:
+                            rows[r_key][method_name] = '-'
+
+                rows[dt_str][method_name] = a.average_concentration
+
+            # Crear el Excel
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Reporte de Análisis"
+
+            # Información de cabecera en el Excel
+            product = Product.objects.get(pk=product_id)
+            sample_point = SamplePoint.objects.get(pk=sample_point_id)
+            
+            ws.merge_cells('A1:C1')
+            ws['A1'] = f"Producto: {product.description_product}"
+            ws.merge_cells('A2:C2')
+            ws['A2'] = f"Punto de Muestreo: {sample_point.sample_point_name}"
+            ws['A1'].font = Font(bold=True, size=12)
+            ws['A2'].font = Font(bold=True, size=12)
+
+            # Estilos
+            header_font = Font(bold=True, color="FFFFFF")
+            header_fill = PatternFill(start_color="2A383E", end_color="2A383E", fill_type="solid")
+            alignment = Alignment(horizontal="center")
+            border = Border(
+                left=Side(style='thin'),
+                right=Side(style='thin'),
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
+
+            # Cabeceras
+            headers = ['Fecha y Hora'] + methods
+            header_row = 4
+            for col_num, header in enumerate(headers, 1):
+                cell = ws.cell(row=header_row, column=col_num, value=header)
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.alignment = alignment
+                cell.border = border
+
+            # Datos
+            for row_num, (dt_str, row_data) in enumerate(rows.items(), header_row + 1):
+                ws.cell(row=row_num, column=1, value=dt_str).border = border
+                for col_num, method in enumerate(methods, 2):
+                    ws.cell(row=row_num, column=col_num, value=row_data.get(method, '-')).border = border
+
+            # Ajustar ancho de columnas
+            for col in ws.columns:
+                max_length = 0
+                column = col[0].column_letter
+                for cell in col:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                adjusted_width = (max_length + 2)
+                ws.column_dimensions[column].width = adjusted_width
+
+            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = f'attachment; filename="reporte_analisis_{datetime.now().strftime("%Y%m%d%H%M%S")}.xlsx"'
+            wb.save(response)
+            return response
+
+        except Exception as e:
+            return HttpResponse(f"Error al generar el excel: {str(e)}", status=500)
