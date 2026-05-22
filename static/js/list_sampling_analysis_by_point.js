@@ -110,6 +110,19 @@ $(function () {
         loadData();
     });
 
+    $('.btnExcel').on('click', function () {
+        var product = $('#id_product').val();
+        var sample_point = $('#id_sample_point').val();
+        
+        if (!sample_point) {
+            alert('Debe seleccionar un punto de muestreo');
+            return false;
+        }
+
+        var url = window.location.pathname + 'excel/?product=' + product + '&sample_point=' + sample_point;
+        window.open(url, '_blank');
+    });
+
     // Carga inicial
     initTable({columns: [], data: []});
 });

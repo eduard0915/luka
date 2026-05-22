@@ -169,7 +169,8 @@ class CalibrationForm(ModelForm):
             if form.is_valid():
                 data = form.save(commit=False)
                 years= relativedelta(date.today(), data.equipment_instrumental.date_calibration_fix).years
-                data.date_calibration_next = data.equipment_instrumental.date_calibration_fix + relativedelta(years=1 if years == 0 else years)
+                year_calibration = (data.equipment_instrumental.frequency_calibration / 12)
+                data.date_calibration_next = data.equipment_instrumental.date_calibration_fix + relativedelta(years=1 if years == 0 else years) + relativedelta(years=year_calibration)
                 data.responsible_user_id = get_current_user().id
                 data.save()
             else:

@@ -15,7 +15,7 @@
                     <select class="form-control select2" name="product" id="id_product">
                         <option value="">---------</option>
                         {% for p in products %}
-                            <option value="{{ p.id }}">{{ p.description_product }} (V{{ p.version }})</option>
+                            <option value="{{ p.id }}">{{ p.description_product }}</option>
                         {% endfor %}
                     </select>
                 </div>

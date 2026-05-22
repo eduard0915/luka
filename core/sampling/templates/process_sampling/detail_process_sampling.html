@@ -225,7 +225,7 @@
                                                 <tbody>
                                                 {% for sa in sampling_analysis %}
                                                     <tr>
-                                                        <td class="text-left align-middle">{{ sa.analytical_method.description_analytical_method }}</td>
+                                                        <td class="text-left align-middle">{{ sa.analytical_method.description_analytical_method }} - {{ sa.analytical_method.code_analytical_method }}</td>
                                                         <td class="text-center align-middle">{{ sa.average_concentration|default_if_none:'Pendiente' }} {% if sa.average_concentration %}{{ sa.unit_measure_prod|default_if_none:"" }}{% endif %}</td>
                                                         <td class="text-center align-middle">{{ sa.comply|default_if_none:"Pendiente" }}</td>
 
