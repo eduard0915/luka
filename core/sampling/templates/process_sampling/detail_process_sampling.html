@@ -6,7 +6,7 @@
 
 {% block head %}
     {% block head_list %}
-        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script src="https://cdn.jsdelivr.net/npm/core-js@3/bundle.min.js"></script>
         <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         <script>
             window.MathJax = {
@@ -227,8 +227,9 @@
                                                     <tr>
                                                         <td class="text-left align-middle">{{ sa.analytical_method.description_analytical_method }} - {{ sa.analytical_method.code_analytical_method }}</td>
                                                         <td class="text-center align-middle">{{ sa.average_concentration|default_if_none:'Pendiente' }} {% if sa.average_concentration %}{{ sa.unit_measure_prod|default_if_none:"" }}{% endif %}</td>
-                                                        <td class="text-center align-middle">{{ sa.comply|default_if_none:"Pendiente" }}</td>
-
+                                                        <td class="text-center align-middle {% if sa.comply == 'No Cumple' %}text-danger{% endif %}">
+                                                            {{ sa.comply|default_if_none:"Pendiente" }}
+                                                        </td>
                                                         <td class="text-center align-middle">
                                                             {% if object.status_sampling == 'Confirmada' %}
                                                                 <a href="javascript:void(0);"

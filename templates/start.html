@@ -29,7 +29,7 @@
                     <div class="info-card-title">Muestras Confirmadas</div>
                     <div class="info-card-value">{{ count_confirmed_sampling }}</div>
                     <div class="info-card-change positive">
-                        3% <span style="color: #6c757d; font-weight: 400;">por Procesar</span>
+                        {{ percent_sampling_confirmed }}% <span style="color: #6c757d; font-weight: 400;">por Procesar</span>
                     </div>
                 </div>
                 <div class="info-card-icon">
@@ -47,12 +47,30 @@
                     <div class="info-card-title">Muestras en Proceso</div>
                     <div class="info-card-value">{{ count_in_process_sampling }}</div>
                     <div class="info-card-change negative">
-                        -2% <span style="color: #6c757d; font-weight: 400;">Finalizadas</span>
+                        {{ percent_sampling_end }}% <span style="color: #6c757d; font-weight: 400;">por Finalizar</span>
                     </div>
                 </div>
                 <div class="info-card-icon">
                     <a href="{% url 'sampling:list_sampling_process_in_process' %}" title="Ver Listado">
                         <i class="bi bi-measuring-cup text-white"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Muestras con resultados fuera de especificación Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="info-card">
+                <div class="info-card-content">
+                    <div class="info-card-title">Resultados con OSS</div>
+                    <div class="info-card-value">{{ count_oos_result }}</div>
+                    <div class="info-card-change negative">
+                        {{ percent_oos_result }}% <span style="color: #6c757d; font-weight: 400; width: 100%">de Muestras en Proceso</span>
+                    </div>
+                </div>
+                <div class="danger-card-icon">
+                    <a href="{% url 'sampling:list_sampling_process_out_specification' %}" title="Ver Listado">
+                        <i class="bi bi-exclamation-octagon text-white"></i>
                     </a>
                 </div>
             </div>

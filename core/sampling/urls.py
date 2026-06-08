@@ -21,6 +21,7 @@ urlpatterns = [
     path('process/list/scheduled/', SamplingProcessScheduledListView.as_view(), name='list_sampling_process_scheduled'),
     path('process/list/confirmed/', SamplingProcessConfirmedListView.as_view(), name='list_sampling_process_confirmed'),
     path('process/list/in-process/', SamplingProcessInProcessListView.as_view(), name='list_sampling_process_in_process'),
+    path('process/list/out-specification/', SamplingProcessOutSpecificationListView.as_view(), name='list_sampling_process_out_specification'),
     path('process/update/<uuid:pk>/', SamplingProcessUpdateView.as_view(), name='update_sampling_process'),
     path('process/detail/<uuid:pk>/', SamplingProcessDetailView.as_view(), name='detail_sampling_process'),
     path('process/update-image/<uuid:pk>/', SamplingProcessImageUpdateView.as_view(), name='update_image_sample'),
