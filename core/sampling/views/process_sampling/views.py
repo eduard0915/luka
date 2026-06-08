@@ -121,6 +121,7 @@ class SamplingProcessListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
             if action == 'searchdata':
                 # Obtener el estado del filtro si existe
                 status_filter = request.POST.get('status_filter', None)
+                out_specification = request.POST.get('out_specification', None)
                 
                 qs = SamplingProcess.objects.select_related(
                     'group_sampling',
@@ -130,6 +131,9 @@ class SamplingProcessListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
                 
                 if status_filter:
                     qs = qs.filter(status_sampling=status_filter)
+
+                if out_specification == 'True':
+                    qs = qs.filter(samplinganalysis__comply='No Cumple').distinct()
 
                 data = list(qs.values(
                     'id',
@@ -212,6 +216,17 @@ class SamplingProcessInProcessListView(SamplingProcessListView):
         context['title'] = 'Muestras En Proceso'
         context['entity'] = 'Muestras En Proceso'
         context['status_filter'] = 'En Proceso'
+        return context
+
+
+# Listado de Muestreos con resultados Fuera de Límite
+class SamplingProcessOutSpecificationListView(SamplingProcessListView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Muestras Fuera de Especificación'
+        context['entity'] = 'Muestras Fuera de Especificación'
+        context['status_filter'] = 'En Proceso'
+        context['out_specification'] = 'True'
         return context
 
 

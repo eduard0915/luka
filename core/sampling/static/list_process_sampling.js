@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 data: function (d) {
                     d.action = 'searchdata';
                     d.status_filter = typeof status_filter !== 'undefined' ? status_filter : '';
+                    d.out_specification = typeof out_specification !== 'undefined' ? out_specification : '';
                 },
                 dataSrc: ""
             },
