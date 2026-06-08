@@ -213,26 +213,46 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['show_dependent_toggle'] = show_dependent_toggle
 
         if inst_desc or calcules.exists():
+            # 1. Obtener descripción y unidad
             desc = inst_desc.calculate_description if inst_desc else "Cálculo"
             unit = inst_unit.unit_measure_calculate if inst_unit else ""
 
+            # 2. Recolectar valores válidos (fuera del loop, una sola vez)
+            def is_valid_value(value):
+                """Verifica si un valor no es vacío o None"""
+                return value and str(value).strip()
+
+            volumen_std_list = [calc.volumen_std for calc in calcules if is_valid_value(calc.volumen_std)]
+            sample_quantity_list = [calc.sample_quantity for calc in calcules if is_valid_value(calc.sample_quantity)]
+
+            # Asignar al contexto (None si están vacíos)
+            context['volumen_std'] = volumen_std_list if volumen_std_list else None
+            context['sample_quantity'] = sample_quantity_list if sample_quantity_list else None
+
+            # 3. Construir términos para la ecuación
             num_terms = []
             den_terms = []
             gen_terms = []
 
-            # 2. Iteramos TODAS las instancias para recolectar valores,
-            # sin importar si son la misma instancia que tiene la descripción
             for calc in calcules:
+                # Construir partes válidas
                 parts = []
-                if calc.volumen_std: parts.append(str(calc.volumen_std))
-                if calc.factor: parts.append(str(calc.factor))
-                if calc.sample_quantity: parts.append(str(calc.sample_quantity))
-                context['volumen_std'] = [calc.volumen_std for calc in calcules if calc.volumen_std is not None]
-                context['sample_quantity'] = [calc.sample_quantity for calc in calcules if calc.sample_quantity is not None]
+                if is_valid_value(calc.volumen_std):
+                    parts.append(str(calc.volumen_std))
+                if is_valid_value(calc.factor):
+                    parts.append(str(calc.factor))
+                if is_valid_value(calc.sample_quantity):
+                    parts.append(str(calc.sample_quantity))
+                if is_valid_value(calc.variable):
+                    parts.append(str(calc.variable))
+
+                # Si no hay partes válidas, continuar al siguiente
+                if not parts:
+                    continue
 
                 item_text = " \cdot ".join(parts)
-                if not item_text: continue
 
+                # Agregar según posición
                 if calc.position == 'Numerador':
                     num_terms.append(item_text)
                 elif calc.position == 'Denominador':
@@ -240,16 +260,56 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                 elif calc.position == 'General':
                     gen_terms.append(item_text)
 
-            # 3. Construcción de la estructura LaTeX
+            # 4. Construcción de la estructura LaTeX
             str_num = " \cdot ".join(num_terms) if num_terms else "1"
             str_den = " \cdot ".join(den_terms) if den_terms else "1"
             str_gen = f" \cdot {' \cdot '.join(gen_terms)}" if gen_terms else ""
 
-            # Usamos \text{} para asegurar que espacios y tildes se vean bien
+            # Construcción de la etiqueta con formato
             label = f"\\text{{{desc}}}"
             if unit:
                 label += f" \\text{{ ({unit})}}"
 
             context['final_equation'] = f"{label} = \\frac{{{str_num}}}{{{str_den}}}{str_gen}"
+
+        # if inst_desc or calcules.exists():
+        #     desc = inst_desc.calculate_description if inst_desc else "Cálculo"
+        #     unit = inst_unit.unit_measure_calculate if inst_unit else ""
+        #
+        #     num_terms = []
+        #     den_terms = []
+        #     gen_terms = []
+        #
+        #     # 2. Iteramos TODAS las instancias para recolectar valores,
+        #     # sin importar si son la misma instancia que tiene la descripción
+        #     for calc in calcules:
+        #         parts = []
+        #         if calc.volumen_std: parts.append(str(calc.volumen_std))
+        #         if calc.factor: parts.append(str(calc.factor))
+        #         if calc.sample_quantity: parts.append(str(calc.sample_quantity))
+        #         context['volumen_std'] = [calc.volumen_std for calc in calcules if calc.volumen_std is not None]
+        #         context['sample_quantity'] = [calc.sample_quantity for calc in calcules if calc.sample_quantity is not None]
+        #
+        #         item_text = " \cdot ".join(parts)
+        #         if not item_text: continue
+        #
+        #         if calc.position == 'Numerador':
+        #             num_terms.append(item_text)
+        #         elif calc.position == 'Denominador':
+        #             den_terms.append(item_text)
+        #         elif calc.position == 'General':
+        #             gen_terms.append(item_text)
+        #
+        #     # 3. Construcción de la estructura LaTeX
+        #     str_num = " \cdot ".join(num_terms) if num_terms else "1"
+        #     str_den = " \cdot ".join(den_terms) if den_terms else "1"
+        #     str_gen = f" \cdot {' \cdot '.join(gen_terms)}" if gen_terms else ""
+        #
+        #     # Usamos \text{} para asegurar que espacios y tildes se vean bien
+        #     label = f"\\text{{{desc}}}"
+        #     if unit:
+        #         label += f" \\text{{ ({unit})}}"
+        #
+        #     context['final_equation'] = f"{label} = \\frac{{{str_num}}}{{{str_den}}}{str_gen}"
 
         return context

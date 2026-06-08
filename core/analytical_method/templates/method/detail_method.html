@@ -285,8 +285,13 @@
                                                 <i class="bi bi-list me-2"></i> Procedimiento
                                             </h5>
                                             <a href="javascript:void(0);"
+                                               onclick="open_modal('{% url 'analytical_method:view_procedure_detail' object.id %}')"
+                                               class="btn btn-info btn-sm" title="Ver Procedimiento">
+                                                <i class="bi bi-eye m-0"></i>
+                                            </a>
+                                            <a href="javascript:void(0);"
                                                onclick="open_modal('{% url 'analytical_method:add_procedure' object.id %}')"
-                                               class="btn btn-primary btn-sm">
+                                               class="btn btn-primary btn-sm" title="Agregar Paso Procedimiento">
                                                 <i class="bi bi-plus-square m-0"></i>
                                             </a>
                                         </div>
@@ -468,16 +473,7 @@
                                                             <small>Factor</small>
                                                         </button>
 
-                                                        {% if not volumen_std %}
-                                                            <button type="button"
-                                                                    class="btn btn-outline-primary btn-sm"
-                                                                    onclick="open_modal('{% url 'analytical_method:add_volume_std' object.id %}')">
-                                                                <i class="bi bi-droplet me-1"></i>
-                                                                <small>Volumen Estándar</small>
-                                                            </button>
-                                                        {% endif %}
-
-                                                        {% if not sample_quantity %}
+                                                        {% if sample_quantity|length == 0 %}
                                                             <button type="button"
                                                                     class="btn btn-outline-primary btn-sm"
                                                                     onclick="open_modal('{% url 'analytical_method:add_sample_gram' object.id %}')">
@@ -485,6 +481,13 @@
                                                                 <small>Cantidad de Muestra</small>
                                                             </button>
                                                         {% endif %}
+
+                                                        <button type="button"
+                                                                class="btn btn-outline-primary btn-sm"
+                                                                onclick="open_modal('{% url 'analytical_method:add_variable' object.id %}')">
+                                                            <i class="bi bi-alphabet me-1"></i>
+                                                            <small>Variable</small>
+                                                        </button>
                                                     </div>
                                                 </div>
 
@@ -517,6 +520,8 @@
                                                                             Constante: {{ calc.factor }}
                                                                         {% elif calc.sample_quantity %}
                                                                             Cant. Muestra: {{ calc.sample_quantity }}
+                                                                        {% elif calc.variable %}
+                                                                            Variable: {{ calc.variable }}
                                                                         {% endif %}
                                                                     </td>
                                                                     <td class="text-center">{{ calc.position|default:"No aplica" }}</td>

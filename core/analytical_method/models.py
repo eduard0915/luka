@@ -167,6 +167,7 @@ class AnalyticalMethodProcedure(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE)
     procedure = models.TextField(verbose_name='Procedimiento')
+    step_procedure = models.PositiveSmallIntegerField(verbose_name='Paso N°')
 
     def __str__(self):
         return str(self.procedure)
@@ -190,12 +191,13 @@ class AnalyticalMethodProcedure(BaseModel):
 class AnalyticalMethodCalculate(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analítico', on_delete=models.CASCADE)
-    calculate_description = models.CharField(max_length=100, verbose_name='Descripción del Cálculo')
-    unit_measure_calculate = models.CharField(max_length=10, verbose_name='Unidad a Calcular')
-    volumen_std = models.CharField(max_length=100, verbose_name='Volúmen Estándar', null=True, blank=True)
+    calculate_description = models.CharField(max_length=100, verbose_name='Descripción del Cálculo', null=True, blank=True)
+    unit_measure_calculate = models.CharField(max_length=10, verbose_name='Unidad a Calcular', null=True, blank=True)
+    volumen_std = models.CharField(max_length=100, verbose_name='Variable Volúmen Estándar', null=True, blank=True)
+    variable = models.CharField(max_length=100, verbose_name='Variable', null=True, blank=True)
     factor = models.FloatField(verbose_name='Constante', null=True, blank=True)
-    sample_quantity = models.CharField(max_length=50, verbose_name='Muestra')
-    position = models.CharField(max_length=15, verbose_name='Posición en Ecuación')
+    sample_quantity = models.CharField(max_length=50, verbose_name='Variable Muestra', null=True, blank=True)
+    position = models.CharField(max_length=15, verbose_name='Posición en Ecuación', null=True, blank=True)
 
     def __str__(self):
         return str(self.calculate_description)

@@ -141,6 +141,18 @@ class AnalyticalMethodSampleGramCreateView(LoginRequiredMixin, BaseAnalyticalMet
         return context
 
 
+# Agregar Variable a calculo
+class AnalyticalMethodVariableCreateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, CreateView):
+    model = AnalyticalMethodCalculate
+    form_class = AnalyticalMethodVariableForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Descripción de Variable'
+        context['action'] = 'add'
+        return context
+
+
 # Editar Cantidad de Muestra
 class AnalyticalMethodSampleGramUpdateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, UpdateView):
     model = AnalyticalMethodCalculate

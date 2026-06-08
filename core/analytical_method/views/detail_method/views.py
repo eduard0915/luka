@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import CreateView, UpdateView, DeleteView
+from django.views.generic import CreateView, UpdateView, DeleteView, DetailView
 
 from core.mixins import ValidatePermissionRequiredMixin
 from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodSolution, AnalyticalMethodSolutionStd, \
@@ -175,7 +175,7 @@ class AnalyticalMethodMaterialUpdateView(LoginRequiredMixin, BaseAnalyticalMetho
         return context
 
 
-# Procedimientos
+# Crear pasos Procedimiento
 class AnalyticalMethodProcedureCreateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, CreateView):
     model = AnalyticalMethodProcedure
     form_class = AnalyticalMethodProcedureForm
@@ -187,6 +187,7 @@ class AnalyticalMethodProcedureCreateView(LoginRequiredMixin, BaseAnalyticalMeth
         return context
 
 
+# Editar pasos Procedimiento
 class AnalyticalMethodProcedureUpdateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, UpdateView):
     model = AnalyticalMethodProcedure
     form_class = AnalyticalMethodProcedureForm
@@ -195,6 +196,16 @@ class AnalyticalMethodProcedureUpdateView(LoginRequiredMixin, BaseAnalyticalMeth
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Editar Procedimiento'
         context['action'] = 'edit'
+        return context
+
+
+class AnalyticalMethodProcedureDetailView(LoginRequiredMixin, DetailView):
+    model = AnalyticalMethod
+    template_name = 'method/procedure_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['procedures'] = self.object.analyticalmethodprocedure_set.all().order_by('step_procedure')
         return context
 
 

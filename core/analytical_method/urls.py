@@ -38,6 +38,7 @@ urlpatterns = [
     # Procedimientos
     path('detail/procedure/add/<uuid:pk>/', AnalyticalMethodProcedureCreateView.as_view(), name='add_procedure'),
     path('detail/procedure/update/<uuid:pk>/', AnalyticalMethodProcedureUpdateView.as_view(), name='update_procedure'),
+    path('detail/procedure/view/<uuid:pk>/', AnalyticalMethodProcedureDetailView.as_view(), name='view_procedure_detail'),
 
     # Cálculos
     path('detail/calculate/add_description/<uuid:pk>/', AnalyticalMethodCalculeDescriptionCreateView.as_view(), name='add_calc_description'),
@@ -47,6 +48,7 @@ urlpatterns = [
     path('detail/calculate/add_factor_den/<uuid:pk>/', AnalyticalMethodFactorCreateView.as_view(), name='add_factor'),
     path('detail/calculate/edit_factor_den/<uuid:pk>/', AnalyticalMethodFactorUpdateView.as_view(), name='edit_factor'),
     path('detail/calculate/add_sample_gram/<uuid:pk>/', AnalyticalMethodSampleGramCreateView.as_view(), name='add_sample_gram'),
+    path('detail/calculate/add_variable/<uuid:pk>/', AnalyticalMethodVariableCreateView.as_view(), name='add_variable'),
     path('detail/calculate/edit_sample_gram/<uuid:pk>/', AnalyticalMethodSampleGramUpdateView.as_view(), name='edit_sample_gram'),
     path('detail/calculate/delete/<uuid:pk>/', AnalyticalMethodCalculateDeleteView.as_view(), name='delete_analytical_method_calcule'),
 ]
