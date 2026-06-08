@@ -25,6 +25,8 @@ UNIT_CALCULATE = [
 
 POSITION = [('Numerador', 'Numerador'), ('Denominador', 'Denominador')]
 
+STEP = [('', '')] + [(i, i) for i in range(1, 20)]
+
 
 # Creación de Métodos Analíticos
 class AnalyticalMethodForm(ModelForm):
@@ -245,15 +247,24 @@ class AnalyticalMethodProcedureForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
+        if self.analytical_method and not self.instance.pk:
+            last_step = AnalyticalMethodProcedure.objects.filter(
+                analytical_method=self.analytical_method
+            ).order_by('-step_procedure').first()
+            if last_step:
+                self.fields['step_procedure'].initial = last_step.step_procedure + 1
+            else:
+                self.fields['step_procedure'].initial = 1
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
             form.field.widget.attrs['autocomplete'] = 'off'
 
     class Meta:
         model = AnalyticalMethodProcedure
-        fields = ['procedure']
+        fields = ['step_procedure', 'procedure']
         widgets = {
             'procedure': Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Ingrese el procedimiento'}),
+            'step_procedure': Select(attrs={'class': 'form-control'}, choices=STEP),
         }
 
     def save(self, commit=True):
@@ -376,6 +387,7 @@ class AnalyticalMethodSampleGramForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
+        self.fields['sample_quantity'].required = True
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -384,7 +396,41 @@ class AnalyticalMethodSampleGramForm(ModelForm):
         model = AnalyticalMethodCalculate
         fields = ['sample_quantity', 'position']
         widgets = {
-            'sample_quantity': TextInput(attrs={'class': 'form-control'}),
+            'sample_quantity': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'position': Select(attrs={'class': 'form-control'}, choices=POSITION)
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Agregar Variable a calculo
+class AnalyticalMethodVariableForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        self.fields['variable'].required = True
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodCalculate
+        fields = ['variable', 'position']
+        widgets = {
+            'variable': TextInput(attrs={'class': 'form-control', 'required': True, 'placeholder': 'Descripción de la variable'}),
             'position': Select(attrs={'class': 'form-control'}, choices=POSITION)
         }
 
