@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.forms import ModelForm, TextInput, Select, TimeInput, DateTimeInput, FloatField
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -130,20 +131,19 @@ class SamplingAnalysisProcessingGravimetryForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.analysis = kwargs.pop('analysis')
         super().__init__(*args, **kwargs)
-        calcs = AnalyticalMethodCalculate.objects.select_related('analytical_method').filter(analytical_method_id=self.analysis.analytical_method.id)
-        calc_con_label = calcs.exclude(sample_quantity__in=[None, '', False]).first()
 
-        std_bases = self.analysis.analytical_method.analyticalmethodsolutionstd_set.values_list('solution_std_id', flat=True)
+        calcs = AnalyticalMethodCalculate.objects.select_related('analytical_method').filter(
+            analytical_method_id=self.analysis.analytical_method.id)
 
+        filter_sample = calcs.exclude(Q(sample_quantity__isnull=True) | Q(sample_quantity='')).first()
 
-        if calc_con_label and calc_con_label.sample_quantity:
-            self.fields['quantity_sample'].label = str(calc_con_label.sample_quantity)
+        self.fields['quantity_sample'].label = str(filter_sample.sample_quantity)
 
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
         col_classes = {
-            'standard_solution': 'col-md-7',
+            'standard_solution': 'col-md-2',
             'quantity_standard': 'col-md-2',
         }
 
@@ -171,9 +171,7 @@ class SamplingAnalysisProcessingGravimetryForm(ModelForm):
             instance.analyzed_date = timezone.localtime()
             instance.relational_calculation = False
 
-            # Asociar el primer cálculo encontrado si existe
             # Nota: Esto asume que solo hay un conjunto de cálculos (Num/Den) por método base,
-            # o que todos pertenecen a la misma descripción lógica.
             base_calc = AnalyticalMethodCalculate.objects.filter(analytical_method_id=analytical_method_id).first()
             if base_calc:
                 instance.analytical_method_calculate = base_calc
@@ -191,27 +189,22 @@ class SamplingAnalysisProcessingGravimetryForm(ModelForm):
                 factor_num = 1
                 variable_num = 1
                 sample_num = 1
-                wt_num = 1
 
                 for num in var_num:
                     if num.factor is not None:
                         factor_num *= float(num.factor)
 
                     if num.variable is not None:
-                        variable_num *= float(num.variable)
+                        variable_num *= float(qty_wt)
 
                     if num.sample_quantity and num.sample_quantity.strip():
                         sample_num = float(qty_sample)
 
-                    if num.volumen_std is not None:
-                        wt_num = qty_wt
-
-                numerator = wt_num * factor_num * sample_num * variable_num
+                numerator = factor_num * sample_num * variable_num
 
                 factor_den = 1
                 variable_den = 1
                 sample_den = 1
-                wt_den = 1
 
                 for den in var_den:
 
@@ -219,15 +212,12 @@ class SamplingAnalysisProcessingGravimetryForm(ModelForm):
                         factor_den *= float(den.factor)
 
                     if den.variable is not None:
-                        variable_den *= float(den.variable)
+                        variable_den *= float(qty_wt)
 
                     if den.sample_quantity and den.sample_quantity.strip():
                         sample_den = float(qty_sample)
 
-                    if den.volumen_std is not None:
-                        wt_den = qty_wt
-
-                denominator = wt_den * factor_den * sample_den * variable_den
+                denominator = factor_den * sample_den * variable_den
 
                 instance.concentration_sample = round((numerator / denominator), cifras_sign)
             else:

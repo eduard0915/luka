@@ -8,7 +8,7 @@ from django.views.generic import CreateView, DetailView, DeleteView
 
 from core.analytical_method.models import AnalyticalMethodCalculateRelation
 from core.mixins import ValidatePermissionRequiredMixin
-from core.product.models import SpecificationProduct
+from core.product.models import SpecificationProduct, AnalyticalMethodProduct
 from core.sampling.forms import SamplingAnalysisProcessingForm, SamplingAnalysisProcessingRelationForm, \
     SamplingAnalysisProcessingGravimetryForm
 from core.sampling.models import *
@@ -99,18 +99,36 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
 
         # Obtener la especificación del producto para este análisis
         sampling_process = self.object.sampling_process
-        product = None
-        if sampling_process.point_sampling:
-            product = sampling_process.point_sampling.product
-        elif sampling_process.group_sampling:
-            product = sampling_process.group_sampling.sampling_point.product
+        method = self.object.analytical_method
+        specification = None
+        sampling_point = None
 
-        if product:
-            specification = SpecificationProduct.objects.filter(
-                product=product,
+        if sampling_process.point_sampling:
+            sampling_point = sampling_process.point_sampling
+        elif sampling_process.group_sampling:
+            sampling_point = sampling_process.group_sampling.sampling_point
+
+        if sampling_point:
+            # Buscar la especificación en el punto de muestreo que coincida con el método
+            specification = sampling_point.specification.filter(
                 method_test__analytical_method=method
             ).first()
-            context['specification'] = specification
+
+        # Si no se encuentra en el punto de muestreo, intentar por el producto
+        if not specification:
+            product = None
+            if sampling_process.point_sampling:
+                product = sampling_process.point_sampling.product
+            elif sampling_process.group_sampling:
+                product = sampling_process.group_sampling.sampling_point.product
+
+            if product:
+                specification = SpecificationProduct.objects.filter(
+                    product=product,
+                    method_test__analytical_method=method
+                ).first()
+
+        context['specification'] = specification
 
         context['icon'] = 'bi bi-calculator'
         context['back'] = reverse_lazy('sampling:detail_sampling_process', kwargs={'pk': self.object.sampling_process.id})
@@ -123,7 +141,7 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         return context
 
 
-# Registro de Procesamiento de Análisis Volumetría
+# Registro de Procesamiento de Análisis Volumétrico
 class SamplingAnalysisProcessingCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
     model = SamplingAnalysisProcessing
     form_class = SamplingAnalysisProcessingForm
@@ -164,7 +182,7 @@ class SamplingAnalysisProcessingCreateView(LoginRequiredMixin, ValidatePermissio
         return context
 
 
-# Registro de Procesamiento de Análisis Gravimetría
+# Registro de Procesamiento de Análisis Gravimétrico
 class SamplingAnalysisProcessingGravimetryCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
     model = SamplingAnalysisProcessing
     form_class = SamplingAnalysisProcessingGravimetryForm
@@ -201,7 +219,7 @@ class SamplingAnalysisProcessingGravimetryCreateView(LoginRequiredMixin, Validat
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
-        context['entity'] = 'Registro de Procesamiento de Análisis Gravimetrico'
+        context['entity'] = 'Registro de Procesamiento de Análisis Gravimétrico'
         return context
 
 
@@ -360,7 +378,6 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
 
         # Obtener la primera relación de cálculo si existe
         relation = None
-        print(product.id)
         if product:
             relation = AnalyticalMethodCalculateRelation.objects.filter(
                 product_id=product.id,
