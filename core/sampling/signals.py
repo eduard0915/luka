@@ -72,7 +72,6 @@ def create_sampling_analysis(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=SamplingAnalysisProcessing)
 def update_sampling_analysis(sender, instance, **kwargs):
-
     if instance.relational_calculation:
         return
 
@@ -103,19 +102,21 @@ def update_sampling_analysis(sender, instance, **kwargs):
         # Guardar análisis
         sampling_analysis.save(update_fields=['average_concentration', 'comply', 'date_analysis'])
 
-        # Actualizar inventario
-        _update_solution_inventory(instance)
+        # Actualizar inventario solo si hay solución estándar (análisis volumétrico)
+        if instance.standard_solution_id:
+            _update_solution_inventory(instance)
+
+            # Crear transacción solo si hay solución estándar
+            _create_solution_transaction(instance)
 
         # Crear transacción
         _create_solution_transaction(instance)
-
 
 def _get_sampling_point(sampling_process):
     """Helper para obtener el sampling_point de forma consistente."""
     if sampling_process.group_sampling:
         return sampling_process.group_sampling.sampling_point
     return sampling_process.point_sampling
-
 
 def _check_compliance(sampling_point, analytical_method, concentration_value):
     """
@@ -142,21 +143,26 @@ def _check_compliance(sampling_point, analytical_method, concentration_value):
     lower = specification.lower_limit_prod
     upper = specification.upper_limit_prod
 
+    # Si no hay límites definidos, no se puede determinar cumplimiento
+    if lower is None and upper is None:
+        return None
+
     # Usar Decimal para comparaciones numéricas precisas
     value = Decimal(str(concentration_value))
     lower_dec = Decimal(str(lower)) if lower is not None else None
     upper_dec = Decimal(str(upper)) if upper is not None else None
 
-    # Lógica de verificación simplificada
+    # Validación del cumplimiento según los límites disponibles
     if lower_dec is not None and upper_dec is not None:
+        # Rango completo: lower <= valor <= upper
         return 'Cumple' if lower_dec <= value <= upper_dec else 'No Cumple'
-    elif lower_dec is not None:
+    elif lower_dec is not None and upper_dec is None:
+        # Solo límite inferior: valor >= lower
         return 'Cumple' if value >= lower_dec else 'No Cumple'
-    elif upper_dec is not None:
+    elif lower_dec is None and upper_dec is not None:
+        # Solo límite superior: valor <= upper
         return 'Cumple' if value <= upper_dec else 'No Cumple'
-
     return None
-
 
 def _update_solution_inventory(instance):
     """
@@ -178,11 +184,17 @@ def _update_solution_inventory(instance):
 
 def _create_solution_transaction(instance):
     """Crea el registro de transacción de la solución estándar."""
+    # Solo crear transacción si hay una cantidad válida
+    quantity = instance.quantity_standard
+
+    if quantity is None or quantity <= 0:
+        return
+
     TransactionSolutionStd.objects.create(
         solution_std_inventory_id=instance.standard_solution_id,
         type_transaction='Uso - Análisis de Muestra',
         date_transaction=timezone.localdate(),
         detail_transaction=f'Muestra {instance.sample_analysis.sampling_process}',
-        quantity=instance.quantity_standard,
+        quantity=quantity,
         user_transaction_id=instance.analyzed_by_id,
     )

@@ -75,7 +75,6 @@
                             </div>
                             <div class="col-md-2 px-0">
                                 <b>Resultado</b><br>
-{#                                <p>{{ entity.average_concentration|default_if_none:"Pendiente" }} {% if entity.comply %}{{ specification.unit_measure|default:"" }}{% endif %}</p>#}
                                 <p>{{ entity.average_concentration|default:"Pendiente" }} {% if entity.comply %}{{ specification.unit_measure|default:"" }}{% endif %}</p>
                             </div>
                             <div class="col-md-1 px-0">
@@ -115,29 +114,71 @@
                                                 <div class="table-responsive">
                                                     <table class="table table-hover table-bordered">
                                                         <thead>
-                                                        <tr>
-                                                            <th class="text-center align-middle" style="width: 35%">Solución Estándar</th>
-                                                            <th class="text-center align-middle" style="width: 12%">mL Estándar</th>
-                                                            <th class="text-center align-middle" style="width: 10%">mL Muestra</th>
-                                                            <th class="text-center align-middle" style="width: 10%">[{{ specification.unit_measure|default:"" }}]</th>
-                                                            <th class="text-center align-middle" style="width: 20%">Analizado por</th>
-                                                            <th class="text-center align-middle" style="width: 13%">Fecha</th>
-                                                        </tr>
+                                                        {% if entity.analytical_method.type_method == 'Volumetrico' %}
+                                                            <tr>
+                                                                <th class="text-center align-middle" style="width: 35%">
+                                                                    Solución Estándar
+                                                                </th>
+                                                                <th class="text-center align-middle" style="width: 12%">
+                                                                    mL Estándar
+                                                                </th>
+                                                                <th class="text-center align-middle" style="width: 10%">
+                                                                    mL Muestra
+                                                                </th>
+                                                                <th class="text-center align-middle" style="width: 10%">
+                                                                    [{{ specification.unit_measure|default:"" }}]
+                                                                </th>
+                                                                <th class="text-center align-middle" style="width: 20%">
+                                                                    Analizado por
+                                                                </th>
+                                                                <th class="text-center align-middle" style="width: 13%">
+                                                                    Fecha
+                                                                </th>
+                                                            </tr>
+                                                        {% elif entity.analytical_method.type_method == 'Gravimetrico' %}
+                                                            <tr>
+                                                                <th class="text-center align-middle" style="width: 20%">
+                                                                    Peso Obtenido (g)
+                                                                </th>
+                                                                <th class="text-center align-middle" style="width: 15%">
+                                                                    Muestra (g)
+                                                                </th>
+                                                                <th class="text-center align-middle" style="width: 15%">
+                                                                    [{{ specification.unit_measure|default:"" }}]
+                                                                </th>
+                                                                <th class="text-center align-middle" style="width: 30%">
+                                                                    Analizado por
+                                                                </th>
+                                                                <th class="text-center align-middle" style="width: 20%">
+                                                                    Fecha
+                                                                </th>
+                                                            </tr>
+                                                        {% endif %}
                                                         </thead>
                                                         <tbody>
                                                         {% for ap in analysis_processing %}
-                                                            <tr>
-                                                                <td>
-                                                                    {{ ap.standard_solution.solute_std.reagent }}
-                                                                    {{ ap.standard_solution.concentration_std }}{{ ap.standard_solution.concentration_unit }}
-                                                                    - {{ ap.standard_solution.code_solution_std }}
-                                                                </td>
-                                                                <td class="text-center align-middle">{{ ap.quantity_standard }}</td>
-                                                                <td class="text-center align-middle">{{ ap.quantity_sample }}</td>
-                                                                <td class="text-center align-middle">{{ ap.concentration_sample }}</td>
-                                                                <td class="text-center align-middle">{{ ap.analyzed_by.get_full_name }}</td>
-                                                                <td class="text-center align-middle">{{ ap.analyzed_date|date:"Y-m-d H:i" }}</td>
-                                                            </tr>
+                                                            {% if entity.analytical_method.type_method == 'Volumetrico' %}
+                                                                <tr>
+                                                                    <td>
+                                                                        {{ ap.standard_solution.solute_std.reagent }}
+                                                                        {{ ap.standard_solution.concentration_std }}{{ ap.standard_solution.concentration_unit }}
+                                                                        - {{ ap.standard_solution.code_solution_std }}
+                                                                    </td>
+                                                                    <td class="text-center align-middle">{{ ap.quantity_standard }}</td>
+                                                                    <td class="text-center align-middle">{{ ap.quantity_sample }}</td>
+                                                                    <td class="text-center align-middle">{{ ap.concentration_sample }}</td>
+                                                                    <td class="text-center align-middle">{{ ap.analyzed_by.get_full_name }}</td>
+                                                                    <td class="text-center align-middle">{{ ap.analyzed_date|date:"Y-m-d H:i" }}</td>
+                                                                </tr>
+                                                            {% elif entity.analytical_method.type_method == 'Gravimetrico' %}
+                                                                <tr>
+                                                                    <td class="text-center align-middle">{{ ap.weight_obtained }}</td>
+                                                                    <td class="text-center align-middle">{{ ap.quantity_sample }}</td>
+                                                                    <td class="text-center align-middle">{{ ap.concentration_sample }}</td>
+                                                                    <td class="text-center align-middle">{{ ap.analyzed_by.get_full_name }}</td>
+                                                                    <td class="text-center align-middle">{{ ap.analyzed_date|date:"Y-m-d H:i" }}</td>
+                                                                </tr>
+                                                            {% endif %}
                                                         {% empty %}
                                                             <tr>
                                                                 <td colspan="6" class="text-center">No hay registros de procesamiento</td>
