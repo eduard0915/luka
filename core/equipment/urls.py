@@ -51,6 +51,7 @@ urlpatterns = [
     path('daily_verification/update/<uuid:pk>/', DailyVerificationUpdateView.as_view(), name='update_daily_verification'),
     path('daily_verification/detail/<uuid:pk>/', DailyVerificationDetailView.as_view(), name='detail_daily_verification'),
     path('daily_verification/pdf/<uuid:pk>/', DailyVerificationPDFView.as_view(), name='daily_verification_pdf'),
+    path('get_equipment_data/<str:equipment_id>/', get_equipment_data, name='get_equipment_data'),
     # Patrones de Referencia
     path('reference_pattern/add/<uuid:pk>/', ReferencePatternCreateView.as_view(), name='create_reference_pattern'),
     path('reference_pattern/update/<uuid:pk>/', ReferencePatternUpdateView.as_view(), name='update_reference_pattern'),

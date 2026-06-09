@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 {'data': 'equipment'},
                 {'data': 'date_verification_daily'},
                 {'data': 'parameter_verified'},
-                {'data': 'reference_pattern_daily'},
+                {'data': 'reference_pattern__description_pattern'},
                 {'data': 'verification_result_daily'},
                 {'data': 'equipment_instrumental__tolerance'},
                 {'data': 'error'},

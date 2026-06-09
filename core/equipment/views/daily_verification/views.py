@@ -8,12 +8,13 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, ListView, UpdateView, DetailView
 from xhtml2pdf import pisa
 
 from core.company.models import Company
 from core.equipment.forms import DailyVerificationForm
-from core.equipment.models import DailyVerification, EquipmentInstrumental
+from core.equipment.models import DailyVerification, EquipmentInstrumental, ReferencePattern
 from core.mixins import ValidatePermissionRequiredMixin
 from luka import settings
 
@@ -37,8 +38,7 @@ class DailyVerificationListView(LoginRequiredMixin, ValidatePermissionRequiredMi
             action = request.POST.get('action')
             if action == 'searchdata':
                 verifications = list(DailyVerification.objects.select_related(
-                    'equipment_instrumental',
-                    'verified_by'
+                    'equipment_instrumental', 'verified_by', 'reference_pattern'
                 ).values(
                     'id',
                     'equipment_instrumental__code_equipment',
@@ -48,7 +48,8 @@ class DailyVerificationListView(LoginRequiredMixin, ValidatePermissionRequiredMi
                     'date_verification_daily',
                     'parameter_verified',
                     'comply',
-                    'reference_pattern_daily',
+                    'reference_pattern__description_pattern',
+                    'reference_pattern__description_pattern',
                     'verified_by__first_name',
                     'verified_by__last_name',
                     'verification_result_daily',
@@ -387,3 +388,59 @@ class DailyVerificationPDFView(LoginRequiredMixin, ValidatePermissionRequiredMix
         except Exception as e:
             print(e)
             return HttpResponseRedirect(reverse_lazy('equipment:list_daily_verification'))
+
+
+@require_http_methods(["GET"])
+def get_equipment_data(request, equipment_id):
+    """
+    Retorna los ReferencePattern y el unit_tolerance asociados a un EquipmentInstrumental específico
+    """
+    try:
+        # Obtener el equipo
+        equipment = EquipmentInstrumental.objects.get(id=equipment_id)
+
+        # Obtener patrones de referencia vigentes
+        patterns = ReferencePattern.objects.filter(
+            equipment_instrumental_id=equipment_id,
+            date_expire_calibration__gte=timezone.now().date()  # Solo patrones vigentes
+        ).values('id', 'description_pattern', 'magnitude_pattern', 'unit_pattern')
+
+        data = {
+            'success': True,
+            'patterns': list(patterns),
+            'unit_tolerance': equipment.unit_tolerance if hasattr(equipment, 'unit_tolerance') else ''
+        }
+    except EquipmentInstrumental.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Equipo no encontrado'
+        }
+    except Exception as e:
+        data = {
+            'success': False,
+            'error': str(e)
+        }
+
+    return JsonResponse(data)
+# @require_http_methods(["GET"])
+# def get_reference_patterns(request, equipment_id):
+#     """
+#     Retorna los ReferencePattern asociados a un EquipmentInstrumental específico
+#     """
+#     try:
+#         patterns = ReferencePattern.objects.filter(
+#             equipment_instrumental_id=equipment_id,
+#             date_expire_calibration__gte=timezone.now().date()  # Solo patrones vigentes
+#         ).values('id', 'description_pattern', 'magnitude_pattern', 'unit_pattern')
+#
+#         data = {
+#             'success': True,
+#             'patterns': list(patterns)
+#         }
+#     except Exception as e:
+#         data = {
+#             'success': False,
+#             'error': str(e)
+#         }
+#
+#     return JsonResponse(data)

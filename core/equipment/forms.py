@@ -191,7 +191,7 @@ class DailyVerificationForm(ModelForm):
             'verification_result_daily': 'col-md-2',
             'equipment_instrumental': 'col-md-5',
             'observation_verification': 'col-md-5',
-            'reference_pattern_daily': 'col-md-2',
+            'reference_pattern': 'col-md-2',
             'parameter_verified': 'col-md-2'
         }
 
@@ -201,16 +201,15 @@ class DailyVerificationForm(ModelForm):
     class Meta:
         model = DailyVerification
         fields = [
-            'equipment_instrumental', 'parameter_verified', 'reference_pattern_daily', 'verification_result_daily',
+            'equipment_instrumental', 'parameter_verified', 'reference_pattern', 'verification_result_daily',
             'observation_verification'
         ]
         widgets = {
             'equipment_instrumental': Select(attrs={'class': 'form-control', 'required': True, 'style': 'width: 100%'}),
             'parameter_verified': Select(attrs={'class': 'form-control', 'required': True}, choices=UNIT_TOLERANCE),
-            'reference_pattern_daily': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
+            'reference_pattern': Select(attrs={'class': 'form-control', 'required': True}),
             'verification_result_daily': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
-            'observation_verification': Textarea(attrs={'class': 'form-control', 'rows': 1}),
-            'responsible_user': Select(attrs={'class': 'form-control', 'required': True, 'style': 'width: 100%'}),
+            'observation_verification': Textarea(attrs={'class': 'form-control', 'rows': 1})
         }
 
     def save(self, commit=True):
@@ -221,7 +220,7 @@ class DailyVerificationForm(ModelForm):
                 data = form.save(commit=False)
                 data.date_verification_daily = timezone.localtime()
                 data.verified_by_id = get_current_user().id
-                data.error = round((data.reference_pattern_daily - data.verification_result_daily) * 1000, 4)
+                data.error = round((data.reference_pattern.magnitude_pattern - data.verification_result_daily) * 1000, 4)
                 tolerance = data.equipment_instrumental.tolerance
                 if data.error > -tolerance or data.error < tolerance:
                     data.comply = True
@@ -250,7 +249,7 @@ class EquipmentInstrumentalForm(ModelForm):
         fields = [
             'code_equipment', 'description_equipment', 'supplier_equipment',
             'brand_equipment', 'model_equipment', 'serie_equipment', 'frequency_calibration',
-            'intermediate_verification', 'verification_pattern', 'unit_tolerance', 'tolerance',
+            'intermediate_verification', 'unit_tolerance', 'tolerance',
             'laboratory', 'responsible_user', 'photo_equipment', 'manual_equipment', 'date_calibration_fix'
         ]
         widgets = {
@@ -260,7 +259,6 @@ class EquipmentInstrumentalForm(ModelForm):
             'brand_equipment': TextInput(attrs={'class': 'form-control', 'required': True}),
             'model_equipment': TextInput(attrs={'class': 'form-control', 'required': True}),
             'serie_equipment': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'verification_pattern': TextInput(attrs={'class': 'form-control', 'required': True}),
             'frequency_calibration': TextInput(attrs={'class': 'form-control'}),
             'intermediate_verification': TextInput(attrs={'class': 'form-control'}),
             'tolerance': TextInput(attrs={'class': 'form-control'}),

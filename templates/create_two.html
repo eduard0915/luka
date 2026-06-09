@@ -74,6 +74,10 @@
         <script src="{% static 'form_sampling_process.js' %}"></script>
     {% endif %}
 
+    {% if entity == 'Verificaciones Diarias' or entity == 'Nueva Verificación Diaria' %}
+        <script src="{% static 'js/form_daily_verification.js' %}"></script>
+    {% endif %}
+
     <script src="{% static 'js/datetime.js' %}"></script>
 
     <script type="application/javascript">
