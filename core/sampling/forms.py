@@ -14,6 +14,7 @@ TYPE_SAMPLING = [('En Proceso', 'En Proceso'), ('Producto Terminado', 'Producto 
 SELECT = [(True, 'Si'), (False, 'No')]
 
 
+# Registro de Procesamiento de Análisis Volumetría
 class SamplingAnalysisProcessingForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.analysis = kwargs.pop('analysis')
@@ -112,6 +113,121 @@ class SamplingAnalysisProcessingForm(ModelForm):
                         std_den = qty_std
 
                 denominator = std_den * factor_den * sample_den
+
+                instance.concentration_sample = round((numerator / denominator), cifras_sign)
+            else:
+                instance.concentration_sample = 0
+
+            if commit:
+                instance.save()
+            return instance
+        except Exception as e:
+            raise ValidationError({'error': str(e)})
+
+
+# Registro de Procesamiento de Análisis Gravimetría
+class SamplingAnalysisProcessingGravimetryForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analysis = kwargs.pop('analysis')
+        super().__init__(*args, **kwargs)
+        calcs = AnalyticalMethodCalculate.objects.select_related('analytical_method').filter(analytical_method_id=self.analysis.analytical_method.id)
+        calc_con_label = calcs.exclude(sample_quantity__in=[None, '', False]).first()
+
+        std_bases = self.analysis.analytical_method.analyticalmethodsolutionstd_set.values_list('solution_std_id', flat=True)
+
+
+        if calc_con_label and calc_con_label.sample_quantity:
+            self.fields['quantity_sample'].label = str(calc_con_label.sample_quantity)
+
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+        col_classes = {
+            'standard_solution': 'col-md-7',
+            'quantity_standard': 'col-md-2',
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
+    class Meta:
+        model = SamplingAnalysisProcessing
+        fields = ['weight_obtained', 'quantity_sample']
+        widgets = {
+            'weight_obtained': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'quantity_sample': TextInput(attrs={'class': 'form-control', 'required': True}),
+        }
+
+    def save(self, commit=True):
+        user = get_current_user()
+        analytical_method_id = self.analysis.analytical_method.id
+        var_num = AnalyticalMethodCalculate.objects.filter(analytical_method_id=analytical_method_id, position='Numerador')
+        var_den = AnalyticalMethodCalculate.objects.filter(analytical_method_id=analytical_method_id, position='Denominador')
+
+        try:
+            instance = super().save(commit=False)
+            instance.sample_analysis_id = self.analysis.id
+            instance.analyzed_by_id = user.id
+            instance.analyzed_date = timezone.localtime()
+            instance.relational_calculation = False
+
+            # Asociar el primer cálculo encontrado si existe
+            # Nota: Esto asume que solo hay un conjunto de cálculos (Num/Den) por método base,
+            # o que todos pertenecen a la misma descripción lógica.
+            base_calc = AnalyticalMethodCalculate.objects.filter(analytical_method_id=analytical_method_id).first()
+            if base_calc:
+                instance.analytical_method_calculate = base_calc
+
+            if instance.weight_obtained is None or instance.quantity_sample is None:
+                raise ValidationError(
+                    "Los campos Peso Obtenido y cantidad de muestra son obligatorios")
+
+            qty_wt = float(instance.weight_obtained)
+            qty_sample = float(instance.quantity_sample)
+            cifras_sign = instance.sample_analysis.analytical_method.sig_figs_result
+
+            if qty_sample > 0:
+
+                factor_num = 1
+                variable_num = 1
+                sample_num = 1
+                wt_num = 1
+
+                for num in var_num:
+                    if num.factor is not None:
+                        factor_num *= float(num.factor)
+
+                    if num.variable is not None:
+                        variable_num *= float(num.variable)
+
+                    if num.sample_quantity and num.sample_quantity.strip():
+                        sample_num = float(qty_sample)
+
+                    if num.volumen_std is not None:
+                        wt_num = qty_wt
+
+                numerator = wt_num * factor_num * sample_num * variable_num
+
+                factor_den = 1
+                variable_den = 1
+                sample_den = 1
+                wt_den = 1
+
+                for den in var_den:
+
+                    if den.factor is not None:
+                        factor_den *= float(den.factor)
+
+                    if den.variable is not None:
+                        variable_den *= float(den.variable)
+
+                    if den.sample_quantity and den.sample_quantity.strip():
+                        sample_den = float(qty_sample)
+
+                    if den.volumen_std is not None:
+                        wt_den = qty_wt
+
+                denominator = wt_den * factor_den * sample_den * variable_den
 
                 instance.concentration_sample = round((numerator / denominator), cifras_sign)
             else:

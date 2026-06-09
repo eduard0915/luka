@@ -9,7 +9,8 @@ from django.views.generic import CreateView, DetailView, DeleteView
 from core.analytical_method.models import AnalyticalMethodCalculateRelation
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.models import SpecificationProduct
-from core.sampling.forms import SamplingAnalysisProcessingForm, SamplingAnalysisProcessingRelationForm
+from core.sampling.forms import SamplingAnalysisProcessingForm, SamplingAnalysisProcessingRelationForm, \
+    SamplingAnalysisProcessingGravimetryForm
 from core.sampling.models import *
 
 
@@ -61,6 +62,8 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                 parts.append(str(cr.factor))
             if cr.sample_quantity:
                 parts.append(str(cr.sample_quantity))
+            if cr.variable:
+                parts.append(str(cr.variable))
 
             term = r" \cdot ".join(parts)
             if term:
@@ -111,13 +114,16 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
 
         context['icon'] = 'bi bi-calculator'
         context['back'] = reverse_lazy('sampling:detail_sampling_process', kwargs={'pk': self.object.sampling_process.id})
+
         # URL para agregar procesamiento
-        context['create_processing_url'] = reverse_lazy(
-            'sampling:create_sampling_analysis_processing', kwargs={'pk': self.object.id})
+        if self.object.analytical_method.type_method == 'Volumetrico':
+            context['create_processing_url'] = reverse_lazy('sampling:sampling_analysis_volumetry', kwargs={'pk': self.object.id})
+        elif self.object.analytical_method.type_method == 'Gravimetrico':
+            context['create_processing_url'] = reverse_lazy('sampling:sampling_analysis_gravimetry', kwargs={'pk': self.object.id})
         return context
 
 
-# Registro de Procesamiento de Análisis
+# Registro de Procesamiento de Análisis Volumetría
 class SamplingAnalysisProcessingCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
     model = SamplingAnalysisProcessing
     form_class = SamplingAnalysisProcessingForm
@@ -155,6 +161,47 @@ class SamplingAnalysisProcessingCreateView(LoginRequiredMixin, ValidatePermissio
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Registro de Procesamiento de Análisis'
+        return context
+
+
+# Registro de Procesamiento de Análisis Gravimetría
+class SamplingAnalysisProcessingGravimetryCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    model = SamplingAnalysisProcessing
+    form_class = SamplingAnalysisProcessingGravimetryForm
+    template_name = 'analysis_sampling/create_sampling_analysis_processing.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'add':
+                form = self.get_form()
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, '¡Procesamiento Registrado Satisfactoriamente!')
+                else:
+                    data['error'] = form.errors
+            else:
+                data['error'] = 'No ha ingresado datos en los campos'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        analysis = SamplingAnalysis.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'analysis': analysis})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['action'] = 'add'
+        context['entity'] = 'Registro de Procesamiento de Análisis Gravimetrico'
         return context
 
 
