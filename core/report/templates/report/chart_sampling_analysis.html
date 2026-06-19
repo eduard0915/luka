@@ -54,6 +54,40 @@
             <i class="fa-solid fa-chart-line fa-2x mb-2"></i>
             <p>Seleccione un producto, método y punto de muestreo para ver el gráfico.</p>
         </div>
+        <div id="stats-container" class="row mb-4" style="display: none;">
+            <div class="col-md-3">
+                <div class="card bg-light">
+                    <div class="card-body text-center p-2">
+                        <h6 class="card-title mb-1 text-muted">Promedio</h6>
+                        <h4 class="mb-0" id="stat-avg">-</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-light">
+                    <div class="card-body text-center p-2">
+                        <h6 class="card-title mb-1 text-muted">Desv. Estándar</h6>
+                        <h4 class="mb-0" id="stat-std">-</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-light">
+                    <div class="card-body text-center p-2">
+                        <h6 class="card-title mb-1 text-muted">Máximo</h6>
+                        <h4 class="mb-0" id="stat-max">-</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-light">
+                    <div class="card-body text-center p-2">
+                        <h6 class="card-title mb-1 text-muted">Mínimo</h6>
+                        <h4 class="mb-0" id="stat-min">-</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="chart-container" style="width:100%; height:400px; display:none;">
             <canvas id="myChart"></canvas>
         </div>

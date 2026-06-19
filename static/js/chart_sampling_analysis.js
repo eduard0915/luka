@@ -18,6 +18,7 @@ function get_graph_data() {
 
     $('#chart-placeholder').hide();
     $('#chart-container').show();
+    $('#stats-container').show();
 
     $.ajax({
         url: window.location.pathname,
@@ -43,6 +44,29 @@ function get_graph_data() {
 }
 
 function render_chart(data) {
+    let allValues = [];
+    data.series.forEach(s => {
+        if (s.data) {
+            allValues = allValues.concat(s.data.filter(v => v !== null && v !== undefined));
+        }
+    });
+
+    if (allValues.length > 0) {
+        const avg = allValues.reduce((a, b) => a + b, 0) / allValues.length;
+        const max = Math.max(...allValues);
+        const min = Math.min(...allValues);
+        const std = Math.sqrt(allValues.map(x => Math.pow(x - avg, 2)).reduce((a, b) => a + b, 0) / allValues.length);
+
+        const unit = data.series[0].unit_measure || '';
+        $('#stat-avg').text(avg.toFixed(2) + unit);
+        $('#stat-std').text(std.toFixed(2));
+        $('#stat-max').text(max.toFixed(2) + unit);
+        $('#stat-min').text(min.toFixed(2) + unit);
+        $('#stats-container').show();
+    } else {
+        $('#stats-container').hide();
+    }
+
     const ctx = document.getElementById('myChart');
     if (chart) {
         chart.destroy();
@@ -63,6 +87,7 @@ function render_chart(data) {
         spanGaps: true,
         pointRadius: 4,
         pointHoverRadius: 6,
+        unit_measure: item.unit_measure || ''
     }));
 
     if (data.specifications && data.specifications.length > 0) {
@@ -72,7 +97,8 @@ function render_chart(data) {
 
             if (spec.lower_limit !== null && spec.lower_limit !== undefined) {
                 datasets.push({
-                    label: `L. Inferior: ${spec.name}${pointInfo}`,
+                    // label: `L. Inferior: ${spec.name}${pointInfo}`,
+                    label: `L. Inferior`,
                     data: Array(data.categories.length).fill(spec.lower_limit),
                     borderColor: 'rgba(255, 0, 0, 0.5)',
                     borderDash: [5, 5],
@@ -84,7 +110,8 @@ function render_chart(data) {
             }
             if (spec.upper_limit !== null && spec.upper_limit !== undefined) {
                 datasets.push({
-                    label: `L. Superior: ${spec.name}${pointInfo}`,
+                    // label: `L. Superior: ${spec.name}${pointInfo}`,
+                    label: `L. Superior`,
                     data: Array(data.categories.length).fill(spec.upper_limit),
                     borderColor: 'rgba(255, 0, 0, 0.5)',
                     borderDash: [5, 5],
@@ -140,80 +167,6 @@ function render_chart(data) {
     });
 }
 
-// function render_chart(data) {
-//     const ctx = document.getElementById('myChart');
-//     if (chart) { chart.destroy(); }
-//
-//     const palette = [
-//         'rgb(75,192,192)', 'rgb(255,99,132)', 'rgb(54,162,235)',
-//         'rgb(255,205,86)', 'rgb(153,102,255)', 'rgb(255,159,64)', 'rgb(201,203,207)'
-//     ];
-//
-//     let datasets = data.series.map((item, i) => ({
-//         label: item.name,
-//         data: item.data,
-//         borderColor: palette[i % palette.length],
-//         backgroundColor: palette[i % palette.length] + '33',  // 20% opacidad
-//         fill: false,
-//         tension: 0.2,
-//         spanGaps: true,
-//         pointRadius: 4,
-//         pointHoverRadius: 6,
-//     }));
-//
-//     if (data.specifications && data.specifications.length > 0) {
-//         data.specifications.forEach((spec, i) => {
-//             const pointInfo = spec.sample_point ? ` (${spec.sample_point})` : '';
-//             const unitInfo = spec.unit_measure ? ` [${spec.unit_measure}]` : '';
-//             if (spec.lower_limit !== null && spec.lower_limit !== undefined) {
-//                 datasets.push({
-//                     label: `L. Inferior: ${spec.name}${pointInfo}${unitInfo}`,
-//                     data: Array(data.categories.length).fill(spec.lower_limit),
-//                     borderColor: 'rgba(255, 0, 0, 0.5)',
-//                     borderDash: [5, 5],
-//                     fill: false,
-//                     pointRadius: 0,
-//                     borderWidth: 2
-//                 });
-//             }
-//             if (spec.upper_limit !== null && spec.upper_limit !== undefined) {
-//                 datasets.push({
-//                     label: `L. Superior: ${spec.name}${pointInfo}${unitInfo}`,
-//                     data: Array(data.categories.length).fill(spec.upper_limit),
-//                     borderColor: 'rgba(255, 0, 0, 0.5)',
-//                     borderDash: [5, 5],
-//                     fill: false,
-//                     pointRadius: 0,
-//                     borderWidth: 2
-//                 });
-//             }
-//         });
-//     }
-//
-//     chart = new Chart(ctx, {
-//         type: 'line',
-//         data: { labels: data.categories, datasets },
-//         options: {
-//             responsive: true,
-//             maintainAspectRatio: false,
-//             interaction: { mode: 'index', intersect: false },
-//             scales: {
-//                 y: {
-//                     beginAtZero: false,
-//                     title: { display: true, text: 'Concentración Promedio' }
-//                 },
-//                 x: {
-//                     title: { display: true, text: 'Fecha y Hora' },
-//                     ticks: { maxRotation: 45, minRotation: 30 }
-//                 }
-//             },
-//             plugins: {
-//                 legend: { position: 'top' },
-//                 tooltip: { mode: 'index', intersect: false }
-//             }
-//         }
-//     });
-// }
 
 $(function () {
     // Inicializar Select2
@@ -226,8 +179,9 @@ $(function () {
         resetSelect('#id_analytical_method', true);
         resetSelect('#id_sample_point', true);
 
-        // Ocultar gráfico
+        // Ocultar gráfico y estadísticas
         $('#chart-container').hide();
+        $('#stats-container').hide();
         $('#chart-placeholder').show();
         if (chart) {
             chart.destroy();
