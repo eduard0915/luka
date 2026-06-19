@@ -9,7 +9,7 @@
 <div class="card card-default">
     <div class="card-body">
         <div class="row">
-            <div class="col-lg-4">
+            <div class="col-lg-2">
                 <div class="form-group">
                     <label for="id_product">Producto:</label>
                     <select class="form-control select2" name="product" id="id_product">
@@ -20,7 +20,7 @@
                     </select>
                 </div>
             </div>
-            <div class="col-lg-4">
+            <div class="col-lg-3">
                 <div class="form-group">
                     <label for="id_analytical_method">Método Analítico:</label>
                     <select class="form-control select2" name="analytical_method" id="id_analytical_method" disabled>
@@ -28,12 +28,24 @@
                     </select>
                 </div>
             </div>
-            <div class="col-lg-4">
+            <div class="col-lg-3">
                 <div class="form-group">
                     <label for="id_sample_point">Punto de Muestreo:</label>
                     <select class="form-control select2" name="sample_point" id="id_sample_point" disabled>
                         <option value="">---------</option>
                     </select>
+                </div>
+            </div>
+            <div class="col-lg-2">
+                <div class="form-group">
+                    <label for="id_date_from">Desde:</label>
+                    <input type="date" class="form-control" name="date_from" id="id_date_from">
+                </div>
+            </div>
+            <div class="col-lg-2">
+                <div class="form-group">
+                    <label for="id_date_to">Hasta:</label>
+                    <input type="date" class="form-control" name="date_to" id="id_date_to">
                 </div>
             </div>
         </div>

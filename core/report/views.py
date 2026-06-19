@@ -8,9 +8,10 @@ from django.views.generic import ListView, TemplateView, View
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 from datetime import datetime
+from django.utils import timezone
 
 from core.mixins import ValidatePermissionRequiredMixin
-from core.product.models import Product, SamplePoint, AnalyticalMethodProduct
+from core.product.models import Product, SamplePoint, AnalyticalMethodProduct, SpecificationProduct
 from core.sampling.models import SamplingAnalysis
 
 
@@ -150,9 +151,11 @@ class SamplingAnalysisChartView(LoginRequiredMixin, ValidatePermissionRequiredMi
                 product_id = request.POST.get('product')
                 method_id = request.POST.get('analytical_method')
                 sample_point_id = request.POST.get('sample_point')
+                date_from = request.POST.get('date_from')
+                date_to = request.POST.get('date_to')
 
                 if not product_id or not method_id:
-                    data = {'categories': [], 'series': []}
+                    data = {'categories': [], 'series': [], 'specifications': []}
                 else:
                     filters = Q(analytical_method_id=method_id)
                     filters &= (
@@ -166,38 +169,82 @@ class SamplingAnalysisChartView(LoginRequiredMixin, ValidatePermissionRequiredMi
                             Q(sampling_process__group_sampling__sampling_point_id=sample_point_id)
                         )
 
+                    if date_from:
+                        date_from_dt = timezone.make_aware(datetime.strptime(date_from, '%Y-%m-%d'))
+                        filters &= Q(sampling_process__date_sampling__gte=date_from_dt)
+                    if date_to:
+                        date_to_dt = timezone.make_aware(datetime.strptime(f"{date_to} 23:59:59", '%Y-%m-%d %H:%M:%S'))
+                        filters &= Q(sampling_process__date_sampling__lte=date_to_dt)
+
                     analyses = SamplingAnalysis.objects.filter(filters).select_related(
                         'sampling_process'
                     ).order_by('sampling_process__date_sampling')
 
+                    # Especificaciones asociadas
+                    specifications = []
+                    if sample_point_id and sample_point_id != 'all':
+                        sp = SamplePoint.objects.filter(id=sample_point_id).first()
+                        if sp:
+                            specs = sp.specification.filter(method_test__analytical_method_id=method_id)
+                            for s in specs:
+                                specifications.append({
+                                    'name': s.test_prod,
+                                    'lower_limit': s.lower_limit_prod,
+                                    'upper_limit': s.upper_limit_prod,
+                                    'sample_point': sp.sample_point_name,
+                                    'unit_measure': s.unit_measure
+                                })
+                    else:
+                        # Para 'all', obtener especificaciones de todos los puntos de muestreo del producto para ese método
+                        points = SamplePoint.objects.filter(
+                            product_id=product_id,
+                            specification__method_test__analytical_method_id=method_id
+                        ).prefetch_related('specification')
+
+                        seen_specs = set()
+                        for p in points:
+                            p_specs = p.specification.filter(method_test__analytical_method_id=method_id)
+                            for s in p_specs:
+                                spec_key = (s.test_prod, s.lower_limit_prod, s.upper_limit_prod)
+                                if spec_key not in seen_specs:
+                                    specifications.append({
+                                        'name': s.test_prod,
+                                        'lower_limit': s.lower_limit_prod,
+                                        'upper_limit': s.upper_limit_prod,
+                                        'sample_point': p.sample_point_name,
+                                        'unit_measure': s.unit_measure
+                                    })
+                                    seen_specs.add(spec_key)
+
+                    data['specifications'] = specifications
+
                     # Agrupar por fecha y punto si es 'all', o solo por fecha si es uno específico
-                    graph_data = {}
                     categories = []
-                    
+
                     if sample_point_id == 'all':
                         # Mostrar múltiples series, una por cada punto de muestreo
                         series_dict = {}
                         # Obtener todos los puntos de muestreo del producto para inicializar las series
                         points = SamplePoint.objects.filter(
                             product_id=product_id,
-                            specification__analytical_method_product__analytical_method_id=method_id
+                            specification__method_test__analytical_method_id=method_id
                         ).distinct().order_by('sequence')
                         for p in points:
                             series_dict[str(p.id)] = {'name': p.sample_point_name, 'data': []}
-                        
+
                         # Fechas únicas ordenadas
                         dates_raw = sorted(list(set(
                             a.sampling_process.date_sampling for a in analyses if a.sampling_process.date_sampling
                         )))
                         dates = [d.strftime('%Y-%m-%d %H:%M') for d in dates_raw]
-                        
+
                         data['categories'] = dates
-                        
+
                         for d_raw in dates_raw:
                             d_str = d_raw.strftime('%Y-%m-%d %H:%M')
                             # Filtrar análisis de este momento específico
                             moment_analyses = [a for a in analyses if a.sampling_process.date_sampling.strftime('%Y-%m-%d %H:%M') == d_str]
-                            
+
                             for p_id in series_dict:
                                 # Buscar el valor para este día y punto
                                 val = None
@@ -207,12 +254,12 @@ class SamplingAnalysisChartView(LoginRequiredMixin, ValidatePermissionRequiredMi
                                         a_point_id = str(a.sampling_process.point_sampling_id)
                                     elif a.sampling_process.group_sampling and a.sampling_process.group_sampling.sampling_point_id:
                                         a_point_id = str(a.sampling_process.group_sampling.sampling_point_id)
-                                    
+
                                     if a_point_id == p_id:
                                         val = a.average_concentration
                                         break
                                 series_dict[p_id]['data'].append(val)
-                        
+
                         data['series'] = list(series_dict.values())
                     else:
                         # Una sola serie
@@ -221,13 +268,13 @@ class SamplingAnalysisChartView(LoginRequiredMixin, ValidatePermissionRequiredMi
                             sp = SamplePoint.objects.filter(id=sample_point_id).first()
                             if sp:
                                 point_name = sp.sample_point_name
-                        
+
                         series_data = []
                         for a in analyses:
                             if a.sampling_process.date_sampling:
                                 categories.append(a.sampling_process.date_sampling.strftime('%Y-%m-%d %H:%M'))
                                 series_data.append(a.average_concentration)
-                        
+
                         data['categories'] = categories
                         data['series'] = [{'name': point_name, 'data': series_data}]
 
