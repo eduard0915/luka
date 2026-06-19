@@ -230,7 +230,17 @@ class SamplingAnalysisChartView(LoginRequiredMixin, ValidatePermissionRequiredMi
                             specification__method_test__analytical_method_id=method_id
                         ).distinct().order_by('sequence')
                         for p in points:
-                            series_dict[str(p.id)] = {'name': p.sample_point_name, 'data': []}
+                            # Obtener unit_measure de la primera especificación del punto
+                            unit_measure = ''
+                            spec = p.specification.filter(method_test__analytical_method_id=method_id).first()
+                            if spec and spec.unit_measure:
+                                unit_measure = spec.unit_measure
+
+                            series_dict[str(p.id)] = {
+                                'name': p.sample_point_name,
+                                'data': [],
+                                'unit_measure': unit_measure  # ← AGREGADO
+                            }
 
                         # Fechas únicas ordenadas
                         dates_raw = sorted(list(set(
@@ -264,10 +274,15 @@ class SamplingAnalysisChartView(LoginRequiredMixin, ValidatePermissionRequiredMi
                     else:
                         # Una sola serie
                         point_name = 'Resultado'
+                        unit_measure = ''
                         if sample_point_id:
                             sp = SamplePoint.objects.filter(id=sample_point_id).first()
                             if sp:
                                 point_name = sp.sample_point_name
+                                # Obtener unit_measure de las especificaciones del punto
+                                spec = sp.specification.filter(method_test__analytical_method_id=method_id).first()
+                                if spec and spec.unit_measure:
+                                    unit_measure = spec.unit_measure
 
                         series_data = []
                         for a in analyses:
@@ -276,7 +291,11 @@ class SamplingAnalysisChartView(LoginRequiredMixin, ValidatePermissionRequiredMi
                                 series_data.append(a.average_concentration)
 
                         data['categories'] = categories
-                        data['series'] = [{'name': point_name, 'data': series_data}]
+                        data['series'] = [{
+                            'name': point_name,
+                            'data': series_data,
+                            'unit_measure': unit_measure
+                        }]
 
             elif action == 'search_analytical_method':
                 data = []
