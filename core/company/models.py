@@ -17,6 +17,7 @@ class Company(models.Model):
     company_city = models.CharField(default='Ciudad', max_length=60, verbose_name='Ciudad')
     company_country = models.CharField(default='Pais', max_length=60, verbose_name='Pais')
     training_alert = models.PositiveSmallIntegerField(default=30, verbose_name='Alerta Capacitaciones')
+    autosample = models.BooleanField(default=True, verbose_name='Muestreo Automático')
 
     def __str__(self):
         return str(self.company_name)
