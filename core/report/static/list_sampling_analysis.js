@@ -1,5 +1,5 @@
 var tblAnalysis;
-var select_sample_point;
+var select_analytical_method;
 
 function initTable(json) {
     var table = $('#data');
@@ -32,7 +32,7 @@ function initTable(json) {
         columnDefs: [
             {
                 targets: ['_all'],
-                class: 'text-center',
+                class: 'text-center align-middle',
                 defaultContent: '-'
             }
         ],
@@ -44,9 +44,11 @@ function initTable(json) {
 
 function loadData() {
     var product = $('#id_product').val();
-    var sample_point = $('#id_sample_point').val();
+    var analytical_method = $('#id_analytical_method').val();
+    var start_date = $('#id_start_date').val();
+    var end_date = $('#id_end_date').val();
     
-    if (!sample_point) {
+    if (!analytical_method) {
         initTable({columns: [], data: []});
         return false;
     }
@@ -57,7 +59,9 @@ function loadData() {
         data: {
             'action': 'searchdata',
             'product': product,
-            'sample_point': sample_point
+            'analytical_method': analytical_method,
+            'start_date': start_date,
+            'end_date': end_date
         },
         dataType: 'json',
     }).done(function (json) {
@@ -72,13 +76,13 @@ function loadData() {
 }
 
 $(function () {
-    select_sample_point = $('#id_sample_point');
+    select_analytical_method = $('#id_analytical_method');
 
     $('#id_product').on('change', function () {
         var id = $(this).val();
         var options = '<option value="">---------</option>';
         if (id === '') {
-            select_sample_point.html(options);
+            select_analytical_method.html(options);
             loadData();
             return false;
         }
@@ -86,7 +90,7 @@ $(function () {
             url: window.location.pathname,
             type: 'POST',
             data: {
-                'action': 'search_sample_point',
+                'action': 'search_analytical_method',
                 'id': id
             },
             dataType: 'json',
@@ -101,25 +105,31 @@ $(function () {
         }).fail(function (jqXHR, textStatus, errorThrown) {
             alert(textStatus + ': ' + errorThrown);
         }).always(function () {
-            select_sample_point.html(options);
+            select_analytical_method.html(options);
             loadData();
         });
     });
 
-    $('#id_sample_point').on('change', function () {
+    $('#id_analytical_method').on('change', function () {
         loadData();
     });
 
-    $('.btnExcel').on('click', function () {
+    $('#id_start_date, #id_end_date').on('change', function () {
+        loadData();
+    });
+
+    $('.btnExportExcel').on('click', function () {
         var product = $('#id_product').val();
-        var sample_point = $('#id_sample_point').val();
-        
-        if (!sample_point) {
-            alert('Debe seleccionar un punto de muestreo');
+        var analytical_method = $('#id_analytical_method').val();
+        var start_date = $('#id_start_date').val();
+        var end_date = $('#id_end_date').val();
+
+        if (analytical_method === '') {
+            message_error('Debe seleccionar un método analítico');
             return false;
         }
 
-        var url = window.location.pathname + 'excel/?product=' + product + '&sample_point=' + sample_point;
+        var url = '/report/sampling/analysis/list/excel/?product=' + product + '&analytical_method=' + analytical_method + '&start_date=' + start_date + '&end_date=' + end_date;
         window.open(url, '_blank');
     });
 

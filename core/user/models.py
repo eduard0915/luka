@@ -34,6 +34,7 @@ class User(AbstractUser):
         upload_to='user/%Y%m%d', null=True, blank=True, verbose_name='Foto', validators=[validator_file_image_user])
     slug = models.SlugField(unique=True, null=False, blank=False)
     site = models.ForeignKey(Site, on_delete=models.CASCADE, verbose_name='Planta', null=True, blank=True)
+    notification_email_oss = models.BooleanField(default=False, verbose_name='Notificación Resultados OOS')
 
     def __init__(self, *args, **kwargs):
         super(User, self).__init__(*args, **kwargs)
