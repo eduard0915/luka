@@ -3,12 +3,13 @@ from django.forms import ModelForm, TextInput, Select, TimeInput, DateTimeInput,
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from crum import get_current_user
+from openpyxl.compat import product
+
 from core.sampling.models import SamplingGroup, SamplingProcess, SamplingAnalysisProcessing, \
     SamplingAnalysisProcessingRelation, SamplingAnalysis
-from core.product.models import SamplePoint
+from core.product.models import SamplePoint, AnalyticalMethodProduct
 from core.solution.models import SolutionStd
-from core.analytical_method.models import AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation
-
+from core.analytical_method.models import AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation, AnalyticalMethod
 
 TYPE_SAMPLING = [('En Proceso', 'En Proceso'), ('Producto Terminado', 'Producto Terminado')]
 
@@ -274,6 +275,54 @@ class SamplingAnalysisProcessingRelationForm(ModelForm):
         except Exception as e:
             data['error'] = str(e)
         return data
+
+
+class SamplingAnalysisForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.sampling_process = kwargs.pop('sampling_process')
+        super().__init__(*args, **kwargs)
+
+        if self.sampling_process.point_sampling:
+            product_id = self.sampling_process.point_sampling.product.id
+        else:
+            product_id = self.sampling_process.group_sampling.sampling_point.product.id
+
+        self.fields['analytical_method'].queryset = AnalyticalMethod.objects.filter(
+            analyticalmethodproduct__product_id=product_id,
+            enable_analytical_method=True
+        ).distinct()
+
+        for field in self.visible_fields():
+            field.field.widget.attrs['class'] = 'form-control'
+            field.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = SamplingAnalysis
+        fields = ['analytical_method']
+        widgets = {'analytical_method': Select(attrs={'class': 'form-control'})}
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.sampling_process = self.sampling_process
+        if commit:
+            instance.save()
+        return instance
+
+    def clean(self):
+        cleaned_data = super().clean()
+        analytical_method = cleaned_data.get('analytical_method')
+
+        if analytical_method and self.sampling_process:
+            exists = SamplingAnalysis.objects.filter(
+                sampling_process=self.sampling_process,
+                analytical_method=analytical_method
+            ).exists()
+
+            if exists:
+                self.add_error(
+                    '',f'El método analítico "{analytical_method}" ya está asociado a esta muestra.')
+
+        return cleaned_data
 
 
 class SamplingGroupForm(ModelForm):

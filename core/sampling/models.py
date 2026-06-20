@@ -2,6 +2,7 @@ import uuid
 
 from crum import get_current_user
 from django.db import models, transaction
+from django.forms import model_to_dict
 from django.utils import timezone
 
 from core.analytical_method.models import AnalyticalMethod
@@ -84,8 +85,14 @@ class SamplingProcess(BaseModel):
     def __str__(self):
         return str(self.number_sample)
 
+    def toJSON(self):
+        item = model_to_dict(self)
+        item['sampling_point'] = self.group_sampling.sampling_point.sample_point_name if self.group_sampling else self.point_sampling.sample_point_name
+        item['date_sampling_scheduled'] = self.date_sampling_scheduled.strftime('%Y-%m-%d %H:%M:%S')
+        item['date_sampling'] = self.date_sampling.strftime('%Y-%m-%d %H:%M:%S') if self.date_sampling else ''
+        return item
+
     class Meta:
-        verbose_name = 'SamplingProcess'
         verbose_name_plural = 'SamplingsProcess'
         db_table = 'SamplingProcess'
 
@@ -162,8 +169,15 @@ class SamplingAnalysis(BaseModel):
     def __str__(self):
         return str(self.sampling_process)
 
+    def toJSON(self):
+        item = model_to_dict(self)
+        item['sampling_process'] = self.sampling_process.toJSON()
+        item['analytical_method'] = self.analytical_method.description_analytical_method
+        item['average_concentration'] = format(self.average_concentration, '.4f') if self.average_concentration else '0.0000'
+        item['date_analysis'] = self.date_analysis.strftime('%Y-%m-%d %H:%M:%S') if self.date_analysis else ''
+        return item
+
     class Meta:
-        verbose_name = 'SamplingAnalysis'
         verbose_name_plural = 'SamplingsAnalysis'
         db_table = 'SamplingAnalysis'
 
