@@ -12,7 +12,8 @@ from django.utils import timezone
 
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.models import Product, SamplePoint, AnalyticalMethodProduct, SpecificationProduct
-from core.sampling.models import SamplingAnalysis
+from core.sampling.models import SamplingAnalysis, SamplingAnalysisProcessing
+from core.user.models import User
 
 
 class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
@@ -540,6 +541,205 @@ class SamplingAnalysisByPointExcelView(LoginRequiredMixin, ValidatePermissionReq
 
             response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
             response['Content-Disposition'] = f'attachment; filename="reporte_analisis_{datetime.now().strftime("%Y%m%d%H%M%S")}.xlsx"'
+            wb.save(response)
+            return response
+
+        except Exception as e:
+            return HttpResponse(f"Error al generar el excel: {str(e)}", status=500)
+
+
+class SamplingAnalysisProcessingListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    model = SamplingAnalysisProcessing
+    template_name = 'report/list_sampling_analysis_processing.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action')
+            if action == 'searchdata':
+                items = []
+                date_from = request.POST.get('date_from')
+                date_to = request.POST.get('date_to')
+                analyzed_by = request.POST.get('analyzed_by')
+
+                filters = Q()
+                if date_from:
+                    date_from_dt = timezone.make_aware(datetime.strptime(date_from, '%Y-%m-%d'))
+                    filters &= Q(analyzed_date__gte=date_from_dt)
+                if date_to:
+                    date_to_dt = timezone.make_aware(datetime.strptime(f"{date_to} 23:59:59", '%Y-%m-%d %H:%M:%S'))
+                    filters &= Q(analyzed_date__lte=date_to_dt)
+                if analyzed_by:
+                    filters &= Q(analyzed_by_id=analyzed_by)
+
+                queryset = SamplingAnalysisProcessing.objects.filter(filters).select_related(
+                    'sample_analysis',
+                    'sample_analysis__analytical_method',
+                    'sample_analysis__sampling_process',
+                    'sample_analysis__sampling_process__point_sampling',
+                    'sample_analysis__sampling_process__point_sampling__product',
+                    'sample_analysis__sampling_process__group_sampling__sampling_point',
+                    'sample_analysis__sampling_process__group_sampling__sampling_point__product',
+                    'analyzed_by'
+                ).order_by('-analyzed_date')
+
+                for i in queryset:
+                    product = 'No aplica'
+                    unit = 'No aplica'
+
+                    if i.sample_analysis and i.sample_analysis.sampling_process:
+                        sampling_process = i.sample_analysis.sampling_process
+                        point = None
+                        
+                        if sampling_process.point_sampling:
+                            point = sampling_process.point_sampling
+                        elif sampling_process.group_sampling and sampling_process.group_sampling.sampling_point:
+                            point = sampling_process.group_sampling.sampling_point
+                        
+                        if point:
+                            product = str(point.product)
+                            first_spec = point.specification.first()
+                            if first_spec:
+                                unit = str(first_spec.unit_measure)
+
+                    item = {
+                        'analyzed_date': i.analyzed_date.strftime('%Y-%m-%d %H:%M'),
+                        'sample_analysis': str(i.sample_analysis.sampling_process.number_sample) if i.sample_analysis and i.sample_analysis.sampling_process else 'No aplica',
+                        'product': product,
+                        'method': str(i.sample_analysis.analytical_method),
+                        'unit': unit,
+                        'analyzed_by': str(i.analyzed_by.get_full_name()) + ', ' + str(i.analyzed_by.username),
+                        'concentration_sample': f"{i.concentration_sample} {unit}",
+                    }
+                    items.append(item)
+
+                data = {'data': items}
+
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Procesamiento de Muestras'
+        context['entity'] = 'Procesamiento de Muestras'
+        context['div'] = '12'
+        context['users'] = User.objects.filter(is_superuser=False).order_by('first_name')
+        return context
+
+
+class SamplingAnalysisProcessingExcelView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    permission_required = 'reagent.add_reagent'
+
+    def get(self, request, *args, **kwargs):
+        try:
+            date_from = request.GET.get('date_from')
+            date_to = request.GET.get('date_to')
+            analyzed_by = request.GET.get('analyzed_by')
+
+            filters = Q()
+            if date_from:
+                date_from_dt = timezone.make_aware(datetime.strptime(date_from, '%Y-%m-%d'))
+                filters &= Q(analyzed_date__gte=date_from_dt)
+            if date_to:
+                date_to_dt = timezone.make_aware(datetime.strptime(f"{date_to} 23:59:59", '%Y-%m-%d %H:%M:%S'))
+                filters &= Q(analyzed_date__lte=date_to_dt)
+            if analyzed_by:
+                filters &= Q(analyzed_by_id=analyzed_by)
+
+            queryset = SamplingAnalysisProcessing.objects.filter(filters).select_related(
+                'sample_analysis',
+                'sample_analysis__analytical_method',
+                'sample_analysis__sampling_process',
+                'sample_analysis__sampling_process__point_sampling',
+                'sample_analysis__sampling_process__point_sampling__product',
+                'sample_analysis__sampling_process__group_sampling__sampling_point',
+                'sample_analysis__sampling_process__group_sampling__sampling_point__product',
+                'analyzed_by'
+            ).order_by('-analyzed_date')
+
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Procesamiento de Muestras"
+
+            # Cabeceras
+            headers = [
+                'Fecha', 'Muestra', 'Producto', 'Método de Análisis', 
+                'Resultado', 'Analizado por'
+            ]
+            
+            # Estilos
+            header_font = Font(bold=True, color="FFFFFF")
+            header_fill = PatternFill(start_color="2A383E", end_color="2A383E", fill_type="solid")
+            alignment = Alignment(horizontal="center")
+            border = Border(
+                left=Side(style='thin'),
+                right=Side(style='thin'),
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
+
+            for col_num, header in enumerate(headers, 1):
+                cell = ws.cell(row=1, column=col_num, value=header)
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.alignment = alignment
+                cell.border = border
+
+            # Datos
+            for row_num, i in enumerate(queryset, 2):
+                product = 'No aplica'
+                unit = 'No aplica'
+
+                if i.sample_analysis and i.sample_analysis.sampling_process:
+                    sampling_process = i.sample_analysis.sampling_process
+                    point = None
+                    if sampling_process.point_sampling:
+                        point = sampling_process.point_sampling
+                    elif sampling_process.group_sampling and sampling_process.group_sampling.sampling_point:
+                        point = sampling_process.group_sampling.sampling_point
+                    
+                    if point:
+                        product = str(point.product)
+                        first_spec = point.specification.first()
+                        if first_spec:
+                            unit = str(first_spec.unit_measure)
+
+                row_data = [
+                    i.analyzed_date.strftime('%Y-%m-%d %H:%M'),
+                    str(i.sample_analysis.sampling_process.number_sample) if i.sample_analysis and i.sample_analysis.sampling_process else 'No aplica',
+                    product,
+                    str(i.sample_analysis.analytical_method),
+                    f"{i.concentration_sample} {unit}",
+                    str(i.analyzed_by.get_full_name()) + ', ' + str(i.analyzed_by.username)
+                ]
+
+                for col_num, value in enumerate(row_data, 1):
+                    cell = ws.cell(row=row_num, column=col_num, value=value)
+                    cell.border = border
+
+            # Ajustar ancho de columnas
+            for col in ws.columns:
+                max_length = 0
+                column = col[0].column_letter
+                for cell in col:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                adjusted_width = (max_length + 2)
+                ws.column_dimensions[column].width = adjusted_width
+
+            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = f'attachment; filename="procesamiento_muestras_{datetime.now().strftime("%Y%m%d%H%M%S")}.xlsx"'
             wb.save(response)
             return response
 
