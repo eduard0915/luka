@@ -18,7 +18,7 @@ class Product(BaseModel):
     version = models.PositiveIntegerField(default=1, verbose_name='Version')
 
     def __str__(self):
-        return str(self.code_product) + ' '  + str(self.description_product) + ' Versión ' + str(self.version)
+        return str(self.code_product) + ' '  + str(self.description_product) + ' v' + str(self.version)
 
     class Meta:
         verbose_name = 'Product'
