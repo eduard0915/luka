@@ -4,13 +4,13 @@ from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import CreateView, DetailView, DeleteView
+from django.views.generic import CreateView, DetailView, DeleteView, ListView, UpdateView
 
 from core.analytical_method.models import AnalyticalMethodCalculateRelation
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.models import SpecificationProduct, AnalyticalMethodProduct
 from core.sampling.forms import SamplingAnalysisProcessingForm, SamplingAnalysisProcessingRelationForm, \
-    SamplingAnalysisProcessingGravimetryForm
+    SamplingAnalysisProcessingGravimetryForm, SamplingAnalysisForm
 from core.sampling.models import *
 
 
@@ -421,3 +421,116 @@ class SamplingAnalysisProcessingRelationDeleteView(LoginRequiredMixin, ValidateP
         context['delete'] = 'Está seguro de eliminar calculo de parametro?'
         context['info_delete'] = f'{self.object.analytical_method_calculate_relation.calculate_description_relation}'
         return context
+
+
+class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    model = SamplingAnalysis
+    template_name = 'analysis_sampling/list_analysis.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action')
+            if action == 'searchdata':
+                data = []
+                for i in SamplingAnalysis.objects.all().select_related(
+                    'sampling_process',
+                    'sampling_process__group_sampling',
+                    'sampling_process__group_sampling__sampling_point',
+                    'sampling_process__point_sampling',
+                    'analytical_method'
+                ):
+                    data.append(i.toJSON())
+            elif action == 'delete':
+                pk = request.POST.get('id')
+                obj = SamplingAnalysis.objects.get(pk=pk)
+                obj.delete()
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Listado de Análisis de Muestras'
+        context['create_url'] = reverse_lazy('sampling:create_sampling_analysis')
+        context['list_url'] = reverse_lazy('sampling:list_sampling_analysis')
+        context['entity'] = 'Análisis de Muestras'
+        return context
+
+
+class SamplingAnalysisCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    model = SamplingAnalysis
+    form_class = SamplingAnalysisForm
+    template_name = 'analysis_sampling/create_analysis.html'
+    success_url = reverse_lazy('sampling:list_sampling_analysis')
+    permission_required = 'reagent.add_reagent'
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action')
+            if action == 'add':
+                form = self.get_form()
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, f'Método de Analisis Asociado Satisfactoriamente!')
+                    data['success'] = True
+                else:
+                    for field, errors in form.errors.items():
+                        for error in errors:
+                            if field == '__all__':
+                                messages.error(request, error)
+                            else:
+                                messages.error(request, f"{field}: {error}")
+                    data['success'] = False
+                    data['errors'] = form.errors
+            else:
+                data['error'] = 'No ha ingresado a ninguna opción'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        sampling_process = SamplingProcess.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'sampling_process': sampling_process})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Asociar Método de Analísis'
+        context['action'] = 'add'
+        return context
+
+
+class SamplingAnalysisDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DeleteView):
+    model = SamplingAnalysis
+    template_name = 'analysis_sampling/delete_analysis.html'
+    success_url = reverse_lazy('sampling:list_sampling_analysis')
+    permission_required = 'reagent.add_reagent'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            self.object.delete()
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Eliminación de Método de Análisis de Muestra'
+        context['info_delete'] = f'¿Está seguro de eliminar el método de análisis "{self.object.analytical_method}"?'
+        return context
+
