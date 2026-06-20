@@ -3,21 +3,21 @@
 
 {% block scripts_detail %}
     {{ block.super }}
-    <script src="{% static 'js/list_sampling_analysis_by_point.js' %}"></script>
+    <script src="{% static 'list_sampling_analysis_by_point.js' %}"></script>
 {% endblock %}
 
 {% block buttons %}
-    <li class="breadcrumb-item">
-        <button type="button" class="btn btn-success btn-sm btnExcel">
-            <i class="fa-solid fa-file-excel"></i> Descargar Excel
-        </button>
-    </li>
+{#    <li class="breadcrumb-item">#}
+{#        <button type="button" class="btn btn-success btn-sm btnExcel">#}
+{#            <i class="fa-solid fa-file-excel"></i> Descargar Excel#}
+{#        </button>#}
+{#    </li>#}
 {% endblock %}
 
 {% block content %}
     <div class="row mb-3">
-        <div class="col-md-6">
-            <label>Producto:</label>
+        <div class="col-md-3">
+            <label>Producto</label>
             <select class="form-control select2" name="product" id="id_product">
                 <option value="">---------</option>
                 {% for p in products %}
@@ -25,11 +25,24 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="col-md-6">
-            <label>Punto de Muestreo:</label>
+        <div class="col-md-3">
+            <label>Punto de Muestreo</label>
             <select class="form-control select2" name="sample_point" id="id_sample_point">
                 <option value="">---------</option>
             </select>
+        </div>
+        <div class="col-md-2">
+            <label>Fecha Inicio</label>
+            <input type="date" class="form-control" name="start_date" id="id_start_date">
+        </div>
+        <div class="col-md-2">
+            <label>Fecha Final</label>
+            <input type="date" class="form-control" name="end_date" id="id_end_date">
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="button" class="btn btn-success btnExcel">
+                <i class="fa-solid fa-file-excel"></i> Descargar Excel
+            </button>
         </div>
     </div>
 

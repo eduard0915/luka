@@ -16,6 +16,7 @@ from core.sampling.models import SamplingAnalysis, SamplingAnalysisProcessing
 from core.user.models import User
 
 
+# Reporte de Análisis por Método Analítico
 class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
     model = SamplingAnalysis
     template_name = 'report/list_sampling_analysis.html'
@@ -46,11 +47,22 @@ class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMix
                             Q(sampling_process__group_sampling__sampling_point__product_id=product_id)
                         )
 
+                    # Filtro por fecha de análisis
+                    start_date = request.POST.get('start_date')
+                    end_date = request.POST.get('end_date')
+
+                    if start_date and end_date:
+                        filters &= Q(date_analysis__range=[start_date, end_date + ' 23:59:59'])
+                    else:
+                        # Por defecto, año actual
+                        current_year = datetime.now().year
+                        filters &= Q(date_analysis__year=current_year)
+
                     analyses = SamplingAnalysis.objects.filter(filters).select_related(
                         'sampling_process',
                         'sampling_process__point_sampling',
                         'sampling_process__group_sampling__sampling_point'
-                    ).order_by('sampling_process__date_sampling')
+                    ).order_by('date_analysis')
 
                     # Obtener todos los puntos de muestreo asociados al producto
                     sample_points_query = SamplePoint.objects.filter(product_id=product_id).order_by('sequence')
@@ -71,7 +83,7 @@ class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMix
                     # Agrupar datos por fecha y hora
                     rows = {}
                     for a in analyses:
-                        dt_str = a.sampling_process.date_sampling.strftime('%Y-%m-%d %H:%M:%S') if a.sampling_process.date_sampling else 'N/A'
+                        dt_str = a.date_analysis.strftime('%Y-%m-%d %H:%M:%S') if a.date_analysis else 'N/A'
                         if dt_str not in rows:
                             rows[dt_str] = {'date_analysis': dt_str}
                             # Inicializar todos los puntos conocidos con vacío o N/A para esta fila
@@ -130,10 +142,120 @@ class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMix
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Reporte de Análisis por Método'
-        context['entity'] = 'Reporte de Análisis por Método de Análisis'
+        context['entity'] = 'Reporte de Análisis por Método Analítico'
         context['div'] = '12'
         context['products'] = Product.objects.filter(enable_product=True)
         return context
+
+
+class SamplingAnalysisExcelView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    permission_required = 'reagent.add_reagent'
+
+    def get(self, request, *args, **kwargs):
+        try:
+            product_id = request.GET.get('product')
+            method_id = request.GET.get('analytical_method')
+            start_date = request.GET.get('start_date')
+            end_date = request.GET.get('end_date')
+
+            if not method_id:
+                return HttpResponse("Método analítico no seleccionado", status=400)
+
+            filters = Q(analytical_method_id=method_id)
+            if product_id:
+                filters &= (
+                    Q(sampling_process__point_sampling__product_id=product_id) |
+                    Q(sampling_process__group_sampling__sampling_point__product_id=product_id)
+                )
+
+            if start_date and end_date:
+                filters &= Q(date_analysis__range=[start_date, end_date + ' 23:59:59'])
+            else:
+                current_year = datetime.now().year
+                filters &= Q(date_analysis__year=current_year)
+
+            analyses = SamplingAnalysis.objects.filter(filters).select_related(
+                'sampling_process',
+                'sampling_process__point_sampling',
+                'sampling_process__group_sampling__sampling_point',
+                'analytical_method'
+            ).order_by('date_analysis')
+
+            sample_points_query = SamplePoint.objects.filter(product_id=product_id).order_by('sequence')
+            sample_points = [p.sample_point_name for p in sample_points_query]
+
+            if not sample_points:
+                found_points = set()
+                for a in analyses:
+                    if a.sampling_process.point_sampling:
+                        found_points.add(a.sampling_process.point_sampling.sample_point_name)
+                    elif a.sampling_process.group_sampling and a.sampling_process.group_sampling.sampling_point:
+                        found_points.add(a.sampling_process.group_sampling.sampling_point.sample_point_name)
+                sample_points = sorted(list(found_points))
+
+            rows = {}
+            for a in analyses:
+                dt_str = a.date_analysis.strftime('%Y-%m-%d %H:%M:%S') if a.date_analysis else 'N/A'
+                if dt_str not in rows:
+                    rows[dt_str] = {'date_analysis': dt_str}
+                    for sp in sample_points:
+                        rows[dt_str][sp] = '-'
+
+                point_name = None
+                if a.sampling_process.point_sampling:
+                    point_name = a.sampling_process.point_sampling.sample_point_name
+                elif a.sampling_process.group_sampling and a.sampling_process.group_sampling.sampling_point:
+                    point_name = a.sampling_process.group_sampling.sampling_point.sample_point_name
+
+                if point_name:
+                    if point_name not in sample_points:
+                        sample_points.append(point_name)
+                        for r_key in rows:
+                            if point_name not in rows[r_key]:
+                                rows[r_key][point_name] = '-'
+                    rows[dt_str][point_name] = a.average_concentration
+
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Reporte de Análisis"
+
+            # Estilos
+            header_font = Font(bold=True, color="FFFFFF")
+            header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+            alignment = Alignment(horizontal="center", vertical="center")
+            border = Border(
+                left=Side(style='thin'),
+                right=Side(style='thin'),
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
+
+            # Encabezados
+            headers = ['Fecha y Hora'] + sample_points
+            for col_num, header in enumerate(headers, 1):
+                cell = ws.cell(row=1, column=col_num, value=header)
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.alignment = alignment
+                cell.border = border
+                ws.column_dimensions[ws.cell(row=1, column=col_num).column_letter].width = 20
+
+            # Datos
+            for row_num, (dt, row_data) in enumerate(rows.items(), 2):
+                ws.cell(row=row_num, column=1, value=dt).border = border
+                for col_num, point in enumerate(sample_points, 2):
+                    value = row_data.get(point, '-')
+                    cell = ws.cell(row=row_num, column=col_num, value=value)
+                    cell.border = border
+                    cell.alignment = alignment
+
+            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = f'attachment; filename="reporte_analisis_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
+            wb.save(response)
+            return response
+
+        except Exception as e:
+            return HttpResponse(f"Error generando Excel: {str(e)}", status=500)
 
 
 class SamplingAnalysisChartView(LoginRequiredMixin, ValidatePermissionRequiredMixin, TemplateView):
@@ -355,6 +477,8 @@ class SamplingAnalysisByPointListView(LoginRequiredMixin, ValidatePermissionRequ
             if action == 'searchdata':
                 product_id = request.POST.get('product')
                 sample_point_id = request.POST.get('sample_point')
+                start_date = request.POST.get('start_date')
+                end_date = request.POST.get('end_date')
 
                 if not sample_point_id:
                     data = {
@@ -362,10 +486,16 @@ class SamplingAnalysisByPointListView(LoginRequiredMixin, ValidatePermissionRequ
                         'data': []
                     }
                 else:
-                    filters = (
+                    filters = Q()
+                    filters &= (
                         Q(sampling_process__point_sampling_id=sample_point_id) |
                         Q(sampling_process__group_sampling__sampling_point_id=sample_point_id)
                     )
+
+                    if start_date:
+                        filters &= Q(sampling_process__date_sampling__date__gte=start_date)
+                    if end_date:
+                        filters &= Q(sampling_process__date_sampling__date__lte=end_date)
                     
                     analyses = SamplingAnalysis.objects.filter(filters).select_related(
                         'sampling_process',
@@ -438,14 +568,22 @@ class SamplingAnalysisByPointExcelView(LoginRequiredMixin, ValidatePermissionReq
         try:
             product_id = request.GET.get('product')
             sample_point_id = request.GET.get('sample_point')
+            start_date = request.GET.get('start_date')
+            end_date = request.GET.get('end_date')
 
             if not sample_point_id:
                 return HttpResponse("Debe seleccionar un punto de muestreo", status=400)
 
-            filters = (
+            filters = Q()
+            filters &= (
                 Q(sampling_process__point_sampling_id=sample_point_id) |
                 Q(sampling_process__group_sampling__sampling_point_id=sample_point_id)
             )
+
+            if start_date:
+                filters &= Q(sampling_process__date_sampling__date__gte=start_date)
+            if end_date:
+                filters &= Q(sampling_process__date_sampling__date__lte=end_date)
 
             analyses = SamplingAnalysis.objects.filter(filters).select_related(
                 'sampling_process',
@@ -548,6 +686,7 @@ class SamplingAnalysisByPointExcelView(LoginRequiredMixin, ValidatePermissionReq
             return HttpResponse(f"Error al generar el excel: {str(e)}", status=500)
 
 
+# Procesamiento de Muestras por Analista
 class SamplingAnalysisProcessingListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
     model = SamplingAnalysisProcessing
     template_name = 'report/list_sampling_analysis_processing.html'
@@ -629,12 +768,13 @@ class SamplingAnalysisProcessingListView(LoginRequiredMixin, ValidatePermissionR
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Procesamiento de Muestras'
-        context['entity'] = 'Procesamiento de Muestras'
+        context['entity'] = 'Procesamiento de Muestras por Analista'
         context['div'] = '12'
         context['users'] = User.objects.filter(is_superuser=False).order_by('first_name')
         return context
 
 
+# Descarga Procesamiento de Muestras por Analista
 class SamplingAnalysisProcessingExcelView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
     permission_required = 'reagent.add_reagent'
 

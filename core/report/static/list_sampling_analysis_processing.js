@@ -35,7 +35,7 @@ function loadData() {
         columnDefs: [
             {
                 targets: ['_all'],
-                class: 'text-center',
+                class: 'text-center align-middle',
                 defaultContent: '-'
             }
         ],
