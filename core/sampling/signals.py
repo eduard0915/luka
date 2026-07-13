@@ -87,7 +87,7 @@ def update_sampling_analysis(sender, instance, **kwargs):
         sampling_analysis.average_concentration = instance.concentration_sample
 
         # Actualizar fecha y hora de analisis
-        sampling_analysis.date_analysis = timezone.localtime()
+        sampling_analysis.date_analysis = timezone.now()
 
         # Determinar cumplimiento
         sampling_point = _get_sampling_point(sampling_analysis.sampling_process)

@@ -449,3 +449,66 @@ class AnalyticalMethodVariableForm(ModelForm):
             data['error'] = str(e)
         return data
 
+
+class SolutionStdBackValuationForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = SolutionStdBackValuation
+        fields = ['solution_std', 'volume_std_back']
+        widgets = {
+            'solution_std': Select(attrs={'class': 'form-control', 'required': True}),
+            'volume_std_back': TextInput(attrs={'class': 'form-control', 'required': True})
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+class SolutionStdBackValuationSpentForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = SolutionStdBackValuation
+        fields = ['solution_std', 'volume_std_back']
+        widgets = {
+            'solution_std': Select(attrs={'class': 'form-control', 'required': True}),
+            'volume_std_back': TextInput(attrs={'class': 'form-control', 'required': True, 'value': 0}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data

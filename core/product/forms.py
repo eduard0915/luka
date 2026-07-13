@@ -45,6 +45,14 @@ class ProductForm(ModelForm):
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
+        col_classes = {
+            'code_product': 'col-md-4',
+            'description_product': 'col-md-8',
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-4')
+
     class Meta:
         model = Product
         fields = ['code_product', 'description_product']

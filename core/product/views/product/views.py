@@ -52,7 +52,7 @@ class ProductCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
         context['action'] = 'add'
         context['entity'] = 'Creación de Producto'
         context['title'] = 'Creación de Producto'
-        context['div'] = '10'
+        context['div'] = '6'
         context['list_url'] = self.success_url
         return context
 

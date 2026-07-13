@@ -30,9 +30,10 @@
         {% url 'sampling:list_sampling_process' as list_sampling %}
         {% url 'sampling:list_sampling_process_scheduled' as list_sampling_sch %}
         {% url 'sampling:list_sampling_process_confirmed' as list_sampling_conf %}
+        {% url 'sampling:list_sampling_analysis_processing' as list_processing %}
         {% url 'sampling:create_sampling_process' as create_sampling %}
 
-        {% is_expanded create_method list_method list_sampling create_sampling as analysis_expanded %}
+        {% is_expanded create_method list_method list_sampling create_sampling list_processing as analysis_expanded %}
 
         {% is_active_section create_method list_method as method_active %}
 
@@ -48,9 +49,8 @@
                         <i class="icon bi bi-circle-fill"></i>Métodos
                     </a>
                 </li>
-                <li><a class="treeview-item {% if list_sampling in request.path %}active{% endif %}" href="{% url 'sampling:list_sampling_process' %}"><i class="icon bi bi-circle-fill"></i>
-                    Muestreos</a>
-                </li>
+                <li><a class="treeview-item {% if list_sampling in request.path %}active{% endif %}" href="{% url 'sampling:list_sampling_process' %}"><i class="icon bi bi-circle-fill"></i>Muestreos</a></li>
+                <li><a class="treeview-item {% if list_processing in request.path %}active{% endif %}" href="{% url 'sampling:list_sampling_analysis_processing' %}"><i class="icon bi bi-circle-fill"></i>Procesamiento/Analista</a></li>
             </ul>
         </li>
 

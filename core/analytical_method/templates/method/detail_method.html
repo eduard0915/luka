@@ -452,6 +452,143 @@
                                                     </div>
                                                 {% endif %}
                                             </div>
+                                        {% elif object.type_method == 'Volumetrico por Retroceso' %}
+                                            <div class="row g-2">
+                                                <!-- Botones en una sola fila -->
+                                                <div class="col-12">
+                                                    <div class="d-flex gap-2 flex-wrap">
+                                                        {% if not inst_desc %}
+                                                            <button type="button"
+                                                                    class="btn btn-outline-primary btn-sm"
+                                                                    onclick="open_modal('{% url 'analytical_method:add_calc_description' object.id %}')">
+                                                                <i class="bi bi-file-text me-1"></i>
+                                                                <small>Descripción Cálculo</small>
+                                                            </button>
+                                                        {% endif %}
+
+                                                        <button type="button"
+                                                                class="btn btn-outline-primary btn-sm"
+                                                                onclick="open_modal('{% url 'analytical_method:add_factor' object.id %}')">
+                                                            <i class="bi bi-123 me-1"></i>
+                                                            <small>Constante</small>
+                                                        </button>
+
+                                                        {% if not volumen_std %}
+                                                            <button type="button"
+                                                                    class="btn btn-outline-primary btn-sm"
+                                                                    onclick="open_modal('{% url 'analytical_method:add_solution_std_spent' object.id %}')">
+                                                                <i class="bi bi-droplet me-1"></i>
+                                                                <small>Volumen Estándar</small>
+                                                            </button>
+                                                        {% endif %}
+                                                        {% if not volumen_std_back %}
+                                                            <button type="button"
+                                                                    class="btn btn-outline-primary btn-sm"
+                                                                    onclick="open_modal('{% url 'analytical_method:add_solution_std_back' object.id %}')">
+                                                                <i class="bi bi-droplet me-1"></i>
+                                                                <small>Estándar por Retroceso</small>
+                                                            </button>
+                                                        {% endif %}
+
+                                                        {% if not sample_quantity %}
+                                                            <button type="button"
+                                                                    class="btn btn-outline-primary btn-sm"
+                                                                    onclick="open_modal('{% url 'analytical_method:add_sample_gram' object.id %}')">
+                                                                <i class="bi bi-droplet me-1"></i>
+                                                                <small>Cantidad de Muestra</small>
+                                                            </button>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+
+                                                {% if calcules or volumen_std_back %}
+                                                    <div class="col-12 mt-3">
+                                                        <table class="table table-sm table-bordered">
+                                                            <thead>
+                                                            <tr>
+                                                                <th class="text-center" style="width: 59%;">
+                                                                    Descripción
+                                                                </th>
+                                                                <th class="text-center" style="width: 24%;">Posición
+                                                                </th>
+                                                                <th class="text-center" style="width: 17%;">Acciones
+                                                                </th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            {% if calcules_back %}
+                                                                {% for std_back in calcules_back %}
+                                                                    <tr>
+                                                                        <td class="text-left align-middle">
+                                                                            Solución STD para Retroceso: {{ std_back.solution_std }}
+                                                                            <br>
+                                                                            Volumen: {{ std_back.volume_std_back }} mL
+                                                                        </td>
+                                                                        <td class="text-center">No aplica</td>
+                                                                        <td class="text-center">
+                                                                            <a href="javascript:void(0);"
+                                                                               onclick="open_modal('{% url 'analytical_method:delete_solution_std_back' std_back.id %}')"
+                                                                               class="btn btn-link btn-sm p-0 text-primary">
+                                                                                <i class="bi bi-trash-fill text-danger"></i>
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                            {% for calc in calcules %}
+                                                                <tr>
+                                                                    <td class="text-left align-middle">
+                                                                        {% if calc.calculate_description %}
+                                                                            Descripción:
+                                                                            {{ calc.calculate_description }}
+                                                                        {% elif calc.volumen_std %}
+                                                                            Volumen STD: {{ calc.volumen_std }}
+                                                                        {% elif calc.factor %}
+                                                                            Constante: {{ calc.factor }}
+                                                                        {% elif calc.sample_quantity %}
+                                                                            Cant. Muestra: {{ calc.sample_quantity }}
+                                                                        {% endif %}
+                                                                    </td>
+                                                                    <td class="text-center">{{ calc.position|default:"No aplica" }}</td>
+                                                                    <td class="text-center">
+                                                                        {% if calc.calculate_description %}
+                                                                            <a href="javascript:void(0);"
+                                                                               onclick="open_modal('{% url 'analytical_method:edit_calc_description' calc.id %}')"
+                                                                               class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                                <i class="bi bi-pencil text-warning"></i>
+                                                                            </a>
+                                                                        {% elif calc.volumen_std %}
+                                                                            <a href="javascript:void(0);"
+                                                                               onclick="open_modal('{% url 'analytical_method:edit_volume_std' calc.id %}')"
+                                                                               class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                                <i class="bi bi-pencil text-warning"></i>
+                                                                            </a>
+                                                                        {% elif calc.factor %}
+                                                                            <a href="javascript:void(0);"
+                                                                               onclick="open_modal('{% url 'analytical_method:edit_factor' calc.id %}')"
+                                                                               class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                                <i class="bi bi-pencil text-warning"></i>
+                                                                            </a>
+                                                                        {% elif calc.sample_quantity %}
+                                                                            <a href="javascript:void(0);"
+                                                                               onclick="open_modal('{% url 'analytical_method:edit_sample_gram' calc.id %}')"
+                                                                               class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                                <i class="bi bi-pencil text-warning"></i>
+                                                                            </a>
+                                                                        {% endif %}
+                                                                        <a href="javascript:void(0);"
+                                                                           onclick="open_modal('{% url 'analytical_method:delete_analytical_method_calcule' calc.id %}')"
+                                                                           class="btn btn-link btn-sm p-0 text-primary">
+                                                                            <i class="bi bi-trash-fill text-danger"></i>
+                                                                        </a>
+                                                                    </td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
                                         {% elif object.type_method == 'Gravimetrico' %}
                                             <div class="row g-2">
                                                 <!-- Botones en una sola fila -->
@@ -580,19 +717,37 @@
                                             </h5>
                                         </div>
                                         <div class="col-md-12">
-                                            <div class="p-3 bg-light rounded text-center" id="equation-container">
-                                                {% if final_equation %}
-                                                    <div style="font-size: 0.8rem; overflow-x: auto; font-family: 'Times New Roman', serif;">
-                                                        $${{ final_equation }}$$
-                                                    </div>
-                                                {% else %}
-                                                    <div class="py-3 text-center text-muted">
-                                                        <i class="bi bi-inbox"></i> No hay parámetros definidos para
-                                                        generar
-                                                        la ecuación.
-                                                    </div>
-                                                {% endif %}
-                                            </div>
+                                            {% if object.type_method == 'Volumetrico' or object.type_method == 'Gravimetrico' %}
+                                                <div class="p-3 bg-light rounded text-center" id="equation-container">
+                                                    {% if final_equation %}
+                                                        <div style="font-size: 0.8rem; overflow-x: auto; font-family: 'Times New Roman', serif;">
+                                                            $${{ final_equation }}$$
+                                                        </div>
+                                                    {% else %}
+                                                        <div class="py-3 text-center text-muted">
+                                                            <i class="bi bi-inbox"></i> No hay parámetros definidos para
+                                                            generar
+                                                            la ecuación.
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            {% elif object.type_method == 'Volumetrico por Retroceso' %}
+                                                <div class="p-3 bg-light rounded text-center">
+                                                    {% if volumen_std_back %}
+                                                        {% for std_back in calcules_back %}
+                                                            <div style="font-size: 0.8rem; overflow-x: auto; font-family: 'Times New Roman', serif;">
+                                                                Milimoles Adicionados = {{ std_back.solution_std }} x {{ std_back.volume_std_back }} mL
+                                                            </div>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <div class="py-3 text-center text-muted">
+                                                            <i class="bi bi-inbox"></i> No hay parámetros definidos para
+                                                            generar
+                                                            la ecuación.
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>

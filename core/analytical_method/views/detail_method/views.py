@@ -7,10 +7,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, UpdateView, DeleteView, DetailView
 
 from core.mixins import ValidatePermissionRequiredMixin
-from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodSolution, AnalyticalMethodSolutionStd, \
-    AnalyticalMethodReagent, AnalyticalMethodEquipment, AnalyticalMethodMaterial, AnalyticalMethodProcedure
-from core.analytical_method.forms import AnalyticalMethodSolutionForm, AnalyticalMethodSolutionStdForm, \
-    AnalyticalMethodReagentForm, AnalyticalMethodEquipmentForm, AnalyticalMethodMaterialForm, AnalyticalMethodProcedureForm
+from core.analytical_method.models import *
+from core.analytical_method.forms import *
 
 
 class BaseAnalyticalMethodDetailView(ValidatePermissionRequiredMixin):
@@ -221,3 +219,52 @@ class AnalyticalMethodDetailDeleteView(LoginRequiredMixin, ValidatePermissionReq
         except Exception as e:
             data['error'] = str(e)
         return JsonResponse(data)
+
+
+# Solución Estándar Adicionada en valoración por Retroceso
+class SolutionStdBackValuationCreateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, CreateView):
+    model = SolutionStdBackValuation
+    form_class = SolutionStdBackValuationForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Solución Estándar Adicionada en Valoración por Retroceso'
+        context['action'] = 'add'
+        return context
+
+
+# Solución Estándar Gastada en valoración por Retroceso
+class SolutionStdBackValuationSpentCreateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, CreateView):
+    model = SolutionStdBackValuation
+    form_class = SolutionStdBackValuationSpentForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Solución Estándar a Gastar en Valoración por Retroceso'
+        context['action'] = 'add'
+        return context
+
+
+class SolutionStdBackValuationDeleteView(AnalyticalMethodDetailDeleteView):
+    model = SolutionStdBackValuation
+    template_name = 'method/delete_method_calcule.html'
+    permission_required = 'analytical_method.view_analyticalmethod'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            self.object.delete()
+            messages.success(self.request, 'Variable de Ecuación eliminada satisfactoriamente!')
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Eliminar Variable de Ecuación'
+        context['delete'] = 'Está seguro de eliminar la variable de la ecuación?'
+        return context
