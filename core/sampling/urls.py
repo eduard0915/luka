@@ -36,6 +36,7 @@ urlpatterns = [
     path('analysis/processing/relation/delete/<uuid:pk>/', SamplingAnalysisProcessingRelationDeleteView.as_view(), name='delete_sampling_analysis_processing_relation'),
     # Análisis de la Muestra (CRUD)
     path('analysis/list/', SamplingAnalysisListView.as_view(), name='list_sampling_analysis'), # Sin usar
+    path('analysis/processing/list/', SamplingAnalysisProcessingListView.as_view(), name='list_sampling_analysis_processing'),
     path('analysis/add/<uuid:pk>/', SamplingAnalysisCreateView.as_view(), name='create_sampling_analysis'),
     path('analysis/delete/<uuid:pk>/', SamplingAnalysisDeleteView.as_view(), name='delete_sampling_analysis'),
 ]

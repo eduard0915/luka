@@ -1,0 +1,28 @@
+{% extends 'list_one.html' %}
+{% load static %}
+
+{% block head_list %}
+{% endblock %}
+
+{% block scripts_detail %}
+    <!-- Data table plugin-->
+    <script src="{% static 'lib/vali-admin/js/plugins/jquery.dataTables.min.js' %}"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-1.13.4/datatables.min.css">
+    <script src="{% static 'analysis_sampling/list_processing.js' %}"></script>
+{% endblock %}
+
+{% block buttons %}
+{% endblock %}
+
+{% block columns %}
+    <tr>
+        <th class="text-md-center" style="width: 26%">Analista</th>
+        <th class="text-md-center" style="width: 18%">Fecha Análisis</th>
+        <th class="text-md-center" style="width: 12%">Concentración</th>
+        <th class="text-md-center" style="width: 18%">Muestra</th>
+        <th class="text-md-center" style="width: 26%">Método</th>
+    </tr>
+{% endblock %}
+
+{% block rows %}
+{% endblock %}

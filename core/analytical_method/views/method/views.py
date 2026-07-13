@@ -1,5 +1,3 @@
-
-
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
@@ -10,7 +8,8 @@ from django.views.generic import CreateView, UpdateView, DetailView, ListView
 from django import forms
 
 from core.mixins import ValidatePermissionRequiredMixin
-from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation
+from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate, \
+    AnalyticalMethodCalculateRelation, SolutionStdBackValuation
 from core.analytical_method.forms import AnalyticalMethodForm
 
 
@@ -198,7 +197,9 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['procedures'] = self.object.analyticalmethodprocedure_set.all()
 
         calcules = AnalyticalMethodCalculate.objects.select_related('analytical_method').filter(analytical_method=self.object).order_by('-date_creation')
+        calcules_back = SolutionStdBackValuation.objects.select_related('analytical_method').filter(analytical_method=self.object).order_by('-date_creation')
         context['calcules'] = calcules
+        context['calcules_back'] = calcules_back
 
         inst_desc = calcules.exclude(calculate_description__isnull=True).exclude(calculate_description="").first()
         inst_unit = calcules.exclude(unit_measure_calculate__isnull=True).exclude(unit_measure_calculate="").first()
@@ -206,13 +207,20 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['inst_desc'] = inst_desc
 
         show_dependent_toggle = False
+
         for calc in calcules:
             if calc.volumen_std or calc.factor or calc.sample_quantity:
                 show_dependent_toggle = True
                 break
+
+        for calc_back in calcules_back:
+            if calc_back.solution_std or calc_back.volume_std_back:
+                show_dependent_toggle = True
+                break
+
         context['show_dependent_toggle'] = show_dependent_toggle
 
-        if inst_desc or calcules.exists():
+        if inst_desc or calcules.exists() or calcules_back.exists():
             # 1. Obtener descripción y unidad
             desc = inst_desc.calculate_description if inst_desc else "Cálculo"
             unit = inst_unit.unit_measure_calculate if inst_unit else ""
@@ -223,10 +231,12 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                 return value and str(value).strip()
 
             volumen_std_list = [calc.volumen_std for calc in calcules if is_valid_value(calc.volumen_std)]
+            volumen_std_back_list = [calc_back.volume_std_back for calc_back in calcules_back if is_valid_value(calc_back.volume_std_back)]
             sample_quantity_list = [calc.sample_quantity for calc in calcules if is_valid_value(calc.sample_quantity)]
 
             # Asignar al contexto (None si están vacíos)
             context['volumen_std'] = volumen_std_list if volumen_std_list else None
+            context['volumen_std_back'] = volumen_std_back_list if volumen_std_back_list else None
             context['sample_quantity'] = sample_quantity_list if sample_quantity_list else None
 
             # 3. Construir términos para la ecuación
@@ -271,45 +281,5 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                 label += f" \\text{{ ({unit})}}"
 
             context['final_equation'] = f"{label} = \\frac{{{str_num}}}{{{str_den}}}{str_gen}"
-
-        # if inst_desc or calcules.exists():
-        #     desc = inst_desc.calculate_description if inst_desc else "Cálculo"
-        #     unit = inst_unit.unit_measure_calculate if inst_unit else ""
-        #
-        #     num_terms = []
-        #     den_terms = []
-        #     gen_terms = []
-        #
-        #     # 2. Iteramos TODAS las instancias para recolectar valores,
-        #     # sin importar si son la misma instancia que tiene la descripción
-        #     for calc in calcules:
-        #         parts = []
-        #         if calc.volumen_std: parts.append(str(calc.volumen_std))
-        #         if calc.factor: parts.append(str(calc.factor))
-        #         if calc.sample_quantity: parts.append(str(calc.sample_quantity))
-        #         context['volumen_std'] = [calc.volumen_std for calc in calcules if calc.volumen_std is not None]
-        #         context['sample_quantity'] = [calc.sample_quantity for calc in calcules if calc.sample_quantity is not None]
-        #
-        #         item_text = " \cdot ".join(parts)
-        #         if not item_text: continue
-        #
-        #         if calc.position == 'Numerador':
-        #             num_terms.append(item_text)
-        #         elif calc.position == 'Denominador':
-        #             den_terms.append(item_text)
-        #         elif calc.position == 'General':
-        #             gen_terms.append(item_text)
-        #
-        #     # 3. Construcción de la estructura LaTeX
-        #     str_num = " \cdot ".join(num_terms) if num_terms else "1"
-        #     str_den = " \cdot ".join(den_terms) if den_terms else "1"
-        #     str_gen = f" \cdot {' \cdot '.join(gen_terms)}" if gen_terms else ""
-        #
-        #     # Usamos \text{} para asegurar que espacios y tildes se vean bien
-        #     label = f"\\text{{{desc}}}"
-        #     if unit:
-        #         label += f" \\text{{ ({unit})}}"
-        #
-        #     context['final_equation'] = f"{label} = \\frac{{{str_num}}}{{{str_den}}}{str_gen}"
 
         return context

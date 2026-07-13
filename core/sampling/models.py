@@ -86,7 +86,7 @@ class SamplingProcess(BaseModel):
         return str(self.number_sample)
 
     def toJSON(self):
-        item = model_to_dict(self)
+        item = model_to_dict(self, exclude=['image_sample'])
         item['sampling_point'] = self.group_sampling.sampling_point.sample_point_name if self.group_sampling else self.point_sampling.sample_point_name
         item['date_sampling_scheduled'] = self.date_sampling_scheduled.strftime('%Y-%m-%d %H:%M:%S')
         item['date_sampling'] = self.date_sampling.strftime('%Y-%m-%d %H:%M:%S') if self.date_sampling else ''
@@ -215,6 +215,48 @@ class SamplingAnalysisProcessing(BaseModel):
         verbose_name = 'SamplingAnalysisProcessing'
         verbose_name_plural = 'SamplingAnalysisProcessing'
         db_table = 'SamplingAnalysisProcessing'
+
+    def toJSON(self):
+        item = model_to_dict(self)
+        item['sample_analysis'] = self.sample_analysis.toJSON()
+        item['analyzed_by'] = self.analyzed_by.get_full_name()
+        item['analyzed_date'] = self.analyzed_date.strftime('%Y-%m-%d %H:%M:%S')
+        unit = ""
+        if self.analytical_method_calculate:
+            unit = self.analytical_method_calculate.unit_measure_calculate
+        elif self.analytical_method_calculate_relation:
+            unit = self.analytical_method_calculate_relation.unit_measure_calculate
+        
+        if not unit and self.sample_analysis and self.sample_analysis.analytical_method:
+            # 1. Buscar en cálculos directos del método
+            calc = self.sample_analysis.analytical_method.analyticalmethodcalculate_set.first()
+            if calc:
+                unit = calc.unit_measure_calculate
+            
+            # 2. Si no hay, buscar en relaciones de cálculo (para productos específicos)
+            if not unit:
+                calc_rel = self.sample_analysis.analytical_method.analyticalmethodcalculaterelation_set.first()
+                if calc_rel:
+                    unit = calc_rel.unit_measure_calculate
+            
+            # 3. Si no hay, buscar en cualquier registro de AnalyticalMethodCalculate para este método
+            if not unit:
+                from core.analytical_method.models import AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation
+                fallback_calc = AnalyticalMethodCalculate.objects.filter(
+                    analytical_method=self.sample_analysis.analytical_method
+                ).exclude(unit_measure_calculate__isnull=True).exclude(unit_measure_calculate="").first()
+                if fallback_calc:
+                    unit = fallback_calc.unit_measure_calculate
+                else:
+                    # 4. Último recurso: buscar en cualquier relación de este método
+                    fallback_rel = AnalyticalMethodCalculateRelation.objects.filter(
+                        analytical_method=self.sample_analysis.analytical_method
+                    ).exclude(unit_measure_calculate__isnull=True).exclude(unit_measure_calculate="").first()
+                    if fallback_rel:
+                        unit = fallback_rel.unit_measure_calculate
+
+        item['concentration_sample_display'] = f"{format(self.concentration_sample, ' .2f')} {unit or ''}".strip()
+        return item
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
         user = get_current_user()

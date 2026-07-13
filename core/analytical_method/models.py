@@ -247,3 +247,28 @@ class AnalyticalMethodCalculateRelation(BaseModel):
             else:
                 self.user_updated = user
         return super(AnalyticalMethodCalculateRelation, self).save(*args, **kwargs)
+
+
+# Soluciones Estándares para Retrovaloración
+class SolutionStdBackValuation(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analítico', on_delete=models.CASCADE)
+    solution_std = models.ForeignKey(SolutionStdBase, verbose_name='Solución Estándar', on_delete=models.CASCADE)
+    volume_std_back = models.FloatField(verbose_name='Volumen Estándar (mL)')
+
+    def __str__(self):
+        return str(self.solution_std)
+
+    class Meta:
+        verbose_name = 'SolutionStdBackValuation'
+        verbose_name_plural = 'SolutionStdBackValuations'
+        db_table = 'SolutionStdBackValuation'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(SolutionStdBackValuation, self).save(*args, **kwargs)

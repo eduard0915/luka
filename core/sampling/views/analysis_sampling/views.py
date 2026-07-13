@@ -534,3 +534,41 @@ class SamplingAnalysisDeleteView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['info_delete'] = f'¿Está seguro de eliminar el método de análisis "{self.object.analytical_method}"?'
         return context
 
+
+class SamplingAnalysisProcessingListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    model = SamplingAnalysisProcessing
+    template_name = 'analysis_sampling/list_processing.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action')
+            if action == 'searchdata':
+                data = []
+                for i in SamplingAnalysisProcessing.objects.all().select_related(
+                    'sample_analysis',
+                    'sample_analysis__sampling_process',
+                    'sample_analysis__analytical_method',
+                    'analyzed_by',
+                    'analytical_method_calculate',
+                    'analytical_method_calculate_relation'
+                ):
+                    data.append(i.toJSON())
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Listado de Procesamiento de Análisis'
+        context['list_url'] = reverse_lazy('sampling:list_sampling_analysis_processing')
+        context['entity'] = 'Procesamiento de Análisis'
+        return context
+

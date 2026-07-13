@@ -51,6 +51,11 @@ urlpatterns = [
     path('detail/calculate/add_variable/<uuid:pk>/', AnalyticalMethodVariableCreateView.as_view(), name='add_variable'),
     path('detail/calculate/edit_sample_gram/<uuid:pk>/', AnalyticalMethodSampleGramUpdateView.as_view(), name='edit_sample_gram'),
     path('detail/calculate/delete/<uuid:pk>/', AnalyticalMethodCalculateDeleteView.as_view(), name='delete_analytical_method_calcule'),
+
+    # Soluciones Estándar por Retroceso
+    path('detail/solution_std_back/add/<uuid:pk>/', SolutionStdBackValuationCreateView.as_view(), name='add_solution_std_back'),
+    path('detail/solution_std_spent/add/<uuid:pk>/', SolutionStdBackValuationSpentCreateView.as_view(), name='add_solution_std_spent'),
+    path('detail/solution_std_back/delete/<uuid:pk>/', SolutionStdBackValuationDeleteView.as_view(), name='delete_solution_std_back'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
