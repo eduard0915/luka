@@ -492,10 +492,9 @@ class SolutionStdBackValuationSpentForm(ModelForm):
 
     class Meta:
         model = SolutionStdBackValuation
-        fields = ['solution_std', 'volume_std_back']
+        fields = ['solution_std']
         widgets = {
-            'solution_std': Select(attrs={'class': 'form-control', 'required': True}),
-            'volume_std_back': TextInput(attrs={'class': 'form-control', 'required': True, 'value': 0}),
+            'solution_std': Select(attrs={'class': 'form-control', 'required': True})
         }
 
     def save(self, commit=True):
@@ -505,6 +504,7 @@ class SolutionStdBackValuationSpentForm(ModelForm):
                 instance = super().save(commit=False)
                 if self.analytical_method:
                     instance.analytical_method = self.analytical_method
+                self.volume_std_back = 0
                 instance.save()
                 data = instance
             else:

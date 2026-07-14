@@ -465,15 +465,19 @@
                                                                 <small>Descripción Cálculo</small>
                                                             </button>
                                                         {% endif %}
-
                                                         <button type="button"
                                                                 class="btn btn-outline-primary btn-sm"
                                                                 onclick="open_modal('{% url 'analytical_method:add_factor' object.id %}')">
                                                             <i class="bi bi-123 me-1"></i>
                                                             <small>Constante</small>
                                                         </button>
-
-                                                        {% if not volumen_std %}
+                                                        <button type="button"
+                                                                class="btn btn-outline-primary btn-sm"
+                                                                onclick="open_modal('{% url 'analytical_method:add_variable' object.id %}')">
+                                                            <i class="bi bi-alphabet me-1"></i>
+                                                            <small>Variable</small>
+                                                        </button>
+                                                        {% if not volumen_std_spent %}
                                                             <button type="button"
                                                                     class="btn btn-outline-primary btn-sm"
                                                                     onclick="open_modal('{% url 'analytical_method:add_solution_std_spent' object.id %}')">
@@ -501,7 +505,7 @@
                                                     </div>
                                                 </div>
 
-                                                {% if calcules or volumen_std_back %}
+                                                {% if calcules or volumen_std_back or volumen_std_spent %}
                                                     <div class="col-12 mt-3">
                                                         <table class="table table-sm table-bordered">
                                                             <thead>
@@ -520,14 +524,29 @@
                                                                 {% for std_back in calcules_back %}
                                                                     <tr>
                                                                         <td class="text-left align-middle">
-                                                                            Solución STD para Retroceso: {{ std_back.solution_std }}
-                                                                            <br>
-                                                                            Volumen: {{ std_back.volume_std_back }} mL
+                                                                            Solución STD Adicionada para Retroceso: {{ std_back.solution_std }}, Volumen: {{ std_back.volume_std_back }} mL
                                                                         </td>
-                                                                        <td class="text-center">No aplica</td>
-                                                                        <td class="text-center">
+                                                                        <td class="text-center align-middle">No aplica</td>
+                                                                        <td class="text-center align-middle">
                                                                             <a href="javascript:void(0);"
                                                                                onclick="open_modal('{% url 'analytical_method:delete_solution_std_back' std_back.id %}')"
+                                                                               class="btn btn-link btn-sm p-0 text-primary">
+                                                                                <i class="bi bi-trash-fill text-danger"></i>
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                            {% if calcules_spent %}
+                                                                {% for std_spent in calcules_spent %}
+                                                                    <tr>
+                                                                        <td class="text-left align-middle">
+                                                                            Solución STD Valoración: {{ std_spent.solution_std }}, Volumen: mL Gastados
+                                                                        </td>
+                                                                        <td class="text-center align-middle">No aplica</td>
+                                                                        <td class="text-center align-middle">
+                                                                            <a href="javascript:void(0);"
+                                                                               onclick="open_modal('{% url 'analytical_method:delete_solution_std_back' std_spent.id %}')"
                                                                                class="btn btn-link btn-sm p-0 text-primary">
                                                                                 <i class="bi bi-trash-fill text-danger"></i>
                                                                             </a>
@@ -545,6 +564,8 @@
                                                                             Volumen STD: {{ calc.volumen_std }}
                                                                         {% elif calc.factor %}
                                                                             Constante: {{ calc.factor }}
+                                                                        {% elif calc.variable %}
+                                                                            Variable: {{ calc.variable }}
                                                                         {% elif calc.sample_quantity %}
                                                                             Cant. Muestra: {{ calc.sample_quantity }}
                                                                         {% endif %}
@@ -732,13 +753,45 @@
                                                     {% endif %}
                                                 </div>
                                             {% elif object.type_method == 'Volumetrico por Retroceso' %}
-                                                <div class="p-3 bg-light rounded text-center">
-                                                    {% if volumen_std_back %}
-                                                        {% for std_back in calcules_back %}
+                                                <div class="p-3 bg-light rounded text-left">
+                                                    {% if volumen_std_back or volumen_std_spent %}
+                                                        {% if volumen_std_back %}
+                                                            {% for std_back in calcules_back %}
+                                                                <div style="font-size: 0.8rem; overflow-x: auto; font-family: 'Times New Roman', serif;">
+                                                                    Milimoles de Sln Estándar Adicionados
+                                                                    = {{ std_back.solution_std }}
+                                                                    x {{ std_back.volume_std_back }} mL
+                                                                </div>
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                        <br>
+                                                        {% if volumen_std_spent %}
+                                                            {% for std_spent in calcules_spent %}
+                                                                <div style="font-size: 0.8rem; overflow-x: auto; font-family: 'Times New Roman', serif;">
+                                                                    Milimoles de Sln Estándar Gastados
+                                                                    = {{ std_spent.solution_std }} x mL Gastados
+                                                                </div>
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                        <br>
+                                                        {% if volumen_std_spent and volumen_std_back %}
                                                             <div style="font-size: 0.8rem; overflow-x: auto; font-family: 'Times New Roman', serif;">
-                                                                Milimoles Adicionados = {{ std_back.solution_std }} x {{ std_back.volume_std_back }} mL
+                                                                Milimoles de {% for std_back in calcules_back %}{{ std_back.solution_std.solute_std_base.description_reagent }}{% endfor %} que reaccionaron = Milimoles de Sln Estándar Adicionados - Milimoles de Sln Estándar Gastados
                                                             </div>
-                                                        {% endfor %}
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <div class="py-3 text-center text-muted">
+                                                            <i class="bi bi-inbox"></i> No hay parámetros definidos para
+                                                            generar
+                                                            la ecuación.
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="p-3 bg-light rounded text-center" id="equation-container">
+                                                    {% if final_equation %}
+                                                        <div style="font-size: 0.8rem; overflow-x: auto; font-family: 'Times New Roman', serif;">
+                                                            $${{ final_equation }}$$
+                                                        </div>
                                                     {% else %}
                                                         <div class="py-3 text-center text-muted">
                                                             <i class="bi bi-inbox"></i> No hay parámetros definidos para

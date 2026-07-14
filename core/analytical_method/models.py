@@ -254,7 +254,7 @@ class SolutionStdBackValuation(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analítico', on_delete=models.CASCADE)
     solution_std = models.ForeignKey(SolutionStdBase, verbose_name='Solución Estándar', on_delete=models.CASCADE)
-    volume_std_back = models.FloatField(verbose_name='Volumen Estándar (mL)')
+    volume_std_back = models.FloatField(verbose_name='Volumen Estándar (mL)', blank=True, null=True)
 
     def __str__(self):
         return str(self.solution_std)
