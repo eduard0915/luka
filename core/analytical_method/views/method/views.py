@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 from django.http import JsonResponse
 from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
@@ -197,9 +198,13 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['procedures'] = self.object.analyticalmethodprocedure_set.all()
 
         calcules = AnalyticalMethodCalculate.objects.select_related('analytical_method').filter(analytical_method=self.object).order_by('-date_creation')
-        calcules_back = SolutionStdBackValuation.objects.select_related('analytical_method').filter(analytical_method=self.object).order_by('-date_creation')
+        calcules_back = SolutionStdBackValuation.objects.select_related('analytical_method').filter(
+            analytical_method=self.object).filter(Q(volume_std_back__isnull=False) or Q(volume_std_back__gt=0)).order_by('-date_creation')
+        calcules_spent = SolutionStdBackValuation.objects.select_related('analytical_method').filter(
+            analytical_method=self.object).filter(Q(volume_std_back__isnull=True) or Q(volume_std_back=0)).order_by('-date_creation')
         context['calcules'] = calcules
         context['calcules_back'] = calcules_back
+        context['calcules_spent'] = calcules_spent
 
         inst_desc = calcules.exclude(calculate_description__isnull=True).exclude(calculate_description="").first()
         inst_unit = calcules.exclude(unit_measure_calculate__isnull=True).exclude(unit_measure_calculate="").first()
@@ -218,6 +223,11 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                 show_dependent_toggle = True
                 break
 
+        for calc_spent in calcules_spent:
+            if calc_spent.solution_std or calc_spent.volume_std_back:
+                show_dependent_toggle = True
+                break
+
         context['show_dependent_toggle'] = show_dependent_toggle
 
         if inst_desc or calcules.exists() or calcules_back.exists():
@@ -232,11 +242,13 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
 
             volumen_std_list = [calc.volumen_std for calc in calcules if is_valid_value(calc.volumen_std)]
             volumen_std_back_list = [calc_back.volume_std_back for calc_back in calcules_back if is_valid_value(calc_back.volume_std_back)]
+            volumen_std_spent_list = [calc_spent.volume_std_back for calc_spent in calcules_back if is_valid_value(calc_spent.volume_std_back)]
             sample_quantity_list = [calc.sample_quantity for calc in calcules if is_valid_value(calc.sample_quantity)]
 
             # Asignar al contexto (None si están vacíos)
             context['volumen_std'] = volumen_std_list if volumen_std_list else None
             context['volumen_std_back'] = volumen_std_back_list if volumen_std_back_list else None
+            context['volumen_std_spent'] = volumen_std_spent_list if volumen_std_spent_list else None
             context['sample_quantity'] = sample_quantity_list if sample_quantity_list else None
 
             # 3. Construir términos para la ecuación
