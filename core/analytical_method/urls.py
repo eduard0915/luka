@@ -1,6 +1,7 @@
 from django.conf.urls.static import static
 from django.urls import path
 
+from analytical_method.views.calculate_relation.views import *
 from core.analytical_method.views.calculate.views import *
 from core.analytical_method.views.method.views import *
 from core.analytical_method.views.detail_method.views import *
@@ -51,6 +52,19 @@ urlpatterns = [
     path('detail/calculate/add_variable/<uuid:pk>/', AnalyticalMethodVariableCreateView.as_view(), name='add_variable'),
     path('detail/calculate/edit_sample_gram/<uuid:pk>/', AnalyticalMethodSampleGramUpdateView.as_view(), name='edit_sample_gram'),
     path('detail/calculate/delete/<uuid:pk>/', AnalyticalMethodCalculateDeleteView.as_view(), name='delete_analytical_method_calcule'),
+
+    # Cálculos Relacionados
+    path('detail/calculate_relation/add_description/<uuid:pk>/', AnalyticalMethodCalculeRelationDescriptionCreateView.as_view(), name='add_calc_relation_description'),
+    path('detail/calculate_relation/edit_description/<uuid:pk>/', AnalyticalMethodCalculeRelationDescriptionUpdateView.as_view(), name='edit_calc_relation_description'),
+    path('detail/calculate_relation/add_relation/<uuid:pk>/', AnalyticalMethodCalculateRelationCreateView.as_view(), name='add_calc_relation'),
+    path('detail/calculate_relation/edit_relation/<uuid:pk>/', AnalyticalMethodCalculateRelationUpdateView.as_view(), name='edit_calc_relation'),
+    path('detail/calculate_relation/add_volumen_std_den/<uuid:pk>/', AnalyticalMethodVolumenStdRelationCreateView.as_view(), name='add_volume_relation_std'),
+    path('detail/calculate_relation/edit_volumen_std_den/<uuid:pk>/', AnalyticalMethodVolumenStdRelationUpdateView.as_view(), name='edit_volume_relation_std'),
+    path('detail/calculate_relation/add_factor_den/<uuid:pk>/', AnalyticalMethodFactorRelationCreateView.as_view(), name='add_factor_relation'),
+    path('detail/calculate_relation/edit_factor_den/<uuid:pk>/', AnalyticalMethodFactorRelationUpdateView.as_view(), name='edit_factor_relation'),
+    path('detail/calculate_relation/add_sample_gram/<uuid:pk>/', AnalyticalMethodSampleGramRelationCreateView.as_view(), name='add_sample_gram_relation'),
+    path('detail/calculate_relation/edit_sample_gram/<uuid:pk>/', AnalyticalMethodSampleGramRelationUpdateView.as_view(), name='edit_sample_gram_relation'),
+    path('detail/calculate_relation/delete/<uuid:pk>/', AnalyticalMethodCalculateRelationDeleteView.as_view(), name='delete_analytical_method_calcule_relation'),
 
     # Soluciones Estándar por Retroceso
     path('detail/solution_std_back/add/<uuid:pk>/', SolutionStdBackValuationCreateView.as_view(), name='add_solution_std_back'),
