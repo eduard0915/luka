@@ -1,18 +1,35 @@
 import uuid
 
 from crum import get_current_user
-from django.db import models
+from django.db import models, transaction
+from django.utils import timezone
 
 from core.company.models import Site
 from core.models import BaseModel
 from core.user.models import User
 
 
+# Generador de códigos de reactivos
+def code_reagent_generator():
+    """
+    Genera el siguiente código secuencial de forma segura bloqueando la fila.
+    Inicia en 1000001 y aumenta de 1 en 1.
+    """
+    last_reagent = Reagent.objects.select_for_update().filter(code_reagent__regex=r'^\d+$').order_by('-code_reagent').first()
+
+    if not last_reagent:
+        return "1000001"
+
+    current_number = int(last_reagent.code_reagent)
+    new_number = current_number + 1
+    return str(new_number)
+
+
 # Reactivos
 class Reagent(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     description_reagent = models.CharField(max_length=200, verbose_name='Descripción')
-    code_reagent = models.CharField(max_length=20, verbose_name='Código')
+    code_reagent = models.CharField(max_length=20, verbose_name='Código', unique=True, blank=True)
     technical_sheet = models.FileField(
         upload_to='technical_sheet/%Y%m%d', verbose_name='Ficha Técnica', null=True, blank=True)
     enable_reagent = models.BooleanField(default=True, verbose_name='Habilitado')
@@ -23,12 +40,12 @@ class Reagent(BaseModel):
     molecular_weight = models.FloatField(verbose_name='Gramos/mol')
     gram_equivalent = models.FloatField(verbose_name='Eq-gramo')
     stability_solution = models.PositiveSmallIntegerField(verbose_name='Días Estabilidad en Solución', null=True, blank=True)
-    volumetric = models.BooleanField(default=False, verbose_name='Volumétrico')
-    solvent = models.BooleanField(default=False, verbose_name='Solvente')
-    density_enable = models.BooleanField(default=False, verbose_name='Densidad')
+    volumetric = models.BooleanField(default=False, verbose_name='Uso Volumétrico?')
+    solvent = models.BooleanField(default=False, verbose_name='Uso como Solvente?')
+    density_enable = models.BooleanField(default=False, verbose_name='Usa Densidad?')
     sig_figs_solution = models.PositiveSmallIntegerField(default=2, verbose_name='Cifras Significativas')
-    standard = models.BooleanField(default=False, verbose_name='Estándar')
-    ready_to_use = models.BooleanField(verbose_name='STD Listo para Usar', default=False)
+    standard = models.BooleanField(default=False, verbose_name='Es Estándar?')
+    ready_to_use = models.BooleanField(verbose_name='STD Listo para Usar?', default=False)
 
     def __str__(self):
         return str(self.code_reagent) + ' '  + str(self.description_reagent)
@@ -38,13 +55,21 @@ class Reagent(BaseModel):
         verbose_name_plural = 'Reagents'
         db_table = 'Reagent'
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+    def save(self, *args, **kwargs):
         user = get_current_user()
         if user:
             if not self.user_creation:
                 self.user_creation = user
             else:
                 self.user_updated = user
+
+        # Automatización del código con protección de concurrencia
+        if not self.code_reagent:
+            # Envolvemos en una transacción atómica para que el select_for_update funcione
+            with transaction.atomic(using=kwargs.get('using')):
+                self.code_reagent = code_reagent_generator()
+                return super(Reagent, self).save(*args, **kwargs)
+
         return super(Reagent, self).save(*args, **kwargs)
 
 
@@ -70,7 +95,7 @@ class InventoryReagent(BaseModel):
         verbose_name_plural = 'InventoryReagents'
         db_table = 'InventoryReagent'
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+    def save(self, *args, **kwargs):
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -98,7 +123,7 @@ class TransactionReagent(BaseModel):
         verbose_name_plural = 'TransactionsReagent'
         db_table = 'TransactionReagent'
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+    def save(self, *args, **kwargs):
         user = get_current_user()
         if user:
             if not self.user_creation:
