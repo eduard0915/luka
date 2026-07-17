@@ -8,20 +8,35 @@ Django 6.0 · PostgreSQL 16 · Python 3.12 (Docker) / 3.13 (local)
 
 ## Arrancar
 
-**En local, sin Docker** → [`docs/desarrollo-local.md`](docs/desarrollo-local.md)
-Guía paso a paso verificada: dependencias del sistema, PostgreSQL, entorno virtual,
-variables de entorno y los errores típicos con su causa.
-
-**Con Docker:**
+El servidor corre en tu máquina y sus dependencias (base de datos y cron) en Docker:
 
 ```bash
-cp .env.example .env          # ajusta DATABASE_URL a @db-luka:5432
-docker compose up -d --build
-docker compose exec web-luka python manage.py migrate
-docker compose exec web-luka python manage.py createsuperuser
+cp .env.example .env                    # para docker compose
+docker compose up -d                    # base en 127.0.0.1:5432 + scheduler
+
+python3.13 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt         # necesita: brew install cairo pkg-config
+# crea luka/.env (ver la guía)
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
 ```
 
 La app queda en http://127.0.0.1:8000/ y entra por `/login/`.
+
+Guía completa, con los errores típicos y su causa →
+[`docs/desarrollo-local.md`](docs/desarrollo-local.md)
+
+## Los dos compose
+
+| Archivo | Para qué |
+|---------|----------|
+| `docker-compose.yml` | dependencias de desarrollo local: base (con puerto publicado) y scheduler |
+| `docker-compose.dokploy.yml` | stack completo de producción; es el que despliega Dokploy |
+
+Son archivos independientes a propósito, no un override: el merge de compose solo suma,
+así que no habría forma de quitarle el puerto publicado al de producción. Si tocas un
+servicio, revisa si el cambio aplica también al otro.
 
 ## Configuración
 
@@ -46,8 +61,8 @@ despliegue.
 ## Pruebas
 
 ```bash
-python manage.py test                    # local
-docker compose run --rm web-luka python manage.py test    # en Docker
+python manage.py test                 # toda la suite
+python manage.py test core.sampling   # solo muestreo (39 pruebas)
 ```
 
 ## Muestreo automático
