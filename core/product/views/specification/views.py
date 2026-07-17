@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, UpdateView
@@ -33,8 +34,15 @@ class BaseSpecificationProductView(ValidatePermissionRequiredMixin):
                 return JsonResponse(data)
 
             if form.is_valid():
-                form.save()
-                messages.success(request, f'Operación realizada con éxito!')
+                result = form.save()
+                # form.save() atrapa sus propias excepciones y devuelve un dict con 'error'
+                if isinstance(result, dict) and result.get('error'):
+                    data['error'] = result['error']
+                else:
+                    messages.success(request, 'Operación realizada con éxito!')
+                    product_id = self.kwargs.get('pk') if action == 'add' else self.object.product_id
+                    data['success'] = True
+                    data['redirect_url'] = reverse('product:detail_product', args=[product_id])
             else:
                 data['error'] = form.errors
         except Exception as e:
@@ -50,6 +58,12 @@ class BaseSpecificationProductView(ValidatePermissionRequiredMixin):
 class SpecificationProductCreateView(LoginRequiredMixin, BaseSpecificationProductView, CreateView):
     model = SpecificationProduct
     form_class = SpecificationProductForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        product = Product.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'product': product})
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

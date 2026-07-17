@@ -52,7 +52,7 @@ class ProductCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
         context['action'] = 'add'
         context['entity'] = 'Creación de Producto'
         context['title'] = 'Creación de Producto'
-        context['div'] = '6'
+        context['div'] = '8'
         context['list_url'] = self.success_url
         return context
 
@@ -96,7 +96,7 @@ class ProductUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
         context['title'] = 'Edición de Punto de Muestreo'
         context['entity'] = 'Edición de Punto de Muestreo'
         context['action'] = 'edit'
-        context['div'] = '10'
+        context['div'] = '8'
         context['list_url'] = self.success_url
         return context
 
@@ -124,6 +124,7 @@ class ProductListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
                         'description_product': i.description_product,
                         'enable_product': i.enable_product,
                         'version': i.version,
+                        'site': i.site.site_name
                     })
                 return JsonResponse(data, safe=False)
             else:
@@ -137,7 +138,7 @@ class ProductListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
         context['title'] = 'Productos'
         context['create_url'] = reverse_lazy('product:create_product')
         context['entity'] = 'Productos'
-        context['div'] = '8'
+        context['div'] = '9'
         context['icon'] = 'fa-solid fa-vial-virus'
         return context
 

@@ -1,7 +1,7 @@
 from django.conf.urls.static import static
 from django.urls import path
 
-from analytical_method.views.calculate_relation.views import *
+from core.analytical_method.views.calculate_relation.views import *
 from core.analytical_method.views.calculate.views import *
 from core.analytical_method.views.method.views import *
 from core.analytical_method.views.detail_method.views import *
