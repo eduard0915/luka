@@ -46,8 +46,9 @@ class ProductForm(ModelForm):
             form.field.widget.attrs['autocomplete'] = 'off'
 
         col_classes = {
-            'code_product': 'col-md-4',
-            'description_product': 'col-md-8',
+            'code_product': 'col-md-3',
+            'description_product': 'col-md-6',
+            'site': 'col-md-3',
         }
 
         for field_name, field in self.fields.items():
@@ -55,10 +56,11 @@ class ProductForm(ModelForm):
 
     class Meta:
         model = Product
-        fields = ['code_product', 'description_product']
+        fields = ['code_product', 'description_product', 'site']
         widgets = {
             'code_product': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'description_product': TextInput(attrs={'class': 'form-control', 'required': True})
+            'description_product': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'site': Select(attrs={'class': 'form-control', 'required': True})
         }
 
     def save(self, commit=True):
@@ -67,8 +69,7 @@ class ProductForm(ModelForm):
         user = get_current_user()
         try:
             if form.is_valid():
-                data = form.save(commit=False)
-                data.site_id = user.site.id
+                data = form.save()
                 data.save()
             else:
                 data['error'] = form.errors

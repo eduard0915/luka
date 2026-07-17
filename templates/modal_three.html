@@ -63,10 +63,33 @@
 
         <script type="application/javascript">
 
-            $('form').on('submit', function (e) {
+            // Convierte los errores del formulario (dict de Django o string) en HTML para Swal
+            function format_errors(error) {
+                if (typeof error === 'object' && error !== null) {
+                    var html = '<ul style="text-align: left;">';
+                    $.each(error, function (key, value) {
+                        html += '<li>' + key + ': ' + value + '</li>';
+                    });
+                    return html + '</ul>';
+                }
+                return '<p>' + error + '</p>';
+            }
+
+            $('#modal_form').on('submit', function (e) {
                 e.preventDefault();
                 var parameters = new FormData(this);
                 const form_action = $(this).attr('action');
+                const $btn = $('#btnSubmit');
+                const original_btn = $btn.html();
+
+                function reset_btn() {
+                    $btn.prop('disabled', false).html(original_btn);
+                }
+
+                $btn.prop('disabled', true).html(
+                    `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...`
+                );
+
                 $.ajax({
                     url: form_action,
                     type: 'POST',
@@ -76,26 +99,36 @@
                     contentType: false,
                 }).done(function (data) {
                     console.log(data);
-                    if (!data.hasOwnProperty('error')) {
+                    if (data.hasOwnProperty('error')) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error de Validación',
+                            html: format_errors(data.error),
+                        });
+                        reset_btn();
+                        return;
+                    }
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: 'Operación realizada satisfactoriamente',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(function () {
                         if (data.hasOwnProperty('redirect_url')) {
                             window.location.href = data.redirect_url;
                         } else {
                             location.href = window.location.pathname;
                         }
-                        return false;
-                    }
-                    message_error(data.error);
+                    });
                 }).fail(function (jqXHR, textStatus, errorThrown) {
-                    alert(textStatus + ': ' + errorThrown);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error del Sistema',
+                        text: textStatus + ': ' + errorThrown,
+                    });
+                    reset_btn();
                 });
-            });
-
-            $("#btnSubmit").click(function () {
-                $(this).prop("disabled", true); //deshabilitamos el botón
-                $(this).submit()
-                $(this).html(
-                    `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...` //añadimos el spinner
-                );
             });
 
             // Initialize Datepicker for any datepicker-enabled input found in the modal (Bootstrap 5 enhanced)

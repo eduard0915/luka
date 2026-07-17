@@ -199,9 +199,9 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
 
         calcules = AnalyticalMethodCalculate.objects.select_related('analytical_method').filter(analytical_method=self.object).order_by('-date_creation')
         calcules_back = SolutionStdBackValuation.objects.select_related('analytical_method').filter(
-            analytical_method=self.object).filter(Q(volume_std_back__isnull=False) or Q(volume_std_back__gt=0)).order_by('-date_creation')
+            analytical_method=self.object).filter(Q(volume_std_back__isnull=False) | Q(volume_std_back__gt=0)).order_by('-date_creation')
         calcules_spent = SolutionStdBackValuation.objects.select_related('analytical_method').filter(
-            analytical_method=self.object).filter(Q(volume_std_back__isnull=True) or Q(volume_std_back=0)).order_by('-date_creation')
+            analytical_method=self.object).filter(Q(volume_std_back__isnull=True) | Q(volume_std_back=0)).order_by('-date_creation')
         context['calcules'] = calcules
         context['calcules_back'] = calcules_back
         context['calcules_spent'] = calcules_spent
@@ -246,7 +246,8 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
 
             volumen_std_list = [calc.volumen_std for calc in calcules if is_valid_value(calc.volumen_std)]
             volumen_std_back_list = [calc_back.volume_std_back for calc_back in calcules_back if is_valid_value(calc_back.volume_std_back)]
-            volumen_std_spent_list = [calc_spent.volume_std_back for calc_spent in calcules_spent if is_valid_value(calc_spent.volume_std_back)]
+            # volumen_std_spent_list = [calc_spent.volume_std_back for calc_spent in calcules_spent if is_valid_value(calc_spent.volume_std_back)]
+            volumen_std_spent_list = [calc_spent.solution_std for calc_spent in calcules_spent if calc_spent]
             sample_quantity_list = [calc.sample_quantity for calc in calcules if is_valid_value(calc.sample_quantity)]
 
             # Asignar al contexto (None si están vacíos)
