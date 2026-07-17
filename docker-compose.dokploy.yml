@@ -1,0 +1,86 @@
+# Stack completo de PRODUCCIÓN. Este es el archivo que despliega Dokploy: hay que
+# apuntar el "Compose Path" del proyecto a docker-compose.dokploy.yml.
+#
+# El docker-compose.yml de la raíz NO sirve para desplegar: solo levanta las
+# dependencias de desarrollo local y publica el puerto de la base.
+#
+# Es una copia deliberada y no un override de docker-compose.yml: el merge de compose
+# solo suma, así que no habría forma de quitarle aquí el puerto publicado. Si tocas un
+# servicio, revisa si el cambio aplica también al otro archivo.
+services:
+  db-luka:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web-luka:
+    build:
+      context: .
+      args:
+        - MEDIA_URL=${MEDIA_URL}   # ✅ Solo lo que se necesita en build time
+    restart: unless-stopped
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - DEBUG=${DEBUG}
+      - MEDIA=${MEDIA}
+      - REGION_NAME=${REGION_NAME}
+      - BUCKET=${BUCKET}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - MEDIA_URL=${MEDIA_URL}
+      - USER_MAIL=${USER_MAIL}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS}
+      - PORT=${PORT}
+    depends_on:
+      db-luka:
+        condition: service_healthy
+
+  scheduler-luka:
+    build:
+      context: .
+      args:
+        - MEDIA_URL=${MEDIA_URL}
+    # Ruta ABSOLUTA, no `supercronic` a secas: como PID 1 supercronic activa el reaper,
+    # que se re-ejecuta con ForkExec(os.Args[0]) sin resolver el PATH. Con el nombre
+    # pelado falla al arrancar con "Failed to fork exec: no such file or directory".
+    command: /usr/local/bin/supercronic /app/crontab
+    restart: unless-stopped
+    environment:
+      - TZ=America/Bogota
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - DEBUG=${DEBUG}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - BUCKET=${BUCKET}
+      - REGION_NAME=${REGION_NAME}
+      - MEDIA_URL=${MEDIA_URL}
+    depends_on:
+      db-luka:
+        condition: service_healthy
+      web-luka:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:

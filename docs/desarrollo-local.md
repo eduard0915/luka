@@ -3,10 +3,15 @@
 Guía verificada en macOS (Apple Silicon) contra este repo. Para correrlo con Docker
 ver `docs/deploy/scheduler.md` y el `docker-compose.yml`.
 
+El servidor Django corre en tu máquina (con recarga automática), y sus dependencias —la
+base de datos y el cron de muestreos— en Docker. Así la base es la misma versión que
+producción (`postgres:16-alpine`), es desechable y no te deja un servicio permanente
+instalado.
+
 ## 1. Dependencias del sistema
 
 ```bash
-brew install python@3.13 postgresql@16 cairo pkg-config
+brew install python@3.13 cairo pkg-config
 ```
 
 `pkg-config` no es opcional: sin él la instalación de `pycairo` falla con
@@ -17,20 +22,39 @@ Sobre la versión de Python: la imagen de Docker usa 3.12, pero el proyecto corr
 en 3.13 (verificado: las 39 pruebas de `core.sampling` pasan). Evita 3.14 por ahora —
 varias dependencias compiladas aún no publican wheels para esa versión.
 
-## 2. Levantar PostgreSQL
+## 2. Levantar las dependencias (base de datos y cron)
+
+Primero el `.env` de la raíz, que es el que lee docker compose para interpolar las
+`${VARIABLES}` del archivo (ver la sección 4 sobre los dos `.env`):
 
 ```bash
-brew services start postgresql@16
-export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"   # añádelo a tu ~/.zshrc
+cp .env.example .env
 ```
 
-Crear el rol y la base. El rol necesita `CREATEDB` porque el runner de pruebas crea y
-destruye una base `test_luka` en cada corrida:
+Y arriba:
 
 ```bash
-psql -d postgres -c "CREATE ROLE luka LOGIN PASSWORD 'luka' CREATEDB"
-createdb -O luka luka
+docker compose up -d
 ```
+
+Eso levanta:
+
+- **`db-luka`** — PostgreSQL 16, publicado en `127.0.0.1:5432` para que el Django del
+  host lo alcance. El rol y la base se crean solos con las variables `POSTGRES_*`, ya
+  con permiso para crear la base `test_luka` que el runner de pruebas necesita.
+- **`scheduler-luka`** — el cron de muestreos, con el código del host montado, así que
+  ejecuta lo que estás editando.
+
+Comandos útiles:
+
+```bash
+docker compose logs -f scheduler-luka   # ver el cron disparar
+docker compose ps                       # estado
+docker compose down                     # parar (con -v además borra los datos)
+```
+
+`docker-compose.yml` es solo para esto. El despliegue usa `docker-compose.dokploy.yml`,
+que lleva el stack completo y no publica el puerto de la base.
 
 ## 3. Entorno virtual e instalación
 
@@ -71,20 +95,22 @@ clave en blanco.
 el mundo espera (`python-decouple` estándar hace lo contrario). De ahí sale la
 convención de dos archivos:
 
-| Archivo | Para qué | Host de la BD |
-|---------|----------|---------------|
-| `luka/.env` | desarrollo local sin Docker | `localhost` |
-| `.env` (raíz) | interpolar `${VARIABLES}` en `docker-compose.yml` | `db-luka` |
+| Archivo | Lo lee | Para qué |
+|---------|--------|----------|
+| `luka/.env` | el Django del host | tu configuración local (`DATABASE_URL` a `localhost`) |
+| `.env` (raíz) | docker compose | interpolar las `${VARIABLES}` del compose |
 
 decouple busca desde `luka/settings.py` hacia arriba, así que encuentra `luka/.env`
-primero y la raíz solo si aquel no existe. Manteniéndolos separados, correr en local y
-con Docker no se pisan. Ambos están en el `.gitignore`, y el `.dockerignore` impide que
-cualquiera de los dos entre en la imagen (si entrara, sobrescribiría en silencio el
-`SECRET_KEY` y el `DEBUG` del despliegue).
+primero y la raíz solo si aquel no existe. Manteniéndolos separados, el host y los
+contenedores no se pisan con el host de la base. Ambos están en el `.gitignore`, y el
+`.dockerignore` impide que cualquiera entre en la imagen (si entrara, sobrescribiría en
+silencio el `SECRET_KEY` y el `DEBUG` del despliegue).
 
-Excepción útil: `DATABASE_URL` es la única que sí respeta la variable de entorno por
-encima del archivo, porque `dj_database_url.config()` lee `os.environ` primero y usa el
-valor de decouple solo como fallback.
+Detalle que evita una confusión: el `scheduler-luka` monta el repo, así que ve tu
+`luka/.env` con `localhost` — que dentro del contenedor sería él mismo. No es problema:
+el compose le pasa `DATABASE_URL` apuntando a `db-luka`, y esa variable es la única que
+gana sobre el archivo, porque `dj_database_url.config()` lee `os.environ` primero y usa
+el valor de decouple solo como fallback.
 
 ## 5. Migrar y arrancar
 
@@ -112,8 +138,9 @@ python manage.py generate_samplings --dry-run
 python manage.py generate_samplings
 ```
 
-En local no hace falta el cron: el scheduler es el contenedor `scheduler-luka` del
-despliegue. Para probar la generación basta con invocar el comando a mano.
+El `scheduler-luka` ya corre ese mismo comando cada hora contra tu base local; puedes
+verlo con `docker compose logs -f scheduler-luka`. Invocarlo a mano no molesta: es
+idempotente.
 
 ## Problemas frecuentes
 
@@ -126,11 +153,15 @@ en tu `.env`. Ponle un valor de relleno.
 **`ImproperlyConfigured: settings.DATABASES is improperly configured`** — falta
 `DATABASE_URL`, o decouple no encontró el `.env`. Confirma que está en `luka/.env`.
 
-**`connection refused` al puerto 5432** — PostgreSQL no está corriendo:
-`brew services start postgresql@16`. Verifica con `pg_isready`.
+**`connection refused` al puerto 5432** — la base no está arriba (`docker compose up -d`)
+o el puerto está ocupado por otro PostgreSQL. Comprueba quién lo tiene con
+`lsof -nP -iTCP:5432 -sTCP:LISTEN`; si es un `postgresql` de brew, párala con
+`brew services stop postgresql@16`.
 
-**`permission denied to create database` al correr las pruebas** — al rol `luka` le
-falta `CREATEDB`: `psql -d postgres -c "ALTER ROLE luka CREATEDB"`.
+**El `scheduler-luka` reinicia en bucle con `Failed to fork exec`** — el `command:` del
+compose debe usar la ruta absoluta `/usr/local/bin/supercronic`. Como PID 1, supercronic
+activa el reaper, que se re-ejecuta con `ForkExec(os.Args[0])` sin resolver el `PATH`, y
+con el nombre pelado no se encuentra a sí mismo.
 
 **La app arranca pero cambias `luka/.env` y no pasa nada** — decouple lee el archivo al
 importar los settings; reinicia el `runserver`.

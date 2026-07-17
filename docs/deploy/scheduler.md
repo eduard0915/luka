@@ -4,7 +4,7 @@ El comando `python manage.py generate_samplings` crea las muestras programadas
 del día para cada grupo de muestreo habilitado. Es idempotente y recupera hasta
 30 días perdidos, por lo que puede ejecutarse las veces que sea sin duplicar.
 
-En el despliegue lo dispara el servicio `scheduler-luka` del `docker-compose.yml`,
+En el despliegue lo dispara el servicio `scheduler-luka` del `docker-compose.dokploy.yml`,
 que corre supercronic con el `crontab` de la raíz del repo: cada hora al minuto 10.
 La primera corrida del día crea el lote completo; las demás son no-ops. La
 frecuencia horaria cubre el caso "servidor caído a medianoche, recuperado durante
@@ -30,14 +30,20 @@ período omitido.
 | Lógica de negocio | `core/sampling/services.py` |
 | Comando | `core/sampling/management/commands/generate_samplings.py` |
 | Programación | `crontab` (raíz del repo) |
-| Servicio | `scheduler-luka` en `docker-compose.yml` |
+| Servicio | `scheduler-luka` en `docker-compose.dokploy.yml` |
 | Binario de cron | supercronic, instalado en el `Dockerfile` |
 | Auditoría | tabla `SamplingGenerationLog` (visible en el admin de Django) |
 
 ## Despliegue en Dokploy
 
-El servicio `scheduler-luka` ya está en el `docker-compose.yml`: se despliega solo
-con el resto del stack. Requisitos:
+**Requisito previo:** el proyecto en Dokploy debe apuntar su *Compose Path* a
+`docker-compose.dokploy.yml`. El `docker-compose.yml` de la raíz **no sirve para
+desplegar**: solo levanta las dependencias de desarrollo local y publica el puerto de la
+base. Si Dokploy sigue apuntando a `docker-compose.yml`, el despliegue quedaría sin
+`web-luka` y con PostgreSQL escuchando en el host.
+
+El servicio `scheduler-luka` ya está en ese archivo: se despliega solo con el resto del
+stack. Requisitos:
 
 1. Las variables de entorno del proyecto en Dokploy deben incluir las mismas que
    usa `web-luka` (`SECRET_KEY`, `DATABASE_URL`, `DEBUG`, `AWS_ACCESS_KEY_ID`,
@@ -55,17 +61,37 @@ programación `10 * * * *`. El comando es el mismo; solo cambia el disparador.
 ## Verificación
 
 ```bash
-# El compose es válido y el scheduler está declarado
-docker compose --env-file .env.example config
+# El compose de producción es válido y declara los tres servicios
+docker compose -f docker-compose.dokploy.yml --env-file .env.example config --services
 
 # El binario existe en la imagen y el crontab parsea
-docker compose run --rm --entrypoint sh scheduler-luka -c 'supercronic -test /app/crontab'
+docker compose -f docker-compose.dokploy.yml run --rm --entrypoint sh scheduler-luka \
+  -c '/usr/local/bin/supercronic -test /app/crontab'
 
 # Qué se crearía hoy, sin escribir nada
-docker compose run --rm web-luka python manage.py generate_samplings --dry-run
+docker compose -f docker-compose.dokploy.yml run --rm web-luka \
+  python manage.py generate_samplings --dry-run
 ```
 
+Ojo: `supercronic -test` solo valida que el crontab parsee, y sale antes de arrancar el
+reaper. No prueba que el servicio se sostenga en pie. Para eso, mira los logs del
+contenedor tras el despliegue (abajo).
+
 ## Monitoreo
+
+Los logs de `scheduler-luka` deben mostrar al arrancar:
+
+```
+level=info msg="reaping dead processes"
+level=info msg="read crontab: /app/crontab"
+```
+
+y, en cada corrida, `msg=starting`, la línea de resumen y `msg="job succeeded"`.
+
+Si en cambio reinicia en bucle con `level=fatal msg="Failed to fork exec: no such file
+or directory"`, es que el `command:` perdió la ruta absoluta. Como PID 1 supercronic
+activa el reaper, que se re-ejecuta con `ForkExec(os.Args[0])` sin resolver el `PATH`:
+tiene que ser `/usr/local/bin/supercronic`, no `supercronic` a secas.
 
 - El comando termina con exit code 1 si algún grupo falló (los demás se procesan
   igual); los detalles quedan en stderr, visibles en los logs del contenedor.
