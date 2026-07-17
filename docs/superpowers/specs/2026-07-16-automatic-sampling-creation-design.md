@@ -72,6 +72,18 @@ La restricción única `(sampling_group, target_date)` garantiza idempotencia a
 nivel de base de datos: aunque dos procesos corran a la vez, un día de un grupo
 solo puede generarse una vez.
 
+### Regla: sin punto de muestreo no se crean muestras
+
+- **Flujo automático:** un grupo solo genera muestras si su `sampling_point`
+  está habilitado (`enable_point=True`) y tiene `sample_point_code` no vacío.
+  Si el punto está deshabilitado o sin código, el día se registra con
+  `skipped=True` — misma semántica que un grupo deshabilitado: al rehabilitar
+  el punto NO se rellena el período (deshabilitado ≠ servidor caído).
+- **Flujo manual:** `SamplingProcessForm` valida que se especifique
+  `group_sampling` o `point_sampling`. Hoy ambos campos son opcionales y el
+  error solo aparece después como `ValueError` al generar el código; pasa a ser
+  un error de validación del formulario.
+
 ### Reglas de catch-up
 
 - Para cada grupo se procesan los días desde *el día siguiente al último log de
@@ -185,6 +197,9 @@ la fecha vía `--date` (sin mocks de reloj ni dependencias nuevas):
    continuidad con muestras manuales y automáticas el mismo día; fecha del
    código = día programado en catch-up.
 6. **Errores**: un grupo inválido no impide procesar los demás; exit code ≠ 0.
+7. **Punto de muestreo requerido**: punto deshabilitado o sin código → log con
+   `skipped=True` y cero muestras, sin backfill al rehabilitarlo; el formulario
+   manual rechaza muestras sin grupo ni punto.
 
 ## Fuera de alcance
 
