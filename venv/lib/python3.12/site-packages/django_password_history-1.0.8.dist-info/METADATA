@@ -1,0 +1,167 @@
+Metadata-Version: 2.1
+Name: django-password-history
+Version: 1.0.8
+Summary: Django module meant to allow django users to keep a history of their previously used passwords.
+Home-page: https://github.com/Lenders-Cooperative/django-password-history
+Author: Roderick Smith
+Author-email: smithroderick17@gmail.com
+License: BSD
+Download-URL: https://github.com/Lenders-Cooperative/django-password-history/archive/refs/tags/vf.tar.gz
+Keywords: django-password-history
+Platform: UNKNOWN
+Classifier: Framework :: Django :: 2.2
+Classifier: Framework :: Django :: 3.0
+Classifier: Framework :: Django :: 3.1
+Classifier: Framework :: Django :: 3.2
+Classifier: Framework :: Django :: 4.0
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Description-Content-Type: text/markdown
+Requires-Dist: django-model-utils (==4.2.0)
+Requires-Dist: djangoql (==0.17.1)
+
+<h1 align="center">Django Password History</h1>
+
+<div align="center">
+
+[![Status](https://img.shields.io/badge/status-active-success.svg)]()
+[![GitHub Issues](https://img.shields.io/github/issues/Lenders-Cooperative/django-password-history)](https://github.com/Lenders-Cooperative/django-password-history/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/kylelobo/The-Documentation-Compendium.svg)](https://github.com/Lenders-Cooperative/django-password-history/pulls)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+
+</div>
+
+---
+
+<p align="center"> Django module meant to allow django users to keep a history of their previously used passwords.
+    <br> 
+</p>
+
+## 📝 Table of Contents
+
+- [About](#about)
+- [Getting Started](#getting-started)
+- [Running Tests](#running-tests)
+- [Usage](#usage)
+- [Built Using](#built-using)
+- [Authors](#authors)
+- [Acknowledgments](#acknowledgements)
+
+## About
+
+Django module meant to allow django users to keep a history of their previously used passwords.
+
+## Getting Started
+
+Follow these instructions to install and setup django-password-history in your django project.
+
+### Prerequisites
+
+The only prerequisites to installing django-password-history is having django 2 installed in a Python 3 environment.
+
+### Installing
+
+The installation process for django password history is very simple. Start by running the following command to install the package.
+
+```
+pip install django-password-history
+```
+
+
+End with an example of getting some data out of the system or using it for a little demo.
+
+## Running Tests
+
+The test suite for this package is a work in progress. The initial sample test can be run by using the following command.
+
+```
+coverage run --source django_password_history runtests.py
+```
+
+
+## Usage
+
+In order to use the system you must add django_password_history to your installed apps in your settings.py file.
+
+```
+INSTALLED_APPS = [
+    'django_password_history'
+]
+```
+
+Next you need to define how many historical passwords you want to compare on to the new password when a password is chanced. The default and max is 5 previous passwords.
+
+```
+PREVIOUS_PASSWORD_COUNT = 3
+```
+
+THe UserPasswordHistory has a one to one relationship with your user model as defined in your settings.py file.
+
+```
+AUTH_USER_MODEL = "users.User"
+```
+
+To import the UserPasswordHistory model add the following to the top of the desired python file.
+
+```
+from django_password_history.models import UserPasswordHistory
+```
+
+
+
+## Built Using
+
+- [Django](https://www.djangoproject.com/) - Web Framework
+- [Cookiecutter Django Package](https://github.com/pydanny/cookiecutter-djangopackage) - Cookie Cutter Django Package
+
+## Authors
+- David Graves - Working on behalf of Lender's Cooperative
+- [Roderick Smith](https://github.com/rsmith0717) - Working on behalf of Lender's Cooperative
+
+
+## Acknowledgements
+
+- Inspiration
+- References
+
+
+
+
+History
+-------
+
+1.0.0 (2021-06-21)
+++++++++++++++++++
+
+* First release on PyPI.
+
+
+1.0.3 (2021-12-08)
+++++++++++++++++++
+
+* Accommodate tenant architecture by checking for a SiteSettings model to see if previous_password_count has been set.
+* Second release on PyPI.
+
+
+1.0.4 (2022-02-08)
+++++++++++++++++++
+
+* Set django admin user fields to autocomplete, and change password fields to read only.
+* Third release on PyPI.
+
+
+1.0.5 (2022-08-31)
+++++++++++++++++++
+
+* Extend support of password history up to 24 passwords.
+* Fourth release on PyPI.
+
+

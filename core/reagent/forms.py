@@ -20,12 +20,17 @@ class ReagentForm(ModelForm):
             form.field.widget.attrs['autocomplete'] = 'off'
 
         col_classes = {
-            'code_reagent': 'col-md-2',
+            'site': 'col-md-2',
             'description_reagent': 'col-md-5',
             'umb': 'col-md-2',
             'purity_unit': 'col-md-2',
             'molecular_weight': 'col-md-2',
             'gram_equivalent': 'col-md-2',
+            'volumetric': 'col-md-2',
+            'solvent': 'col-md-2',
+            'density_enable': 'col-md-2',
+            'standard': 'col-md-2',
+            'ready_to_use': 'col-md-2',
         }
 
         for field_name, field in self.fields.items():
@@ -34,12 +39,11 @@ class ReagentForm(ModelForm):
     class Meta:
         model = Reagent
         fields = [
-            'code_reagent', 'description_reagent', 'umb', 'manufacturer', 'site', 'technical_sheet', 'purity_unit',
+            'description_reagent', 'umb', 'manufacturer', 'site', 'technical_sheet', 'purity_unit',
             'molecular_weight', 'gram_equivalent', 'stability_solution', 'volumetric', 'solvent', 'density_enable',
             'standard', 'ready_to_use']
         widgets = {
             'description_reagent': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'code_reagent': TextInput(attrs={'class': 'form-control', 'required': True}),
             'manufacturer': TextInput(attrs={'class': 'form-control', 'required': True}),
             'molecular_weight': TextInput(attrs={'class': 'form-control', 'required': True}),
             'gram_equivalent': TextInput(attrs={'class': 'form-control', 'required': True}),
