@@ -206,6 +206,10 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['calcules_back'] = calcules_back
         context['calcules_spent'] = calcules_spent
 
+        calcules_relation = AnalyticalMethodCalculateRelation.objects.select_related('analytical_method').filter(analytical_method=self.object).order_by('-date_creation')
+        context['calcules_relation'] = calcules_relation
+        context['has_relations'] = calcules_relation.exists()
+
         inst_desc = calcules.exclude(calculate_description__isnull=True).exclude(calculate_description="").first()
         inst_unit = calcules.exclude(unit_measure_calculate__isnull=True).exclude(unit_measure_calculate="").first()
 
@@ -230,7 +234,7 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
 
         context['show_dependent_toggle'] = show_dependent_toggle
 
-        if inst_desc or calcules.exists() or calcules_back.exists():
+        if inst_desc or calcules.exists() or calcules_back.exists() or calcules_relation.exists():
             # 1. Obtener descripción y unidad
             desc = inst_desc.calculate_description if inst_desc else "Cálculo"
             unit = inst_unit.unit_measure_calculate if inst_unit else ""
@@ -242,7 +246,7 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
 
             volumen_std_list = [calc.volumen_std for calc in calcules if is_valid_value(calc.volumen_std)]
             volumen_std_back_list = [calc_back.volume_std_back for calc_back in calcules_back if is_valid_value(calc_back.volume_std_back)]
-            volumen_std_spent_list = [calc_spent.volume_std_back for calc_spent in calcules_back if is_valid_value(calc_spent.volume_std_back)]
+            volumen_std_spent_list = [calc_spent.volume_std_back for calc_spent in calcules_spent if is_valid_value(calc_spent.volume_std_back)]
             sample_quantity_list = [calc.sample_quantity for calc in calcules if is_valid_value(calc.sample_quantity)]
 
             # Asignar al contexto (None si están vacíos)
@@ -319,18 +323,20 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
             str_den_rel = " \cdot ".join(den_terms_rel) if den_terms_rel else "1"
             str_gen_rel = f" \cdot {' \cdot '.join(gen_terms_rel)}" if gen_terms_rel else ""
 
-            if rel_desc:
+            if num_terms_rel or den_terms_rel or gen_terms_rel:
+                if not rel_desc:
+                    rel_desc = "Cálculo Relacionado"
                 label_rel = f"\\text{{{rel_desc}}}"
                 if rel_unit:
                     label_rel += f" \\text{{ ({rel_unit})}}"
-                context[
-                    'final_equation_relation'] = f"{label_rel} = \\frac{{{str_num_rel}}}{{{str_den_rel}}}{str_gen_rel}"
+                context['final_equation_relation'] = f"{label_rel} = \\frac{{{str_num_rel}}}{{{str_den_rel}}}{str_gen_rel}"
 
-            # Construcción de la etiqueta con formato
-            label = f"\\text{{{desc}}}"
-            if unit:
-                label += f" \\text{{ ({unit})}}"
+            if num_terms or den_terms or gen_terms:
+                # Construcción de la etiqueta con formato
+                label = f"\\text{{{desc}}}"
+                if unit:
+                    label += f" \\text{{ ({unit})}}"
 
-            context['final_equation'] = f"{label} = \\frac{{{str_num}}}{{{str_den}}}{str_gen}"
+                context['final_equation'] = f"{label} = \\frac{{{str_num}}}{{{str_den}}}{str_gen}"
 
         return context
