@@ -84,7 +84,7 @@ class AnalyticalMethodCalculeRelationDescriptionUpdateView(LoginRequiredMixin, B
 # Creación de Cálculo Relacionado
 class AnalyticalMethodCalculateRelationCreateView(LoginRequiredMixin, BaseAnalyticalMethodCalculateRelationDetailView, CreateView):
     model = AnalyticalMethodCalculateRelation
-    form_class = AnalyticalMethodCalculateRelationRelationForm
+    form_class = AnalyticalMethodCalculateRelationForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -96,7 +96,7 @@ class AnalyticalMethodCalculateRelationCreateView(LoginRequiredMixin, BaseAnalyt
 # Edición de Cálculo Relacionado
 class AnalyticalMethodCalculateRelationUpdateView(LoginRequiredMixin, BaseAnalyticalMethodCalculateRelationDetailView, UpdateView):
     model = AnalyticalMethodCalculateRelation
-    form_class = AnalyticalMethodCalculateRelationRelationForm
+    form_class = AnalyticalMethodCalculateRelationForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
