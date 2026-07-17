@@ -844,12 +844,12 @@
 
             if (toggleDependentVars) {
                 toggleDependentVars.addEventListener('change', function () {
-                    if (this.checked) {
-                        dependentVarsTitle.style.display = 'flex';
-                        dependentVarsContent.style.display = 'flex';
-                    } else {
-                        dependentVarsTitle.style.display = 'none';
-                        dependentVarsContent.style.display = 'none';
+                    const display = this.checked ? 'flex' : 'none';
+                    if (dependentVarsTitle) {
+                        dependentVarsTitle.style.display = display;
+                    }
+                    if (dependentVarsContent) {
+                        dependentVarsContent.style.display = display;
                     }
                 });
             }
