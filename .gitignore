@@ -9,7 +9,6 @@ __pycache__
 .idea
 staticfiles
 media
-README.md
 django_errors.log
 .django_errors.log
 
