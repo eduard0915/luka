@@ -922,6 +922,19 @@
                                                     {% endif %}
                                                 </div>
                                             {% endif %}
+                                            <div class="p-3 bg-light rounded text-center mt-3" id="equation-relation-container">
+                                                {% if final_equation_relation %}
+                                                    <div style="font-size: 0.8rem; overflow-x: auto; font-family: 'Times New Roman', serif;">
+                                                        $${{ final_equation_relation }}$$
+                                                    </div>
+                                                {% else %}
+                                                    <div class="py-3 text-center text-muted">
+                                                        <i class="bi bi-inbox"></i> No hay parámetros definidos para
+                                                        generar
+                                                        la ecuación relacional.
+                                                    </div>
+                                                {% endif %}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
