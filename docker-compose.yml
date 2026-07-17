@@ -45,6 +45,29 @@ services:
       db-luka:
         condition: service_healthy
 
+  scheduler-luka:
+    build:
+      context: .
+      args:
+        - MEDIA_URL=${MEDIA_URL}
+    command: supercronic /app/crontab
+    restart: unless-stopped
+    environment:
+      - TZ=America/Bogota
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - DEBUG=${DEBUG}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - BUCKET=${BUCKET}
+      - REGION_NAME=${REGION_NAME}
+      - MEDIA_URL=${MEDIA_URL}
+    depends_on:
+      db-luka:
+        condition: service_healthy
+      web-luka:
+        condition: service_started
+
 volumes:
   postgres_data:
   static_volume:

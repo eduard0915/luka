@@ -50,6 +50,11 @@ RUN pip install --upgrade pip setuptools wheel
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Supercronic: cron para contenedores (scheduler de muestreos automáticos)
+ARG TARGETARCH
+ADD https://github.com/aptible/supercronic/releases/download/v0.2.33/supercronic-linux-${TARGETARCH} /usr/local/bin/supercronic
+RUN chmod +x /usr/local/bin/supercronic
+
 # Copy application code
 COPY . .
 

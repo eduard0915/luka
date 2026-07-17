@@ -8,6 +8,7 @@ from openpyxl.compat import product
 from core.sampling.models import SamplingGroup, SamplingProcess, SamplingAnalysisProcessing, \
     SamplingAnalysisProcessingRelation, SamplingAnalysis
 from core.product.models import SamplePoint, AnalyticalMethodProduct
+from core.sampling.services import DAILY_PERIODICITY
 from core.solution.models import SolutionStd
 from core.analytical_method.models import AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation, AnalyticalMethod
 
@@ -328,7 +329,16 @@ class SamplingAnalysisForm(ModelForm):
 class SamplingGroupForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['sampling_point'].queryset = SamplePoint.objects.filter(enable_point=True, sample_frequency__isnull=False)
+        queryset = SamplePoint.objects.filter(
+            enable_point=True, sample_frequency__isnull=False, periodicity__in=DAILY_PERIODICITY)
+        # Un grupo ya existente debe poder seguir editándose (hora, muestras/día) aunque su
+        # punto sea no diario: el filtro es para no CREAR grupos muertos, no para dejar
+        # ineditables los legacy. No afecta la generación: should_skip_group los sigue
+        # omitiendo. sampling_point_id, no instance.pk: el id es UUID con default, así que
+        # una instancia nueva sin guardar ya trae pk.
+        if self.instance.sampling_point_id:
+            queryset = queryset | SamplePoint.objects.filter(pk=self.instance.sampling_point_id)
+        self.fields['sampling_point'].queryset = queryset.distinct()
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
         col_classes = {'sampling_point': 'col-md-6'}
@@ -382,9 +392,13 @@ class SamplingProcessForm(ModelForm):
         cleaned_data = super().clean()
         group_sampling = cleaned_data.get('group_sampling')
         point_sampling = cleaned_data.get('point_sampling')
+        if not group_sampling and not point_sampling:
+            raise ValidationError('Debe seleccionar un Grupo de Muestreo o un Punto de Muestreo.')
+        # Excluyentes: si vienen ambos gana el grupo. Con dos `if` independientes el
+        # segundo leía la variable ya obsoleta y anulaba AMBOS campos.
         if group_sampling:
             cleaned_data['point_sampling'] = None
-        if point_sampling:
+        elif point_sampling:
             cleaned_data['group_sampling'] = None
         return cleaned_data
 
