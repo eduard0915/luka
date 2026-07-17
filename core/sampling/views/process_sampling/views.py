@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_exempt
@@ -156,7 +157,7 @@ class SamplingProcessListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
                 # Formatea de campos
                 for item in data:
                     if item['date_sampling_scheduled']:
-                        item['date_sampling_scheduled'] = item['date_sampling_scheduled'].strftime('%Y-%m-%d %H:%M')
+                        item['date_sampling_scheduled'] = timezone.localtime(item['date_sampling_scheduled']).strftime('%Y-%m-%d %H:%M')
                     first_name = item.get('sampling_created_by__first_name', '') or ''
                     last_name = item.get('sampling_created_by__last_name', '') or ''
                     cargo = item.get('sampling_created_by__cargo', '') or ''

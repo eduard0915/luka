@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from core.sampling.models import SamplingGroup, SamplingProcess
+from core.sampling.models import SamplingGenerationLog, SamplingGroup, SamplingProcess
 
 
 class SamplingGroupAdmin(admin.ModelAdmin):
@@ -16,5 +16,10 @@ class SamplingProcessAdmin(admin.ModelAdmin):
                      'automatic_sampling', 'sampling_confirmed_by', 'sampling_created_by', 'status_sampling',
                      'batch_number')
 
+class SamplingGenerationLogAdmin(admin.ModelAdmin):
+    list_display = ('sampling_group', 'target_date', 'samples_created', 'skipped', 'date_creation')
+    list_filter = ('skipped', 'target_date')
+
 admin.site.register(SamplingGroup, SamplingGroupAdmin)
 admin.site.register(SamplingProcess, SamplingProcessAdmin)
+admin.site.register(SamplingGenerationLog, SamplingGenerationLogAdmin)

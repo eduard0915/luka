@@ -1,4 +1,6 @@
 luka/.env
+.env
+!.env.example
 **/.venv
 db.sqlite3
 db.sqlite3-journal
