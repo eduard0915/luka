@@ -20,7 +20,7 @@ urlpatterns = [
     path('instrumental/update/<uuid:pk>/', EquipmentInstrumentalUpdateView.as_view(), name='update_equipment_instrumental'),
     path('instrumental/detail/<uuid:pk>/', EquipmentInstrumentalDetailView.as_view(), name='detail_equipment_instrumental'),
     path('instrumental/pdf/<uuid:pk>/', EquipmentInstrumentalPDFView.as_view(), name='equipment_instrumental_pdf'),
-    # Materiales Instrumentales
+    # Material Instrumental
     path('material/add/', MaterialInstrumentalCreateView.as_view(), name='create_material_instrumental'),
     path('material/list/', MaterialInstrumentalListView.as_view(), name='list_material_instrumental'),
     path('material/update/<uuid:pk>/', MaterialInstrumentalUpdateView.as_view(), name='update_material_instrumental'),

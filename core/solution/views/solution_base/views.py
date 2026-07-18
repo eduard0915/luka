@@ -185,9 +185,9 @@ class SolutionBaseListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Maestro de Soluciones'
+        context['title'] = 'Soluciones Base'
         context['create_url'] = reverse_lazy('solution:create_solution_base')
-        context['entity'] = 'Maestro de Soluciones'
+        context['entity'] = 'Maestro de Soluciones Base'
         context['div'] = '7'
         context['icon'] = 'fa-solid fa-flask-vial'
         return context

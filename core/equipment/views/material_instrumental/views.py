@@ -59,9 +59,9 @@ class MaterialInstrumentalCreateView(LoginRequiredMixin, ValidatePermissionRequi
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Registrar Material Instrumental'
+        context['title'] = 'Crear Material Instrumental'
         context['action'] = 'add'
-        context['entity'] = 'Materiales Instrumentales'
+        context['entity'] = 'Crear Material Instrumental'
         context['div'] = '10'
         context['icon'] = 'fa-solid fa-flask'
         context['list_url'] = reverse_lazy('equipment:list_material_instrumental')
@@ -114,9 +114,9 @@ class MaterialInstrumentalListView(LoginRequiredMixin, ValidatePermissionRequire
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Listado de Materiales Instrumentales'
+        context['title'] = 'Material Instrumental'
         context['create_url'] = reverse_lazy('equipment:create_material_instrumental')
-        context['entity'] = 'Materiales Instrumentales'
+        context['entity'] = 'Material Instrumental'
         context['div'] = '12'
         context['icon'] = 'fa-solid fa-flask'
         return context
