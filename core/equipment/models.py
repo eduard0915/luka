@@ -1,7 +1,7 @@
 import uuid
 
 from crum import get_current_user
-from django.db import models
+from django.db import models, transaction
 
 from core.laboratory.models import Laboratory
 from core.models import BaseModel
@@ -50,10 +50,26 @@ class EquipmentInstrumental(BaseModel):
         return super(EquipmentInstrumental, self).save(*args, **kwargs)
 
 
+# Generador de códigos de material instrumental
+def code_instrumental_generator():
+    """
+    Genera el siguiente código secuencial de forma segura bloqueando la fila.
+    Inicia en 2000001 y aumenta de 1 en 1.
+    """
+    last_material = MaterialInstrumental.objects.select_for_update().filter(code_instrumental__regex=r'^\d+$').order_by('-code_instrumental').first()
+
+    if not last_material:
+        return "2000001"
+
+    current_number = int(last_material.code_instrumental)
+    new_number = current_number + 1
+    return str(new_number)
+
+
 # Material Instrumental o de Laboratorio
 class MaterialInstrumental(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    code_instrumental = models.CharField(max_length=20, verbose_name='Código')
+    code_instrumental = models.CharField(max_length=20, verbose_name='Código', unique=True, blank=True)
     description_instrumental = models.CharField(max_length=200, verbose_name='Descripción')
     supplier_equipment = models.CharField(max_length=200, verbose_name='Proveedor')
     brand_instrumental = models.CharField(max_length=100, verbose_name='Marca')
@@ -78,6 +94,14 @@ class MaterialInstrumental(BaseModel):
                 self.user_creation = user
             else:
                 self.user_updated = user
+
+        # Automatización del código con protección de concurrencia
+        if not self.code_instrumental:
+            # Envolvemos en una transacción atómica para que el select_for_update funcione
+            with transaction.atomic(using=kwargs.get('using')):
+                self.code_instrumental = code_instrumental_generator()
+                return super(MaterialInstrumental, self).save(*args, **kwargs)
+
         return super(MaterialInstrumental, self).save(*args, **kwargs)
 
 
