@@ -6,7 +6,7 @@ from crum import get_current_user
 from openpyxl.compat import product
 
 from core.sampling.models import SamplingGroup, SamplingProcess, SamplingAnalysisProcessing, \
-    SamplingAnalysisProcessingRelation, SamplingAnalysis
+    SamplingAnalysisProcessingRelation, SamplingAnalysis, MillimoleReacted
 from core.product.models import SamplePoint, AnalyticalMethodProduct
 from core.sampling.services import DAILY_PERIODICITY
 from core.solution.models import SolutionStd
@@ -27,9 +27,7 @@ class SamplingAnalysisProcessingForm(ModelForm):
 
         std_bases = self.analysis.analytical_method.analyticalmethodsolutionstd_set.values_list('solution_std_id', flat=True)
         self.fields['standard_solution'].queryset = SolutionStd.objects.select_related('solute_std').filter(
-            solution_std_base_id__in=std_bases,
-            preparation_confirmed=True,
-            quantity_solution_std__gt=0)
+            solution_std_base_id__in=std_bases, preparation_confirmed=True, quantity_solution_std__gt=0)
 
         if calc_con_label and calc_con_label.sample_quantity:
             self.fields['quantity_sample'].label = str(calc_con_label.sample_quantity)
@@ -66,10 +64,8 @@ class SamplingAnalysisProcessingForm(ModelForm):
             instance.analyzed_by_id = user.id
             instance.analyzed_date = timezone.localtime()
             instance.relational_calculation = False
-            
-            # Asociar el primer cálculo encontrado si existe
-            # Nota: Esto asume que solo hay un conjunto de cálculos (Num/Den) por método base, 
-            # o que todos pertenecen a la misma descripción lógica.
+
+            # Nota: Esto asume que solo hay un conjunto de cálculos (Num/Den) por método base
             base_calc = AnalyticalMethodCalculate.objects.filter(analytical_method_id=analytical_method_id).first()
             if base_calc:
                 instance.analytical_method_calculate = base_calc
@@ -538,6 +534,61 @@ class SamplingProcessInProcessForm(ModelForm):
         except Exception as e:
             data['error'] = str(e)
         return data
+
+
+class MillimoleReactedForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analysis = kwargs.pop('analysis')
+        super().__init__(*args, **kwargs)
+
+        std_bases = self.analysis.analytical_method.analyticalmethodsolutionstd_set.values_list('solution_std_id', flat=True)
+        solutions_qs = SolutionStd.objects.select_related('solute_std').filter(
+            solution_std_base_id__in=std_bases, preparation_confirmed=True, quantity_solution_std__gt=0)
+
+        self.fields['standard_solution_add'].queryset = solutions_qs
+        self.fields['standard_solution_spend'].queryset = solutions_qs
+
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+        col_classes = {
+            'standard_solution_add': 'col-md-9',
+            'standard_solution_spend': 'col-md-9',
+            'milliliter_std_add': 'col-md-3',
+            'milliliter_std_spend': 'col-md-3',
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
+    class Meta:
+        model = MillimoleReacted
+        fields = ['standard_solution_add', 'milliliter_std_add', 'standard_solution_spend', 'milliliter_std_spend']
+        widgets = {
+            'standard_solution_add': Select(attrs={'class': 'form-control select2', 'required': True, 'style': 'width: 100%'}),
+            'milliliter_std_add': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'standard_solution_spend': Select(attrs={'class': 'form-control select2', 'required': True, 'style': 'width: 100%'}),
+            'milliliter_std_spend': TextInput(attrs={'class': 'form-control', 'required': True}),
+        }
+
+    def save(self, commit=True):
+        try:
+            instance = super().save(commit=False)
+            instance.sampling_analysis_id = self.analysis.id
+
+            v1 = float(instance.milliliter_std_add)
+            c1 = float(instance.standard_solution_add.concentration_std)
+            v2 = float(instance.milliliter_std_spend)
+            c2 = float(instance.standard_solution_spend.concentration_std)
+
+            # Cálculo de milimoles que reaccionaron: (V1 * C1) - (V2 * C2)
+            instance.millimole = round((v1 * c1) - (v2 * c2), 6)
+
+            if commit:
+                instance.save()
+            return instance
+        except Exception as e:
+            raise ValidationError({'error': str(e)})
 
 
 class SamplingProcessApprovedForm(ModelForm):

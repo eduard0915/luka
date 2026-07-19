@@ -27,7 +27,6 @@ urlpatterns = [
     path('process/update-image/<uuid:pk>/', SamplingProcessImageUpdateView.as_view(), name='update_image_sample'),
     path('process/confirmed/<uuid:pk>/', SamplingProcessConfirmedUpdateView.as_view(), name='confirmed_sampling_process'),
     path('process/approved/<uuid:pk>/', SamplingProcessApprovedUpdateView.as_view(), name='approved_sampling_process'),
-    path('analysis/inprocess/<uuid:pk>/', SamplingProcessInProcessUpdateView.as_view(), name='sampling_in_process'),
     path('analysis/inprocess/<uuid:pk>/<uuid:analysis_id>/', SamplingProcessInProcessUpdateView.as_view(), name='sampling_in_process_with_analysis'),
     # Procesamiento de la muestra
     path('analysis/detail/<uuid:pk>/', SamplingAnalysisDetailView.as_view(), name='detail_sampling_analysis'),
@@ -35,6 +34,9 @@ urlpatterns = [
     path('analysis/processing_gravimetry/add/<uuid:pk>/', SamplingAnalysisProcessingGravimetryCreateView.as_view(), name='sampling_analysis_gravimetry'),
     path('analysis/processing/relation/add/<uuid:pk>/', SamplingAnalysisProcessingRelationCreateView.as_view(), name='create_sampling_analysis_processing_relation'),
     path('analysis/processing/relation/delete/<uuid:pk>/', SamplingAnalysisProcessingRelationDeleteView.as_view(), name='delete_sampling_analysis_processing_relation'),
+    # Milimoles que reaccionaron
+    path('analysis/millimole/add/<uuid:pk>/', MillimoleReactedCreateView.as_view(), name='create_millimole_reacted'),
+    path('analysis/millimole/delete/<uuid:pk>/', MillimoleReactedDeleteView.as_view(), name='delete_millimole_reacted'),
     # Análisis de la Muestra (CRUD)
     path('analysis/list/', SamplingAnalysisListView.as_view(), name='list_sampling_analysis'), # Sin usar
     path('analysis/processing/list/', SamplingAnalysisProcessingListView.as_view(), name='list_sampling_analysis_processing'),

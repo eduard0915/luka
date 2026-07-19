@@ -10,7 +10,7 @@ from core.analytical_method.models import AnalyticalMethodCalculateRelation
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.models import SpecificationProduct, AnalyticalMethodProduct
 from core.sampling.forms import SamplingAnalysisProcessingForm, SamplingAnalysisProcessingRelationForm, \
-    SamplingAnalysisProcessingGravimetryForm, SamplingAnalysisForm
+    SamplingAnalysisProcessingGravimetryForm, SamplingAnalysisForm, MillimoleReactedForm
 from core.sampling.models import *
 
 
@@ -62,8 +62,8 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                 parts.append(str(cr.factor))
             if cr.sample_quantity:
                 parts.append(str(cr.sample_quantity))
-            if cr.variable:
-                parts.append(str(cr.variable))
+            # if cr.variable:
+            #     parts.append(str(cr.variable))
 
             term = r" \cdot ".join(parts)
             if term:
@@ -136,6 +136,9 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         # URL para agregar procesamiento
         if self.object.analytical_method.type_method == 'Volumetrico':
             context['create_processing_url'] = reverse_lazy('sampling:sampling_analysis_volumetry', kwargs={'pk': self.object.id})
+        if self.object.analytical_method.type_method == 'Volumetrico por Retroceso':
+            context['create_millimole_reacted'] = reverse_lazy('sampling:create_millimole_reacted', kwargs={'pk': self.object.id})
+            context['create_processing_url'] = reverse_lazy('sampling:create_millimole_reacted', kwargs={'pk': self.object.id})
         elif self.object.analytical_method.type_method == 'Gravimetrico':
             context['create_processing_url'] = reverse_lazy('sampling:sampling_analysis_gravimetry', kwargs={'pk': self.object.id})
         return context
@@ -420,6 +423,74 @@ class SamplingAnalysisProcessingRelationDeleteView(LoginRequiredMixin, ValidateP
         context['entity'] = 'Eliminar de Calculo'
         context['delete'] = 'Está seguro de eliminar calculo de parametro?'
         context['info_delete'] = f'{self.object.analytical_method_calculate_relation.calculate_description_relation}'
+        return context
+
+
+# Registro de Milimoles que reaccionaron
+class MillimoleReactedCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    model = MillimoleReacted
+    form_class = MillimoleReactedForm
+    template_name = 'analysis_sampling/create_sampling_analysis_processing.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'add':
+                form = self.get_form()
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, '¡Soluciones Estándar Registrados Satisfactoriamente!')
+                else:
+                    data['error'] = form.errors
+            else:
+                data['error'] = 'No ha ingresado datos en los campos'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        analysis = SamplingAnalysis.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'analysis': analysis})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['action'] = 'add'
+        context['entity'] = 'Registro de Soluciones Estándar Adicionada y Gastada'
+        return context
+
+
+# Eliminación de Milimoles que reaccionaron
+class MillimoleReactedDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DeleteView):
+    model = MillimoleReacted
+    template_name = 'analysis_sampling/delete_analysis.html'
+    permission_required = 'reagent.add_reagent'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            self.object.delete()
+            messages.success(request, f'Registro de milimoles eliminado satisfactoriamente!')
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Eliminar Registro de Milimoles'
+        context['delete'] = '¿Está seguro de eliminar este registro de milimoles?'
+        context['info_delete'] = f'{self.object.millimole}'
         return context
 
 
