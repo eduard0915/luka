@@ -4,10 +4,12 @@ from django.dispatch import receiver
 from django.utils import timezone
 from decimal import Decimal
 
-from core.sampling.models import SamplingProcess, SamplingAnalysis, SamplingAnalysisProcessing
+from core.sampling.models import SamplingProcess, SamplingAnalysis, SamplingAnalysisProcessing, MillimoleReacted
 from core.solution.models import TransactionSolutionStd, SolutionStd
+from core.analytical_method.models import AnalyticalMethodCalculate
 
 
+# Signal para creación de especificaciones y metodos de análisis cuando el estado de la muestra es Confirmada
 @receiver(post_save, sender=SamplingProcess)
 def create_sampling_analysis(sender, instance, created, **kwargs):
     """
@@ -70,6 +72,7 @@ def create_sampling_analysis(sender, instance, created, **kwargs):
         )
 
 
+# Signal para actualización de los análisis de una muestra
 @receiver(post_save, sender=SamplingAnalysisProcessing)
 def update_sampling_analysis(sender, instance, **kwargs):
     if instance.relational_calculation:
@@ -86,7 +89,7 @@ def update_sampling_analysis(sender, instance, **kwargs):
         # Actualizar concentración promedio
         sampling_analysis.average_concentration = instance.concentration_sample
 
-        # Actualizar fecha y hora de analisis
+        # Actualizar fecha y hora de análisis
         sampling_analysis.date_analysis = timezone.now()
 
         # Determinar cumplimiento
@@ -104,13 +107,15 @@ def update_sampling_analysis(sender, instance, **kwargs):
 
         # Actualizar inventario solo si hay solución estándar (análisis volumétrico)
         if instance.standard_solution_id:
-            _update_solution_inventory(instance)
+            _update_solution_inventory(instance.standard_solution_id, instance.quantity_standard)
 
             # Crear transacción solo si hay solución estándar
-            _create_solution_transaction(instance)
-
-        # Crear transacción
-        _create_solution_transaction(instance)
+            _create_solution_transaction(
+                instance.standard_solution_id,
+                instance.quantity_standard,
+                instance.analyzed_by_id,
+                f'Muestra {instance.sample_analysis.sampling_process}'
+            )
 
 def _get_sampling_point(sampling_process):
     """Helper para obtener el sampling_point de forma consistente."""
@@ -164,37 +169,130 @@ def _check_compliance(sampling_point, analytical_method, concentration_value):
         return 'Cumple' if value <= upper_dec else 'No Cumple'
     return None
 
-def _update_solution_inventory(instance):
+def _update_solution_inventory(solution_id, quantity_to_subtract):
     """
     Actualiza el inventario de la solución estándar.
     Usa select_for_update para evitar race conditions.
     """
-    std_solution = SolutionStd.objects.select_for_update().get(
-        pk=instance.standard_solution_id
-    )
+    if solution_id is None or quantity_to_subtract is None or quantity_to_subtract <= 0:
+        return
+
+    std_solution = SolutionStd.objects.select_for_update().get(pk=solution_id)
 
     # Usar Decimal para operaciones numéricas precisas
     current_quantity = Decimal(str(std_solution.quantity_solution_std))
-    used_quantity = Decimal(str(instance.quantity_standard))
+    used_quantity = Decimal(str(quantity_to_subtract))
     new_quantity = current_quantity - used_quantity
 
-    std_solution.quantity_solution_std = round(new_quantity, 2)
+    std_solution.quantity_solution_std = float(round(new_quantity, 2))
     std_solution.save(update_fields=['quantity_solution_std'])
 
 
-def _create_solution_transaction(instance):
+def _create_solution_transaction(solution_id, quantity, user_id, detail_text):
     """Crea el registro de transacción de la solución estándar."""
     # Solo crear transacción si hay una cantidad válida
-    quantity = instance.quantity_standard
-
-    if quantity is None or quantity <= 0:
+    if solution_id is None or quantity is None or quantity <= 0:
         return
 
     TransactionSolutionStd.objects.create(
-        solution_std_inventory_id=instance.standard_solution_id,
+        solution_std_inventory_id=solution_id,
         type_transaction='Uso - Análisis de Muestra',
         date_transaction=timezone.localdate(),
-        detail_transaction=f'Muestra {instance.sample_analysis.sampling_process}',
+        detail_transaction=detail_text,
         quantity=quantity,
-        user_transaction_id=instance.analyzed_by_id,
+        user_transaction_id=user_id,
     )
+
+
+@receiver(post_save, sender=MillimoleReacted)
+def create_sampling_analysis_processing_from_millimole(sender, instance, created, **kwargs):
+    """
+    Crea una instancia de SamplingAnalysisProcessing cuando se genera un MillimoleReacted.
+    Lógica de cálculo similar a SamplingAnalysisProcessingGravimetryForm.
+    """
+    if not created:
+        return
+
+    with transaction.atomic():
+        analysis = instance.sampling_analysis
+        analytical_method_id = analysis.analytical_method.id
+        
+        # Obtener variables de cálculo para el método
+        var_num = AnalyticalMethodCalculate.objects.filter(analytical_method_id=analytical_method_id, position='Numerador')
+        var_den = AnalyticalMethodCalculate.objects.filter(analytical_method_id=analytical_method_id, position='Denominador')
+        base_calc = AnalyticalMethodCalculate.objects.filter(analytical_method_id=analytical_method_id).first()
+
+        millimole = float(instance.millimole)
+        qty_sample = float(instance.quantity_sample)
+        cifras_sign = analysis.analytical_method.sig_figs_result or 2
+
+        concentration_sample = 0
+        if qty_sample > 0:
+            factor_num = 1.0
+            variable_num = 1.0
+            sample_num = 1.0
+
+            for num in var_num:
+                if num.factor is not None:
+                    factor_num *= float(num.factor)
+                if num.variable is not None:
+                    # En GravimetryForm usa weight_obtained, aquí usamos millimole
+                    variable_num *= millimole
+                if num.sample_quantity and num.sample_quantity.strip():
+                    sample_num = qty_sample
+
+            numerator = factor_num * sample_num * variable_num
+
+            factor_den = 1.0
+            variable_den = 1.0
+            sample_den = 1.0
+
+            for den in var_den:
+                if den.factor is not None:
+                    factor_den *= float(den.factor)
+                if den.variable is not None:
+                    variable_den *= millimole
+                if den.sample_quantity and den.sample_quantity.strip():
+                    sample_den = qty_sample
+
+            denominator = factor_den * sample_den * variable_den
+            
+            if denominator != 0:
+                concentration_sample = round((numerator / denominator), cifras_sign)
+
+        # Crear instancia de SamplingAnalysisProcessing
+        SamplingAnalysisProcessing.objects.create(
+            sample_analysis=analysis,
+            millimole_reacted=millimole,
+            quantity_sample=qty_sample,
+            concentration_sample=concentration_sample,
+            analyzed_by=instance.user_creation,
+            analyzed_date=timezone.now(),
+            relational_calculation=False,
+            analytical_method_calculate=base_calc,  
+            weight_obtained=None,
+            quantity_standard=None,
+            standard_solution=None,
+            analytical_method_calculate_relation=None
+        )
+
+        # Descuento de inventario y creación de transacciones para MillimoleReacted
+        # Solución Adicionada
+        if instance.standard_solution_add_id and instance.milliliter_std_add > 0:
+            _update_solution_inventory(instance.standard_solution_add_id, instance.milliliter_std_add)
+            _create_solution_transaction(
+                instance.standard_solution_add_id,
+                instance.milliliter_std_add,
+                instance.user_creation_id,
+                f'Adición para Volumetría por Retroceso - Muestra {instance.sampling_analysis.sampling_process}'
+            )
+
+        # Solución Gastada
+        if instance.standard_solution_spend_id and instance.milliliter_std_spend > 0:
+            _update_solution_inventory(instance.standard_solution_spend_id, instance.milliliter_std_spend)
+            _create_solution_transaction(
+                instance.standard_solution_spend_id,
+                instance.milliliter_std_spend,
+                instance.user_creation_id,
+                f'Gasto en Volumetría por Retroceso - Muestra {instance.sampling_analysis.sampling_process}'
+            )

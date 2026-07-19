@@ -298,12 +298,12 @@
                                 <tbody>
                                 {% for foo in transactions %}
                                     <tr>
-                                        <td>{{ foo.date_transaction | date:'Y-m-d' }}</td>
-                                        <td>{{ foo.type_transaction }}</td>
-                                        <td>{{ foo.quantity | intcomma:False }}</td>
-                                        <td>{{ foo.user_transaction }}</td>
-                                        <td>{{ foo.detail_transaction }}</td>
-                                        <td>
+                                        <td class="text-center align-middle">{{ foo.date_transaction | date:'Y-m-d' }}</td>
+                                        <td class="text-center align-middle">{{ foo.type_transaction }}</td>
+                                        <td class="text-center align-middle">{{ foo.quantity | intcomma:False }}</td>
+                                        <td class="text-center align-middle">{{ foo.user_transaction }}</td>
+                                        <td class="text-center align-middle">{{ foo.detail_transaction }}</td>
+                                        <td class="text-center align-middle">
                                             <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
                                                title="Editar">
                                                 <i class="bi bi-pencil-square text-warning me-2"></i>
@@ -313,7 +313,7 @@
                                 {% empty %}
                                     <tr>
                                         <td colspan="6" class="text-center">
-                                            No hay capacitaciones asociadas.
+                                            No hay transacciones asociadas.
                                         </td>
                                     </tr>
                                 {% endfor %}
