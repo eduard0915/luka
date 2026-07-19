@@ -239,7 +239,7 @@
                                                         <td class="text-center align-middle">
                                                             {% if object.status_sampling == 'Confirmada' %}
                                                                 <a href="javascript:void(0);"
-                                                                   onclick="open_modal('{% url 'sampling:sampling_in_process' object.id %}')"
+                                                                   onclick="open_modal('{% url 'sampling:sampling_in_process_with_analysis' object.id sa.id %}')"
                                                                    class="btn btn-primary btn-xs">
                                                                     <i class="bi bi-box-arrow-up-right m-0"></i>
                                                                 </a>

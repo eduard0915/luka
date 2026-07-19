@@ -37,6 +37,8 @@ TYPE_TEST = [('Rango', 'Rango'), ('Descriptivo', 'Descriptivo')]
 
 TYPE_SAMPLE = [('En Proceso', 'En Proceso'), ('Producto Terminado', 'Producto Terminado')]
 
+SEQUENCE = [('', '')] + [(i, i) for i in range(1, 50)]
+
 
 # Creación de Productos
 class ProductForm(ModelForm):
@@ -118,7 +120,7 @@ class SamplePointForm(ModelForm):
             'sample_frequency': Select(attrs={'class': 'form-control'}, choices=FREQUENCY),
             'sample_type': Select(attrs={'class': 'form-control'}, choices=TYPE_SAMPLE),
             'periodicity': Select(attrs={'class': 'form-control'}, choices=PERIODICITY),
-            'sequence': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'sequence': Select(attrs={'class': 'form-control', 'required': True}, choices=SEQUENCE),
             'specification': SelectMultiple(attrs={'class': 'form-control', 'required': True})
         }
 
@@ -303,10 +305,8 @@ class ProductCalculateRelationForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.product = kwargs.pop('product', None)
         super().__init__(*args, **kwargs)
-        if self.product:
-            self.fields['analytical_method_calculate'].queryset = AnalyticalMethodCalculate.objects.filter(
-                analytical_method__analyticalmethodproduct__product=self.product
-            ).distinct()
+        self.fields['analytical_method_calculate'].queryset = AnalyticalMethodCalculate.objects.exclude(
+            calculate_description__isnull=True).exclude(calculate_description='').distinct()
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
             form.field.widget.attrs['autocomplete'] = 'off'

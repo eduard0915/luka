@@ -296,41 +296,41 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
             num_terms_rel = []
             den_terms_rel = []
             gen_terms_rel = []
-            rel_desc = ""
-            rel_unit = ""
+            # rel_desc = ""
+            # rel_unit = ""
+            #
+            # for cr in calcules_relation:
+            #     parts_rel = []
+            #     if cr.calculate_description_relation:
+            #         rel_desc = cr.calculate_description_relation
+            #         rel_unit = cr.unit_measure_calculate
+            #     if cr.analytical_method_calculate: parts_rel.append(
+            #         f"\\text{{{cr.analytical_method_calculate.calculate_description}}}")
+            #     if cr.volumen_std: parts_rel.append(str(cr.volumen_std))
+            #     if cr.factor: parts_rel.append(str(cr.factor))
+            #     if cr.sample_quantity: parts_rel.append(str(cr.sample_quantity))
+            #
+            #     item_text_rel = " \cdot ".join(parts_rel)
+            #     if not item_text_rel: continue
+            #
+            #     if cr.position == 'Numerador':
+            #         num_terms_rel.append(item_text_rel)
+            #     elif cr.position == 'Denominador':
+            #         den_terms_rel.append(item_text_rel)
+            #     elif cr.position == 'General':
+            #         gen_terms_rel.append(item_text_rel)
+            #
+            # str_num_rel = " \cdot ".join(num_terms_rel) if num_terms_rel else "1"
+            # str_den_rel = " \cdot ".join(den_terms_rel) if den_terms_rel else "1"
+            # str_gen_rel = f" \cdot {' \cdot '.join(gen_terms_rel)}" if gen_terms_rel else ""
 
-            for cr in calcules_relation:
-                parts_rel = []
-                if cr.calculate_description_relation:
-                    rel_desc = cr.calculate_description_relation
-                    rel_unit = cr.unit_measure_calculate
-                if cr.analytical_method_calculate: parts_rel.append(
-                    f"\\text{{{cr.analytical_method_calculate.calculate_description}}}")
-                if cr.volumen_std: parts_rel.append(str(cr.volumen_std))
-                if cr.factor: parts_rel.append(str(cr.factor))
-                if cr.sample_quantity: parts_rel.append(str(cr.sample_quantity))
-
-                item_text_rel = " \cdot ".join(parts_rel)
-                if not item_text_rel: continue
-
-                if cr.position == 'Numerador':
-                    num_terms_rel.append(item_text_rel)
-                elif cr.position == 'Denominador':
-                    den_terms_rel.append(item_text_rel)
-                elif cr.position == 'General':
-                    gen_terms_rel.append(item_text_rel)
-
-            str_num_rel = " \cdot ".join(num_terms_rel) if num_terms_rel else "1"
-            str_den_rel = " \cdot ".join(den_terms_rel) if den_terms_rel else "1"
-            str_gen_rel = f" \cdot {' \cdot '.join(gen_terms_rel)}" if gen_terms_rel else ""
-
-            if num_terms_rel or den_terms_rel or gen_terms_rel:
-                if not rel_desc:
-                    rel_desc = "Cálculo Relacionado"
-                label_rel = f"\\text{{{rel_desc}}}"
-                if rel_unit:
-                    label_rel += f" \\text{{ ({rel_unit})}}"
-                context['final_equation_relation'] = f"{label_rel} = \\frac{{{str_num_rel}}}{{{str_den_rel}}}{str_gen_rel}"
+            # if num_terms_rel or den_terms_rel or gen_terms_rel:
+            #     if not rel_desc:
+            #         rel_desc = "Cálculo Relacionado"
+            #     label_rel = f"\\text{{{rel_desc}}}"
+            #     if rel_unit:
+            #         label_rel += f" \\text{{ ({rel_unit})}}"
+            #     context['final_equation_relation'] = f"{label_rel} = \\frac{{{str_num_rel}}}{{{str_den_rel}}}{str_gen_rel}"
 
             if num_terms or den_terms or gen_terms:
                 # Construcción de la etiqueta con formato
