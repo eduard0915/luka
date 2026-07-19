@@ -563,12 +563,13 @@ class MillimoleReactedForm(ModelForm):
 
     class Meta:
         model = MillimoleReacted
-        fields = ['standard_solution_add', 'milliliter_std_add', 'standard_solution_spend', 'milliliter_std_spend']
+        fields = ['standard_solution_add', 'milliliter_std_add', 'standard_solution_spend', 'milliliter_std_spend', 'quantity_sample']
         widgets = {
             'standard_solution_add': Select(attrs={'class': 'form-control select2', 'required': True, 'style': 'width: 100%'}),
             'milliliter_std_add': TextInput(attrs={'class': 'form-control', 'required': True}),
             'standard_solution_spend': Select(attrs={'class': 'form-control select2', 'required': True, 'style': 'width: 100%'}),
             'milliliter_std_spend': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'quantity_sample': TextInput(attrs={'class': 'form-control', 'required': True}),
         }
 
     def save(self, commit=True):

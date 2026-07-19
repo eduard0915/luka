@@ -190,6 +190,7 @@ class SamplingAnalysisProcessing(BaseModel):
     standard_solution = models.ForeignKey(SolutionStd, verbose_name='Solución Estándar', on_delete=models.CASCADE, null=True, blank=True)
     quantity_standard = models.FloatField(verbose_name='mL Estándar', null=True, blank=True)
     weight_obtained = models.FloatField(verbose_name='Peso Obtenido', null=True, blank=True)
+    millimole_reacted = models.FloatField(verbose_name='Milimoles que Reaccionan', null=True, blank=True)
     quantity_sample = models.FloatField(verbose_name='Cant. de Muestra')
     concentration_sample = models.FloatField(verbose_name='Concentración Muestra')
     analyzed_by = models.ForeignKey(User, verbose_name='Analizado por', on_delete=models.CASCADE)
@@ -293,12 +294,13 @@ class SamplingAnalysisProcessingRelation(BaseModel):
 # Milimoles que reaccionaron
 class MillimoleReacted(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    standard_solution_add = models.ForeignKey(SolutionStd, on_delete=models.CASCADE, null=True, blank=True, related_name='standard_solution_add', verbose_name='Solución Estandar Adicionada')
-    standard_solution_spend = models.ForeignKey(SolutionStd, on_delete=models.CASCADE, null=True, blank=True, related_name='standard_solution_spend', verbose_name='Solución Estandar Gastada')
-    sampling_analysis = models.ForeignKey(SamplingAnalysis, on_delete=models.CASCADE, null=True, blank=True)
+    standard_solution_add = models.ForeignKey(SolutionStd, on_delete=models.CASCADE, related_name='standard_solution_add', verbose_name='Solución Estandar Adicionada')
+    standard_solution_spend = models.ForeignKey(SolutionStd, on_delete=models.CASCADE, related_name='standard_solution_spend', verbose_name='Solución Estandar Gastada')
+    sampling_analysis = models.ForeignKey(SamplingAnalysis, on_delete=models.CASCADE)
     milliliter_std_add = models.FloatField(verbose_name='Mililitros Adicionados')
     milliliter_std_spend = models.FloatField(verbose_name='Mililitros Gastados')
-    millimole = models.FloatField(verbose_name='Milimoles Reaccionaron', null=True, blank=True)
+    millimole = models.FloatField(verbose_name='Milimoles Reaccionaron')
+    quantity_sample = models.FloatField(verbose_name='Cantidad de Muestra (g)')
 
     def __str__(self):
         return str(self.millimole)

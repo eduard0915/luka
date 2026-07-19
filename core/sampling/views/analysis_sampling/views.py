@@ -28,6 +28,7 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['analysis_processing_relational'] = self.object.samplinganalysisprocessing_set.filter(relational_calculation=True).order_by('-analyzed_date')
         context['analysis_processing_relational_new'] = self.object.samplinganalysisprocessingrelation_set.all().order_by('-date_creation')
         context['analysis_count'] = self.object.samplinganalysisprocessing_set.filter(relational_calculation=False).count()
+        context['millimole_reacted'] = self.object.millimolereacted_set.all().order_by('-date_creation')
 
         # Datos del método analítico
         method = self.object.analytical_method
@@ -137,7 +138,6 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         if self.object.analytical_method.type_method == 'Volumetrico':
             context['create_processing_url'] = reverse_lazy('sampling:sampling_analysis_volumetry', kwargs={'pk': self.object.id})
         if self.object.analytical_method.type_method == 'Volumetrico por Retroceso':
-            context['create_millimole_reacted'] = reverse_lazy('sampling:create_millimole_reacted', kwargs={'pk': self.object.id})
             context['create_processing_url'] = reverse_lazy('sampling:create_millimole_reacted', kwargs={'pk': self.object.id})
         elif self.object.analytical_method.type_method == 'Gravimetrico':
             context['create_processing_url'] = reverse_lazy('sampling:sampling_analysis_gravimetry', kwargs={'pk': self.object.id})

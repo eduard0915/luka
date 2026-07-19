@@ -1,6 +1,7 @@
 luka/.env
 .env
 !.env.example
+venv
 **/.venv
 db.sqlite3
 db.sqlite3-journal
@@ -9,8 +10,12 @@ __pycache__
 .idea
 staticfiles
 media
+.claude
 django_errors.log
 .django_errors.log
+.env.example
+.dockerignore
+README.md
 
 # User-specific stuff
 .idea/**/workspace.xml
@@ -34,19 +39,6 @@ django_errors.log
 # Gradle
 .idea/**/gradle.xml
 .idea/**/libraries
-
-# Gradle and Maven with auto-import
-# When using Gradle or Maven with auto-import, you should exclude module files,
-# since they will be recreated, and may cause churn.  Uncomment if using
-# auto-import.
-# .idea/artifacts
-# .idea/compiler.xml
-# .idea/jarRepositories.xml
-# .idea/modules.xml
-# .idea/*.iml
-# .idea/modules
-# *.iml
-# *.ipr
 
 # CMake
 cmake-build-*/
@@ -80,14 +72,6 @@ fabric.properties
 
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
-
-### PyCharm Patch ###
-# Comment Reason: https://github.com/joeblau/gitignore.io/issues/186#issuecomment-215987721
-
-# *.iml
-# modules.xml
-# .idea/misc.xml
-# *.ipr
 
 # Sonarlint plugin
 # https://plugins.jetbrains.com/plugin/7973-sonarlint

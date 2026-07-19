@@ -80,6 +80,7 @@ TEMPLATES = [
             ],
             'builtins': [
                 'templatetags.path_helpers',
+                'templatetags.custom_filters',
             ],
         },
     },

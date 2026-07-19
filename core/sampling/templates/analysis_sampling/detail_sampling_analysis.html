@@ -1,6 +1,8 @@
 {% extends 'body.html' %}
+{% load custom_filters %}
 {% load static %}
 {% load humanize %}
+
 
 {% block head %}
     {% block head_list %}
@@ -69,10 +71,11 @@
                                 <b>Muestra</b><br>
                                 <p>{{ entity.sampling_process.number_sample }}</p>
                             </div>
-                            <div class="col-md-2">
-                                <b>Cant. Muestra</b><br>
-                                <p>{{ entity.analytical_method.sample_size }} Gramos</p>
-                            </div>
+{#                            <div class="col-md-2">#}
+{#                                <b>Cant. Muestra</b><br>#}
+{#                                <p>{{ entity.quantity_sample }} Gramos</p>#}
+{#                                <p>{{ entity.analytical_method.sample_size }} Gramos</p>#}
+{#                            </div>#}
                             <div class="col-md-2 px-0">
                                 <b>Resultado</b><br>
                                 <p>{{ entity.average_concentration|default:"Pendiente" }} {% if entity.comply %}{{ specification.unit_measure|default:"" }}{% endif %}</p>
@@ -137,19 +140,19 @@
                                                             </tr>
                                                         {% elif entity.analytical_method.type_method == 'Volumetrico por Retroceso' %}
                                                             <tr>
-                                                                <th class="text-center align-middle" style="width: 35%">
+                                                                <th class="text-center align-middle" style="width: 19%">
                                                                     STD Adicionada
                                                                 </th>
-                                                                <th class="text-center align-middle" style="width: 12%">
+                                                                <th class="text-center align-middle" style="width: 19%">
                                                                     STD Gastados
                                                                 </th>
-                                                                <th class="text-center align-middle" style="width: 10%">
-                                                                    Muestra
+                                                                <th class="text-center align-middle" style="width: 12%">
+                                                                    Muestra (g)
                                                                 </th>
-                                                                <th class="text-center align-middle" style="width: 10%">
+                                                                <th class="text-center align-middle" style="width: 8%">
                                                                     [{{ specification.unit_measure|default:"" }}]
                                                                 </th>
-                                                                <th class="text-center align-middle" style="width: 20%">
+                                                                <th class="text-center align-middle" style="width: 19%">
                                                                     Analizado por
                                                                 </th>
                                                                 <th class="text-center align-middle" style="width: 13%">
@@ -186,6 +189,29 @@
                                                                         - {{ ap.standard_solution.code_solution_std }}
                                                                     </td>
                                                                     <td class="text-center align-middle">{{ ap.quantity_standard }}</td>
+                                                                    <td class="text-center align-middle">{{ ap.quantity_sample }}</td>
+                                                                    <td class="text-center align-middle">{{ ap.concentration_sample }}</td>
+                                                                    <td class="text-center align-middle">{{ ap.analyzed_by.get_full_name }}</td>
+                                                                    <td class="text-center align-middle">{{ ap.analyzed_date|date:"Y-m-d H:i" }}</td>
+                                                                </tr>
+                                                            {% elif entity.analytical_method.type_method == 'Volumetrico por Retroceso' %}
+                                                                <tr>
+                                                                    <td class="text-center align-middle">
+                                                                        {% with mr=millimole_reacted|index:forloop.counter0 %}
+                                                                            {{ mr.standard_solution_add.solute_std.reagent }}
+                                                                            {{ mr.standard_solution_add.concentration_std }}{{ mr.standard_solution_add.concentration_unit }}
+                                                                            - {{ mr.standard_solution_add.code_solution_std }}
+                                                                            ({{ mr.milliliter_std_add }} mL)
+                                                                        {% endwith %}
+                                                                    </td>
+                                                                    <td class="text-center align-middle">
+                                                                        {% with mr=millimole_reacted|index:forloop.counter0 %}
+                                                                            {{ mr.standard_solution_spend.solute_std.reagent }}
+                                                                            {{ mr.standard_solution_spend.concentration_std }}{{ mr.standard_solution_spend.concentration_unit }}
+                                                                            - {{ mr.standard_solution_spend.code_solution_std }}
+                                                                            ({{ mr.milliliter_std_spend }} mL)
+                                                                        {% endwith %}
+                                                                    </td>
                                                                     <td class="text-center align-middle">{{ ap.quantity_sample }}</td>
                                                                     <td class="text-center align-middle">{{ ap.concentration_sample }}</td>
                                                                     <td class="text-center align-middle">{{ ap.analyzed_by.get_full_name }}</td>
