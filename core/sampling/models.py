@@ -47,11 +47,6 @@ class SamplingProcess(BaseModel):
     type_sampling = models.CharField(verbose_name='Tipo de Muestreo', max_length=30)
     date_sampling_scheduled = models.DateTimeField(verbose_name='Programación de Muestreo')
     date_sampling = models.DateTimeField(verbose_name='Fecha y Hora de Muestreo', null=True, blank=True)
-    # 45 = max_length de sample_point_code (30) + 15 del sufijo '-AAAAMMDD-n'.
-    # Si se amplía sample_point_code, este campo debe revisarse en el mismo cambio.
-    # db_index: next_sample_number filtra por prefijo; sin índice es seq scan de toda
-    # la tabla sosteniendo el lock. Django crea además el índice _like con
-    # varchar_pattern_ops, que es el que sirve para LIKE 'prefijo%' con collation no-C.
     number_sample = models.CharField(verbose_name='N° de Muestra', max_length=45, db_index=True)
     automatic_sampling = models.BooleanField(verbose_name='Muestreo Automático', default=True)
     sampling_confirmed_by = models.ForeignKey(User, verbose_name='Confirmado por', on_delete=models.CASCADE, related_name='sampling_confirmed_by', null=True, blank=True)

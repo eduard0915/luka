@@ -326,19 +326,27 @@ class SamplingAnalysisForm(ModelForm):
         return cleaned_data
 
 
+# Creación de Grupos de Muestreo
 class SamplingGroupForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         queryset = SamplePoint.objects.filter(
             enable_point=True, sample_frequency__isnull=False, periodicity__in=DAILY_PERIODICITY)
-        # Un grupo ya existente debe poder seguir editándose (hora, muestras/día) aunque su
-        # punto sea no diario: el filtro es para no CREAR grupos muertos, no para dejar
-        # ineditables los legacy. No afecta la generación: should_skip_group los sigue
-        # omitiendo. sampling_point_id, no instance.pk: el id es UUID con default, así que
-        # una instancia nueva sin guardar ya trae pk.
+
+        # IDs de sampling_point ya usados en otros SamplingGroup existentes
+        used_points = SamplingGroup.objects.exclude(
+            pk=self.instance.pk
+        ).exclude(
+            sampling_point__isnull=True
+        ).values_list('sampling_point_id', flat=True)
+
+        queryset = queryset.exclude(pk__in=used_points)
+
         if self.instance.sampling_point_id:
             queryset = queryset | SamplePoint.objects.filter(pk=self.instance.sampling_point_id)
+
         self.fields['sampling_point'].queryset = queryset.distinct()
+
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
         col_classes = {'sampling_point': 'col-md-6'}
@@ -365,6 +373,40 @@ class SamplingGroupForm(ModelForm):
         except Exception as e:
             data['error'] = str(e)
         return data
+# class SamplingGroupForm(ModelForm):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         queryset = SamplePoint.objects.filter(
+#             enable_point=True, sample_frequency__isnull=False, periodicity__in=DAILY_PERIODICITY)
+#         if self.instance.sampling_point_id:
+#             queryset = queryset | SamplePoint.objects.filter(pk=self.instance.sampling_point_id)
+#         self.fields['sampling_point'].queryset = queryset.distinct()
+#         for form in self.visible_fields():
+#             form.field.widget.attrs['autocomplete'] = 'off'
+#         col_classes = {'sampling_point': 'col-md-6'}
+#         for field_name, field in self.fields.items():
+#             field.col_class = col_classes.get(field_name, 'col-md-3')
+#
+#     class Meta:
+#         model = SamplingGroup
+#         fields = ['sampling_point', 'first_hour_sampling', 'number_sampling_day']
+#         widgets = {
+#             'sampling_point': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+#             'first_hour_sampling': TimeInput(format='%H:%M', attrs={'class': 'form-control', 'type': 'time'}),
+#             'number_sampling_day': TextInput(attrs={'class': 'form-control', 'required': True})
+#         }
+#
+#     def save(self, commit=True):
+#         data = {}
+#         form = super()
+#         try:
+#             if form.is_valid():
+#                 data = form.save()
+#             else:
+#                 data['error'] = form.errors
+#         except Exception as e:
+#             data['error'] = str(e)
+#         return data
 
 
 class SamplingProcessForm(ModelForm):
