@@ -130,6 +130,9 @@ class SamplePointForm(ModelForm):
                 data = form.save(commit=False)
                 data.product_id = self.product.id
                 data.save()
+                # commit=False difiere el guardado del M2M; hay que persistirlo
+                # explícitamente o las especificaciones seleccionadas se pierden.
+                self.save_m2m()
             else:
                 data['error'] = form.errors
         except Exception as e:
