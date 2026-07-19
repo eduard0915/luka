@@ -288,3 +288,33 @@ class SamplingAnalysisProcessingRelation(BaseModel):
         if self.calcule:
             self.calcule = round(self.calcule, 6)
         return super(SamplingAnalysisProcessingRelation, self).save(*args, **kwargs)
+
+
+# Milimoles que reaccionaron
+class MillimoleReacted(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    standard_solution_add = models.ForeignKey(SolutionStd, on_delete=models.CASCADE, null=True, blank=True, related_name='standard_solution_add', verbose_name='Solución Estandar Adicionada')
+    standard_solution_spend = models.ForeignKey(SolutionStd, on_delete=models.CASCADE, null=True, blank=True, related_name='standard_solution_spend', verbose_name='Solución Estandar Gastada')
+    sampling_analysis = models.ForeignKey(SamplingAnalysis, on_delete=models.CASCADE, null=True, blank=True)
+    milliliter_std_add = models.FloatField(verbose_name='Mililitros Adicionados')
+    milliliter_std_spend = models.FloatField(verbose_name='Mililitros Gastados')
+    millimole = models.FloatField(verbose_name='Milimoles Reaccionaron', null=True, blank=True)
+
+    def __str__(self):
+        return str(self.millimole)
+
+    class Meta:
+        verbose_name = 'MillimoleReacted'
+        verbose_name_plural = 'MillimolesReacted'
+        db_table = 'MillimoleReacted'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        # if self.millimole:
+        #     self.millimole = round(self.millimole, 6)
+        return super(MillimoleReacted, self).save(*args, **kwargs)
