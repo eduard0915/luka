@@ -28,6 +28,7 @@ urlpatterns = [
     path('process/confirmed/<uuid:pk>/', SamplingProcessConfirmedUpdateView.as_view(), name='confirmed_sampling_process'),
     path('process/approved/<uuid:pk>/', SamplingProcessApprovedUpdateView.as_view(), name='approved_sampling_process'),
     path('analysis/inprocess/<uuid:pk>/', SamplingProcessInProcessUpdateView.as_view(), name='sampling_in_process'),
+    path('analysis/inprocess/<uuid:pk>/<uuid:analysis_id>/', SamplingProcessInProcessUpdateView.as_view(), name='sampling_in_process_with_analysis'),
     # Procesamiento de la muestra
     path('analysis/detail/<uuid:pk>/', SamplingAnalysisDetailView.as_view(), name='detail_sampling_analysis'),
     path('analysis/processing_volumetry/add/<uuid:pk>/', SamplingAnalysisProcessingCreateView.as_view(), name='sampling_analysis_volumetry'),

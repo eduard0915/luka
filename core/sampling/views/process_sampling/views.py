@@ -447,10 +447,15 @@ class SamplingProcessInProcessUpdateView(LoginRequiredMixin, ValidatePermissionR
             if form.is_valid():
                 form.save()
                 messages.success(request, f'Inicio de Procesamiento de Muestra realizado satisfactoriamente!')
-                analysis = SamplingAnalysis.objects.select_related('sampling_process').filter(
-                    sampling_process_id=self.object.id).first()
-                if analysis:
-                    data['redirect_url'] = reverse_lazy('sampling:detail_sampling_analysis', kwargs={'pk': analysis.id})
+                
+                analysis_id = self.kwargs.get('analysis_id')
+                if analysis_id:
+                    data['redirect_url'] = reverse_lazy('sampling:detail_sampling_analysis', kwargs={'pk': analysis_id})
+                else:
+                    analysis = SamplingAnalysis.objects.select_related('sampling_process').filter(
+                        sampling_process_id=self.object.id).first()
+                    if analysis:
+                        data['redirect_url'] = reverse_lazy('sampling:detail_sampling_analysis', kwargs={'pk': analysis.id})
             else:
                 error_messages = format_form_errors(form)
                 messages.error(request, f'Por favor corrija los errores: {error_messages}')

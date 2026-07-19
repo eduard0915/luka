@@ -83,6 +83,12 @@ class ProductCalculateRelationCreateView(LoginRequiredMixin, BaseProductCalculat
     model = AnalyticalMethodCalculateRelation
     form_class = ProductCalculateRelationForm
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        product = Product.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'product': product})
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Agregar Cálculo Relacionado'

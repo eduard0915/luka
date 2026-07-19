@@ -92,7 +92,7 @@ class SpecificationProduct(BaseModel):
 # Puntos de Muestreo
 class SamplePoint(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    sample_point_code = models.CharField(max_length=30, verbose_name='Código')
+    sample_point_code = models.CharField(max_length=30, verbose_name='Código (Id)')
     sample_point_name = models.CharField(max_length=100, verbose_name='Punto de Muestreo')
     sample_frequency = models.SmallIntegerField(verbose_name='Frecuencia (Horas)', null=True, blank=True)
     sequence = models.SmallIntegerField(verbose_name='Secuencia')
