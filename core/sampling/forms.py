@@ -236,9 +236,9 @@ class SamplingAnalysisProcessingRelationForm(ModelForm):
         self.relation= kwargs.pop('relation', None)
 
         super().__init__(*args, **kwargs)
-        # self.fields['numerator'].widget.attrs['hidden'] = True
+        self.fields['numerator'].widget.attrs['hidden'] = True
         self.fields['numerator'].label = ''
-        # self.fields['denominator'].widget.attrs['hidden'] = True
+        self.fields['denominator'].widget.attrs['hidden'] = True
         self.fields['denominator'].label = ''
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -265,7 +265,7 @@ class SamplingAnalysisProcessingRelationForm(ModelForm):
         try:
             if form.is_valid():
                 data = form.save(commit=False)
-                data.calcule = float(data.numerator / data.denominator)
+                data.calcule = round((data.numerator / data.denominator), self.relation.sig_figs)
                 data.sampling_analysis_id = self.analysis.id
                 data.sampling_process_id = self.sampling.id
                 data.analytical_method_calculate_relation_id = self.relation.id

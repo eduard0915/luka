@@ -454,8 +454,8 @@ class ProductCalculateRelationForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.product = kwargs.pop('product', None)
         super().__init__(*args, **kwargs)
-        self.fields['analytical_method_calculate'].queryset = AnalyticalMethodCalculate.objects.exclude(
-            calculate_description__isnull=[None, '']).distinct()
+        self.fields['analytical_method_calculate'].queryset = AnalyticalMethodCalculate.objects.filter(
+            calculate_description__isnull=False).exclude(calculate_description='')
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
             form.field.widget.attrs['autocomplete'] = 'off'

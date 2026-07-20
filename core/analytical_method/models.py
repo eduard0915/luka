@@ -230,6 +230,7 @@ class AnalyticalMethodCalculateRelation(BaseModel):
     factor = models.FloatField(verbose_name='Constante', null=True, blank=True)
     sample_quantity = models.CharField(max_length=50, verbose_name='Muestra', null=True, blank=True)
     position = models.CharField(max_length=15, verbose_name='Posición en Ecuación', null=True, blank=True)
+    sig_figs = models.SmallIntegerField(verbose_name='Cifras Significativas', default=4)
 
     def __str__(self):
         return str(self.calculate_description_relation)

@@ -4,14 +4,13 @@ from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import CreateView, DetailView, DeleteView, ListView, UpdateView
+from django.views.generic import CreateView, DetailView, DeleteView, ListView
 
-from core.analytical_method.models import AnalyticalMethodCalculateRelation
 from core.mixins import ValidatePermissionRequiredMixin
-from core.product.models import SpecificationProduct, AnalyticalMethodProduct
-from core.sampling.forms import SamplingAnalysisProcessingForm, SamplingAnalysisProcessingRelationForm, \
-    SamplingAnalysisProcessingGravimetryForm, SamplingAnalysisForm, MillimoleReactedForm
+from core.product.models import SpecificationProduct
+from core.sampling.forms import *
 from core.sampling.models import *
+from core.analytical_method.models import AnalyticalMethodCalculateRelation
 
 
 # Detalle de Análisis de Muestra
@@ -111,7 +110,7 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
 
         if sampling_point:
             # Buscar la especificación en el punto de muestreo que coincida con el método
-            specification = sampling_point.specification.filter(
+            specification = sampling_point.specification.select_related('method_test__analytical_method').filter(
                 method_test__analytical_method=method
             ).first()
 
@@ -124,7 +123,7 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                 product = sampling_process.group_sampling.sampling_point.product
 
             if product:
-                specification = SpecificationProduct.objects.filter(
+                specification = SpecificationProduct.objects.select_related('method_test__analytical_method', 'product').filter(
                     product=product,
                     method_test__analytical_method=method
                 ).first()
@@ -267,14 +266,14 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
             product = sampling.group_sampling.sampling_point.product
 
         relation = AnalyticalMethodCalculateRelation.objects.select_related(
-            'analytical_method_calculate'
+            'analytical_method_calculate', 'product'
         ).filter(
             product=product,
             calculate_description_relation__isnull=False,
             analytical_method_calculate__isnull=True
-        ).first()
+        ).exclude(calculate_description_relation__in=[None, '']).first()
 
-        analysis = SamplingAnalysis.objects.filter(sampling_process=self.kwargs.get('pk')).first()
+        analysis = SamplingAnalysis.objects.select_related('sampling_process').filter(sampling_process=self.kwargs.get('pk')).first()
 
         kwargs.update({
             'analysis': analysis,
@@ -285,7 +284,7 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        analysis_qs = SamplingAnalysis.objects.filter(sampling_process=self.kwargs.get('pk'))
+        analysis_qs = SamplingAnalysis.objects.select_related('sampling_process').filter(sampling_process=self.kwargs.get('pk'))
         sampling = SamplingProcess.objects.get(pk=self.kwargs.get('pk'))
 
         product = None
@@ -299,21 +298,14 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
             return form
 
         # Obtener relaciones de cálculo como QuerySet
-        relation_num_qs = AnalyticalMethodCalculateRelation.objects.select_related(
-            'analytical_method_calculate'
-        ).filter(
-            product=product,
-            position='Numerador',
-            # analytical_method_calculate__isnull=False
-        )
+        relation_num_qs = AnalyticalMethodCalculateRelation.objects.select_related('product').filter(
+            product=product, position='Numerador')
 
-        relation_den_qs = AnalyticalMethodCalculateRelation.objects.select_related(
-            'analytical_method_calculate'
-        ).filter(
-            product=product,
-            position='Denominador',
-            # analytical_method_calculate__isnull=False
-        )
+        relation_den_qs = AnalyticalMethodCalculateRelation.objects.select_related('product').filter(
+            product=product, position='Denominador')
+
+        _relation = AnalyticalMethodCalculateRelation.objects.select_related('product').filter(
+            product=product).exclude(calculate_description_relation__in=[None, '']).first()
 
         # Inicializar variables
         numerator = 1.0
@@ -325,7 +317,7 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
         for relation_num in relation_num_qs:
             if relation_num.analytical_method_calculate:
                 # Obtener el análisis correspondiente
-                target_analysis = analysis_qs.filter(
+                target_analysis = analysis_qs.select_related('analytical_method').filter(
                     analytical_method=relation_num.analytical_method_calculate.analytical_method
                 ).first()
 
@@ -343,7 +335,7 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
         for relation_den in relation_den_qs:
             if relation_den.analytical_method_calculate:
                 # Obtener el análisis correspondiente
-                target_analysis = analysis_qs.filter(
+                target_analysis = analysis_qs.select_related('analytical_method').filter(
                     analytical_method=relation_den.analytical_method_calculate.analytical_method
                 ).first()
 
@@ -369,9 +361,10 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
         form.initial['denominator'] = round(denominator, 4)
 
         # Calcular el resultado
-        sig_figs = analysis_qs.first().analytical_method.sig_figs_result if analysis_qs.first().analytical_method else 4
+        sign_figs = _relation.sig_figs if _relation.sig_figs else 4
+
         if denominator != 0:
-            form.initial['calcule'] = round(numerator / denominator, sig_figs)
+            form.initial['calcule'] = round(numerator / denominator, sign_figs)
         else:
             form.initial['calcule'] = 0
 
@@ -391,7 +384,7 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
 
         # Obtener la primera relación de cálculo si existe
 
-        relation = AnalyticalMethodCalculateRelation.objects.filter(
+        relation = AnalyticalMethodCalculateRelation.objects.select_related('product').filter(
             product=product).exclude(calculate_description_relation__in=[None, '']).first()
 
         # Usar la relación solo si existe

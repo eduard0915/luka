@@ -260,8 +260,7 @@ class SamplingAnalysisProcessing(BaseModel):
 class SamplingAnalysisProcessingRelation(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     sampling_analysis = models.ForeignKey(SamplingAnalysis, on_delete=models.CASCADE, null=True, blank=True)
-    analytical_method_calculate_relation = models.ForeignKey(
-        'analytical_method.AnalyticalMethodCalculateRelation', on_delete=models.CASCADE, null=True, blank=True)
+    analytical_method_calculate_relation = models.ForeignKey(AnalyticalMethodCalculateRelation, on_delete=models.CASCADE, null=True, blank=True)
     numerator = models.FloatField(verbose_name='Numerador')
     denominator = models.FloatField(verbose_name='Denominador', null=True, blank=True)
     calcule = models.FloatField(verbose_name='Resultado')
@@ -282,8 +281,8 @@ class SamplingAnalysisProcessingRelation(BaseModel):
                 self.user_creation = user
             else:
                 self.user_updated = user
-        if self.calcule:
-            self.calcule = round(self.calcule, 6)
+        # if self.calcule:
+        #     self.calcule = round(self.calcule, 6)
         return super(SamplingAnalysisProcessingRelation, self).save(*args, **kwargs)
 
 
