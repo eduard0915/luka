@@ -332,21 +332,22 @@ def create_sampling_analysis_processing_from_millimole(sender, instance, created
 @receiver(post_save, sender=SamplingAnalysisProcessingRelation)
 def create_processing_relation(instance, created, **kwargs):
 
-    analysis = SamplingAnalysis.objects.get(analytical_method_relation=instance.analytical_method_calculate_relation)
+    analysis = SamplingAnalysis.objects.filter(analytical_method_relation=instance.analytical_method_calculate_relation).first()
 
-    previous_analysis = SamplingAnalysisProcessingRelation.objects.select_related(
-        'analytical_method_calculate_relation').filter(analytical_method_calculate_relation=instance.analytical_method_calculate_relation)
+    spc = SpecificationProduct.objects.filter(method_test_relacional=instance.analytical_method_calculate_relation).first()
 
-    stats = previous_analysis.aggregate(std=StdDev('calcule'), avg=Avg('calcule'))
+    if analysis:
+        previous_analysis = SamplingAnalysisProcessingRelation.objects.select_related(
+            'analytical_method_calculate_relation').filter(
+            analytical_method_calculate_relation=instance.analytical_method_calculate_relation)
 
-    spc = SpecificationProduct.objects.get(method_test_relacional=instance.analytical_method_calculate_relation)
+        stats = previous_analysis.aggregate(std=StdDev('calcule'), avg=Avg('calcule'))
 
-    analysis.standard_deviation = float(stats['std']) or 0
-    analysis.coefficient_variation = float(stats['std'] / stats['avg']) or 0
-    analysis.average_concentration = float(stats['avg']) or float(instance.calcule)
-    if spc.lower_limit_prod <= instance.calcule <= spc.upper_limit_prod:
-        analysis.comply = 'Cumple'
-    else:
-        analysis.comply = 'No Cumple'
-    analysis.save()
-
+        analysis.standard_deviation = float(stats['std']) or 0
+        analysis.coefficient_variation = float(stats['std'] / stats['avg']) or 0
+        analysis.average_concentration = float(stats['avg']) or float(instance.calcule)
+        if spc.lower_limit_prod <= instance.calcule <= spc.upper_limit_prod:
+            analysis.comply = 'Cumple'
+        else:
+            analysis.comply = 'No Cumple'
+        analysis.save()
