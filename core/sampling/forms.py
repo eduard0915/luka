@@ -228,6 +228,39 @@ class SamplingAnalysisProcessingGravimetryForm(ModelForm):
             raise ValidationError({'error': str(e)})
 
 
+# Registro de Análisis por lectura directa
+class SamplingAnalysisProcessingDirectForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.analysis = kwargs.pop('analysis', None)
+        super().__init__(*args, **kwargs)
+        self.fields['concentration_sample'].label = 'Registrar Lectura'
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+        col_classes = {
+            'concentration_sample': 'col-md-4',
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
+    class Meta:
+        model = SamplingAnalysisProcessing
+        fields = ['concentration_sample']
+        widgets = {
+            'concentration_sample': TextInput(attrs={'class': 'form-control', 'required': True})
+        }
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.sample_analysis_id = self.analysis.id
+        instance.analyzed_by_id = get_current_user().id
+        instance.analyzed_date = timezone.now()
+        if commit:
+            instance.save()
+        return instance
+
+
 # Cálculo de parámetros con variables relacionadas
 class SamplingAnalysisProcessingRelationForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -260,21 +293,35 @@ class SamplingAnalysisProcessingRelationForm(ModelForm):
         }
 
     def save(self, commit=True):
-        data = {}
-        form = super()
-        try:
-            if form.is_valid():
-                data = form.save(commit=False)
-                data.calcule = round((data.numerator / data.denominator), self.relation.sig_figs)
-                data.sampling_analysis_id = self.analysis.id
-                data.sampling_process_id = self.sampling.id
-                data.analytical_method_calculate_relation_id = self.relation.id
-                data.save()
-            else:
-                data['error'] = form.errors
-        except Exception as e:
-            data['error'] = str(e)
-        return data
+        instance = super().save(commit=False)
+        if self.relation is None:
+            raise ValidationError('No se encontró una relación de cálculo asociada.')
+        if not instance.denominator:
+            raise ValidationError('El denominador no puede ser cero.')
+        instance.calcule = round(instance.numerator / instance.denominator, self.relation.sig_figs)
+        instance.sampling_analysis_id = self.analysis.id
+        instance.sampling_process_id = self.sampling.id
+        instance.analytical_method_calculate_relation_id = self.relation.id
+        if commit:
+            instance.save()
+        return instance
+
+    # def save(self, commit=True):
+    #     data = {}
+    #     form = super()
+    #     try:
+    #         if form.is_valid():
+    #             data = form.save(commit=False)
+    #             data.calcule = round((data.numerator / data.denominator), self.relation.sig_figs)
+    #             data.sampling_analysis_id = self.analysis.id
+    #             data.sampling_process_id = self.sampling.id
+    #             data.analytical_method_calculate_relation_id = self.relation.id
+    #             data.save()
+    #         else:
+    #             data['error'] = form.errors
+    #     except Exception as e:
+    #         data['error'] = str(e)
+    #     return data
 
 
 # Asociar método analitico en muestra

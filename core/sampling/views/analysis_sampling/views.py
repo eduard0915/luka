@@ -140,6 +140,8 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
             context['create_processing_url'] = reverse_lazy('sampling:create_millimole_reacted', kwargs={'pk': self.object.id})
         elif self.object.analytical_method.type_method == 'Gravimetrico':
             context['create_processing_url'] = reverse_lazy('sampling:sampling_analysis_gravimetry', kwargs={'pk': self.object.id})
+        elif self.object.analytical_method.type_method == 'Lectura Directa':
+            context['create_processing_url'] = reverse_lazy('sampling:sampling_analysis_direct', kwargs={'pk': self.object.id})
         return context
 
 
@@ -222,6 +224,48 @@ class SamplingAnalysisProcessingGravimetryCreateView(LoginRequiredMixin, Validat
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Registro de Procesamiento de Análisis Gravimétrico'
+        return context
+
+
+# Registro de análisis por lectura directa (pH, Densidad, Viscosidad)
+class SamplingAnalysisProcessingDirectCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    model = SamplingAnalysisProcessing
+    form_class = SamplingAnalysisProcessingDirectForm
+    template_name = 'modal_one.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'add':
+                form = self.get_form()
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, '¡Procesamiento Registrado Satisfactoriamente!')
+                else:
+                    data['error'] = form.errors
+            else:
+                data['error'] = 'No ha ingresado datos en los campos'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        analysis = SamplingAnalysis.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'analysis': analysis})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        analysis = SamplingAnalysis.objects.get(pk=self.kwargs.get('pk'))
+        context['action'] = 'add'
+        context['entity'] = 'Registro de ' + str(analysis.analytical_method.description_analytical_method)
         return context
 
 
