@@ -244,28 +244,36 @@
                                                 {% for sa in sampling_analysis %}
                                                     <tr>
                                                         <td class="text-left align-middle">
-                                                            {{ sa.analytical_method.description_analytical_method }} - {{ sa.analytical_method.code_analytical_method }}
+                                                            {% if sa.analytical_method %}
+                                                                {{ sa.analytical_method.description_analytical_method }}
+                                                            {% else %}
+                                                                {{ sa.analytical_method_relation.calculate_description_relation }}
+                                                            {% endif %}
                                                         </td>
                                                         <td class="text-center align-middle">{{ sa.average_concentration|default_if_none:'Pendiente' }} {% if sa.average_concentration %}{{ sa.unit_measure_prod|default_if_none:"" }}{% endif %}</td>
                                                         <td class="text-center align-middle {% if sa.comply == 'No Cumple' %}text-danger{% endif %}">
                                                             {{ sa.comply|default_if_none:"Pendiente" }}
                                                         </td>
                                                         <td class="text-center align-middle">
-                                                            {% if object.status_sampling == 'Confirmada' %}
-                                                                <a href="javascript:void(0);"
-                                                                   onclick="open_modal('{% url 'sampling:sampling_in_process_with_analysis' object.id sa.id %}')"
-                                                                   class="btn btn-primary btn-xs">
-                                                                    <i class="bi bi-box-arrow-up-right m-0"></i>
+                                                            {% if not sa.analytical_method_relation %}
+                                                                {% if object.status_sampling == 'Confirmada' %}
+                                                                    <a href="javascript:void(0);"
+                                                                       onclick="open_modal('{% url 'sampling:sampling_in_process_with_analysis' object.id sa.id %}')"
+                                                                       class="btn btn-primary btn-xs">
+                                                                        <i class="bi bi-box-arrow-up-right m-0"></i>
+                                                                    </a>
+                                                                {% else %}
+                                                                    <a href="{% url 'sampling:detail_sampling_analysis' sa.id %}" title="Ver Análisis" class="btn btn-info btn-xs">
+                                                                        <i class="fa-solid fa-flask-vial m-0"></i>
+                                                                    </a>
+                                                                {% endif %}
+                                                                <a href="javascript:void(0);" class="btn btn-danger btn-xs"
+                                                                   onclick="open_modal('{% url 'sampling:delete_sampling_analysis' sa.id %}')">
+                                                                    <i class="bi bi-trash m-0"></i>
                                                                 </a>
                                                             {% else %}
-                                                                <a href="{% url 'sampling:detail_sampling_analysis' sa.id %}" title="Ver Análisis" class="btn btn-info btn-xs">
-                                                                    <i class="fa-solid fa-flask-vial m-0"></i>
-                                                                </a>
+                                                                NA
                                                             {% endif %}
-                                                            <a href="javascript:void(0);" class="btn btn-danger btn-xs"
-                                                               onclick="open_modal('{% url 'sampling:delete_sampling_analysis' sa.id %}')">
-                                                                <i class="bi bi-trash m-0"></i>
-                                                            </a>
                                                         </td>
                                                     </tr>
                                                 {% endfor %}

@@ -43,9 +43,6 @@ def create_sampling_analysis(sender, instance, created, **kwargs):
         if spec.method_test and spec.method_test.analytical_method
     }
 
-    # if not analytical_methods:
-    #     return
-
     # Crear análisis en bloque para mejor rendimiento
     # Primero verificar cuáles ya existen
     existing_methods = set(
@@ -59,7 +56,7 @@ def create_sampling_analysis(sender, instance, created, **kwargs):
     new_analyses = [
         SamplingAnalysis(
             sampling_process=instance,
-            analytical_method=method,
+            analytical_method=method
         )
         for method in analytical_methods
         if method.id not in existing_methods
@@ -71,21 +68,35 @@ def create_sampling_analysis(sender, instance, created, **kwargs):
             ignore_conflicts=True  # Por si acaso hay race conditions
         )
 
+    if instance.group_sampling:
+        product_id = instance.group_sampling.sampling_point.product.id
+    else:
+        product_id = instance.point_sampling.product.id
+
     calculate_relations = AnalyticalMethodCalculateRelation.objects.filter(
-        product=instance.product).exclude(calculate_description_relation__in=[None, ''])
+        product=product_id).exclude(calculate_description_relation__in=[None, ''])
 
-    print(calculate_relations)
+    existing_relations = set(
+        SamplingAnalysis.objects.filter(
+            sampling_process=instance,
+            analytical_method_relation__in=calculate_relations
+        ).values_list('analytical_method_relation_id', flat=True)
+    )
 
-    if calculate_relations:
-        new_analyses += [
-            SamplingAnalysis(
-                sampling_process=instance,
-                analytical_method=None,
-                analytical_method_relation=relation,
-            )
-            for relation in calculate_relations
-            if relation.id not in calculate_relations
-        ]
+    new_analyses_rel = [
+        SamplingAnalysis(
+            sampling_process=instance,
+            analytical_method_relation=calculate,
+        )
+        for calculate in calculate_relations
+        if calculate.id not in existing_relations
+    ]
+
+    if new_analyses_rel:
+        SamplingAnalysis.objects.bulk_create(
+            new_analyses_rel,
+            ignore_conflicts=True  # Por si acaso hay race conditions
+        )
 
 
 # Signal para actualización de los análisis de una muestra
