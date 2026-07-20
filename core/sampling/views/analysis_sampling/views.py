@@ -256,10 +256,11 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        analysis = SamplingAnalysis.objects.filter(sampling_process=self.kwargs.get('pk')).first()
+
         sampling = SamplingProcess.objects.get(pk=self.kwargs.get('pk'))
 
         product = None
+
         if sampling.point_sampling:
             product = sampling.point_sampling.product
         elif sampling.group_sampling:
@@ -272,6 +273,8 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
             calculate_description_relation__isnull=False,
             analytical_method_calculate__isnull=True
         ).first()
+
+        analysis = SamplingAnalysis.objects.filter(sampling_process=self.kwargs.get('pk')).first()
 
         kwargs.update({
             'analysis': analysis,
@@ -301,7 +304,7 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
         ).filter(
             product=product,
             position='Numerador',
-            analytical_method_calculate__isnull=False
+            # analytical_method_calculate__isnull=False
         )
 
         relation_den_qs = AnalyticalMethodCalculateRelation.objects.select_related(
@@ -309,7 +312,7 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
         ).filter(
             product=product,
             position='Denominador',
-            analytical_method_calculate__isnull=False
+            # analytical_method_calculate__isnull=False
         )
 
         # Inicializar variables
@@ -327,11 +330,14 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
                 ).first()
 
                 if target_analysis and target_analysis.average_concentration:
-                    val = float(target_analysis.average_concentration)
+                    val_num = float(target_analysis.average_concentration)
                     if relation_num.factor:
-                        val *= relation_num.factor
-                    numerator *= val
+                        val_num *= relation_num.factor
+                    numerator *= val_num
                     has_num = True
+            else:
+                numerator *= relation_num.factor
+                has_num = True
 
         # Procesar denominador
         for relation_den in relation_den_qs:
@@ -342,11 +348,15 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
                 ).first()
 
                 if target_analysis and target_analysis.average_concentration:
-                    val = float(target_analysis.average_concentration)
+                    val_den = float(target_analysis.average_concentration)
                     if relation_den.factor:
-                        val *= relation_den.factor
-                    denominator *= val
+                        val_den *= relation_den.factor
+                    denominator *= val_den
                     has_den = True
+            else:
+                denominator *= relation_den.factor
+                has_den = True
+
 
         # Establecer valores por defecto si no se encontraron
         if not has_num:
@@ -359,7 +369,7 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
         form.initial['denominator'] = round(denominator, 4)
 
         # Calcular el resultado
-        sig_figs = analysis_qs.first().analytical_method.sig_figs_result if analysis_qs.exists() else 4
+        sig_figs = analysis_qs.first().analytical_method.sig_figs_result if analysis_qs.first().analytical_method else 4
         if denominator != 0:
             form.initial['calcule'] = round(numerator / denominator, sig_figs)
         else:
@@ -380,12 +390,9 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
             product = sampling.group_sampling.sampling_point.product
 
         # Obtener la primera relación de cálculo si existe
-        relation = None
-        if product:
-            relation = AnalyticalMethodCalculateRelation.objects.filter(
-                product_id=product.id,
-                analytical_method_calculate__isnull=False
-            ).first()
+
+        relation = AnalyticalMethodCalculateRelation.objects.filter(
+            product=product).exclude(calculate_description_relation__in=[None, '']).first()
 
         # Usar la relación solo si existe
         if relation:
@@ -393,8 +400,8 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
         else:
             context['entity'] = 'Cálculo Relacional'
 
-        context['confirm_msg'] = '¿Está Seguro de Ejecutar el Calculo?'
         context['detail_button'] = 'Si, Ejecutar'
+        context['calculo'] = 'True'
         return context
 
 
