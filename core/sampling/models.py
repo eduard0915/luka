@@ -187,7 +187,7 @@ class SamplingAnalysisProcessing(BaseModel):
     quantity_standard = models.FloatField(verbose_name='mL Estándar', null=True, blank=True)
     weight_obtained = models.FloatField(verbose_name='Peso Obtenido', null=True, blank=True)
     millimole_reacted = models.FloatField(verbose_name='Milimoles que Reaccionan', null=True, blank=True)
-    quantity_sample = models.FloatField(verbose_name='Cant. de Muestra')
+    quantity_sample = models.FloatField(verbose_name='Cant. de Muestra', blank=True, null=True)
     concentration_sample = models.FloatField(verbose_name='Concentración Muestra')
     analyzed_by = models.ForeignKey(User, verbose_name='Analizado por', on_delete=models.CASCADE)
     analyzed_date = models.DateTimeField(verbose_name='Fecha de Análisis')
@@ -198,7 +198,7 @@ class SamplingAnalysisProcessing(BaseModel):
         'analytical_method.AnalyticalMethodCalculateRelation', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
-        return str(self.quantity_standard)
+        return str(self.concentration_sample)
 
     class Meta:
         verbose_name = 'SamplingAnalysisProcessing'
