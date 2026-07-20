@@ -275,7 +275,12 @@ class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMi
         # Mapear unidades de SpecificationProduct
         if sampling_point:
             specs = sampling_point.specification.all()
-            spec_units = {spec.method_test.analytical_method_id: spec.unit_measure for spec in specs}
+            # spec_units = {spec.method_test.analytical_method_id: spec.unit_measure for spec in specs}
+            spec_units = {
+                (spec.method_test or spec.method_test_relacional).analytical_method_id: spec.unit_measure
+                for spec in specs
+                if spec.method_test or spec.method_test_relacional
+            }
             
             # También intentar obtener unidades de AnalyticalMethodCalculate si no están en SpecificationProduct
             method_ids = [sa.analytical_method_id for sa in sampling_analysis]

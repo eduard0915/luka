@@ -34,7 +34,13 @@
                         <tbody>
                         {% for method in object.specification.all %}
                             <tr>
-                                <td>{{ method.method_test }}</td>
+                                <td>
+                                    {% if method.method_test %}
+                                        {{ method.method_test }}
+                                    {% else %}
+                                        {{ method.method_test_relacional }}
+                                    {% endif %}
+                                </td>
                             </tr>
                         {% empty %}
                             <tr>

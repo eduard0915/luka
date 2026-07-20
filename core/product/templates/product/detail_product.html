@@ -189,10 +189,10 @@
                     </div>
                     <!-- Contenedor de la Ecuación -->
                     <div class="row mt-3">
-                        <div class="col-md-12">
+                        <div class="col-md-8">
                             <div class="p-3 bg-light rounded text-center" id="equation-relation-container">
                                 {% if final_equation_relation %}
-                                    <div style="font-size: 1.2rem; overflow-x: auto; font-family: 'Times New Roman', serif;">
+                                    <div style="font-size: 0.9rem; overflow-x: auto; font-family: 'Times New Roman', serif;">
                                         $${{ final_equation_relation }}$$
                                     </div>
                                 {% else %}
@@ -202,6 +202,16 @@
                                 {% endif %}
                             </div>
                         </div>
+                        {% if final_equation_relation %}
+                            <div class="col-md-4 d-flex justify-content-center align-items-center">
+                                <p>
+                                    <a class="btn btn-primary icon-btn"
+                                       onclick="open_modal('{{ create_specification_product_calcule }}')"><i
+                                            class="bi bi-plus-square me-2"></i>Especificación
+                                    </a>
+                                </p>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -246,11 +256,28 @@
                                 {% else %}
                                     <td class="text-center">{{ item.features_prod }}</td>
                                 {% endif %}
-                                <td class="text-center">{{ item.method_test.analytical_method.code_analytical_method }}</td>
                                 <td class="text-center">
-                                    <a onclick="open_modal('{% url 'product:update_specification_product' item.id %}')"
+                                    {% if not item.method_test %}
+                                        {{ item.method_test_relacional.calculate_description_relation }}
+                                    {% else %}
+                                        {{ item.method_test.analytical_method.code_analytical_method }}
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if not item.method_test %}
+                                        <a onclick="open_modal('{% url 'product:update_specification_product_calcule' item.id %}')"
                                        title="Editar" style="cursor: pointer;">
                                         <i class="bi bi-pencil-square text-warning me-2"></i>
+                                    </a>
+                                    {% else %}
+                                        <a onclick="open_modal('{% url 'product:update_specification_product' item.id %}')"
+                                       title="Editar" style="cursor: pointer;">
+                                        <i class="bi bi-pencil-square text-warning me-2"></i>
+                                    </a>
+                                    {% endif %}
+                                    <a onclick="open_modal('{% url 'product:delete_specification_product' item.id %}')"
+                                       title="Eliminar" style="cursor: pointer;">
+                                        <i class="bi bi-trash text-danger me-2"></i>
                                     </a>
                                 </td>
                             </tr>
@@ -315,6 +342,10 @@
                                     <a onclick="open_modal('{% url 'product:detail_sample_point' sample.id %}')"
                                        title="Métodos Analíticos">
                                         <i class="bi bi-info-square text-info me-2"></i>
+                                    </a>
+                                     <a onclick="open_modal('{% url 'product:delete_sample_point' sample.id %}')"
+                                       title="Eliminar" style="cursor: pointer;">
+                                        <i class="bi bi-trash text-danger me-2"></i>
                                     </a>
                                 </td>
                             </tr>

@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import CreateView, UpdateView, DetailView
+from django.views.generic import CreateView, UpdateView, DetailView, DeleteView
 
 from core.company.models import Site
 from core.mixins import ValidatePermissionRequiredMixin
@@ -107,4 +107,33 @@ class SamplePointDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Detalle de Punto de Muestreo'
+        return context
+
+
+# Eliminación de Punto de Muestreo
+class SamplePointDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DeleteView):
+    model = SamplePoint
+    template_name = 'delete_modal.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            self.object.delete()
+            messages.success(request, 'Punto de Muestreo eliminado satisfactoriamente')
+            data['success'] = True
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Eliminar Punto de Muestreo de Producto'
+        context['delete'] = '¿Está seguro de eliminar este punto de muestreo?, esta acción es irreversible.'
+        context['info_delete'] = f'Se eliminará el punto de muestreo: {self.object.sample_point_name}'
         return context

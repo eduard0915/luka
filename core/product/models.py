@@ -3,6 +3,7 @@ import uuid
 from crum import get_current_user
 from django.db import models
 
+from core.analytical_method.models import AnalyticalMethodCalculateRelation
 from core.analytical_method.models import AnalyticalMethod
 from core.company.models import Process, Site
 from core.models import BaseModel
@@ -68,11 +69,17 @@ class SpecificationProduct(BaseModel):
     features_prod = models.CharField(max_length=250, verbose_name='Descripción', null=True, blank=True)
     lower_limit_prod = models.FloatField(verbose_name='Limite Inferior', null=True, blank=True)
     upper_limit_prod = models.FloatField(verbose_name='Limite Superior', null=True, blank=True)
-    method_test = models.ForeignKey(AnalyticalMethodProduct, verbose_name='Método', on_delete=models.CASCADE)
+    method_test = models.ForeignKey(
+        AnalyticalMethodProduct, verbose_name='Método', on_delete=models.CASCADE, blank=True, null=True)
+    method_test_relacional = models.ForeignKey(
+        AnalyticalMethodCalculateRelation, verbose_name='Calculo', on_delete=models.CASCADE, blank=True, null=True)
     unit_measure = models.CharField(max_length=10, verbose_name='Unidad de Medida', null=True, blank=True)
 
     def __str__(self):
-        return str(self.test_prod) + ' - ' + str(self.method_test.analytical_method)
+        if self.method_test:
+            return str(self.test_prod) + ' - ' + str(self.method_test.analytical_method)
+        else:
+            return str(self.test_prod) + ' - ' + str(self.method_test_relacional.calculate_description_relation)
 
     class Meta:
         verbose_name = 'SpecificationProduct'
