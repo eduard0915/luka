@@ -101,11 +101,6 @@ class SamplingProcess(BaseModel):
 
 # Siguiente código de muestra para un punto en una fecha: {código}-{AAAAMMDD}-{n}.
 # La secuencia es por CÓDIGO de punto, no por punto: sample_point_code no es único
-# y dos puntos de productos distintos pueden compartirlo. Compartir el contador es
-# justamente lo que evita códigos duplicados entre ellos.
-# El lock cubre ese mismo namespace (todos los puntos que comparten el código), no
-# solo la fila de este punto. DEBE llamarse DENTRO de la transacción que hace el
-# INSERT: el lock se libera en el COMMIT, no al salir de esta función.
 def next_sample_number(sampling_point, code_date):
     list(
         SamplePoint.objects.select_for_update()

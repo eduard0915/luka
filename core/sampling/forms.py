@@ -493,20 +493,18 @@ class SamplingProcessConfirmedForm(ModelForm):
         widgets = {'image_sample': TextInput(attrs={'class': 'form-control', 'type': 'file'})}
 
     def save(self, commit=True):
-        data = {}
         form = super()
         try:
-            if form.is_valid():
-                data = form.save(commit=False)
-                data.sampling_confirmed_by_id = get_current_user().id
-                data.date_sampling = timezone.localtime()
-                data.status_sampling = 'Confirmada'
-                data.save()
-            else:
-                data['error'] = form.errors
+            if not form.is_valid():
+                return {'error': form.errors}
+            instance = form.save(commit=False)
+            instance.sampling_confirmed_by_id = get_current_user().id
+            instance.date_sampling = timezone.localtime()
+            instance.status_sampling = 'Confirmada'
+            instance.save()
+            return instance
         except Exception as e:
-            data['error'] = str(e)
-        return data
+            return {'error': str(e)}
 
 
 class SamplingProcessInProcessForm(ModelForm):
