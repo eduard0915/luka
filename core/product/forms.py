@@ -428,9 +428,10 @@ class ProductCalculateRelationDescriptionForm(ModelForm):
 
     class Meta:
         model = AnalyticalMethodCalculateRelation
-        fields = ['calculate_description_relation', 'unit_measure_calculate']
+        fields = ['calculate_description_relation', 'unit_measure_calculate', 'sig_figs']
         widgets = {
-            'calculate_description_relation': TextInput(attrs={'class': 'form-control'}),
+            'calculate_description_relation': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'sig_figs': TextInput(attrs={'class': 'form-control', 'required': True}),
             'unit_measure_calculate': Select(attrs={'class': 'form-control'}, choices=UNIT_CALCULATE)
         }
 
@@ -450,6 +451,7 @@ class ProductCalculateRelationDescriptionForm(ModelForm):
         return data
 
 
+# Registro de variable con análisis previo
 class ProductCalculateRelationForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.product = kwargs.pop('product', None)
