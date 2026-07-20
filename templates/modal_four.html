@@ -108,5 +108,9 @@
             <script src="{% static 'analysis_sampling/millimole_reacted_validation.js' %}"></script>
         {% endif %}
 
+        {% if calculo == 'True' %}
+            <script src="{% static 'analysis_sampling/zero_value_validation.js' %}"></script>
+        {% endif %}
+
     {% endblock %}
 </div>

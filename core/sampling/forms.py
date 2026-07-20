@@ -234,9 +234,12 @@ class SamplingAnalysisProcessingRelationForm(ModelForm):
         self.analysis = kwargs.pop('analysis', None)
         self.sampling = kwargs.pop('sampling', None)
         self.relation= kwargs.pop('relation', None)
-        # print(self.relation.id)
 
         super().__init__(*args, **kwargs)
+        # self.fields['numerator'].widget.attrs['hidden'] = True
+        self.fields['numerator'].label = ''
+        # self.fields['denominator'].widget.attrs['hidden'] = True
+        self.fields['denominator'].label = ''
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
@@ -274,6 +277,7 @@ class SamplingAnalysisProcessingRelationForm(ModelForm):
         return data
 
 
+# Asociar método analitico en muestra
 class SamplingAnalysisForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.sampling_process = kwargs.pop('sampling_process')
@@ -481,6 +485,7 @@ class SamplingProcessImageForm(ModelForm):
         return data
 
 
+# Confirmación de recepción de muestra
 class SamplingProcessConfirmedForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -507,6 +512,7 @@ class SamplingProcessConfirmedForm(ModelForm):
             return {'error': str(e)}
 
 
+# Cambio de estado de muestra a En Proceso
 class SamplingProcessInProcessForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -534,6 +540,7 @@ class SamplingProcessInProcessForm(ModelForm):
         return data
 
 
+# Cálculo de milimoles en valoración por retroceso
 class MillimoleReactedForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.analysis = kwargs.pop('analysis')
@@ -590,6 +597,7 @@ class MillimoleReactedForm(ModelForm):
             raise ValidationError({'error': str(e)})
 
 
+# Aprobación de control de calidad de muestra
 class SamplingProcessApprovedForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
