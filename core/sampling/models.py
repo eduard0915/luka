@@ -6,7 +6,7 @@ from django.db import models, transaction
 from django.forms import model_to_dict
 from django.utils import timezone
 
-from core.analytical_method.models import AnalyticalMethod
+from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculateRelation
 from core.models import BaseModel
 from core.product.models import SamplePoint
 from core.solution.models import SolutionStd
@@ -149,7 +149,8 @@ class SamplingGenerationLog(BaseModel):
 class SamplingAnalysis(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     sampling_process = models.ForeignKey(SamplingProcess, verbose_name='Muestra', on_delete=models.CASCADE)
-    analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE)
+    analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE, blank=True, null=True)
+    analytical_method_relation = models.ForeignKey(AnalyticalMethodCalculateRelation, verbose_name='Calculo Relacional', on_delete=models.CASCADE, blank=True, null=True)
     average_concentration = models.FloatField(verbose_name='Resultado', null=True, blank=True)
     standard_deviation = models.FloatField(verbose_name='Desviación Estándar', null=True, blank=True)
     coefficient_variation = models.FloatField(verbose_name='Coeficiente de Variación', null=True, blank=True)

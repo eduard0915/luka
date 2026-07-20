@@ -10,6 +10,7 @@ from core.equipment.models import ReferencePattern, EquipmentInstrumental
 from core.mixins import ValidatePermissionRequiredMixin
 
 
+# Creación de patrón de referencia
 class ReferencePatternCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
     model = ReferencePattern
     form_class = ReferencePatternForm
@@ -50,6 +51,7 @@ class ReferencePatternCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
         return context
 
 
+# Edición de patrón de referencia
 class ReferencePatternUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
     model = ReferencePattern
     form_class = ReferencePatternUpdateForm
@@ -86,6 +88,7 @@ class ReferencePatternUpdateView(LoginRequiredMixin, ValidatePermissionRequiredM
         return context
 
 
+# Eliminación de patrón de referencia
 class ReferencePatternDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DeleteView):
     model = ReferencePattern
     template_name = 'delete_modal.html'

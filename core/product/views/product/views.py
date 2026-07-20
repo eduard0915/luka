@@ -164,6 +164,7 @@ class ProductDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Det
         context['create_method_product'] = reverse_lazy('product:create_method_product', kwargs={'pk': self.object.pk})
         context['analytical_methods'] = AnalyticalMethodProduct.objects.select_related('product').filter(product_id=self.object.id)
         context['create_specification_product'] = reverse_lazy('product:create_specification_product', kwargs={'pk': self.object.pk})
+        context['create_specification_product_calcule'] = reverse_lazy('product:create_specification_product_calcule', kwargs={'pk': self.object.pk})
         context['specifications'] = SpecificationProduct.objects.filter(product_id=self.object.id)
 
         calcules_relation = AnalyticalMethodCalculateRelation.objects.select_related('product').filter(product_id=self.object.id).order_by('-date_creation')

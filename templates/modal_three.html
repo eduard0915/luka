@@ -75,11 +75,11 @@
                 return '<p>' + error + '</p>';
             }
 
-            $('#modal_form').on('submit', function (e) {
+            $(document).on('submit', '#modal_form', function (e) {
                 e.preventDefault();
                 var parameters = new FormData(this);
                 const form_action = $(this).attr('action');
-                const $btn = $('#btnSubmit');
+                const $btn = $(this).find('#btnSubmit');
                 const original_btn = $btn.html();
 
                 function reset_btn() {
@@ -98,22 +98,14 @@
                     processData: false,
                     contentType: false,
                 }).done(function (data) {
-                    console.log(data);
                     if (data.hasOwnProperty('error')) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error de Validación',
-                            html: format_errors(data.error),
-                        });
+                        Swal.fire({icon: 'error', title: 'Error de Validación', html: format_errors(data.error)});
                         reset_btn();
                         return;
                     }
                     Swal.fire({
-                        icon: 'success',
-                        title: '¡Éxito!',
-                        text: 'Operación realizada satisfactoriamente',
-                        timer: 2000,
-                        showConfirmButton: false
+                        icon: 'success', title: '¡Éxito!', text: 'Operación realizada satisfactoriamente',
+                        timer: 2000, showConfirmButton: false
                     }).then(function () {
                         if (data.hasOwnProperty('redirect_url')) {
                             window.location.href = data.redirect_url;
@@ -122,14 +114,66 @@
                         }
                     });
                 }).fail(function (jqXHR, textStatus, errorThrown) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error del Sistema',
-                        text: textStatus + ': ' + errorThrown,
-                    });
+                    Swal.fire({icon: 'error', title: 'Error del Sistema', text: textStatus + ': ' + errorThrown});
                     reset_btn();
                 });
             });
+
+            {#$('#modal_form').on('submit', function (e) {#}
+            {#    e.preventDefault();#}
+            {#    var parameters = new FormData(this);#}
+            {#    const form_action = $(this).attr('action');#}
+            {#    const $btn = $('#btnSubmit');#}
+            {#    const original_btn = $btn.html();#}
+            {##}
+            {#    function reset_btn() {#}
+            {#        $btn.prop('disabled', false).html(original_btn);#}
+            {#    }#}
+            {##}
+            {#    $btn.prop('disabled', true).html(#}
+            {#        `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...`#}
+            {#    );#}
+            {##}
+            {#    $.ajax({#}
+            {#        url: form_action,#}
+            {#        type: 'POST',#}
+            {#        data: parameters,#}
+            {#        dataType: 'json',#}
+            {#        processData: false,#}
+            {#        contentType: false,#}
+            {#    }).done(function (data) {#}
+            {#        console.log(data);#}
+            {#        if (data.hasOwnProperty('error')) {#}
+            {#            Swal.fire({#}
+            {#                icon: 'error',#}
+            {#                title: 'Error de Validación',#}
+            {#                html: format_errors(data.error),#}
+            {#            });#}
+            {#            reset_btn();#}
+            {#            return;#}
+            {#        }#}
+            {#        Swal.fire({#}
+            {#            icon: 'success',#}
+            {#            title: '¡Éxito!',#}
+            {#            text: 'Operación realizada satisfactoriamente',#}
+            {#            timer: 2000,#}
+            {#            showConfirmButton: false#}
+            {#        }).then(function () {#}
+            {#            if (data.hasOwnProperty('redirect_url')) {#}
+            {#                window.location.href = data.redirect_url;#}
+            {#            } else {#}
+            {#                location.href = window.location.pathname;#}
+            {#            }#}
+            {#        });#}
+            {#    }).fail(function (jqXHR, textStatus, errorThrown) {#}
+            {#        Swal.fire({#}
+            {#            icon: 'error',#}
+            {#            title: 'Error del Sistema',#}
+            {#            text: textStatus + ': ' + errorThrown,#}
+            {#        });#}
+            {#        reset_btn();#}
+            {#    });#}
+            {# });#}
 
             // Initialize Datepicker for any datepicker-enabled input found in the modal (Bootstrap 5 enhanced)
             const dateInputs = document.querySelectorAll('[data-datepicker="1"], .js-datepicker');

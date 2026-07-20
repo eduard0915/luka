@@ -53,11 +53,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         } else if (status === 'Confirmada') {
                             badge_class = 'bg-info';
                         } else if (status === 'En Proceso') {
-                            badge_class = 'bg-primary';
-                        } else if (status === 'Aprobada') {
-                            badge_class = 'bg-success';
-                        } else if (status === 'Cancelada') {
                             badge_class = 'bg-secondary';
+                        } else if (status === 'Aprobado') {
+                            badge_class = 'bg-primary';
+                        } else if (status === 'Cancelado') {
+                            badge_class = 'bg-dark';
                         }
 
                         return '<span class="badge ' + badge_class + ' ' + text_class + '">' + status + '</span>';

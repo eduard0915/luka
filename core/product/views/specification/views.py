@@ -4,13 +4,15 @@ from django.http import JsonResponse
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import CreateView, UpdateView
+from django.views.generic import CreateView, UpdateView, DeleteView
 
 from core.mixins import ValidatePermissionRequiredMixin
+from core.product.forms import SpecificationProductForm, SpecificationProductCalculeForm, \
+    SpecificationProductCalculeUpdateForm, SpecificationProductUpdateForm
 from core.product.models import Product, SpecificationProduct
-from core.product.forms import SpecificationProductForm
 
 
+# Vista Base para las vistas de especificaciones de productos
 class BaseSpecificationProductView(ValidatePermissionRequiredMixin):
     permission_required = 'reagent.add_reagent'
     template_name = 'modal_three.html'
@@ -55,6 +57,7 @@ class BaseSpecificationProductView(ValidatePermissionRequiredMixin):
         return context
 
 
+# Asignación de Especificación a Producto
 class SpecificationProductCreateView(LoginRequiredMixin, BaseSpecificationProductView, CreateView):
     model = SpecificationProduct
     form_class = SpecificationProductForm
@@ -72,12 +75,84 @@ class SpecificationProductCreateView(LoginRequiredMixin, BaseSpecificationProduc
         return context
 
 
+# Edición de Especificación a Producto
 class SpecificationProductUpdateView(LoginRequiredMixin, BaseSpecificationProductView, UpdateView):
     model = SpecificationProduct
-    form_class = SpecificationProductForm
+    form_class = SpecificationProductUpdateForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        spc = SpecificationProduct.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'spc': spc})
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Editar Especificación'
         context['action'] = 'edit'
+        return context
+
+
+# Asignación de Especificación a Producto desde Calculo
+class SpecificationProductCalculeCreateView(LoginRequiredMixin, BaseSpecificationProductView, CreateView):
+    model = SpecificationProduct
+    form_class = SpecificationProductCalculeForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        product = Product.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'product': product})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Agregar Especificación'
+        context['action'] = 'add'
+        return context
+
+
+# Edición de Asignación Especificación a Producto
+class SpecificationProductCalculeUpdateView(LoginRequiredMixin, BaseSpecificationProductView, UpdateView):
+    model = SpecificationProduct
+    form_class = SpecificationProductCalculeUpdateForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        spc = SpecificationProduct.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'spc': spc})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Editar Especificación'
+        context['action'] = 'edit'
+        return context
+
+
+# Eliminación de Especificación a Producto
+class SpecificationProductDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DeleteView):
+    model = SpecificationProduct
+    template_name = 'delete_modal.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            self.object.delete()
+            messages.success(request, 'Especificación eliminado satisfactoriamente')
+            data['success'] = True
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Eliminar Especificación de Producto'
+        context['delete'] = '¿Está seguro de eliminar este registro?, esta acción es irreversible.'
+        context['info_delete'] = f'Se eliminará la especificación: {self.object.test_prod}'
         return context

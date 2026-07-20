@@ -185,7 +185,7 @@ class SamplePointUpdateForm(ModelForm):
         return data
 
 
-# Creación de Especificación de Producto
+# Asignación de Especificación de Producto
 class SpecificationProductForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.product = kwargs.pop('product', None)
@@ -227,6 +227,155 @@ class SpecificationProductForm(ModelForm):
                 instance = super().save(commit=False)
                 if self.product:
                     instance.product = self.product
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Edición de Asignación de Especificación de Producto
+class SpecificationProductUpdateForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.spc = kwargs.pop('spc', None)
+        super().__init__(*args, **kwargs)
+        if self.spc:
+            self.fields['method_test'].queryset = AnalyticalMethodProduct.objects.filter(product=self.spc.product)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+        col_classes = {
+            'type_test': 'col-md-4',
+            'test_prod': 'col-md-8',
+            'lower_limit_prod': 'col-md-4',
+            'upper_limit_prod': 'col-md-4',
+            'features_prod': 'col-md-12',
+            'method_test': 'col-md-12',
+            'unit_measure': 'col-md-4',
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
+    class Meta:
+        model = SpecificationProduct
+        fields = ['type_test', 'test_prod', 'lower_limit_prod', 'upper_limit_prod', 'unit_measure', 'features_prod','method_test']
+        widgets = {
+            'method_test': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+            'type_test': Select(attrs={'class': 'form-control', 'style': 'width: 100%'}, choices=TYPE_TEST),
+            'unit_measure': Select(attrs={'class': 'form-control', 'style': 'width: 100%'}, choices=UM),
+            'lower_limit_prod': TextInput(attrs={'class': 'form-control', 'style': 'width: 100%'}),
+            'upper_limit_prod': TextInput(attrs={'class': 'form-control', 'style': 'width: 100%'}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save()
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Asignación de Especificación de Producto desde Cálculo
+class SpecificationProductCalculeForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.product = kwargs.pop('product', None)
+        super().__init__(*args, **kwargs)
+        self.fields['method_test_relacional'].queryset = AnalyticalMethodCalculateRelation.objects.filter(
+            product=self.product).exclude(calculate_description_relation__in=[None, ''])
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+        col_classes = {
+            'type_test': 'col-md-4',
+            'test_prod': 'col-md-8',
+            'lower_limit_prod': 'col-md-4',
+            'upper_limit_prod': 'col-md-4',
+            'features_prod': 'col-md-12',
+            'method_test_relacional': 'col-md-12',
+            'unit_measure': 'col-md-4',
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
+    class Meta:
+        model = SpecificationProduct
+        fields = ['type_test', 'test_prod', 'lower_limit_prod', 'upper_limit_prod', 'unit_measure', 'features_prod','method_test_relacional']
+        widgets = {
+            'method_test_relacional': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+            'type_test': Select(attrs={'class': 'form-control', 'style': 'width: 100%'}, choices=TYPE_TEST),
+            'unit_measure': Select(attrs={'class': 'form-control', 'style': 'width: 100%'}, choices=UM),
+            'lower_limit_prod': TextInput(attrs={'class': 'form-control', 'style': 'width: 100%'}),
+            'upper_limit_prod': TextInput(attrs={'class': 'form-control', 'style': 'width: 100%'}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.product:
+                    instance.product = self.product
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Edición de Asignación de Especificación de Producto desde Cálculo
+class SpecificationProductCalculeUpdateForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.spc = kwargs.pop('spc', None)
+        super().__init__(*args, **kwargs)
+        self.fields['method_test_relacional'].queryset = AnalyticalMethodCalculateRelation.objects.filter(
+            product=self.spc.product).exclude(calculate_description_relation__in=[None, ''])
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+        col_classes = {
+            'type_test': 'col-md-4',
+            'test_prod': 'col-md-8',
+            'lower_limit_prod': 'col-md-4',
+            'upper_limit_prod': 'col-md-4',
+            'features_prod': 'col-md-12',
+            'method_test_relacional': 'col-md-12',
+            'unit_measure': 'col-md-4',
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
+    class Meta:
+        model = SpecificationProduct
+        fields = ['type_test', 'test_prod', 'lower_limit_prod', 'upper_limit_prod', 'unit_measure', 'features_prod','method_test_relacional']
+        widgets = {
+            'method_test_relacional': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+            'type_test': Select(attrs={'class': 'form-control', 'style': 'width: 100%'}, choices=TYPE_TEST),
+            'unit_measure': Select(attrs={'class': 'form-control', 'style': 'width: 100%'}, choices=UM),
+            'lower_limit_prod': TextInput(attrs={'class': 'form-control', 'style': 'width: 100%'}),
+            'upper_limit_prod': TextInput(attrs={'class': 'form-control', 'style': 'width: 100%'}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save()
                 instance.save()
                 data = instance
             else:
@@ -306,7 +455,7 @@ class ProductCalculateRelationForm(ModelForm):
         self.product = kwargs.pop('product', None)
         super().__init__(*args, **kwargs)
         self.fields['analytical_method_calculate'].queryset = AnalyticalMethodCalculate.objects.exclude(
-            calculate_description__isnull=True).exclude(calculate_description='').distinct()
+            calculate_description__isnull=[None, '']).distinct()
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
             form.field.widget.attrs['autocomplete'] = 'off'

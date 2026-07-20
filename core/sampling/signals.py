@@ -6,7 +6,7 @@ from decimal import Decimal
 
 from core.sampling.models import SamplingProcess, SamplingAnalysis, SamplingAnalysisProcessing, MillimoleReacted
 from core.solution.models import TransactionSolutionStd, SolutionStd
-from core.analytical_method.models import AnalyticalMethodCalculate
+from core.analytical_method.models import AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation
 
 
 # Signal para creación de especificaciones y metodos de análisis cuando el estado de la muestra es Confirmada
@@ -43,8 +43,8 @@ def create_sampling_analysis(sender, instance, created, **kwargs):
         if spec.method_test and spec.method_test.analytical_method
     }
 
-    if not analytical_methods:
-        return
+    # if not analytical_methods:
+    #     return
 
     # Crear análisis en bloque para mejor rendimiento
     # Primero verificar cuáles ya existen
@@ -70,6 +70,22 @@ def create_sampling_analysis(sender, instance, created, **kwargs):
             new_analyses,
             ignore_conflicts=True  # Por si acaso hay race conditions
         )
+
+    calculate_relations = AnalyticalMethodCalculateRelation.objects.filter(
+        product=instance.product).exclude(calculate_description_relation__in=[None, ''])
+
+    print(calculate_relations)
+
+    if calculate_relations:
+        new_analyses += [
+            SamplingAnalysis(
+                sampling_process=instance,
+                analytical_method=None,
+                analytical_method_relation=relation,
+            )
+            for relation in calculate_relations
+            if relation.id not in calculate_relations
+        ]
 
 
 # Signal para actualización de los análisis de una muestra
