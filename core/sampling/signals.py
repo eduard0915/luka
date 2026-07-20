@@ -1,12 +1,15 @@
+from decimal import Decimal
+
 from django.db import transaction
+from django.db.models.aggregates import Avg, StdDev
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
-from decimal import Decimal
 
-from core.sampling.models import SamplingProcess, SamplingAnalysis, SamplingAnalysisProcessing, MillimoleReacted
-from core.solution.models import TransactionSolutionStd, SolutionStd
 from core.analytical_method.models import AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation
+from core.product.models import SpecificationProduct
+from core.sampling.models import *
+from core.solution.models import SolutionStd, TransactionSolutionStd
 
 
 # Signal para creación de especificaciones y metodos de análisis cuando el estado de la muestra es Confirmada
@@ -46,7 +49,7 @@ def create_sampling_analysis(sender, instance, created, **kwargs):
     # Crear análisis en bloque para mejor rendimiento
     # Primero verificar cuáles ya existen
     existing_methods = set(
-        SamplingAnalysis.objects.filter(
+        SamplingAnalysis.objects.select_related('sampling_process', 'analytical_method').filter(
             sampling_process=instance,
             analytical_method__in=analytical_methods
         ).values_list('analytical_method_id', flat=True)
@@ -73,11 +76,11 @@ def create_sampling_analysis(sender, instance, created, **kwargs):
     else:
         product_id = instance.point_sampling.product.id
 
-    calculate_relations = AnalyticalMethodCalculateRelation.objects.filter(
+    calculate_relations = AnalyticalMethodCalculateRelation.objects.select_related('product').filter(
         product=product_id).exclude(calculate_description_relation__in=[None, ''])
 
     existing_relations = set(
-        SamplingAnalysis.objects.filter(
+        SamplingAnalysis.objects.select_related('sampling_process', 'analytical_method_relation').filter(
             sampling_process=instance,
             analytical_method_relation__in=calculate_relations
         ).values_list('analytical_method_relation_id', flat=True)
@@ -163,11 +166,8 @@ def _check_compliance(sampling_point, analytical_method, concentration_value):
         str: 'Cumple', 'No Cumple', o None
     """
     # Buscar especificación con select_related para optimización
-    specification = sampling_point.specification.select_related(
-        'method_test__analytical_method'
-    ).filter(
-        method_test__analytical_method=analytical_method
-    ).first()
+    specification = sampling_point.specification.select_related('method_test__analytical_method').filter(
+        method_test__analytical_method=analytical_method).first()
 
     if not specification:
         return None
@@ -245,9 +245,12 @@ def create_sampling_analysis_processing_from_millimole(sender, instance, created
         analytical_method_id = analysis.analytical_method.id
         
         # Obtener variables de cálculo para el método
-        var_num = AnalyticalMethodCalculate.objects.filter(analytical_method_id=analytical_method_id, position='Numerador')
-        var_den = AnalyticalMethodCalculate.objects.filter(analytical_method_id=analytical_method_id, position='Denominador')
-        base_calc = AnalyticalMethodCalculate.objects.filter(analytical_method_id=analytical_method_id).first()
+        var_num = AnalyticalMethodCalculate.objects.select_related('analytical_method').filter(
+            analytical_method_id=analytical_method_id, position='Numerador')
+        var_den = AnalyticalMethodCalculate.objects.select_related('analytical_method').filter(
+            analytical_method_id=analytical_method_id, position='Denominador')
+        base_calc = AnalyticalMethodCalculate.objects.select_related('analytical_method').filter(
+            analytical_method_id=analytical_method_id).first()
 
         millimole = float(instance.millimole)
         qty_sample = float(instance.quantity_sample)
@@ -323,3 +326,27 @@ def create_sampling_analysis_processing_from_millimole(sender, instance, created
                 instance.user_creation_id,
                 f'Gasto en Volumetría por Retroceso - Muestra {instance.sampling_analysis.sampling_process}'
             )
+
+
+# Registro de valores calculados en análisis de muestra
+@receiver(post_save, sender=SamplingAnalysisProcessingRelation)
+def create_processing_relation(instance, created, **kwargs):
+
+    analysis = SamplingAnalysis.objects.get(analytical_method_relation=instance.analytical_method_calculate_relation)
+
+    previous_analysis = SamplingAnalysisProcessingRelation.objects.select_related(
+        'analytical_method_calculate_relation').filter(analytical_method_calculate_relation=instance.analytical_method_calculate_relation)
+
+    stats = previous_analysis.aggregate(std=StdDev('calcule'), avg=Avg('calcule'))
+
+    spc = SpecificationProduct.objects.get(method_test_relacional=instance.analytical_method_calculate_relation)
+
+    analysis.standard_deviation = float(stats['std']) or 0
+    analysis.coefficient_variation = float(stats['std'] / stats['avg']) or 0
+    analysis.average_concentration = float(stats['avg']) or float(instance.calcule)
+    if spc.lower_limit_prod <= instance.calcule <= spc.upper_limit_prod:
+        analysis.comply = 'Cumple'
+    else:
+        analysis.comply = 'No Cumple'
+    analysis.save()
+
