@@ -18,6 +18,8 @@ class Company(models.Model):
     company_country = models.CharField(default='Pais', max_length=60, verbose_name='Pais')
     training_alert = models.PositiveSmallIntegerField(default=30, verbose_name='Alerta Capacitaciones')
     autosample = models.BooleanField(default=True, verbose_name='Muestreo Automático')
+    service_software = models.BooleanField(default=True, verbose_name='Servicio Habilitado')
+    notification_email = models.BooleanField(default=True, verbose_name='Notificaciones por Email')
 
     def __str__(self):
         return str(self.company_name)

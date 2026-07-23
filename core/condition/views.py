@@ -255,7 +255,7 @@ class ConditionRegisterExportExcelView(LoginRequiredMixin, ValidatePermissionReq
     def get(self, request, *args, **kwargs):
         try:
             # Filtrar registros de los últimos 3 años
-            three_years_ago = timezone.now() - timedelta(days=3 * 365)
+            three_years_ago = timezone.localtime() - timedelta(days=3 * 365)
             registers = ConditionRegister.objects.filter(
                 registration_date__gte=three_years_ago
             ).select_related('condition', 'registered_by', 'actions_registered_by').order_by('-registration_date')

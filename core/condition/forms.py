@@ -109,7 +109,7 @@ class ConditionRegisterForm(ModelForm):
 
     def save(self, commit=True):
         user = get_current_user()
-        registration_date = timezone.localtime()
+        registration_date = timezone.now()
         
         # Guardar primer registro
         instance1 = super().save(commit=False)

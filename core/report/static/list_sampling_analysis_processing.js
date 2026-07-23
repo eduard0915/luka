@@ -4,6 +4,7 @@ function loadData() {
     var date_from = $('#id_date_from').val();
     var date_to = $('#id_date_to').val();
     var analyzed_by = $('#id_analyzed_by').val();
+    var profile = $('#id_profile').val();
 
     tblAnalysis = $('#data').DataTable({
         responsive: {
@@ -21,6 +22,7 @@ function loadData() {
                 'date_from': date_from,
                 'date_to': date_to,
                 'analyzed_by': analyzed_by,
+                'profile': profile,
             },
             dataSrc: "data"
         },
@@ -31,6 +33,7 @@ function loadData() {
             {"data": "method"},
             {"data": "concentration_sample"},
             {"data": "analyzed_by"},
+            {"data": "profile"},
         ],
         columnDefs: [
             {
@@ -52,7 +55,7 @@ $(function () {
         width: '100%'
     });
 
-    $('#id_date_from, #id_date_to, #id_analyzed_by').on('change', function () {
+    $('#id_date_from, #id_date_to, #id_analyzed_by, #id_profile').on('change', function () {
         loadData();
     });
 
@@ -60,7 +63,8 @@ $(function () {
         var date_from = $('#id_date_from').val();
         var date_to = $('#id_date_to').val();
         var analyzed_by = $('#id_analyzed_by').val();
-        var url = '/report/sampling/analysis/processing/excel/?date_from=' + date_from + '&date_to=' + date_to + '&analyzed_by=' + analyzed_by;
+        var profile = $('#id_profile').val();
+        var url = '/report/sampling/analysis/processing/excel/?date_from=' + date_from + '&date_to=' + date_to + '&analyzed_by=' + analyzed_by + '&profile=' + profile;
         window.open(url, '_blank');
     });
 

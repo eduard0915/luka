@@ -6,11 +6,15 @@ venv
 db.sqlite3
 db.sqlite3-journal
 test.py
+test
 __pycache__
 .idea
 staticfiles
 media
 .claude
+.junie
+.opencode
+AGENTS.md
 django_errors.log
 .django_errors.log
 .env.example

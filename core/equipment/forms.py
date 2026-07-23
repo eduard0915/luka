@@ -218,7 +218,7 @@ class DailyVerificationForm(ModelForm):
         try:
             if form.is_valid():
                 data = form.save(commit=False)
-                data.date_verification_daily = timezone.localtime()
+                data.date_verification_daily = timezone.now()
                 data.verified_by_id = get_current_user().id
                 data.error = round((data.reference_pattern.magnitude_pattern - data.verification_result_daily) * 1000, 4)
                 tolerance = data.equipment_instrumental.tolerance

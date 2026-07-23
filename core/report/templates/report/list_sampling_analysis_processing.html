@@ -16,12 +16,21 @@
             <label>Fecha Final</label>
             <input type="date" class="form-control" name="date_to" id="id_date_to">
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <label>Analista</label>
             <select class="form-control" name="analyzed_by" id="id_analyzed_by">
                 <option value="">Todos</option>
                 {% for u in users %}
                     <option value="{{ u.id }}">{{ u.get_full_name }}, {{ u.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label>Perfil</label>
+            <select class="form-control" name="profile" id="id_profile">
+                <option value="">Todos</option>
+                {% for p in profiles %}
+                    <option value="{{ p.id }}">{{ p.name }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -43,6 +52,7 @@
     <th>Método de Análisis</th>
     <th>Resultado</th>
     <th>Analizado por</th>
+    <th>Perfil</th>
 {% endblock %}
 
 {% block rows %}

@@ -475,7 +475,7 @@ TARGET = date(2026, 7, 16)
 class ComputeSamplingTimesTests(TestCase):
     def test_distribucion_uniforme_con_cruce_de_medianoche(self):
         group = build_sampling_group(first_hour='07:00:00', per_day=4)
-        times = [timezone.localtime(t) for t in compute_sampling_times(group, TARGET)]
+        times = [timezone.now()(t) for t in compute_sampling_times(group, TARGET)]
         self.assertEqual(
             [(t.date(), t.time()) for t in times],
             [
@@ -498,7 +498,7 @@ class ComputeSamplingTimesTests(TestCase):
 
     def test_intervalo_para_frecuencia_de_8_horas(self):
         group = build_sampling_group(first_hour='07:00:00', per_day=3)  # 24h / 8h = 3
-        times = [timezone.localtime(t).time() for t in compute_sampling_times(group, TARGET)]
+        times = [timezone.now()(t).time() for t in compute_sampling_times(group, TARGET)]
         self.assertEqual(times, [time(7, 0), time(15, 0), time(23, 0)])
 
     def test_todos_los_horarios_son_aware(self):
@@ -553,7 +553,7 @@ git commit -m "Cálculo de horarios de muestreo distribuidos uniformemente en 24
 
 ### Task 3b: Hora local en la serialización de muestras
 
-`toJSON()` renderiza `date_sampling_scheduled` en UTC: con `USE_TZ = True` (`settings.py:125`) y `TIME_ZONE = 'America/Bogota'` (`settings.py:119`), el ORM devuelve datetimes aware en UTC y `.strftime()` sin `timezone.localtime()` imprime UTC. Las horas del ejemplo del spec (07:00, 13:00, 19:00, 01:00) se verían +5h en el listado. No es un comportamiento preexistente uniforme al que los usuarios se hayan acostumbrado, sino una contradicción interna ya viva: `core/sampling/templates/process_sampling/detail_process_sampling.html:102` renderiza el MISMO campo con `{{ object.date_sampling_scheduled|date:"Y-m-d H:i" }}`, y el filtro `date` lleva `expects_localtime=True`, así que el detalle muestra 07:00 y el listado 12:00 para el mismo registro. Esta feature multiplica esa contradicción por N muestras/día/grupo, justo sobre la promesa titular del spec. El patrón correcto ya existe in-repo: `core/condition/views.py:76,226,299` usan `timezone.localtime(...).strftime(...)`.
+`toJSON()` renderiza `date_sampling_scheduled` en UTC: con `USE_TZ = True` (`settings.py:125`) y `TIME_ZONE = 'America/Bogota'` (`settings.py:119`), el ORM devuelve datetimes aware en UTC y `.strftime()` sin `timezone.now()()` imprime UTC. Las horas del ejemplo del spec (07:00, 13:00, 19:00, 01:00) se verían +5h en el listado. No es un comportamiento preexistente uniforme al que los usuarios se hayan acostumbrado, sino una contradicción interna ya viva: `core/sampling/templates/process_sampling/detail_process_sampling.html:102` renderiza el MISMO campo con `{{ object.date_sampling_scheduled|date:"Y-m-d H:i" }}`, y el filtro `date` lleva `expects_localtime=True`, así que el detalle muestra 07:00 y el listado 12:00 para el mismo registro. Esta feature multiplica esa contradicción por N muestras/día/grupo, justo sobre la promesa titular del spec. El patrón correcto ya existe in-repo: `core/condition/views.py:76,226,299` usan `timezone.now()(...).strftime(...)`.
 
 **Files:**
 - Modify: `core/sampling/models.py` (método `SamplingProcess.toJSON`)
@@ -575,8 +575,8 @@ En `core/sampling/models.py`, dentro de `SamplingProcess.toJSON()` (líneas 91-9
 por:
 
 ```python
-        item['date_sampling_scheduled'] = timezone.localtime(self.date_sampling_scheduled).strftime('%Y-%m-%d %H:%M:%S')
-        item['date_sampling'] = timezone.localtime(self.date_sampling).strftime('%Y-%m-%d %H:%M:%S') if self.date_sampling else ''
+        item['date_sampling_scheduled'] = timezone.now()(self.date_sampling_scheduled).strftime('%Y-%m-%d %H:%M:%S')
+        item['date_sampling'] = timezone.now()(self.date_sampling).strftime('%Y-%m-%d %H:%M:%S') if self.date_sampling else ''
 ```
 
 (`timezone` ya está importado en `core/sampling/models.py:6`.)
@@ -598,7 +598,7 @@ from django.utils import timezone
 por:
 
 ```python
-                        item['date_sampling_scheduled'] = timezone.localtime(item['date_sampling_scheduled']).strftime('%Y-%m-%d %H:%M')
+                        item['date_sampling_scheduled'] = timezone.now()(item['date_sampling_scheduled']).strftime('%Y-%m-%d %H:%M')
 ```
 
 - [ ] **Step 3: Verificar que no se rompió nada**

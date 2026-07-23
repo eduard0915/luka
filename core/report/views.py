@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import Group
 from django.db.models import Q, Avg
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse_lazy
@@ -705,6 +706,7 @@ class SamplingAnalysisProcessingListView(LoginRequiredMixin, ValidatePermissionR
                 date_from = request.POST.get('date_from')
                 date_to = request.POST.get('date_to')
                 analyzed_by = request.POST.get('analyzed_by')
+                profile = request.POST.get('profile')
 
                 filters = Q()
                 if date_from:
@@ -715,6 +717,8 @@ class SamplingAnalysisProcessingListView(LoginRequiredMixin, ValidatePermissionR
                     filters &= Q(analyzed_date__lte=date_to_dt)
                 if analyzed_by:
                     filters &= Q(analyzed_by_id=analyzed_by)
+                if profile:
+                    filters &= Q(analyzed_by__groups__id=profile)
 
                 queryset = SamplingAnalysisProcessing.objects.filter(filters).select_related(
                     'sample_analysis',
@@ -746,6 +750,8 @@ class SamplingAnalysisProcessingListView(LoginRequiredMixin, ValidatePermissionR
                             if first_spec:
                                 unit = str(first_spec.unit_measure)
 
+                    groups_str = ', '.join([g.name for g in i.analyzed_by.groups.all()]) if i.analyzed_by else ''
+
                     item = {
                         'analyzed_date': i.analyzed_date.strftime('%Y-%m-%d %H:%M'),
                         'sample_analysis': str(i.sample_analysis.sampling_process.number_sample) if i.sample_analysis and i.sample_analysis.sampling_process else 'No aplica',
@@ -753,6 +759,7 @@ class SamplingAnalysisProcessingListView(LoginRequiredMixin, ValidatePermissionR
                         'method': str(i.sample_analysis.analytical_method),
                         'unit': unit,
                         'analyzed_by': str(i.analyzed_by.get_full_name()) + ', ' + str(i.analyzed_by.username),
+                        'profile': groups_str,
                         'concentration_sample': f"{i.concentration_sample} {unit}",
                     }
                     items.append(item)
@@ -771,6 +778,7 @@ class SamplingAnalysisProcessingListView(LoginRequiredMixin, ValidatePermissionR
         context['entity'] = 'Procesamiento de Muestras por Analista'
         context['div'] = '12'
         context['users'] = User.objects.filter(is_superuser=False).order_by('first_name')
+        context['profiles'] = Group.objects.all().order_by('name')
         return context
 
 
@@ -783,6 +791,7 @@ class SamplingAnalysisProcessingExcelView(LoginRequiredMixin, ValidatePermission
             date_from = request.GET.get('date_from')
             date_to = request.GET.get('date_to')
             analyzed_by = request.GET.get('analyzed_by')
+            profile = request.GET.get('profile')
 
             filters = Q()
             if date_from:
@@ -793,6 +802,8 @@ class SamplingAnalysisProcessingExcelView(LoginRequiredMixin, ValidatePermission
                 filters &= Q(analyzed_date__lte=date_to_dt)
             if analyzed_by:
                 filters &= Q(analyzed_by_id=analyzed_by)
+            if profile:
+                filters &= Q(analyzed_by__groups__id=profile)
 
             queryset = SamplingAnalysisProcessing.objects.filter(filters).select_related(
                 'sample_analysis',
@@ -811,8 +822,8 @@ class SamplingAnalysisProcessingExcelView(LoginRequiredMixin, ValidatePermission
 
             # Cabeceras
             headers = [
-                'Fecha', 'Muestra', 'Producto', 'Método de Análisis', 
-                'Resultado', 'Analizado por'
+                'Fecha', 'Muestra', 'Producto', 'Método de Análisis',
+                'Resultado', 'Analizado por', 'Perfil'
             ]
             
             # Estilos
@@ -852,13 +863,16 @@ class SamplingAnalysisProcessingExcelView(LoginRequiredMixin, ValidatePermission
                         if first_spec:
                             unit = str(first_spec.unit_measure)
 
+                groups_str = ', '.join([g.name for g in i.analyzed_by.groups.all()]) if i.analyzed_by else ''
+
                 row_data = [
                     i.analyzed_date.strftime('%Y-%m-%d %H:%M'),
                     str(i.sample_analysis.sampling_process.number_sample) if i.sample_analysis and i.sample_analysis.sampling_process else 'No aplica',
                     product,
                     str(i.sample_analysis.analytical_method),
                     f"{i.concentration_sample} {unit}",
-                    str(i.analyzed_by.get_full_name()) + ', ' + str(i.analyzed_by.username)
+                    str(i.analyzed_by.get_full_name()) + ', ' + str(i.analyzed_by.username),
+                    groups_str
                 ]
 
                 for col_num, value in enumerate(row_data, 1):

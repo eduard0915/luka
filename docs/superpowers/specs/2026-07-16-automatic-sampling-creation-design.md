@@ -153,7 +153,7 @@ Para el día objetivo `D` de un grupo habilitado con `N = number_sampling_day`:
   12:00 donde el spec promete 07:00; el detalle, en cambio, ya localiza con el
   filtro `|date:`. No es una convención preexistente sino una contradicción viva
   que esta feature multiplicaría por N muestras/día/grupo: la serialización pasa
-  a usar `timezone.localtime()`, el patrón que ya existe en
+  a usar `timezone.now()()`, el patrón que ya existe en
   `core/condition/views.py`.
 
 Cada `SamplingProcess` creado:
