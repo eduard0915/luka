@@ -20,6 +20,7 @@ class SamplingGroup(BaseModel):
     first_hour_sampling = models.TimeField(verbose_name='Hora del Primer Muestreo', default='07:00:00')
     number_sampling_day = models.PositiveSmallIntegerField(verbose_name='Muestras por Día', validators=[MinValueValidator(1)])
     enable_sampling_group = models.BooleanField(verbose_name='Habilitado', default=True)
+    enable_sampling_auto = models.BooleanField(verbose_name='Automuestreo Habilitado', default=True)
 
     def __str__(self):
         return str(self.sampling_point)

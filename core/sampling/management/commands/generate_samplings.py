@@ -4,6 +4,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Max
 from django.utils import timezone
 
+from core.company.models import Company
 from core.sampling.models import SamplingGenerationLog, SamplingGroup
 from core.sampling.services import (
     compute_sampling_times,
@@ -36,7 +37,16 @@ class Command(BaseCommand):
         days_generated = 0
         errors = 0
 
-        for group in SamplingGroup.objects.select_related('sampling_point').order_by('date_creation'):
+        # Solo genera si hay al menos una compañía con autosample y service_software activos
+        if not Company.objects.filter(autosample=True, service_software=True).exists():
+            self.stdout.write('No hay compañías habilitadas para automuestreo')
+            return
+
+        groups = SamplingGroup.objects.filter(
+            enable_sampling_group=True, enable_sampling_auto=True
+        ).select_related('sampling_point').order_by('date_creation')
+
+        for group in groups:
             try:
                 created, days = self._process_group(group, today, dry_run)
                 total_created += created
