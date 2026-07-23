@@ -6,6 +6,7 @@ from core.login.views import *
 
 urlpatterns = [
     path('', LoginFormView.as_view(), name='login'),
+    path('service-not-available/', ServiceNotAvailableView.as_view(), name='service_not_available'),
     path("logout/", LogoutView.as_view(), name='logout'),
     # path('login-failed/', lockout, name='login-failed'),
     # path('reset/password_reset/', FormResetPasswordView.as_view(form_class=EmailValidationForgotPassword),

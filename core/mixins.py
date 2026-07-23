@@ -2,7 +2,11 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 
 
+# Validador de Permisos en vistas
 class ValidatePermissionRequiredMixin(object):
+    """
+    Mixin para validar permisos de usuario en vistas basadas en clases.
+    """
     permission_required = ''
     url_redirect = None
 

@@ -62,7 +62,7 @@ class SamplingAnalysisProcessingForm(ModelForm):
             instance = super().save(commit=False)
             instance.sample_analysis_id = self.analysis.id
             instance.analyzed_by_id = user.id
-            instance.analyzed_date = timezone.localtime()
+            instance.analyzed_date = timezone.now()
             instance.relational_calculation = False
 
             # Nota: Esto asume que solo hay un conjunto de cálculos (Num/Den) por método base
@@ -166,7 +166,7 @@ class SamplingAnalysisProcessingGravimetryForm(ModelForm):
             instance = super().save(commit=False)
             instance.sample_analysis_id = self.analysis.id
             instance.analyzed_by_id = user.id
-            instance.analyzed_date = timezone.localtime()
+            instance.analyzed_date = timezone.now()
             instance.relational_calculation = False
 
             # Nota: Esto asume que solo hay un conjunto de cálculos (Num/Den) por método base,
@@ -551,7 +551,7 @@ class SamplingProcessConfirmedForm(ModelForm):
                 return {'error': form.errors}
             instance = form.save(commit=False)
             instance.sampling_confirmed_by_id = get_current_user().id
-            instance.date_sampling = timezone.localtime()
+            instance.date_sampling = timezone.now()
             instance.status_sampling = 'Confirmada'
             instance.save()
             return instance
@@ -664,7 +664,7 @@ class SamplingProcessApprovedForm(ModelForm):
             if form.is_valid():
                 data = form.save(commit=False)
                 data.approved_by_id = get_current_user().id
-                data.date_approved = timezone.localtime()
+                data.date_approved = timezone.now()()
                 data.status_sampling = 'Aprobado'
                 data.save()
             else:

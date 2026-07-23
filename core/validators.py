@@ -6,6 +6,9 @@ from django.core.exceptions import ValidationError
 
 # Validador tamaño de archivos de 256Kb
 def validator_file_image(value):
+    """
+    Validador para archivos de imagen con tamaño máximo de 256Kb.
+    """
     limit = 256 * 1024     # de bits
     ext = os.path.splitext(value.name)[1]
     file = os.path.basename(value.name)
@@ -22,6 +25,9 @@ def validator_file_image(value):
 
 # Validador tamaño de imágenes de 256Kb
 def validator_file_image_user(value):
+    """
+    Validador para imágenes de usuario con tamaño máximo de 256Kb.
+    """
     limit = 256 * 1024     # de bits
     ext = os.path.splitext(value.name)[1]
     valid_extensions = ['.jpeg', '.jpg', '.png', '.svg']
