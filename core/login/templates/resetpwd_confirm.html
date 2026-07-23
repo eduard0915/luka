@@ -1,0 +1,68 @@
+{% extends 'base_login.html' %}
+{% load widget_tweaks %}
+
+{% block styles %}
+.logo {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.logo img {
+    max-width: 35%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.login-box a {
+    color: #00695C;
+}
+
+.login-box a:hover {
+    color: #004d40;
+}
+{% endblock %}
+
+{% block content %}
+{% if validlink %}
+    <form class="login-form" action="." method="post">
+        <h3 class="login-head"><i class="bi bi-lock me-2"></i>Nueva Contraseña</h3>
+        {% csrf_token %}
+        <p class="text-muted mb-3">
+            Ingrese su nueva contraseña.
+        </p>
+        <div class="mb-3">
+            {{ form.new_password1|add_class:'form-control'|attr:'autocomplete:off'|attr:'placeholder: Nueva Contraseña' }}
+        </div>
+        <div class="mb-3">
+            {{ form.new_password2|add_class:'form-control'|attr:'autocomplete:off'|attr:'placeholder: Confirmar Contraseña' }}
+        </div>
+        {% if form.new_password2.errors %}
+            <div class="alert alert-danger py-2" role="alert">
+                {% for error in form.new_password2.errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+        <div class="mb-3 btn-container d-grid">
+            <button class="btn btn-primary btn-block" type="submit">
+                <i class="bi bi-check-lg me-2 fs-5"></i>Restablecer Contraseña
+            </button>
+        </div>
+    </form>
+{% else %}
+    <div class="login-form">
+        <h3 class="login-head"><i class="bi bi-exclamation-triangle me-2"></i>Enlace Inválido</h3>
+        <p class="text-muted">
+            El enlace de restablecimiento de contraseña es inválido o ya ha sido utilizado.
+            Por favor, solicite un nuevo restablecimiento de contraseña.
+        </p>
+        <div class="text-center mt-3">
+            <a href="{% url 'password_reset' %}"><i class="bi bi-key"></i> Solicitar nuevo enlace</a>
+        </div>
+        <div class="text-center mt-2">
+            <a href="{% url 'login' %}"><i class="bi bi-arrow-left"></i> Volver al inicio de sesión</a>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

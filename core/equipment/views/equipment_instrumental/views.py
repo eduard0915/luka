@@ -199,6 +199,7 @@ class EquipmentInstrumentalDetailView(LoginRequiredMixin, ValidatePermissionRequ
     model = EquipmentInstrumental
     template_name = 'equipment_instrumental/detail_equipment.html'
     permission_required = 'equipment.add_equipmentinstrumental'
+    queryset = EquipmentInstrumental.objects.select_related('laboratory__site', 'responsible_user')
 
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
@@ -211,11 +212,11 @@ class EquipmentInstrumentalDetailView(LoginRequiredMixin, ValidatePermissionRequ
         context['list_url'] = reverse_lazy('equipment:list_equipment_instrumental')
         context['update_url'] = reverse_lazy('equipment:update_equipment_instrumental', kwargs={'pk': self.object.pk})
         # Mantenimientos del equipo
-        context['maintenances'] = self.object.maintenance_set.all().order_by('-date_maintenance')
+        context['maintenances'] = self.object.maintenance_set.select_related('responsible_user').all().order_by('-date_maintenance')
         # Calibraciones del equipo
-        context['calibrations'] = self.object.calibration_set.all().order_by('-date_calibration')
+        context['calibrations'] = self.object.calibration_set.select_related('responsible_user').all().order_by('-date_calibration')
         # Verificaciones del equipo
-        context['verifications'] = self.object.verification_set.all().order_by('-date_verification')
+        context['verifications'] = self.object.verification_set.select_related('responsible_user').all().order_by('-date_verification')
         # Patrones de Referencia del equipo
         context['reference_patterns'] = self.object.referencepattern_set.all().order_by('description_pattern')
         context['pdf_url'] = reverse('equipment:equipment_instrumental_pdf', kwargs={'pk': self.object.pk})
@@ -247,14 +248,14 @@ class EquipmentInstrumentalPDFView(LoginRequiredMixin, ValidatePermissionRequire
     def get(self, request, *args, **kwargs):
         try:
             template = get_template('equipment_instrumental/pdf_equipment.html')
-            object = EquipmentInstrumental.objects.get(pk=self.kwargs['pk'])
+            object = EquipmentInstrumental.objects.select_related('laboratory__site', 'responsible_user').get(pk=self.kwargs['pk'])
             company = Company.objects.first()
 
             context = {
                 'object': object,
-                'maintenances': object.maintenance_set.all().order_by('-date_maintenance'),
-                'calibrations': object.calibration_set.all().order_by('-date_calibration'),
-                'verifications': object.verification_set.all().order_by('-date_verification'),
+                'maintenances': object.maintenance_set.select_related('responsible_user').all().order_by('-date_maintenance'),
+                'calibrations': object.calibration_set.select_related('responsible_user').all().order_by('-date_calibration'),
+                'verifications': object.verification_set.select_related('responsible_user').all().order_by('-date_verification'),
                 'company': company,
                 'title': f'Hoja de Vida de Equipo: {object.code_equipment}',
                 'today': timezone.now(),

@@ -1,13 +1,51 @@
 from datetime import timedelta
 
 from django.contrib import messages
-from django.contrib.auth.views import *
+from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView, LoginView
 from django.shortcuts import redirect
 from django.utils import timezone
 from django.views.generic import TemplateView
 
 from core.company.models import Company
 from core.user.models import PasswordHistoryUser
+from luka import settings
+
+
+# Restablecimiento de contraseña
+class FormResetPasswordView(PasswordResetView):
+    template_name = 'resetpwd_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Restablecer Contraseña'
+        return context
+
+
+class ResetPasswordDoneView(PasswordResetDoneView):
+    template_name = 'resetpwd_done.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Correo Enviado'
+        return context
+
+
+class ResetConfirmPasswordView(PasswordResetConfirmView):
+    template_name = 'resetpwd_confirm.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Nueva Contraseña'
+        return context
+
+
+class ResetCompletePasswordView(PasswordResetCompleteView):
+    template_name = 'resetpwd_complete.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Contraseña Restablecida'
+        return context
 
 
 # Login para iniciar sesión
