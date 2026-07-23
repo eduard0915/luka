@@ -18,16 +18,26 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
     model = SamplingAnalysis
     template_name = 'analysis_sampling/detail_sampling_analysis.html'
     permission_required = 'reagent.add_reagent'
+    queryset = SamplingAnalysis.objects.select_related('analytical_method')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Procesamiento de Análisis de Muestra'
         context['entity'] = self.object
-        context['analysis_processing'] = self.object.samplinganalysisprocessing_set.filter(relational_calculation=False).order_by('-analyzed_date')
-        context['analysis_processing_relational'] = self.object.samplinganalysisprocessing_set.filter(relational_calculation=True).order_by('-analyzed_date')
+        context['analysis_processing'] = self.object.samplinganalysisprocessing_set.filter(relational_calculation=False).select_related(
+            'standard_solution__solute_std__reagent',
+            'analyzed_by'
+        ).order_by('-analyzed_date')
+        context['analysis_processing_relational'] = self.object.samplinganalysisprocessing_set.filter(relational_calculation=True).select_related(
+            'standard_solution__solute_std__reagent',
+            'analyzed_by'
+        ).order_by('-analyzed_date')
         context['analysis_processing_relational_new'] = self.object.samplinganalysisprocessingrelation_set.all().order_by('-date_creation')
         context['analysis_count'] = self.object.samplinganalysisprocessing_set.filter(relational_calculation=False).count()
-        context['millimole_reacted'] = self.object.millimolereacted_set.all().order_by('-date_creation')
+        context['millimole_reacted'] = self.object.millimolereacted_set.select_related(
+            'standard_solution_add__solute_std__reagent',
+            'standard_solution_spend__solute_std__reagent',
+        ).all().order_by('-date_creation')
 
         # Datos del método analítico
         method = self.object.analytical_method
