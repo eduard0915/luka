@@ -161,7 +161,10 @@ class SamplingProcessListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
                     first_name = item.get('sampling_created_by__first_name', '') or ''
                     last_name = item.get('sampling_created_by__last_name', '') or ''
                     cargo = item.get('sampling_created_by__cargo', '') or ''
-                    item['sampling_created_by__get_full_name'] = f"{first_name} {last_name}, {cargo}".strip()
+                    if first_name or last_name or cargo:
+                        item['sampling_created_by__get_full_name'] = f"{first_name} {last_name}, {cargo}".strip()
+                    else:
+                        item['sampling_created_by__get_full_name'] = 'Automático'
                     if item['group_sampling']:
                         code_point = item.get('group_sampling__sampling_point__sample_point_code', '') or ''
                         name_point = item.get('group_sampling__sampling_point__sample_point_name', '') or ''

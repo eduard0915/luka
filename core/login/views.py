@@ -11,7 +11,6 @@ from core.user.models import PasswordHistoryUser
 from luka import settings
 
 
-# Restablecimiento de contraseña
 class FormResetPasswordView(PasswordResetView):
     template_name = 'resetpwd_form.html'
 
@@ -48,7 +47,6 @@ class ResetCompletePasswordView(PasswordResetCompleteView):
         return context
 
 
-# Login para iniciar sesión
 class LoginFormView(LoginView):
     """Vista de inicio de sesión que valida la expiración de la contraseña del usuario autenticado."""
     template_name = 'login.html'

@@ -64,8 +64,18 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 {
-                    targets: [1, 2, 3],
+                    targets: [1, 2],
                     class: 'td-actions text-center align-middle'
+                },
+                {
+                    targets: [3],
+                    class: 'td-actions text-center align-middle',
+                    render: function (data) {
+                        if (!data || data === 'None' || data === '') {
+                            return 'Automático';
+                        }
+                        return data;
+                    }
                 },
                 {
                     targets: [5],
