@@ -1,9 +1,9 @@
-"""
-WSGI config for luka project.
+"""Punto de entrada WSGI para el proyecto Luka LIS.
 
-It exposes the WSGI callable as a module-level variable named ``application``.
+Expone la aplicación WSGI como una variable de nivel de módulo
+llamada ``application``.
 
-For more information on this file, see
+Para más información, consulte:
 https://docs.djangoproject.com/en/5.2/howto/deployment/wsgi/
 """
 

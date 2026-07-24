@@ -1,3 +1,5 @@
+"""Definición de rutas URL de la aplicación de equipos."""
+
 from django.conf.urls.static import static
 from django.urls import path
 

@@ -1,3 +1,5 @@
+"""Definición de rutas URL para la aplicación de laboratorios."""  # noqa: E501
+
 from django.conf.urls.static import static
 from django.urls import path
 

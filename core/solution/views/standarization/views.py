@@ -1,3 +1,5 @@
+"""Vistas para la configuración de estandarización entre soluciones y estándares."""
+
 from core.mixins import ValidatePermissionRequiredMixin
 
 from django.contrib import messages
@@ -14,6 +16,7 @@ from core.solution.models import Standardization
 
 # Creación de Configuración de Estandarización
 class StandardizationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para crear la configuración de estandarización de una solución con un estándar."""
     model = Standardization
     form_class = StandardizationForm
     template_name = 'standarization/create_std_sln.html'
@@ -21,9 +24,11 @@ class StandardizationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMi
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Maneja la petición de creación de configuración de estandarización."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de configuración de estandarización vía AJAX."""
         data = {}
         try:
             action = request.POST['action']
@@ -41,12 +46,14 @@ class StandardizationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMi
         return JsonResponse(data)
 
     def get_form_kwargs(self):
+        """Agrega el reactivo a los kwargs del formulario."""
         kwargs = super().get_form_kwargs()
         reagent = Reagent.objects.get(pk=self.kwargs.get('pk'))
         kwargs.update({'reagent': reagent})
         return kwargs
 
     def get_context_data(self, **kwargs):
+        """Agrega la acción y entidad al contexto."""
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Configuración de Estandarización'
@@ -55,6 +62,7 @@ class StandardizationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMi
 
 # Edición de configuración de estandarización
 class StandardizationUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para editar la configuración de estandarización existente."""
     model = Standardization
     form_class = StandardizationUpdateForm
     template_name = 'standarization/create_std_sln.html'
@@ -62,10 +70,12 @@ class StandardizationUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMi
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Obtiene la configuración de estandarización a editar y maneja la petición."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de edición de estandarización vía AJAX."""
         data = {}
         try:
             action = request.POST['action']
@@ -83,6 +93,7 @@ class StandardizationUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMi
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega la entidad y acción al contexto."""
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Edición de Configuración de Estandarización'
         context['action'] = 'edit'

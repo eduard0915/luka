@@ -1,3 +1,9 @@
+"""Formularios de la aplicación de reactivos para el sistema Luka LIMS.
+
+Define los formularios basados en modelos para la creación, edición y
+transferencia de reactivos, inventario de reactivos y transacciones.
+"""
+
 from crum import get_current_user
 from django import forms
 from django.forms import ModelForm, TextInput, FileInput, Select, DateInput, NumberInput, CheckboxInput
@@ -12,9 +18,11 @@ UNIT_PURITY = [('', '-----'), ('%', '%'), ('mg/L', 'mg/L'), ('g/L', 'g/L'), ('M'
 REGISTRY_TYPE = [('', '-----'), ('Uso', 'Uso'), ('Ajuste de Salida', 'Ajuste de Salida'), ('Ajuste de Entrada', 'Ajuste de Entrada')]
 
 
-# Creación Reactivo
 class ReagentForm(ModelForm):
+    """Formulario para la creación y edición de reactivos."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario configurando atributos de campos y clases CSS."""
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -60,6 +68,7 @@ class ReagentForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el formulario y retorna un diccionario con el resultado."""
         data = {}
         form = super()
         try:
@@ -72,9 +81,11 @@ class ReagentForm(ModelForm):
         return data
 
 
-# Registro de Entrada Inventario de Reactivo
 class InventoryReagentForm(ModelForm):
+    """Formulario para el registro de entrada de reactivos al inventario."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario ajustando el queryset y etiquetas según el usuario y el reactivo."""
         super().__init__(*args, **kwargs)
         user = get_current_user()
         if user and user.site:
@@ -116,6 +127,7 @@ class InventoryReagentForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el formulario y retorna un diccionario con el resultado."""
         data = {}
         form = super()
         try:
@@ -128,9 +140,11 @@ class InventoryReagentForm(ModelForm):
         return data
 
 
-# Traslado de InventoryReagent a SolutionStd
 class InventoryReagentTransferForm(ModelForm):
+    """Formulario de solo lectura para el traslado de inventario de reactivo a solución estándar."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario configurando campos como solo lectura y ajustando etiquetas."""
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.reagent:
             self.fields['quantity_stock'].label = f"Cantidad ({self.instance.reagent.umb})"
@@ -164,39 +178,11 @@ class InventoryReagentTransferForm(ModelForm):
         }
 
 
-# Edición de Registro de Entrada Inventario de Reactivo
-# class InventoryReagentUpdateForm(ModelForm):
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         for form in self.visible_fields():
-#             form.field.widget.attrs['autocomplete'] = 'off'
-#
-#     class Meta:
-#         model = InventoryReagent
-#         fields = ['reagent', 'quantity_stock','batch_number', 'date_expire']
-#         widgets = {
-#             'reagent': Select(attrs={'class': 'form-control', 'required': True}),
-#             'quantity_stock': TextInput(attrs={'class': 'form-control', 'required': True}),
-#             'batch_number': TextInput(attrs={'class': 'form-control', 'required': True}),
-#             'date_expire': DateInput(attrs={'class': 'form-control', 'required': True, 'type': 'text', 'data-datepicker': '1', 'placeholder': 'yyyy-mm-dd'}),
-#         }
-#
-#     def save(self, commit=True):
-#         data = {}
-#         form = super()
-#         try:
-#             if form.is_valid():
-#                 data = form.save()
-#             else:
-#                 data['error'] = form.errors
-#         except Exception as e:
-#             data['error'] = str(e)
-#         return data
-
-
-# Creación Transacción de Reactivo
 class TransactionReagentForm(ModelForm):
+    """Formulario para la creación de transacciones de reactivo (uso, ajustes)."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario extrayendo el inventario desde los kwargs."""
         self.invent = kwargs.pop('invent')
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -214,6 +200,7 @@ class TransactionReagentForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la transacción asociada al inventario de reactivo y retorna un diccionario."""
         data = {}
         form = super()
         try:
@@ -228,9 +215,11 @@ class TransactionReagentForm(ModelForm):
         return data
 
 
-# Actualización Transacción de Reactivo
 class TransactionReagentUpdateForm(ModelForm):
+    """Formulario para la actualización de transacciones de reactivo."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario configurando el autocompletado de los campos."""
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -244,6 +233,7 @@ class TransactionReagentUpdateForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el formulario y retorna un diccionario con el resultado."""
         data = {}
         form = super()
         try:

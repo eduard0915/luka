@@ -1,10 +1,5 @@
 import os
-from urllib.request import urlopen
 
-import boto3
-from botocore.config import Config
-from botocore.exceptions import ClientError
-from decouple import config
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -22,12 +17,13 @@ from xhtml2pdf import pisa
 from core.company.models import Company
 from core.mixins import ValidatePermissionRequiredMixin
 from core.solution.forms import *
-from core.solution.models import Solution, StandardizationSolution, TransactionSolution, SolutionBase, SolutionStdBase
+from core.solution.models import Solution, StandardizationSolution, TransactionSolution
 from luka import settings
 
 
-# Creación de Soluciones
+"""Vistas CRUD para la gestión de soluciones del laboratorio."""
 class SolutionCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para la creación de una nueva solución en el laboratorio."""
     model = Solution
     form_class = SolutionForm
     template_name = 'solution/create_solution.html'
@@ -35,10 +31,12 @@ class SolutionCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cr
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Inicializa el objeto como nulo y maneja la petición."""
         self.object = None
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de creación de solución vía AJAX."""
         data = {}
         try:
             action = request.POST['action']
@@ -71,9 +69,11 @@ class SolutionCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cr
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de detalle de la solución creada."""
         return reverse('solution:detail_solution', kwargs={'pk': self.object.pk})
 
     def get_context_data(self, **kwargs):
+        """Agrega título, acción y URLs al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Preparar Solución'
         context['action'] = 'add'
@@ -126,15 +126,18 @@ def get_solution_base_data(request, base_id):
 
 # Listado de Soluciones
 class SolutionListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista para listar todas las soluciones registradas."""
     model = Solution
     template_name = 'solution/list_solution.html'
     permission_required = 'reagent.view_reagent'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Maneja la petición del listado de soluciones."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la solicitud AJAX de búsqueda y retorna datos JSON."""
         data = {}
         try:
             action = request.POST['action']
@@ -172,6 +175,7 @@ class SolutionListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, List
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega título, URL de creación y entidad al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Soluciones'
         context['create_url'] = reverse_lazy('solution:create_solution')
@@ -184,6 +188,7 @@ class SolutionListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, List
 
 # Edición de Soluciones
 class SolutionUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para editar una solución existente."""
     model = Solution
     form_class = SolutionForm
     template_name = 'solution/update_solution.html'
@@ -191,10 +196,12 @@ class SolutionUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Up
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Obtiene la solución a editar y maneja la petición."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de edición de solución."""
         data = {}
         try:
             action = request.POST['action']
@@ -214,6 +221,7 @@ class SolutionUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Up
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega título, acción y URLs al contexto de edición."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Editar Solución a Preparar'
         context['entity'] = 'Editar Solución a Preparar'
@@ -226,6 +234,7 @@ class SolutionUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Up
 
 # Confirmación de Preparación de solución
 class SolutionConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para confirmar la preparación de una solución."""
     model = Solution
     form_class = SolutionConfirmedForm
     template_name = 'solution/confirmed_solution.html'
@@ -233,10 +242,12 @@ class SolutionConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionRequired
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Obtiene la solución a confirmar."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la confirmación de preparación vía AJAX."""
         data = {}
         try:
             action = request.POST['action']
@@ -254,6 +265,7 @@ class SolutionConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionRequired
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega entidad e información de confirmación al contexto."""
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Preparación de Solución ' + self.object.code_solution
         context['action'] = 'edit'
@@ -264,14 +276,17 @@ class SolutionConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionRequired
 
 # Detalle de Soluciones
 class SolutionDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """Vista de detalle de una solución con transacciones y estandarizaciones."""
     model = Solution
     template_name = 'solution/detail_solution.html'
     permission_required = 'reagent.add_reagent'
 
     def dispatch(self, request, *args, **kwargs):
+        """Maneja la petición de detalle de la solución."""
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
+        """Agrega transacciones, estandarizaciones y URLs al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Preparación de Solución'
         context['entity'] = 'Preparación de Solución'
@@ -291,6 +306,7 @@ class SolutionDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, De
 
 # Etiqueta de Identificación de Solución
 class SolutionLabelPDFDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista para generar la etiqueta PDF de identificación de una solución."""
     permission_required = 'reagent.add_reagent'
 
     @staticmethod
@@ -319,6 +335,7 @@ class SolutionLabelPDFDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         return path
 
     def get(self, request, *args, **kwargs):
+        """Genera y retorna el PDF de la etiqueta de identificación."""
         try:
             template = get_template('solution/label_solution.html')
             sln = Solution.objects.get(pk=self.kwargs['pk'])

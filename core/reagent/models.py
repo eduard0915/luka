@@ -1,3 +1,9 @@
+"""Modelos de datos de la aplicación de reactivos para Luka LIMS.
+
+Define los modelos Reagent, InventoryReagent y TransactionReagent junto con
+el generador de códigos secuenciales para reactivos.
+"""
+
 import uuid
 
 from crum import get_current_user
@@ -9,7 +15,6 @@ from core.models import BaseModel
 from core.user.models import User
 
 
-# Generador de códigos de reactivos
 def code_reagent_generator():
     """
     Genera el siguiente código secuencial de forma segura bloqueando la fila.
@@ -25,8 +30,9 @@ def code_reagent_generator():
     return str(new_number)
 
 
-# Reactivos
 class Reagent(BaseModel):
+    """Modelo que representa un reactivo químico en el laboratorio."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     description_reagent = models.CharField(max_length=200, verbose_name='Descripción')
     code_reagent = models.CharField(max_length=20, verbose_name='Código', unique=True, blank=True)
@@ -48,6 +54,7 @@ class Reagent(BaseModel):
     ready_to_use = models.BooleanField(verbose_name='STD Listo para Usar?', default=False)
 
     def __str__(self):
+        """Retorna una representación legible del reactivo con código y descripción."""
         return str(self.code_reagent) + ' '  + str(self.description_reagent)
 
     class Meta:
@@ -56,6 +63,7 @@ class Reagent(BaseModel):
         db_table = 'Reagent'
 
     def save(self, *args, **kwargs):
+        """Guarda el reactivo asignando el usuario actual y generando el código automáticamente."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -63,9 +71,7 @@ class Reagent(BaseModel):
             else:
                 self.user_updated = user
 
-        # Automatización del código con protección de concurrencia
         if not self.code_reagent:
-            # Envolvemos en una transacción atómica para que el select_for_update funcione
             with transaction.atomic(using=kwargs.get('using')):
                 self.code_reagent = code_reagent_generator()
                 return super(Reagent, self).save(*args, **kwargs)
@@ -73,8 +79,9 @@ class Reagent(BaseModel):
         return super(Reagent, self).save(*args, **kwargs)
 
 
-# Inventario de Reactivos
 class InventoryReagent(BaseModel):
+    """Modelo que representa el inventario de un reactivo con lote, pureza y cantidad disponible."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     reagent = models.ForeignKey(Reagent, verbose_name='Reactivo', on_delete=models.CASCADE)
     batch_number = models.CharField(max_length=50, verbose_name='N° Lote')
@@ -86,6 +93,7 @@ class InventoryReagent(BaseModel):
     density = models.FloatField(verbose_name='Densidad (g/mL)', default=1)
 
     def __str__(self):
+        """Retorna una representación del inventario con descripción, lote, pureza y cantidad disponible."""
         return str(self.reagent.description_reagent) + ' Lote N°: ' + str(self.batch_number) + ' (' + str(
             self.purity) + str(self.reagent.purity_unit) + '). Disponible: ' + str(
             self.quantity_stock) + self.reagent.umb
@@ -96,6 +104,7 @@ class InventoryReagent(BaseModel):
         db_table = 'InventoryReagent'
 
     def save(self, *args, **kwargs):
+        """Guarda el inventario asignando el usuario actual."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -105,8 +114,9 @@ class InventoryReagent(BaseModel):
         return super(InventoryReagent, self).save(*args, **kwargs)
 
 
-# Movimientos de Reactivos
 class TransactionReagent(BaseModel):
+    """Modelo que representa una transacción o movimiento de un reactivo en el inventario."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     reagent_inventory = models.ForeignKey(InventoryReagent, verbose_name='Reactivo', on_delete=models.CASCADE)
     date_transaction = models.DateField(verbose_name='Fecha')
@@ -116,6 +126,7 @@ class TransactionReagent(BaseModel):
     user_transaction = models.ForeignKey(User, verbose_name='', on_delete=models.CASCADE)
 
     def __str__(self):
+        """Retorna la cantidad de la transacción como representación."""
         return str(self.quantity)
 
     class Meta:
@@ -124,6 +135,7 @@ class TransactionReagent(BaseModel):
         db_table = 'TransactionReagent'
 
     def save(self, *args, **kwargs):
+        """Guarda la transacción asignando el usuario actual."""
         user = get_current_user()
         if user:
             if not self.user_creation:

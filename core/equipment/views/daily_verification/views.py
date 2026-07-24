@@ -1,3 +1,5 @@
+"""Vistas de verificaciones diarias para la gestión de controles diarios de equipos instrumentales."""
+
 import os
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -22,17 +24,20 @@ from django.conf import settings
 from django.contrib.staticfiles import finders
 
 
-# Listado de Verificaciones Diarias
 class DailyVerificationListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista de listado de verificaciones diarias."""
+
     model = DailyVerification
     template_name = 'daily_verification/list_daily_verification.html'
     permission_required = 'equipment.view_verification'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP aplicando la exención de CSRF."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa las solicitudes POST para la búsqueda de verificaciones diarias y datos de gráficos."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -71,7 +76,7 @@ class DailyVerificationListView(LoginRequiredMixin, ValidatePermissionRequiredMi
                 from datetime import timedelta
                 twelve_months_ago = timezone.now() - timedelta(days=365)
                 equipment_id = request.POST.get('equipment_id')
-                qs = DailyVerification.objects.filter(date_verification_daily__gte=twelve_months_ago)
+                qs = DailyVerification.objects.select_related('equipment_instrumental').filter(date_verification_daily__gte=twelve_months_ago)
                 if equipment_id:
                     qs = qs.filter(equipment_instrumental_id=equipment_id)
                 qs = qs.order_by('date_verification_daily')
@@ -127,6 +132,7 @@ class DailyVerificationListView(LoginRequiredMixin, ValidatePermissionRequiredMi
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de listado."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Listado de Verificaciones Diarias'
         context['create_url'] = reverse_lazy('equipment:create_daily_verification')
@@ -136,17 +142,20 @@ class DailyVerificationListView(LoginRequiredMixin, ValidatePermissionRequiredMi
         return context
 
 
-# Gráfico de Verificaciones Diarias
 class DailyVerificationChartView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista de gráfico de verificaciones diarias para visualizar la tendencia del error."""
+
     model = DailyVerification
     template_name = 'daily_verification/chart_daily_verification.html'
     permission_required = 'equipment.view_verification'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP aplicando la exención de CSRF."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa las solicitudes POST para obtener los datos del gráfico de verificación diaria."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -172,10 +181,9 @@ class DailyVerificationChartView(LoginRequiredMixin, ValidatePermissionRequiredM
                     'unit_tolerance': ''
                 }
 
-                # Filtrar por equipo si se pasa un ID
                 equipment_id = self.kwargs.get('pk')
                 equipment = None
-                qs = DailyVerification.objects.all()
+                qs = DailyVerification.objects.select_related('equipment_instrumental').all()
                 if equipment_id:
                     equipment = EquipmentInstrumental.objects.filter(id=equipment_id).first()
                     if equipment:
@@ -199,6 +207,7 @@ class DailyVerificationChartView(LoginRequiredMixin, ValidatePermissionRequiredM
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales incluyendo el título personalizado según el equipo."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Gráfico de Verificaciones Diarias'
 
@@ -213,8 +222,9 @@ class DailyVerificationChartView(LoginRequiredMixin, ValidatePermissionRequiredM
         return context
 
 
-# Creación de Verificación Diaria
 class DailyVerificationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista de creación de verificaciones diarias."""
+
     model = DailyVerification
     form_class = DailyVerificationForm
     template_name = 'daily_verification/create_daily_verification.html'
@@ -222,10 +232,12 @@ class DailyVerificationCreateView(LoginRequiredMixin, ValidatePermissionRequired
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP inicializando el objeto como nulo."""
         self.object = None
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la solicitud POST para registrar una nueva verificación diaria."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -252,9 +264,11 @@ class DailyVerificationCreateView(LoginRequiredMixin, ValidatePermissionRequired
         return JsonResponse(data, safe=False)
 
     def get_success_url(self):
+        """Retorna la URL de redirección después de crear una verificación diaria."""
         return reverse_lazy('equipment:list_daily_verification')
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de creación."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Nueva Verificación Diaria'
         context['entity'] = 'Verificaciones Diarias'
@@ -264,8 +278,9 @@ class DailyVerificationCreateView(LoginRequiredMixin, ValidatePermissionRequired
         return context
 
 
-# Actualización de Verificación Diaria
 class DailyVerificationUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista de edición de verificaciones diarias."""
+
     model = DailyVerification
     form_class = DailyVerificationForm
     template_name = 'daily_verification/create_daily_verification.html'
@@ -273,10 +288,12 @@ class DailyVerificationUpdateView(LoginRequiredMixin, ValidatePermissionRequired
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP obteniendo el objeto a editar."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la solicitud POST para actualizar una verificación diaria existente."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -303,9 +320,11 @@ class DailyVerificationUpdateView(LoginRequiredMixin, ValidatePermissionRequired
         return JsonResponse(data, safe=False)
 
     def get_success_url(self):
+        """Retorna la URL de redirección después de editar una verificación diaria."""
         return reverse_lazy('equipment:list_daily_verification')
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de edición."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Editar Verificación Diaria'
         context['entity'] = 'Verificaciones Diarias'
@@ -315,13 +334,15 @@ class DailyVerificationUpdateView(LoginRequiredMixin, ValidatePermissionRequired
         return context
 
 
-# Detalle de Verificación Diaria
 class DailyVerificationDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """Vista de detalle de verificación diaria."""
+
     model = DailyVerification
     template_name = 'daily_verification/detail_daily_verification.html'
     permission_required = 'equipment.view_verification'
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de detalle."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Detalle de Verificación Diaria'
         context['entity'] = 'Verificaciones Diarias'
@@ -332,15 +353,13 @@ class DailyVerificationDetailView(LoginRequiredMixin, ValidatePermissionRequired
         return context
 
 
-# Vista PDF de Verificación Diaria
 class DailyVerificationPDFView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista de generación de reporte PDF de verificación diaria."""
+
     permission_required = 'equipment.view_verification'
 
     def link_callback(uri, rel):
-        """
-        Convert HTML URIs to absolute system paths so xhtml2pdf can access those
-        resources
-        """
+        """Convierte URIs HTML a rutas absolutas del sistema para que xhtml2pdf acceda a los recursos."""
         result = finders.find(uri)
         if result:
             if not isinstance(result, (list, tuple)):
@@ -348,10 +367,10 @@ class DailyVerificationPDFView(LoginRequiredMixin, ValidatePermissionRequiredMix
             result = list(os.path.realpath(path) for path in result)
             path = result[0]
         else:
-            s_url = settings.STATIC_URL  # Typically /static/
-            s_root = settings.STATIC_ROOT  # Typically /home/userX/project_static/
-            m_url = settings.MEDIA_URL  # Typically /media/
-            m_root = settings.MEDIA_ROOT  # Typically /home/userX/project_media/
+            s_url = settings.STATIC_URL
+            s_root = settings.STATIC_ROOT
+            m_url = settings.MEDIA_URL
+            m_root = settings.MEDIA_ROOT
 
             if uri.startswith(m_url):
                 path = os.path.join(m_root, uri.replace(m_url, ""))
@@ -360,7 +379,6 @@ class DailyVerificationPDFView(LoginRequiredMixin, ValidatePermissionRequiredMix
             else:
                 return uri
 
-        # make sure that file exists
         if not os.path.isfile(path):
             raise Exception(
                 'media URI must start with %s or %s' % (s_url, m_url)
@@ -368,6 +386,7 @@ class DailyVerificationPDFView(LoginRequiredMixin, ValidatePermissionRequiredMix
         return path
 
     def get(self, request, *args, **kwargs):
+        """Genera y retorna el reporte PDF de una verificación diaria específica."""
         try:
             template = get_template('daily_verification/pdf_daily_verification.html')
             context = {
@@ -377,7 +396,6 @@ class DailyVerificationPDFView(LoginRequiredMixin, ValidatePermissionRequiredMix
             }
             html = template.render(context)
             response = HttpResponse(content_type='application/pdf')
-            # response['Content-Disposition'] = 'attachment; filename="daily_verification.pdf"'
             pisa_status = pisa.CreatePDF(
                 html, dest=response,
                 link_callback=DailyVerificationPDFView.link_callback
@@ -392,17 +410,13 @@ class DailyVerificationPDFView(LoginRequiredMixin, ValidatePermissionRequiredMix
 
 @require_http_methods(["GET"])
 def get_equipment_data(request, equipment_id):
-    """
-    Retorna los ReferencePattern y el unit_tolerance asociados a un EquipmentInstrumental específico
-    """
+    """Retorna los patrones de referencia vigentes y la unidad de tolerancia de un equipo instrumental."""
     try:
-        # Obtener el equipo
         equipment = EquipmentInstrumental.objects.get(id=equipment_id)
 
-        # Obtener patrones de referencia vigentes
         patterns = ReferencePattern.objects.filter(
             equipment_instrumental_id=equipment_id,
-            date_expire_calibration__gte=timezone.now().date()  # Solo patrones vigentes
+            date_expire_calibration__gte=timezone.now().date()
         ).values('id', 'description_pattern', 'magnitude_pattern', 'unit_pattern')
 
         data = {

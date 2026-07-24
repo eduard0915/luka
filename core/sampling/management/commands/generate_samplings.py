@@ -1,3 +1,5 @@
+"""Comando de administración para la generación automática de muestras."""
+
 from datetime import datetime, timedelta
 
 from django.core.management.base import BaseCommand, CommandError
@@ -16,13 +18,16 @@ CATCHUP_MAX_DAYS = 30
 
 
 class Command(BaseCommand):
+    """Comando que crea las muestras programadas del día para cada grupo de muestreo."""
     help = 'Crea las muestras programadas (SamplingProcess) del día para cada grupo de muestreo, con recuperación de días perdidos'
 
     def add_arguments(self, parser):
+        """Configura los argumentos opcionales del comando."""
         parser.add_argument('--date', help="Simula la fecha de 'hoy' (YYYY-MM-DD); para pruebas y operación manual")
         parser.add_argument('--dry-run', action='store_true', help='Reporta lo que se crearía sin escribir en la base de datos')
 
     def handle(self, *args, **options):
+        """Ejecuta la generación de muestras para todos los grupos habilitados."""
         if options['date']:
             today = datetime.strptime(options['date'], '%Y-%m-%d').date()
             # Un log con fecha futura congelaría al grupo: el catch-up avanza desde
@@ -63,6 +68,7 @@ class Command(BaseCommand):
             raise CommandError(f'{errors} grupos con error')
 
     def _process_group(self, group, today, dry_run):
+        """Procesa un grupo de muestreo generando las muestras desde el último registro hasta hoy."""
         last = SamplingGenerationLog.objects.filter(
             sampling_group=group, target_date__lte=today,   # ignora logs de días futuros
         ).aggregate(last=Max('target_date'))['last']

@@ -1,3 +1,9 @@
+"""Vistas para el CRUD de productos y su detalle con información relacionada.
+
+Incluye la creación, edición, listado y detalle de productos, así como
+la construcción de ecuaciones para los cálculos dependientes.
+"""
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
@@ -15,6 +21,8 @@ from core.utils import format_form_errors
 
 # Creación de Productos
 class ProductCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para la creación de un nuevo producto."""
+
     model = Product
     form_class = ProductForm
     template_name = 'product/create_product.html'
@@ -24,10 +32,12 @@ class ProductCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Inicializa el objeto en None y procesa la petición sin CSRF."""
         self.object = None
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la creación del producto vía AJAX."""
         data = {}
         try:
             action = request.POST['action']
@@ -48,6 +58,7 @@ class ProductCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega los datos de contexto específicos para la creación de producto."""
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Creación de Producto'
@@ -59,6 +70,8 @@ class ProductCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
 
 # Edición de Productos
 class ProductUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para la edición de un producto existente."""
+
     model = Product
     form_class = ProductForm
     template_name = 'product/create_product.html'
@@ -68,10 +81,12 @@ class ProductUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Obtiene el objeto actual y procesa la petición sin CSRF."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la edición del producto vía AJAX."""
         data = {}
         try:
             action = request.POST['action']
@@ -92,6 +107,7 @@ class ProductUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega los datos de contexto específicos para la edición de producto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Edición de Punto de Muestreo'
         context['entity'] = 'Edición de Punto de Muestreo'
@@ -103,15 +119,19 @@ class ProductUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
 
 # Listado de Productos
 class ProductListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista para el listado de productos con búsqueda vía AJAX."""
+
     model = Product
     template_name = 'product/list_product.html'
     permission_required = 'reagent.view_inventoryreagent'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la petición HTTP con protección CSRF desactivada."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Retorna los datos de productos en formato JSON para la tabla del listado."""
         data = {}
         try:
             action = request.POST['action']
@@ -134,6 +154,7 @@ class ProductListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega los datos de contexto para la plantilla del listado."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Productos'
         context['create_url'] = reverse_lazy('product:create_product')
@@ -145,14 +166,18 @@ class ProductListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
 
 # Detalle de Producto
 class ProductDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """Vista de detalle de producto con puntos de muestreo, métodos, especificaciones y ecuaciones."""
+
     model = Product
     template_name = 'product/detail_product.html'
     permission_required = 'equipment.add_equipmentinstrumental'
 
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la petición HTTP para mostrar el detalle del producto."""
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
+        """Construye el contexto con las relaciones del producto y la ecuación de cálculo."""
         context = super().get_context_data(**kwargs)
         context['title'] = self.object.code_product
         context['entity'] = self.object

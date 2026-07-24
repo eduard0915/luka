@@ -1,3 +1,9 @@
+"""Señales de Django para el módulo de soluciones.
+
+Maneja el descuento automático de inventarios, el registro de
+transacciones y el cálculo de estadísticas de estandarización.
+"""
+
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 
 from django.db import transaction
@@ -13,6 +19,7 @@ from core.solution.models import *
 # Descuento de inventario de reactivos soluto para soluciones
 @receiver(post_save, sender=Solution)
 def discount_inventory_reagent_solute(sender, instance, **kwargs):
+    """Descuenta del inventario las cantidades de soluto y solvente usadas al confirmar una solución."""
 
     if instance.preparation_confirmed and instance.solvent_reagent:
 
@@ -48,6 +55,7 @@ def discount_inventory_reagent_solute(sender, instance, **kwargs):
 # Descuento de inventario de reactivos en preparación de soluciones Estándares
 @receiver(post_save, sender=SolutionStd)
 def discount_reagent_transaction_std(sender, instance, **kwargs):
+    """Descuenta del inventario las cantidades de soluto y solvente usadas al confirmar una solución estándar."""
 
     if instance.preparation_confirmed and instance.solvent_reagent:
 

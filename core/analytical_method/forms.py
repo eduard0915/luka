@@ -1,3 +1,9 @@
+"""Formularios para la aplicación de métodos analíticos.
+
+Define los formularios para la creación y edición de métodos analíticos,
+incluyendo soluciones, reactivos, equipos, materiales, procedimientos y cálculos.
+"""
+
 from django.forms import ModelForm, TextInput, Select, Textarea
 
 from core.analytical_method.models import *
@@ -30,7 +36,9 @@ STEP = [('', '')] + [(i, i) for i in range(1, 20)]
 
 # Creación de Métodos Analíticos
 class AnalyticalMethodForm(ModelForm):
+    """Formulario para la creación y edición de métodos analíticos."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario filtrando laboratorios habilitados y configurando clases CSS."""
         super().__init__(*args, **kwargs)
         self.fields['laboratory'].queryset = Laboratory.objects.filter(enable_laboratory=True)
         for form in self.visible_fields():
@@ -73,6 +81,7 @@ class AnalyticalMethodForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el método analítico y retorna los datos o errores."""
         data = {}
         form = super()
         try:
@@ -86,7 +95,9 @@ class AnalyticalMethodForm(ModelForm):
 
 
 class AnalyticalMethodSolutionForm(ModelForm):
+    """Formulario para asociar una solución a un método analítico."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario filtrando soluciones base habilitadas."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
         self.fields['solution'].queryset = SolutionBase.objects.filter(enable_solution=True)
@@ -102,6 +113,7 @@ class AnalyticalMethodSolutionForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la relación solución-método analítico."""
         data = {}
         try:
             if self.is_valid():
@@ -118,7 +130,9 @@ class AnalyticalMethodSolutionForm(ModelForm):
 
 
 class AnalyticalMethodSolutionStdForm(ModelForm):
+    """Formulario para asociar una solución estándar a un método analítico."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario filtrando soluciones estándar base habilitadas."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
         self.fields['solution_std'].queryset = SolutionStdBase.objects.filter(enable_solution_std=True)
@@ -134,6 +148,7 @@ class AnalyticalMethodSolutionStdForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la relación solución estándar-método analítico."""
         data = {}
         try:
             if self.is_valid():
@@ -150,7 +165,9 @@ class AnalyticalMethodSolutionStdForm(ModelForm):
 
 
 class AnalyticalMethodReagentForm(ModelForm):
+    """Formulario para asociar un reactivo a un método analítico."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario con los reactivos disponibles."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -165,6 +182,7 @@ class AnalyticalMethodReagentForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la relación reactivo-método analítico."""
         data = {}
         try:
             if self.is_valid():
@@ -181,7 +199,9 @@ class AnalyticalMethodReagentForm(ModelForm):
 
 
 class AnalyticalMethodEquipmentForm(ModelForm):
+    """Formulario para asociar un equipo a un método analítico."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario con los equipos disponibles."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -196,6 +216,7 @@ class AnalyticalMethodEquipmentForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la relación equipo-método analítico."""
         data = {}
         try:
             if self.is_valid():
@@ -212,7 +233,9 @@ class AnalyticalMethodEquipmentForm(ModelForm):
 
 
 class AnalyticalMethodMaterialForm(ModelForm):
+    """Formulario para asociar un material a un método analítico."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario con los materiales disponibles."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -227,6 +250,7 @@ class AnalyticalMethodMaterialForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la relación material-método analítico."""
         data = {}
         try:
             if self.is_valid():
@@ -244,7 +268,9 @@ class AnalyticalMethodMaterialForm(ModelForm):
 
 # Creación de paso a paso o procedimiento
 class AnalyticalMethodProcedureForm(ModelForm):
+    """Formulario para agregar un paso de procedimiento a un método analítico."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario con el paso numerado automáticamente."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
         if self.analytical_method and not self.instance.pk:
@@ -268,6 +294,7 @@ class AnalyticalMethodProcedureForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el paso del procedimiento."""
         data = {}
         try:
             if self.is_valid():
@@ -285,7 +312,9 @@ class AnalyticalMethodProcedureForm(ModelForm):
 
 # Creación de descripción de cálculo
 class AnalyticalMethodCalculeDescriptionForm(ModelForm):
+    """Formulario para la descripción del cálculo de concentración."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de descripción de cálculo."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -301,6 +330,7 @@ class AnalyticalMethodCalculeDescriptionForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la descripción del cálculo."""
         data = {}
         try:
             if self.is_valid():
@@ -318,7 +348,9 @@ class AnalyticalMethodCalculeDescriptionForm(ModelForm):
 
 # Creación Volumen de Estándar
 class AnalyticalMethodVolumenStdForm(ModelForm):
+    """Formulario para el volumen estándar en el cálculo."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de volumen estándar."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -334,6 +366,7 @@ class AnalyticalMethodVolumenStdForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el volumen estándar del cálculo."""
         data = {}
         try:
             if self.is_valid():
@@ -351,7 +384,9 @@ class AnalyticalMethodVolumenStdForm(ModelForm):
 
 # Creación Factor Denominador
 class AnalyticalMethodFactorForm(ModelForm):
+    """Formulario para el factor constante en el cálculo."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de factor constante."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -367,6 +402,7 @@ class AnalyticalMethodFactorForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el factor constante del cálculo."""
         data = {}
         try:
             if self.is_valid():
@@ -384,7 +420,9 @@ class AnalyticalMethodFactorForm(ModelForm):
 
 # Agregar Cantidad de Muestra
 class AnalyticalMethodSampleGramForm(ModelForm):
+    """Formulario para la variable de muestra en el cálculo."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de variable de muestra."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
         self.fields['sample_quantity'].required = True
@@ -401,6 +439,7 @@ class AnalyticalMethodSampleGramForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la variable de muestra del cálculo."""
         data = {}
         try:
             if self.is_valid():
@@ -418,7 +457,9 @@ class AnalyticalMethodSampleGramForm(ModelForm):
 
 # Relación de Cálculos
 class AnalyticalMethodCalculateRelationForm(ModelForm):
+    """Formulario para crear un cálculo relacionado."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de cálculo relacionado."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
         if self.analytical_method:
@@ -439,6 +480,7 @@ class AnalyticalMethodCalculateRelationForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el cálculo relacionado."""
         data = {}
         try:
             if self.is_valid():
@@ -456,7 +498,9 @@ class AnalyticalMethodCalculateRelationForm(ModelForm):
 
 # Relación de Cálculos
 class AnalyticalMethodCalculeRelationDescriptionForm(ModelForm):
+    """Formulario para la descripción de un cálculo relacionado."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de descripción de cálculo relacionado."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -472,6 +516,7 @@ class AnalyticalMethodCalculeRelationDescriptionForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la descripción del cálculo relacionado."""
         data = {}
         try:
             if self.is_valid():
@@ -488,7 +533,9 @@ class AnalyticalMethodCalculeRelationDescriptionForm(ModelForm):
 
 
 class AnalyticalMethodVolumenStdRelationForm(ModelForm):
+    """Formulario para el volumen estándar en cálculo relacionado."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de volumen estándar relacionado."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -504,6 +551,7 @@ class AnalyticalMethodVolumenStdRelationForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el volumen estándar del cálculo relacionado."""
         data = {}
         try:
             if self.is_valid():
@@ -520,7 +568,9 @@ class AnalyticalMethodVolumenStdRelationForm(ModelForm):
 
 
 class AnalyticalMethodFactorRelationForm(ModelForm):
+    """Formulario para el factor constante en cálculo relacionado."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de factor relacionado."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -536,6 +586,7 @@ class AnalyticalMethodFactorRelationForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el factor del cálculo relacionado."""
         data = {}
         try:
             if self.is_valid():
@@ -552,7 +603,9 @@ class AnalyticalMethodFactorRelationForm(ModelForm):
 
 
 class AnalyticalMethodSampleGramRelationForm(ModelForm):
+    """Formulario para la variable de muestra en cálculo relacionado."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de muestra relacionada."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -568,6 +621,7 @@ class AnalyticalMethodSampleGramRelationForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la variable de muestra del cálculo relacionado."""
         data = {}
         try:
             if self.is_valid():
@@ -585,7 +639,9 @@ class AnalyticalMethodSampleGramRelationForm(ModelForm):
 
 # Agregar Variable a calculo
 class AnalyticalMethodVariableForm(ModelForm):
+    """Formulario para la variable adicional en el cálculo."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de variable adicional."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
         self.fields['variable'].required = True
@@ -602,6 +658,7 @@ class AnalyticalMethodVariableForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la variable adicional del cálculo."""
         data = {}
         try:
             if self.is_valid():
@@ -618,7 +675,9 @@ class AnalyticalMethodVariableForm(ModelForm):
 
 
 class SolutionStdBackValuationForm(ModelForm):
+    """Formulario para la solución estándar de retrovaloración."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de retrovaloración."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -634,6 +693,7 @@ class SolutionStdBackValuationForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la configuración de retrovaloración."""
         data = {}
         try:
             if self.is_valid():
@@ -650,7 +710,9 @@ class SolutionStdBackValuationForm(ModelForm):
 
 
 class SolutionStdBackValuationSpentForm(ModelForm):
+    """Formulario para el gasto de solución estándar de retrovaloración."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de gasto de retrovaloración."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -665,6 +727,7 @@ class SolutionStdBackValuationSpentForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el gasto de retrovaloración."""
         data = {}
         try:
             if self.is_valid():

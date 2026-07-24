@@ -1,9 +1,9 @@
-"""
-ASGI config for luka project.
+"""Punto de entrada ASGI para el proyecto Luka LIS.
 
-It exposes the ASGI callable as a module-level variable named ``application``.
+Expone la aplicación ASGI como una variable de nivel de módulo
+llamada ``application``.
 
-For more information on this file, see
+Para más información, consulte:
 https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
 """
 

@@ -1,3 +1,5 @@
+"""Modelos de datos para la aplicación de muestreo del laboratorio."""
+
 import uuid
 
 from crum import get_current_user
@@ -13,8 +15,8 @@ from core.solution.models import SolutionStd
 from core.user.models import User
 
 
-# Grupos de Muestreo
 class SamplingGroup(BaseModel):
+    """Modelo que representa un grupo de muestreo asociado a un punto de muestreo."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     sampling_point = models.ForeignKey(SamplePoint, verbose_name='Punto de Muestreo', on_delete=models.CASCADE)
     first_hour_sampling = models.TimeField(verbose_name='Hora del Primer Muestreo', default='07:00:00')
@@ -23,6 +25,7 @@ class SamplingGroup(BaseModel):
     enable_sampling_auto = models.BooleanField(verbose_name='Automuestreo Habilitado', default=True)
 
     def __str__(self):
+        """Devuelve el punto de muestreo como representación del grupo."""
         return str(self.sampling_point)
 
     class Meta:
@@ -31,6 +34,7 @@ class SamplingGroup(BaseModel):
         db_table = 'SamplingGroup'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda el grupo asignando el usuario de creación o actualización."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -40,8 +44,8 @@ class SamplingGroup(BaseModel):
         return super(SamplingGroup, self).save(*args, **kwargs)
 
 
-# Muestreo
 class SamplingProcess(BaseModel):
+    """Modelo que representa un proceso de muestreo individual."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     group_sampling = models.ForeignKey(SamplingGroup, verbose_name='Grupo de Muestreo', on_delete=models.CASCADE, null=True, blank=True)
     point_sampling = models.ForeignKey(SamplePoint, verbose_name='Punto de Muestreo', on_delete=models.CASCADE, null=True, blank=True)
@@ -60,9 +64,11 @@ class SamplingProcess(BaseModel):
     approved = models.BooleanField(verbose_name='Aprobado', default=False)
 
     def __str__(self):
+        """Devuelve el número de muestra como representación del proceso."""
         return str(self.number_sample)
 
     def toJSON(self):
+        """Serializa el proceso de muestreo a un diccionario JSON."""
         item = model_to_dict(self, exclude=['image_sample'])
         item['sampling_point'] = self.group_sampling.sampling_point.sample_point_name if self.group_sampling else self.point_sampling.sample_point_name
         item['date_sampling_scheduled'] = timezone.localtime(self.date_sampling_scheduled).strftime('%Y-%m-%d %H:%M:%S')
@@ -74,6 +80,7 @@ class SamplingProcess(BaseModel):
         db_table = 'SamplingProcess'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda el proceso generando el código de muestra si no existe."""
         user = get_current_user()
 
         if user:
@@ -83,14 +90,13 @@ class SamplingProcess(BaseModel):
                 self.user_updated = user
 
         if not self.number_sample:
-            # El atomic abarca el lock del punto, el cálculo del consecutivo y el
-            # INSERT: el lock solo se libera en el COMMIT.
             with transaction.atomic():
                 self.number_sample = self.generate_sample_code()
                 return super(SamplingProcess, self).save(*args, **kwargs)
         return super(SamplingProcess, self).save(*args, **kwargs)
 
     def generate_sample_code(self):
+        """Genera el código único de la muestra basado en el punto de muestreo y la fecha."""
         if self.group_sampling:
             sampling_point = self.group_sampling.sampling_point
         elif self.point_sampling:
@@ -100,9 +106,8 @@ class SamplingProcess(BaseModel):
         return next_sample_number(sampling_point, timezone.localdate())
 
 
-# Siguiente código de muestra para un punto en una fecha: {código}-{AAAAMMDD}-{n}.
-# La secuencia es por CÓDIGO de punto, no por punto: sample_point_code no es único
 def next_sample_number(sampling_point, code_date):
+    """Calcula el siguiente código de muestra para un punto y fecha: {codigo}-{AAAAMMDD}-{n}."""
     list(
         SamplePoint.objects.select_for_update()
         .filter(sample_point_code=sampling_point.sample_point_code)
@@ -121,8 +126,8 @@ def next_sample_number(sampling_point, code_date):
     return f'{prefix}{max_sequence + 1}'
 
 
-# Registro de generación automática de muestras (idempotencia y auditoría)
 class SamplingGenerationLog(BaseModel):
+    """Registro de generación automática de muestras para idempotencia y auditoría."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     sampling_group = models.ForeignKey(SamplingGroup, verbose_name='Grupo de Muestreo', on_delete=models.CASCADE)
     target_date = models.DateField(verbose_name='Día Generado')
@@ -130,6 +135,7 @@ class SamplingGenerationLog(BaseModel):
     skipped = models.BooleanField(verbose_name='Omitido', default=False)
 
     def __str__(self):
+        """Devuelve el grupo y la fecha como representación del registro."""
         return f'{self.sampling_group} - {self.target_date}'
 
     class Meta:
@@ -141,8 +147,8 @@ class SamplingGenerationLog(BaseModel):
         ]
 
 
-# Análisis de la Muestra
 class SamplingAnalysis(BaseModel):
+    """Modelo que representa el análisis de una muestra con un método analítico."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     sampling_process = models.ForeignKey(SamplingProcess, verbose_name='Muestra', on_delete=models.CASCADE)
     analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE, blank=True, null=True)
@@ -156,9 +162,11 @@ class SamplingAnalysis(BaseModel):
     date_verified= models.DateTimeField(verbose_name='Fecha de Aprobado', null=True, blank=True)
 
     def __str__(self):
+        """Devuelve el proceso de muestreo asociado como representación del análisis."""
         return str(self.sampling_process)
 
     def toJSON(self):
+        """Serializa el análisis de muestra a un diccionario JSON."""
         item = model_to_dict(self)
         item['sampling_process'] = self.sampling_process.toJSON()
         item['analytical_method'] = self.analytical_method.description_analytical_method
@@ -171,6 +179,7 @@ class SamplingAnalysis(BaseModel):
         db_table = 'SamplingAnalysis'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda el análisis asignando el usuario de creación o actualización."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -180,8 +189,8 @@ class SamplingAnalysis(BaseModel):
         return super(SamplingAnalysis, self).save(*args, **kwargs)
 
 
-# Procesamiento de la muestra
 class SamplingAnalysisProcessing(BaseModel):
+    """Modelo que representa el procesamiento de un análisis de muestra."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     sample_analysis = models.ForeignKey(SamplingAnalysis, verbose_name='Análisis de la Muestra', on_delete=models.CASCADE)
     standard_solution = models.ForeignKey(SolutionStd, verbose_name='Solución Estándar', on_delete=models.CASCADE, null=True, blank=True)
@@ -199,6 +208,7 @@ class SamplingAnalysisProcessing(BaseModel):
         'analytical_method.AnalyticalMethodCalculateRelation', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
+        """Devuelve la concentración de la muestra como representación del procesamiento."""
         return str(self.concentration_sample)
 
     class Meta:
@@ -207,6 +217,7 @@ class SamplingAnalysisProcessing(BaseModel):
         db_table = 'SamplingAnalysisProcessing'
 
     def toJSON(self):
+        """Serializa el procesamiento del análisis a un diccionario JSON."""
         item = model_to_dict(self)
         item['sample_analysis'] = self.sample_analysis.toJSON()
         item['analyzed_by'] = self.analyzed_by.get_full_name()
@@ -249,6 +260,7 @@ class SamplingAnalysisProcessing(BaseModel):
         return item
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda el procesamiento asignando el usuario de creación o actualización."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -259,6 +271,7 @@ class SamplingAnalysisProcessing(BaseModel):
 
 
 class SamplingAnalysisProcessingRelation(BaseModel):
+    """Modelo que representa el cálculo de parámetros con variables relacionadas."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     sampling_analysis = models.ForeignKey(SamplingAnalysis, on_delete=models.CASCADE, null=True, blank=True)
     analytical_method_calculate_relation = models.ForeignKey(AnalyticalMethodCalculateRelation, on_delete=models.CASCADE, null=True, blank=True)
@@ -268,6 +281,7 @@ class SamplingAnalysisProcessingRelation(BaseModel):
     sampling_process = models.ForeignKey(SamplingProcess, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
+        """Devuelve el resultado del cálculo como representación."""
         return str(self.calcule)
 
     class Meta:
@@ -276,6 +290,7 @@ class SamplingAnalysisProcessingRelation(BaseModel):
         db_table = 'SamplingAnalysisProcessingRelation'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda la relación de procesamiento asignando el usuario de creación o actualización."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -287,8 +302,8 @@ class SamplingAnalysisProcessingRelation(BaseModel):
         return super(SamplingAnalysisProcessingRelation, self).save(*args, **kwargs)
 
 
-# Milimoles que reaccionaron
 class MillimoleReacted(BaseModel):
+    """Modelo que registra los milimoles que reaccionaron en una valoración por retroceso."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     standard_solution_add = models.ForeignKey(SolutionStd, on_delete=models.CASCADE, related_name='standard_solution_add', verbose_name='Solución Estandar Adicionada')
     standard_solution_spend = models.ForeignKey(SolutionStd, on_delete=models.CASCADE, related_name='standard_solution_spend', verbose_name='Solución Estandar Gastada')
@@ -299,6 +314,7 @@ class MillimoleReacted(BaseModel):
     quantity_sample = models.FloatField(verbose_name='Cantidad de Muestra (g)')
 
     def __str__(self):
+        """Devuelve el valor de milimoles como representación."""
         return str(self.millimole)
 
     class Meta:
@@ -307,6 +323,7 @@ class MillimoleReacted(BaseModel):
         db_table = 'MillimoleReacted'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda el registro de milimoles asignando el usuario de creación o actualización."""
         user = get_current_user()
         if user:
             if not self.user_creation:

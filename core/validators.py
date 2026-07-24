@@ -1,10 +1,15 @@
+"""Validadores genéricos para campos de archivos e imágenes.
+
+Define funciones de validación reutilizables, como el control de
+tamaño máximo (256 KB) y extensiones permitidas para imágenes.
+"""
+
 import os
 import re
 
 from django.core.exceptions import ValidationError
 
 
-# Validador tamaño de archivos de 256Kb
 def validator_file_image(value):
     """
     Validador para archivos de imagen con tamaño máximo de 256Kb.

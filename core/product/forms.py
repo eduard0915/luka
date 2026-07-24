@@ -1,3 +1,11 @@
+"""Formularios para la gestión de productos, puntos de muestreo,
+especificaciones y métodos analíticos dentro del sistema Luka LIMS.
+
+Define las listas de opciones (frecuencia, periodicidad, unidades de medida,
+tipo de ensayo, tipo de muestra y secuencia) y los formularios asociados
+a cada modelo del módulo product.
+"""
+
 from crum import get_current_user
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm, TextInput, Select, SelectMultiple
@@ -42,7 +50,9 @@ SEQUENCE = [('', '')] + [(i, i) for i in range(1, 50)]
 
 # Creación de Productos
 class ProductForm(ModelForm):
+    """Formulario para la creación y edición de productos."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario asignando clases CSS y desactivando autocompletado."""
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -57,6 +67,7 @@ class ProductForm(ModelForm):
             field.col_class = col_classes.get(field_name, 'col-md-4')
 
     class Meta:
+        """Metadatos del formulario ProductForm."""
         model = Product
         fields = ['code_product', 'description_product', 'site']
         widgets = {
@@ -66,6 +77,7 @@ class ProductForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el producto validando el formulario y retornando los datos o errores."""
         data = {}
         form = super()
         user = get_current_user()
@@ -82,7 +94,10 @@ class ProductForm(ModelForm):
 
 # Creación de Puntos de Muestreo
 class SamplePointForm(ModelForm):
+    """Formulario para la creación de puntos de muestreo asociados a un producto."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario filtrando las especificaciones por producto."""
         self.product = kwargs.pop('product')
         super().__init__(*args, **kwargs)
         self.fields['specification'].queryset = SpecificationProduct.objects.select_related('product').filter(product=self.product)
@@ -99,6 +114,7 @@ class SamplePointForm(ModelForm):
             field.col_class = col_classes.get(field_name, 'col-md-4')
 
     def clean(self):
+        """Valida que la frecuencia sea obligatoria cuando la periodicidad es Diaria."""
         cleaned_data = super().clean()
         periodicity = cleaned_data.get('periodicity')
         sample_frequency = cleaned_data.get('sample_frequency')
@@ -112,6 +128,7 @@ class SamplePointForm(ModelForm):
         return cleaned_data
 
     class Meta:
+        """Metadatos del formulario SamplePointForm."""
         model = SamplePoint
         fields = ['sample_point_code', 'sample_point_name', 'periodicity', 'sequence', 'sample_type', 'sample_frequency', 'specification']
         widgets = {
@@ -125,6 +142,7 @@ class SamplePointForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el punto de muestreo asociándolo al producto y persistiendo las relaciones M2M."""
         data = {}
         form = super()
         try:
@@ -144,7 +162,10 @@ class SamplePointForm(ModelForm):
 
 # Edición de Puntos de Muestreo
 class SamplePointUpdateForm(ModelForm):
+    """Formulario para la edición de puntos de muestreo existentes."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario cargando las especificaciones del producto asociado."""
         self.sample = kwargs.pop('sample')
         super().__init__(*args, **kwargs)
         self.fields['specification'].queryset = SpecificationProduct.objects.filter(product=self.sample.product)
@@ -161,6 +182,7 @@ class SamplePointUpdateForm(ModelForm):
             field.col_class = col_classes.get(field_name, 'col-md-4')
 
     class Meta:
+        """Metadatos del formulario SamplePointUpdateForm."""
         model = SamplePoint
         fields = ['sample_point_code', 'sample_point_name', 'sample_frequency', 'sequence', 'sample_type', 'specification']
         widgets = {
@@ -173,6 +195,7 @@ class SamplePointUpdateForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda los cambios del punto de muestreo y retorna los datos o errores."""
         data = {}
         form = super()
         try:
@@ -187,7 +210,10 @@ class SamplePointUpdateForm(ModelForm):
 
 # Asignación de Especificación de Producto
 class SpecificationProductForm(ModelForm):
+    """Formulario para la creación de especificaciones de producto con métodos analíticos."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario filtrando los métodos analíticos por producto."""
         self.product = kwargs.pop('product', None)
         super().__init__(*args, **kwargs)
         if self.product:
@@ -210,6 +236,7 @@ class SpecificationProductForm(ModelForm):
             field.col_class = col_classes.get(field_name, 'col-md-3')
 
     class Meta:
+        """Metadatos del formulario SpecificationProductForm."""
         model = SpecificationProduct
         fields = ['type_test', 'test_prod', 'lower_limit_prod', 'upper_limit_prod', 'unit_measure', 'features_prod','method_test']
         widgets = {
@@ -221,6 +248,7 @@ class SpecificationProductForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la especificación asignándole el producto correspondiente."""
         data = {}
         try:
             if self.is_valid():
@@ -238,7 +266,10 @@ class SpecificationProductForm(ModelForm):
 
 # Edición de Asignación de Especificación de Producto
 class SpecificationProductUpdateForm(ModelForm):
+    """Formulario para la edición de especificaciones de producto existentes."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario cargando la especificación y filtrando los métodos disponibles."""
         self.spc = kwargs.pop('spc', None)
         super().__init__(*args, **kwargs)
         if self.spc:
@@ -261,6 +292,7 @@ class SpecificationProductUpdateForm(ModelForm):
             field.col_class = col_classes.get(field_name, 'col-md-3')
 
     class Meta:
+        """Metadatos del formulario SpecificationProductUpdateForm."""
         model = SpecificationProduct
         fields = ['type_test', 'test_prod', 'lower_limit_prod', 'upper_limit_prod', 'unit_measure', 'features_prod','method_test']
         widgets = {
@@ -272,6 +304,7 @@ class SpecificationProductUpdateForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la especificación editada y retorna la instancia o los errores."""
         data = {}
         try:
             if self.is_valid():
@@ -287,7 +320,10 @@ class SpecificationProductUpdateForm(ModelForm):
 
 # Asignación de Especificación de Producto desde Cálculo
 class SpecificationProductCalculeForm(ModelForm):
+    """Formulario para la creación de especificaciones basadas en cálculos relacionales."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario filtrando los métodos de cálculo relacional por producto."""
         self.product = kwargs.pop('product', None)
         super().__init__(*args, **kwargs)
         self.fields['method_test_relacional'].queryset = AnalyticalMethodCalculateRelation.objects.filter(
@@ -310,6 +346,7 @@ class SpecificationProductCalculeForm(ModelForm):
             field.col_class = col_classes.get(field_name, 'col-md-3')
 
     class Meta:
+        """Metadatos del formulario SpecificationProductCalculeForm."""
         model = SpecificationProduct
         fields = ['type_test', 'test_prod', 'lower_limit_prod', 'upper_limit_prod', 'unit_measure', 'features_prod','method_test_relacional']
         widgets = {
@@ -321,6 +358,7 @@ class SpecificationProductCalculeForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la especificación por cálculo asignándole el producto correspondiente."""
         data = {}
         try:
             if self.is_valid():
@@ -338,7 +376,10 @@ class SpecificationProductCalculeForm(ModelForm):
 
 # Edición de Asignación de Especificación de Producto desde Cálculo
 class SpecificationProductCalculeUpdateForm(ModelForm):
+    """Formulario para la edición de especificaciones basadas en cálculos relacionales."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario cargando la especificación por cálculo y filtrando los métodos."""
         self.spc = kwargs.pop('spc', None)
         super().__init__(*args, **kwargs)
         self.fields['method_test_relacional'].queryset = AnalyticalMethodCalculateRelation.objects.filter(
@@ -361,6 +402,7 @@ class SpecificationProductCalculeUpdateForm(ModelForm):
             field.col_class = col_classes.get(field_name, 'col-md-3')
 
     class Meta:
+        """Metadatos del formulario SpecificationProductCalculeUpdateForm."""
         model = SpecificationProduct
         fields = ['type_test', 'test_prod', 'lower_limit_prod', 'upper_limit_prod', 'unit_measure', 'features_prod','method_test_relacional']
         widgets = {
@@ -372,6 +414,7 @@ class SpecificationProductCalculeUpdateForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la especificación por cálculo editada y retorna la instancia o los errores."""
         data = {}
         try:
             if self.is_valid():
@@ -386,7 +429,10 @@ class SpecificationProductCalculeUpdateForm(ModelForm):
 
 
 class AnalyticalMethodProductForm(ModelForm):
+    """Formulario para la asignación de métodos analíticos a un producto."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario filtrando los métodos analíticos habilitados."""
         self.product = kwargs.pop('product', None)
         super().__init__(*args, **kwargs)
         self.fields['analytical_method'].queryset = AnalyticalMethod.objects.filter(enable_analytical_method=True)
@@ -395,6 +441,7 @@ class AnalyticalMethodProductForm(ModelForm):
             form.field.widget.attrs['autocomplete'] = 'off'
 
     class Meta:
+        """Metadatos del formulario AnalyticalMethodProductForm."""
         model = AnalyticalMethodProduct
         fields = ['analytical_method']
         widgets = {
@@ -402,6 +449,7 @@ class AnalyticalMethodProductForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la asignación del método analítico al producto."""
         data = {}
         try:
             if self.is_valid():
@@ -419,7 +467,10 @@ class AnalyticalMethodProductForm(ModelForm):
 
 # Formularios para Cálculos Dependientes de Productos
 class ProductCalculateRelationDescriptionForm(ModelForm):
+    """Formulario para la descripción de un cálculo relacional asociado a un producto."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de descripción de cálculo."""
         self.product = kwargs.pop('product', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -427,6 +478,7 @@ class ProductCalculateRelationDescriptionForm(ModelForm):
             form.field.widget.attrs['autocomplete'] = 'off'
 
     class Meta:
+        """Metadatos del formulario ProductCalculateRelationDescriptionForm."""
         model = AnalyticalMethodCalculateRelation
         fields = ['calculate_description_relation', 'unit_measure_calculate', 'sig_figs']
         widgets = {
@@ -436,6 +488,7 @@ class ProductCalculateRelationDescriptionForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la descripción del cálculo relacional asignándole el producto."""
         data = {}
         try:
             if self.is_valid():
@@ -453,7 +506,10 @@ class ProductCalculateRelationDescriptionForm(ModelForm):
 
 # Registro de variable con análisis previo
 class ProductCalculateRelationForm(ModelForm):
+    """Formulario para la asignación de un método de cálculo analítico a un producto."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario filtrando los cálculos analíticos disponibles."""
         self.product = kwargs.pop('product', None)
         super().__init__(*args, **kwargs)
         self.fields['analytical_method_calculate'].queryset = AnalyticalMethodCalculate.objects.filter(
@@ -463,6 +519,7 @@ class ProductCalculateRelationForm(ModelForm):
             form.field.widget.attrs['autocomplete'] = 'off'
 
     class Meta:
+        """Metadatos del formulario ProductCalculateRelationForm."""
         model = AnalyticalMethodCalculateRelation
         fields = ['analytical_method_calculate', 'position']
         widgets = {
@@ -471,6 +528,7 @@ class ProductCalculateRelationForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la relación de cálculo asignándole el producto."""
         data = {}
         try:
             if self.is_valid():
@@ -487,7 +545,10 @@ class ProductCalculateRelationForm(ModelForm):
 
 
 class ProductVolumenStdRelationForm(ModelForm):
+    """Formulario para registrar el volumen estándar en una relación de cálculo."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de volumen estándar."""
         self.product = kwargs.pop('product', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -495,6 +556,7 @@ class ProductVolumenStdRelationForm(ModelForm):
             form.field.widget.attrs['autocomplete'] = 'off'
 
     class Meta:
+        """Metadatos del formulario ProductVolumenStdRelationForm."""
         model = AnalyticalMethodCalculateRelation
         fields = ['volumen_std', 'position']
         widgets = {
@@ -503,6 +565,7 @@ class ProductVolumenStdRelationForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el volumen estándar en la relación de cálculo."""
         data = {}
         try:
             if self.is_valid():
@@ -519,7 +582,10 @@ class ProductVolumenStdRelationForm(ModelForm):
 
 
 class ProductFactorRelationForm(ModelForm):
+    """Formulario para registrar un factor constante en una relación de cálculo."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de factor constante."""
         self.product = kwargs.pop('product', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -527,6 +593,7 @@ class ProductFactorRelationForm(ModelForm):
             form.field.widget.attrs['autocomplete'] = 'off'
 
     class Meta:
+        """Metadatos del formulario ProductFactorRelationForm."""
         model = AnalyticalMethodCalculateRelation
         fields = ['factor', 'position']
         widgets = {
@@ -535,6 +602,7 @@ class ProductFactorRelationForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el factor constante en la relación de cálculo."""
         data = {}
         try:
             if self.is_valid():
@@ -551,7 +619,10 @@ class ProductFactorRelationForm(ModelForm):
 
 
 class ProductSampleGramRelationForm(ModelForm):
+    """Formulario para registrar la cantidad de muestra en una relación de cálculo."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de cantidad de muestra."""
         self.product = kwargs.pop('product', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -559,6 +630,7 @@ class ProductSampleGramRelationForm(ModelForm):
             form.field.widget.attrs['autocomplete'] = 'off'
 
     class Meta:
+        """Metadatos del formulario ProductSampleGramRelationForm."""
         model = AnalyticalMethodCalculateRelation
         fields = ['sample_quantity', 'position']
         widgets = {
@@ -567,6 +639,7 @@ class ProductSampleGramRelationForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la cantidad de muestra en la relación de cálculo."""
         data = {}
         try:
             if self.is_valid():

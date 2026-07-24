@@ -1,3 +1,5 @@
+"""Definición de rutas URL para la aplicación de inicio de sesión."""  # noqa: E501
+
 from django.urls import path
 from django.contrib.auth.views import LogoutView
 

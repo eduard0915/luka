@@ -1,3 +1,10 @@
+"""Context processors globales para las plantillas de Luka LIS.
+
+Inyecta en el contexto de todas las plantillas la información de la
+compañía y los contadores de alarmas, muestreos, mantenimientos y
+calibraciones vencidas o pendientes.
+"""
+
 from django.utils import timezone
 
 from core.company.models import Company

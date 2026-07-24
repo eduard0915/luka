@@ -1,3 +1,9 @@
+"""Configuración de las rutas URL para la aplicación product.
+
+Define los patrones de URL para productos, puntos de muestreo,
+métodos analíticos, especificaciones y cálculos relacionales.
+"""
+
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static

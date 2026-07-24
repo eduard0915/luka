@@ -1,3 +1,5 @@
+"""Definición de rutas URL para el módulo de soluciones."""
+
 from django.conf.urls.static import static
 from django.urls import path
 

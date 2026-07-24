@@ -1,3 +1,5 @@
+"""Formularios para la gestión de soluciones, soluciones estándar y estandarizaciones."""
+
 from datetime import timedelta
 
 from crum import get_current_user
@@ -15,7 +17,9 @@ BOOLEAN = [(True, 'Si'), (False, 'No')]
 
 # Creación de Soluciones
 class SolutionForm(ModelForm):
+    """Formulario para la creación y edición de soluciones."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario filtrando los reactivos soluto y solvente disponibles, y asignando clases CSS."""
         super().__init__(*args, **kwargs)
         solute_qs = InventoryReagent.objects.select_related('reagent').filter(
             date_expire__gte=timezone.localtime(), reagent__solvent=False, quantity_stock__gt=0,
@@ -210,7 +214,9 @@ class SolutionForm(ModelForm):
 
 # Creación de soluciones Estándar
 class SolutionStandardForm(ModelForm):
+    """Formulario para la creación de soluciones estándar a partir de reactivos certificados."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario filtrando los estándares y solventes del inventario, y asignando clases CSS."""
         super().__init__(*args, **kwargs)
         solute_qs = InventoryReagent.objects.select_related('reagent').filter(
             date_expire__gte=timezone.localdate(),
@@ -255,6 +261,7 @@ class SolutionStandardForm(ModelForm):
         }
 
     def clean(self):
+        """Valida que el soluto corresponda con la base seleccionada."""
         cleaned_data = super().clean()
         solution_std_base = cleaned_data.get('solution_std_base')
         solute_std = cleaned_data.get('solute_std')
@@ -276,6 +283,7 @@ class SolutionStandardForm(ModelForm):
         return cleaned_data
 
     def save(self, commit=True):
+        """Guarda la instancia calculando las cantidades de soluto y solvente."""
         instance = super().save(commit=False)
 
         # Usar los valores del formulario si están presentes, de lo contrario usar los de la base
@@ -337,7 +345,9 @@ class SolutionStandardForm(ModelForm):
 
 # Confirmar preparación de Solución
 class SolutionConfirmedForm(ModelForm):
+    """Formulario para confirmar la preparación de una solución."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario ocultando la etiqueta del campo de confirmación."""
         super().__init__(*args, **kwargs)
         self.fields['preparation_confirmed'].label = ''
         for form in self.visible_fields():
@@ -349,6 +359,7 @@ class SolutionConfirmedForm(ModelForm):
         widgets = {'preparation_confirmed': Select(attrs={'class': 'form-control', 'hidden': True}), }
 
     def save(self, commit=True):
+        """Confirma la preparación asignando fecha, responsable y fecha de vencimiento."""
         data = {}
         form = super()
         try:
@@ -381,7 +392,9 @@ class SolutionConfirmedForm(ModelForm):
 
 # Confirmar Solución Estándar
 class SolutionStdConfirmedForm(ModelForm):
+    """Formulario para confirmar la preparación de una solución estándar."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario ocultando la etiqueta del campo de confirmación."""
         super().__init__(*args, **kwargs)
         self.fields['preparation_confirmed'].label = ''
         for form in self.visible_fields():
@@ -393,6 +406,7 @@ class SolutionStdConfirmedForm(ModelForm):
         widgets = {'preparation_confirmed': Select(attrs={'class': 'form-control', 'hidden': True}), }
 
     def save(self, commit=True):
+        """Confirma la preparación de la solución estándar asignando responsable y fecha de vencimiento."""
         data = {}
         form = super()
         try:
@@ -421,7 +435,9 @@ class SolutionStdConfirmedForm(ModelForm):
 
 # Registro de Estandarización
 class StandardizationForm(ModelForm):
+    """Formulario para registrar la relación molar entre una solución y un estándar."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario extrayendo el reactivo de los kwargs y filtrando las soluciones estándar."""
         self.reagent = kwargs.pop('reagent')
         super().__init__(*args, **kwargs)
         self.fields['solution_std'].queryset = Reagent.objects.filter(standard=True, solvent=False, enable_reagent=True)
@@ -437,6 +453,7 @@ class StandardizationForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la configuración de estandarización asociada al reactivo."""
         data = {}
         form = super()
         try:
@@ -453,7 +470,9 @@ class StandardizationForm(ModelForm):
 
 # Edición de Registro de Estandarización
 class StandardizationUpdateForm(ModelForm):
+    """Formulario para editar la configuración de estandarización."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario filtrando las soluciones estándar habilitadas."""
         super().__init__(*args, **kwargs)
         self.fields['solution_std'].queryset = Reagent.objects.filter(standard=True, solvent=False, enable_reagent=True)
         for form in self.visible_fields():
@@ -468,6 +487,7 @@ class StandardizationUpdateForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda los cambios en la configuración de estandarización."""
         data = {}
         form = super()
         try:
@@ -482,7 +502,9 @@ class StandardizationUpdateForm(ModelForm):
 
 # Registro de Estandarización
 class StandardizationSolutionForm(ModelForm):
+    """Formulario para registrar la estandarización de una solución contra un estándar."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario extrayendo la estandarización y la solución, y ajustando la etiqueta del estándar."""
         self.std = kwargs.pop('std')
         self.sln = kwargs.pop('sln')
         super().__init__(*args, **kwargs)
@@ -507,6 +529,7 @@ class StandardizationSolutionForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el registro de estandarización calculando la concentración real de la solución."""
         user = get_current_user()
         try:
             instance = super().save(commit=False)
@@ -532,6 +555,7 @@ class StandardizationSolutionForm(ModelForm):
             raise ValidationError({'error': str(e)})
 
     def clean(self):
+        """Valida que la cantidad de estándar no exceda el stock disponible."""
         cleaned = super().clean()
         quantity_standard = cleaned.get('quantity_standard')
         stock_standard = cleaned.get('standard_solution').quantity_solution_std
@@ -548,7 +572,9 @@ class StandardizationSolutionForm(ModelForm):
 
 # Configuración de Soluciones Base
 class SolutionBaseForm(ModelForm):
+    """Formulario para la creación y edición de soluciones base."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario filtrando los reactivos base y asignando clases CSS a los campos."""
         super().__init__(*args, **kwargs)
         self.fields['solute_reagent_base'].queryset = Reagent.objects.filter(enable_reagent=True, solvent=False,
                                                                              standard=False)
@@ -578,6 +604,7 @@ class SolutionBaseForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la solución base o retorna los errores de validación."""
         data = {}
         form = super()
         try:
@@ -592,7 +619,9 @@ class SolutionBaseForm(ModelForm):
 
 # Configuración de Soluciones Estándar Base
 class SolutionStdBaseForm(ModelForm):
+    """Formulario para la creación y edición de soluciones estándar base."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario filtrando los estándares base y asignando clases CSS a los campos."""
         super().__init__(*args, **kwargs)
         self.fields['solute_std_base'].queryset = Reagent.objects.filter(enable_reagent=True, solvent=False,
                                                                          standard=True)
@@ -621,6 +650,7 @@ class SolutionStdBaseForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la solución estándar base o retorna los errores de validación."""
         data = {}
         form = super()
         try:

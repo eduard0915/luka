@@ -1,3 +1,5 @@
+"""Definición de rutas URL para la aplicación de reportes."""
+
 from django.urls import path
 from core.report.views import SamplingAnalysisListView, SamplingAnalysisByPointListView, SamplingAnalysisChartView, \
     SamplingAnalysisByPointExcelView, SamplingAnalysisProcessingListView, SamplingAnalysisProcessingExcelView, SamplingAnalysisExcelView

@@ -1,4 +1,9 @@
-# Función para formatear errores
+"""Utilidades compartidas para toda la aplicación Luka LIS.
+
+Incluye funciones auxiliares como el formateo legible de errores
+de formularios de Django.
+"""
+
 def format_form_errors(form):
     """
     Formatea los errores del formulario de manera legible.
