@@ -9,8 +9,8 @@ from django.db import models
 from django.utils.text import slugify
 from django.utils.timezone import localtime
 
-from core.company.models import Site
 from core.validators import validator_file_image_user
+from core.laboratory.models import Laboratory
 from luka.settings import MEDIA_URL, STATIC_URL
 
 
@@ -37,7 +37,7 @@ class User(AbstractUser):
     photo = models.ImageField(
         upload_to='user/%Y%m%d', null=True, blank=True, verbose_name='Foto', validators=[validator_file_image_user])
     slug = models.SlugField(unique=True, null=False, blank=False)
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, verbose_name='Planta', null=True, blank=True)
+    laboratory = models.ForeignKey(Laboratory, on_delete=models.CASCADE, verbose_name='Laboratorio', null=True, blank=True)
     notification_email_oss = models.BooleanField(default=False, verbose_name='Notificación Resultados OOS')
 
     def __init__(self, *args, **kwargs):

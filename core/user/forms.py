@@ -24,7 +24,8 @@ class UserForm(ModelForm):
     class Meta:
         model = User
         fields = [
-            'first_name', 'last_name', 'email', 'cargo', 'cellphone', 'cedula', 'username', 'password', 'groups', 'site', 'photo'
+            'first_name', 'last_name', 'email', 'cargo', 'cellphone', 'cedula', 'username', 'password', 'groups',
+            'laboratory', 'photo', 'notification_email_oss'
         ]
         widgets = {
             'password': PasswordInput(render_value=True, attrs={'class': 'form-control'}),
@@ -36,13 +37,13 @@ class UserForm(ModelForm):
             'cedula': TextInput(attrs={'class': 'form-control'}),
             'username': TextInput(attrs={'class': 'form-control'}),
             'groups': SelectMultiple(attrs={'class': 'form-control', 'required': True}),
-            'site': Select(attrs={'class': 'form-control', 'required': True}),
+            'laboratory': Select(attrs={'class': 'form-control', 'required': True}),
+            'notification_email_oss': Select(attrs={'class': 'form-control'}, choices=SELECT),
             'photo': FileInput(attrs={'class': 'form-control-file'})
         }
         exclude = ['user_permissions', 'last_login', 'date_joined', 'is_superuser', 'is_staff', 'is_active']
         help_texts = {
             'groups': 'Seleccione perfil del usuario',
-            'is_active': 'Indica si el usuario está habilitado',
             'username': 'Únicamente letras y/o números',
             'photo': 'Opcional, máximo 256Kb .jpg .png',
         }
@@ -85,7 +86,10 @@ class UserUpdateAdminForm(ModelForm):
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'cargo', 'cellphone', 'cedula', 'username', 'site', 'groups', 'photo']
+        fields = [
+            'first_name', 'last_name', 'email', 'cargo', 'cellphone', 'cedula', 'username', 'laboratory', 'photo',
+            'notification_email_oss', 'is_active', 'groups',
+        ]
         widgets = {
             'first_name': TextInput(attrs={'class': 'form-control', 'required': True}),
             'last_name': TextInput(attrs={'class': 'form-control', 'required': True}),
@@ -95,7 +99,9 @@ class UserUpdateAdminForm(ModelForm):
             'cedula': TextInput(attrs={'class': 'form-control'}),
             'username': TextInput(attrs={'class': 'form-control', 'readonly': True}),
             'groups': SelectMultiple(attrs={'class': 'form-control', 'required': True}),
-            'site': Select(attrs={'class': 'form-control', 'required': True}),
+            'laboratory': Select(attrs={'class': 'form-control', 'required': True}),
+            'notification_email_oss': Select(attrs={'class': 'form-control'}, choices=SELECT),
+            'is_active': Select(attrs={'class': 'form-control'}, choices=SELECT),
             'photo': FileInput(attrs={'class': 'form-control-file'})
 
         }
@@ -104,6 +110,7 @@ class UserUpdateAdminForm(ModelForm):
         help_texts = {
             'groups': 'Seleccione perfil del usuario',
             'photo': 'Opcional, máximo 256Kb .jpg .png',
+            'is_active': 'Indica si el usuario está habilitado'
         }
 
     def save(self, commit=True):
