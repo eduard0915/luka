@@ -1,3 +1,5 @@
+"""Formularios para la aplicación de muestreo del laboratorio."""
+
 from django.db.models import Q
 from django.forms import ModelForm, TextInput, Select, TimeInput, DateTimeInput, FloatField
 from django.core.exceptions import ValidationError
@@ -17,9 +19,11 @@ TYPE_SAMPLING = [('En Proceso', 'En Proceso'), ('Producto Terminado', 'Producto 
 SELECT = [(True, 'Si'), (False, 'No')]
 
 
-# Registro de Procesamiento de Análisis Volumetría
 class SamplingAnalysisProcessingForm(ModelForm):
+    """Formulario para el registro de procesamiento de análisis volumétrico."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario con el análisis y configura los campos según el método."""
         self.analysis = kwargs.pop('analysis')
         super().__init__(*args, **kwargs)
         calcs = AnalyticalMethodCalculate.objects.select_related('analytical_method').filter(analytical_method_id=self.analysis.analytical_method.id)
@@ -53,6 +57,7 @@ class SamplingAnalysisProcessingForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el procesamiento volumétrico calculando la concentración de la muestra."""
         user = get_current_user()
         analytical_method_id = self.analysis.analytical_method.id
         var_num = AnalyticalMethodCalculate.objects.filter(analytical_method_id=analytical_method_id, position='Numerador')
@@ -124,9 +129,11 @@ class SamplingAnalysisProcessingForm(ModelForm):
             raise ValidationError({'error': str(e)})
 
 
-# Registro de Procesamiento de Análisis Gravimetría
 class SamplingAnalysisProcessingGravimetryForm(ModelForm):
+    """Formulario para el registro de procesamiento de análisis gravimétrico."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario con el análisis y configura la etiqueta de cantidad de muestra."""
         self.analysis = kwargs.pop('analysis')
         super().__init__(*args, **kwargs)
 
@@ -157,6 +164,7 @@ class SamplingAnalysisProcessingGravimetryForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el procesamiento gravimétrico calculando la concentración de la muestra."""
         user = get_current_user()
         analytical_method_id = self.analysis.analytical_method.id
         var_num = AnalyticalMethodCalculate.objects.filter(analytical_method_id=analytical_method_id, position='Numerador')
@@ -169,7 +177,6 @@ class SamplingAnalysisProcessingGravimetryForm(ModelForm):
             instance.analyzed_date = timezone.now()
             instance.relational_calculation = False
 
-            # Nota: Esto asume que solo hay un conjunto de cálculos (Num/Den) por método base,
             base_calc = AnalyticalMethodCalculate.objects.filter(analytical_method_id=analytical_method_id).first()
             if base_calc:
                 instance.analytical_method_calculate = base_calc
@@ -228,9 +235,11 @@ class SamplingAnalysisProcessingGravimetryForm(ModelForm):
             raise ValidationError({'error': str(e)})
 
 
-# Registro de Análisis por lectura directa
 class SamplingAnalysisProcessingDirectForm(ModelForm):
+    """Formulario para el registro de análisis por lectura directa (pH, densidad, viscosidad)."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario con el análisis y configura la etiqueta de concentración."""
         self.analysis = kwargs.pop('analysis', None)
         super().__init__(*args, **kwargs)
         self.fields['concentration_sample'].label = 'Registrar Lectura'
@@ -252,6 +261,7 @@ class SamplingAnalysisProcessingDirectForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el procesamiento de lectura directa con la concentración registrada."""
         instance = super().save(commit=False)
         instance.sample_analysis_id = self.analysis.id
         instance.analyzed_by_id = get_current_user().id
@@ -261,9 +271,11 @@ class SamplingAnalysisProcessingDirectForm(ModelForm):
         return instance
 
 
-# Cálculo de parámetros con variables relacionadas
 class SamplingAnalysisProcessingRelationForm(ModelForm):
+    """Formulario para el cálculo de parámetros con variables relacionadas."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario con el análisis, muestreo y relación de cálculo."""
         self.analysis = kwargs.pop('analysis', None)
         self.sampling = kwargs.pop('sampling', None)
         self.relation= kwargs.pop('relation', None)
@@ -293,6 +305,7 @@ class SamplingAnalysisProcessingRelationForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el cálculo relacional validando el denominador y calculando el resultado."""
         instance = super().save(commit=False)
         if self.relation is None:
             raise ValidationError('No se encontró una relación de cálculo asociada.')
@@ -305,8 +318,6 @@ class SamplingAnalysisProcessingRelationForm(ModelForm):
         if commit:
             instance.save()
         return instance
-
-    # def save(self, commit=True):
     #     data = {}
     #     form = super()
     #     try:
@@ -324,9 +335,11 @@ class SamplingAnalysisProcessingRelationForm(ModelForm):
     #     return data
 
 
-# Asociar método analitico en muestra
 class SamplingAnalysisForm(ModelForm):
+    """Formulario para asociar un método analítico a una muestra."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario filtrando los métodos analíticos según el producto."""
         self.sampling_process = kwargs.pop('sampling_process')
         super().__init__(*args, **kwargs)
 
@@ -350,6 +363,7 @@ class SamplingAnalysisForm(ModelForm):
         widgets = {'analytical_method': Select(attrs={'class': 'form-control'})}
 
     def save(self, commit=True):
+        """Guarda el análisis con el proceso de muestreo asociado."""
         instance = super().save(commit=False)
         instance.sampling_process = self.sampling_process
         if commit:
@@ -357,6 +371,7 @@ class SamplingAnalysisForm(ModelForm):
         return instance
 
     def clean(self):
+        """Valida que el método analítico no esté ya asociado a la muestra."""
         cleaned_data = super().clean()
         analytical_method = cleaned_data.get('analytical_method')
 
@@ -373,9 +388,11 @@ class SamplingAnalysisForm(ModelForm):
         return cleaned_data
 
 
-# Creación de Grupos de Muestreo
 class SamplingGroupForm(ModelForm):
+    """Formulario para la creación y edición de grupos de muestreo."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario excluyendo puntos de muestreo ya asignados a otros grupos."""
         super().__init__(*args, **kwargs)
         queryset = SamplePoint.objects.filter(
             enable_point=True, sample_frequency__isnull=False, periodicity__in=DAILY_PERIODICITY)
@@ -410,6 +427,7 @@ class SamplingGroupForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el grupo de muestreo y retorna los datos o errores."""
         data = {}
         form = super()
         try:
@@ -457,7 +475,10 @@ class SamplingGroupForm(ModelForm):
 
 
 class SamplingProcessForm(ModelForm):
+    """Formulario para la creación y edición de procesos de muestreo."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario configurando los campos de punto y grupo de muestreo."""
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             self.fields['point_sampling'].queryset = SamplePoint.objects.filter(enable_point=True, sample_type='Producto Terminado', sample_frequency__isnull=True)
@@ -478,13 +499,12 @@ class SamplingProcessForm(ModelForm):
         }
 
     def clean(self):
+        """Valida que se seleccione grupo o punto de muestreo, y que sean excluyentes."""
         cleaned_data = super().clean()
         group_sampling = cleaned_data.get('group_sampling')
         point_sampling = cleaned_data.get('point_sampling')
         if not group_sampling and not point_sampling:
             raise ValidationError('Debe seleccionar un Grupo de Muestreo o un Punto de Muestreo.')
-        # Excluyentes: si vienen ambos gana el grupo. Con dos `if` independientes el
-        # segundo leía la variable ya obsoleta y anulaba AMBOS campos.
         if group_sampling:
             cleaned_data['point_sampling'] = None
         elif point_sampling:
@@ -492,6 +512,7 @@ class SamplingProcessForm(ModelForm):
         return cleaned_data
 
     def save(self, commit=True):
+        """Guarda el proceso de muestreo asignando el usuario creador."""
         data = {}
         user = get_current_user()
         form = super()
@@ -509,7 +530,9 @@ class SamplingProcessForm(ModelForm):
 
 
 class SamplingProcessImageForm(ModelForm):
+    """Formulario para la actualización de la imagen de la muestra."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario con autocompletado desactivado."""
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -520,6 +543,7 @@ class SamplingProcessImageForm(ModelForm):
         widgets = {'image_sample': TextInput(attrs={'class': 'form-control', 'type': 'file'})}
 
     def save(self, commit=True):
+        """Guarda la imagen de la muestra y retorna los datos o errores."""
         data = {}
         form = super()
         try:
@@ -532,9 +556,11 @@ class SamplingProcessImageForm(ModelForm):
         return data
 
 
-# Confirmación de recepción de muestra
 class SamplingProcessConfirmedForm(ModelForm):
+    """Formulario para la confirmación de recepción de muestra."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario con autocompletado desactivado."""
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -545,6 +571,8 @@ class SamplingProcessConfirmedForm(ModelForm):
         widgets = {'image_sample': TextInput(attrs={'class': 'form-control', 'type': 'file'})}
 
     def save(self, commit=True):
+        """Confirma la muestra cambiando el estado a 'Confirmada' y asignando el usuario."""
+        """Confirma la muestra cambiando el estado a 'Confirmada' y asignando el usuario."""
         form = super()
         try:
             if not form.is_valid():
@@ -559,9 +587,11 @@ class SamplingProcessConfirmedForm(ModelForm):
             return {'error': str(e)}
 
 
-# Cambio de estado de muestra a En Proceso
 class SamplingProcessInProcessForm(ModelForm):
+    """Formulario para cambiar el estado de la muestra a 'En Proceso'."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario ocultando el campo de estado."""
         super().__init__(*args, **kwargs)
         self.fields['status_sampling'].label = ''
         for form in self.visible_fields():
@@ -573,6 +603,7 @@ class SamplingProcessInProcessForm(ModelForm):
         widgets = {'status_sampling': TextInput(attrs={'class': 'form-control', 'hidden': 'true'})}
 
     def save(self, commit=True):
+        """Cambia el estado de la muestra a 'En Proceso'."""
         data = {}
         form = super()
         try:
@@ -587,9 +618,11 @@ class SamplingProcessInProcessForm(ModelForm):
         return data
 
 
-# Cálculo de milimoles en valoración por retroceso
 class MillimoleReactedForm(ModelForm):
+    """Formulario para el cálculo de milimoles en valoración por retroceso."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario con el análisis y configura las soluciones estándar."""
         self.analysis = kwargs.pop('analysis')
         super().__init__(*args, **kwargs)
 
@@ -625,6 +658,7 @@ class MillimoleReactedForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el registro calculando los milimoles que reaccionaron: (V1*C1) - (V2*C2)."""
         try:
             instance = super().save(commit=False)
             instance.sampling_analysis_id = self.analysis.id
@@ -634,7 +668,6 @@ class MillimoleReactedForm(ModelForm):
             v2 = float(instance.milliliter_std_spend)
             c2 = float(instance.standard_solution_spend.concentration_std)
 
-            # Cálculo de milimoles que reaccionaron: (V1 * C1) - (V2 * C2)
             instance.millimole = round((v1 * c1) - (v2 * c2), 6)
 
             if commit:
@@ -644,9 +677,11 @@ class MillimoleReactedForm(ModelForm):
             raise ValidationError({'error': str(e)})
 
 
-# Aprobación de control de calidad de muestra
 class SamplingProcessApprovedForm(ModelForm):
+    """Formulario para la aprobación de control de calidad de muestra."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario ocultando la etiqueta de aprobación."""
         super().__init__(*args, **kwargs)
         self.fields['approved'].label = ''
         for form in self.visible_fields():
@@ -658,6 +693,7 @@ class SamplingProcessApprovedForm(ModelForm):
         widgets = {'approved': Select(attrs={'class': 'form-control'}, choices=SELECT)}
 
     def save(self, commit=True):
+        """Aprueba la muestra cambiando el estado a 'Aprobado' y asignando el usuario."""
         data = {}
         form = super()
         try:

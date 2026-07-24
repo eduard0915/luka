@@ -1,3 +1,5 @@
+"""Vistas para la gestión de análisis de muestras."""
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
@@ -13,14 +15,15 @@ from core.sampling.models import *
 from core.analytical_method.models import AnalyticalMethodCalculateRelation
 
 
-# Detalle de Análisis de Muestra
 class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """Vista para el detalle del análisis de una muestra."""
     model = SamplingAnalysis
     template_name = 'analysis_sampling/detail_sampling_analysis.html'
     permission_required = 'reagent.add_reagent'
     queryset = SamplingAnalysis.objects.select_related('analytical_method')
 
     def get_context_data(self, **kwargs):
+        """Agrega procesamientos, ecuaciones, especificaciones y URLs al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Procesamiento de Análisis de Muestra'
         context['entity'] = self.object
@@ -155,8 +158,8 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         return context
 
 
-# Registro de Procesamiento de Análisis Volumétrico
 class SamplingAnalysisProcessingCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para el registro de procesamiento de análisis volumétrico."""
     model = SamplingAnalysisProcessing
     form_class = SamplingAnalysisProcessingForm
     template_name = 'analysis_sampling/create_sampling_analysis_processing.html'
@@ -164,9 +167,11 @@ class SamplingAnalysisProcessingCreateView(LoginRequiredMixin, ValidatePermissio
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de registro de procesamiento volumétrico."""
         data = {}
         try:
             action = request.POST['action']
@@ -184,20 +189,22 @@ class SamplingAnalysisProcessingCreateView(LoginRequiredMixin, ValidatePermissio
         return JsonResponse(data)
 
     def get_form_kwargs(self):
+        """Agrega el análisis a los kwargs del formulario."""
         kwargs = super().get_form_kwargs()
         analysis = SamplingAnalysis.objects.get(pk=self.kwargs.get('pk'))
         kwargs.update({'analysis': analysis})
         return kwargs
 
     def get_context_data(self, **kwargs):
+        """Agrega la entidad y acción al contexto."""
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Registro de Procesamiento de Análisis'
         return context
 
 
-# Registro de Procesamiento de Análisis Gravimétrico
 class SamplingAnalysisProcessingGravimetryCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para el registro de procesamiento de análisis gravimétrico."""
     model = SamplingAnalysisProcessing
     form_class = SamplingAnalysisProcessingGravimetryForm
     template_name = 'analysis_sampling/create_sampling_analysis_processing.html'
@@ -205,9 +212,11 @@ class SamplingAnalysisProcessingGravimetryCreateView(LoginRequiredMixin, Validat
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de registro de procesamiento gravimétrico."""
         data = {}
         try:
             action = request.POST['action']
@@ -225,20 +234,22 @@ class SamplingAnalysisProcessingGravimetryCreateView(LoginRequiredMixin, Validat
         return JsonResponse(data)
 
     def get_form_kwargs(self):
+        """Agrega el análisis a los kwargs del formulario."""
         kwargs = super().get_form_kwargs()
         analysis = SamplingAnalysis.objects.get(pk=self.kwargs.get('pk'))
         kwargs.update({'analysis': analysis})
         return kwargs
 
     def get_context_data(self, **kwargs):
+        """Agrega la entidad y acción al contexto."""
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Registro de Procesamiento de Análisis Gravimétrico'
         return context
 
 
-# Registro de análisis por lectura directa (pH, Densidad, Viscosidad)
 class SamplingAnalysisProcessingDirectCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para el registro de análisis por lectura directa (pH, densidad, viscosidad)."""
     model = SamplingAnalysisProcessing
     form_class = SamplingAnalysisProcessingDirectForm
     template_name = 'modal_one.html'
@@ -246,9 +257,11 @@ class SamplingAnalysisProcessingDirectCreateView(LoginRequiredMixin, ValidatePer
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de registro de lectura directa."""
         data = {}
         try:
             action = request.POST['action']
@@ -266,12 +279,14 @@ class SamplingAnalysisProcessingDirectCreateView(LoginRequiredMixin, ValidatePer
         return JsonResponse(data)
 
     def get_form_kwargs(self):
+        """Agrega el análisis a los kwargs del formulario."""
         kwargs = super().get_form_kwargs()
         analysis = SamplingAnalysis.objects.get(pk=self.kwargs.get('pk'))
         kwargs.update({'analysis': analysis})
         return kwargs
 
     def get_context_data(self, **kwargs):
+        """Agrega la entidad con la descripción del método al contexto."""
         context = super().get_context_data(**kwargs)
         analysis = SamplingAnalysis.objects.get(pk=self.kwargs.get('pk'))
         context['action'] = 'add'
@@ -279,8 +294,8 @@ class SamplingAnalysisProcessingDirectCreateView(LoginRequiredMixin, ValidatePer
         return context
 
 
-# Registro de Procesamiento de Análisis Relacional
 class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para el registro de procesamiento de análisis relacional."""
     model = SamplingAnalysisProcessingRelation
     form_class = SamplingAnalysisProcessingRelationForm
     template_name = 'analysis_sampling/create_sampling_analysis_processing.html'
@@ -288,9 +303,11 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de registro de cálculo relacional."""
         data = {}
         try:
             action = request.POST['action']
@@ -308,6 +325,7 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
         return JsonResponse(data)
 
     def get_form_kwargs(self):
+        """Agrega el análisis, muestreo y relación de cálculo a los kwargs del formulario."""
         kwargs = super().get_form_kwargs()
 
         sampling = SamplingProcess.objects.get(pk=self.kwargs.get('pk'))
@@ -337,6 +355,7 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
         return kwargs
 
     def get_form(self, form_class=None):
+        """Precarga los valores de numerador y denominador según las relaciones de cálculo."""
         form = super().get_form(form_class)
         analysis_qs = SamplingAnalysis.objects.select_related('sampling_process').filter(sampling_process=self.kwargs.get('pk'))
         sampling = SamplingProcess.objects.get(pk=self.kwargs.get('pk'))
@@ -425,6 +444,7 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
         return form
 
     def get_context_data(self, **kwargs):
+        """Agrega la entidad con la descripción del cálculo al contexto."""
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
 
@@ -436,12 +456,9 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
         elif sampling.group_sampling:
             product = sampling.group_sampling.sampling_point.product
 
-        # Obtener la primera relación de cálculo si existe
-
         relation = AnalyticalMethodCalculateRelation.objects.select_related('product').filter(
             product=product).exclude(calculate_description_relation__in=[None, '']).first()
 
-        # Usar la relación solo si existe
         if relation:
             context['entity'] = f'Calcular {relation.calculate_description_relation}'
         else:
@@ -452,17 +469,19 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
         return context
 
 
-# Eliminación de cálculo de variables relacionadas
 class SamplingAnalysisProcessingRelationDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DeleteView):
+    """Vista para eliminar un cálculo de variables relacionadas."""
     model = SamplingAnalysisProcessingRelation
     template_name = 'analysis_sampling/delete_analysis.html'
     permission_required = 'reagent.add_reagent'
 
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud de eliminación."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Elimina el cálculo de variables relacionadas."""
         data = {}
         try:
             detail = self.object.analytical_method_calculate_relation.calculate_description_relation
@@ -473,6 +492,7 @@ class SamplingAnalysisProcessingRelationDeleteView(LoginRequiredMixin, ValidateP
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega la entidad y mensaje de confirmación al contexto."""
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Eliminar de Calculo'
         context['delete'] = 'Está seguro de eliminar calculo de parametro?'
@@ -480,8 +500,8 @@ class SamplingAnalysisProcessingRelationDeleteView(LoginRequiredMixin, ValidateP
         return context
 
 
-# Registro de Milimoles que reaccionaron
 class MillimoleReactedCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para el registro de milimoles que reaccionaron en valoración por retroceso."""
     model = MillimoleReacted
     form_class = MillimoleReactedForm
     template_name = 'analysis_sampling/create_sampling_analysis_processing.html'
@@ -489,9 +509,11 @@ class MillimoleReactedCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de registro de soluciones estándar."""
         data = {}
         try:
             action = request.POST['action']
@@ -509,29 +531,33 @@ class MillimoleReactedCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
         return JsonResponse(data)
 
     def get_form_kwargs(self):
+        """Agrega el análisis a los kwargs del formulario."""
         kwargs = super().get_form_kwargs()
         analysis = SamplingAnalysis.objects.get(pk=self.kwargs.get('pk'))
         kwargs.update({'analysis': analysis})
         return kwargs
 
     def get_context_data(self, **kwargs):
+        """Agrega la entidad y acción al contexto."""
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Registro de Soluciones Estándar Adicionada y Gastada'
         return context
 
 
-# Eliminación de Milimoles que reaccionaron
 class MillimoleReactedDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DeleteView):
+    """Vista para eliminar un registro de milimoles que reaccionaron."""
     model = MillimoleReacted
     template_name = 'analysis_sampling/delete_analysis.html'
     permission_required = 'reagent.add_reagent'
 
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud de eliminación."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Elimina el registro de milimoles."""
         data = {}
         try:
             self.object.delete()
@@ -541,6 +567,7 @@ class MillimoleReactedDeleteView(LoginRequiredMixin, ValidatePermissionRequiredM
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega la entidad y mensaje de confirmación al contexto."""
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Eliminar Registro de Milimoles'
         context['delete'] = '¿Está seguro de eliminar este registro de milimoles?'
@@ -549,15 +576,18 @@ class MillimoleReactedDeleteView(LoginRequiredMixin, ValidatePermissionRequiredM
 
 
 class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista para el listado de análisis de muestras."""
     model = SamplingAnalysis
     template_name = 'analysis_sampling/list_analysis.html'
     permission_required = 'reagent.add_reagent'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa solicitudes POST para búsqueda y eliminación de análisis."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -582,6 +612,7 @@ class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMix
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega el título y entidad del listado al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Listado de Análisis de Muestras'
         context['create_url'] = reverse_lazy('sampling:create_sampling_analysis')
@@ -591,6 +622,7 @@ class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMix
 
 
 class SamplingAnalysisCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para asociar un método analítico a una muestra."""
     model = SamplingAnalysis
     form_class = SamplingAnalysisForm
     template_name = 'analysis_sampling/create_analysis.html'
@@ -598,6 +630,7 @@ class SamplingAnalysisCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
     permission_required = 'reagent.add_reagent'
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de asociación de método analítico."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -623,12 +656,14 @@ class SamplingAnalysisCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
         return JsonResponse(data)
 
     def get_form_kwargs(self):
+        """Agrega el proceso de muestreo a los kwargs del formulario."""
         kwargs = super().get_form_kwargs()
         sampling_process = SamplingProcess.objects.get(pk=self.kwargs.get('pk'))
         kwargs.update({'sampling_process': sampling_process})
         return kwargs
 
     def get_context_data(self, **kwargs):
+        """Agrega la entidad y acción al contexto."""
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Asociar Método de Analísis'
         context['action'] = 'add'
@@ -636,16 +671,19 @@ class SamplingAnalysisCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
 
 
 class SamplingAnalysisDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DeleteView):
+    """Vista para eliminar un análisis de muestra."""
     model = SamplingAnalysis
     template_name = 'analysis_sampling/delete_analysis.html'
     success_url = reverse_lazy('sampling:list_sampling_analysis')
     permission_required = 'reagent.add_reagent'
 
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud de eliminación."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Elimina el análisis de muestra."""
         data = {}
         try:
             self.object.delete()
@@ -654,6 +692,7 @@ class SamplingAnalysisDeleteView(LoginRequiredMixin, ValidatePermissionRequiredM
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega la entidad y mensaje de confirmación al contexto."""
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Eliminación de Método de Análisis de Muestra'
         context['info_delete'] = f'¿Está seguro de eliminar el método de análisis "{self.object.analytical_method}"?'
@@ -661,15 +700,18 @@ class SamplingAnalysisDeleteView(LoginRequiredMixin, ValidatePermissionRequiredM
 
 
 class SamplingAnalysisProcessingListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista para el listado de procesamiento de análisis."""
     model = SamplingAnalysisProcessing
     template_name = 'analysis_sampling/list_processing.html'
     permission_required = 'reagent.add_reagent'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa solicitudes POST para la búsqueda de procesamientos."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -691,6 +733,7 @@ class SamplingAnalysisProcessingListView(LoginRequiredMixin, ValidatePermissionR
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega el título y entidad del listado al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Listado de Procesamiento de Análisis'
         context['list_url'] = reverse_lazy('sampling:list_sampling_analysis_processing')

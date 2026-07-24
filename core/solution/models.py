@@ -1,3 +1,9 @@
+"""Modelos de datos para el módulo de soluciones del sistema LIMS.
+
+Define las entidades Solution, SolutionBase, SolutionStd, SolutionStdBase,
+Standardization, StandardizationSolution, TransactionSolution y TransactionSolutionStd.
+"""
+
 import uuid
 
 from crum import get_current_user
@@ -9,8 +15,8 @@ from core.reagent.models import Reagent, InventoryReagent
 from core.user.models import User
 
 
-# Generador de códigos de soluciones
 def code_solution_generator():
+    """Genera un código secuencial para soluciones con formato SLN-YYYYMMDD-N."""
     # Obtener la fecha actual en la zona horaria local
     today = timezone.localdate()
     today_str = today.strftime('%Y%m%d')
@@ -35,6 +41,7 @@ def code_solution_generator():
 
 # Generador de códigos de soluciones Estándares
 def code_solution_std_generator():
+    """Genera un código secuencial para soluciones estándar con formato STD-YYYYMMDD-N."""
     # Obtener la fecha actual en la zona horaria local
     today = timezone.localdate()
     today_str = today.strftime('%Y%m%d')
@@ -57,8 +64,8 @@ def code_solution_std_generator():
         return f'STD-{today_str}-{new_number}'
 
 
-# soluciones Base
 class SolutionBase(BaseModel):
+    """Define la plantilla base para la preparación de soluciones con soluto, solvente y concentración."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     solute_reagent_base = models.ForeignKey(Reagent, verbose_name='Reactivo', on_delete=models.CASCADE, related_name='solute_base')
     solvent_reagent_base = models.ForeignKey(Reagent, verbose_name='Solvente', on_delete=models.CASCADE, related_name='solvent_base')
@@ -67,6 +74,7 @@ class SolutionBase(BaseModel):
     enable_solution = models.BooleanField(verbose_name='Habilitado', default=True)
 
     def __str__(self):
+        """Retorna la representación en texto con el reactivo y la concentración."""
         return str(self.solute_reagent_base.description_reagent) + ' ' + str(self.concentration_base) + str(self.concentration_unit_base)
 
     class Meta:
@@ -75,6 +83,7 @@ class SolutionBase(BaseModel):
         db_table = 'SolutionBase'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda la solución base asignando el usuario de creación o actualización."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -84,8 +93,8 @@ class SolutionBase(BaseModel):
         return super(SolutionBase, self).save(*args, **kwargs)
 
 
-# Soluciones
 class Solution(BaseModel):
+    """Representa una solución preparada en el laboratorio con su concentración, cantidades y estado."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     solute_reagent = models.ForeignKey(InventoryReagent, verbose_name='Reactivo', on_delete=models.CASCADE, related_name='solute')
     solvent_reagent = models.ForeignKey(InventoryReagent, verbose_name='Solvente', on_delete=models.CASCADE, related_name='solvent')
@@ -107,6 +116,7 @@ class Solution(BaseModel):
     preparation_confirmed = models.BooleanField(default=False)
 
     def __str__(self):
+        """Retorna la representación en texto con la solución base y el código."""
         return str(self.solution_base) + ' - ' + str(self.code_solution)
 
     class Meta:
@@ -115,6 +125,7 @@ class Solution(BaseModel):
         db_table = 'Solution'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda la solución redondeando cantidades y asignando el usuario."""
         user = get_current_user()
 
         if self.quantity_reagent:
@@ -131,8 +142,8 @@ class Solution(BaseModel):
         return super(Solution, self).save(*args, **kwargs)
 
 
-# Soluciones Estándar Base
 class SolutionStdBase(BaseModel):
+    """Define la plantilla base para soluciones estándar con un reactivo certificado."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     solute_std_base = models.ForeignKey(Reagent, verbose_name='Estándar', on_delete=models.CASCADE, related_name='solute_std_base')
     solvent_reagent_base = models.ForeignKey(Reagent, verbose_name='Solvente', on_delete=models.CASCADE, related_name='solvent_std_base', null=True, blank=True)
@@ -141,6 +152,7 @@ class SolutionStdBase(BaseModel):
     enable_solution_std = models.BooleanField(verbose_name='Habilitado', default=True)
 
     def __str__(self):
+        """Retorna la representación con el estándar y la concentración."""
         return str(self.solute_std_base.description_reagent) + ' ' + str(self.concentration_std_base) + str(self.concentration_unit_base)
 
     class Meta:
@@ -149,6 +161,7 @@ class SolutionStdBase(BaseModel):
         db_table = 'SolutionStdBase'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda la solución estándar base asignando el usuario."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -158,8 +171,8 @@ class SolutionStdBase(BaseModel):
         return super(SolutionStdBase, self).save(*args, **kwargs)
 
 
-# Soluciones Estándares
 class SolutionStd(BaseModel):
+    """Representa una solución estándar preparada a partir de un reactivo certificado."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     solute_std = models.ForeignKey(InventoryReagent, verbose_name='Estándar', on_delete=models.CASCADE, related_name='solute_std')
     solvent_reagent = models.ForeignKey(InventoryReagent, verbose_name='Solvente', on_delete=models.CASCADE, related_name='solvent_std', null=True, blank=True)
@@ -176,6 +189,7 @@ class SolutionStd(BaseModel):
     preparation_confirmed = models.BooleanField(default=False)
 
     def __str__(self):
+        """Retorna la representación con el reactivo, concentración, código y cantidad."""
         if not self.preparated_std_by:
             return f'{self.solute_std.reagent} {self.concentration_std}{self.concentration_unit} - {self.code_solution_std} - {self.quantity_solution_std}{self.solute_std.reagent.umb}'
         else:
@@ -187,6 +201,7 @@ class SolutionStd(BaseModel):
         db_table = 'SolutionStd'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda la solución estándar redondeando cantidades y asignando el usuario."""
         user = get_current_user()
 
         if self.quantity_std:
@@ -203,14 +218,15 @@ class SolutionStd(BaseModel):
         return super(SolutionStd, self).save(*args, **kwargs)
 
 
-# Estandarización
 class Standardization(BaseModel):
+    """Configuración de estandarización que relaciona una solución con un estándar y su relación molar."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     solution_reagent = models.ForeignKey(Reagent, verbose_name='Solución', on_delete=models.CASCADE, related_name='solution')
     solution_std = models.ForeignKey(Reagent, verbose_name='Solución Estándar', on_delete=models.CASCADE, related_name='solution_std')
     molar_relation = models.FloatField(verbose_name='Relación Molar', default=1)
 
     def __str__(self):
+        """Retorna la relación molar de la estandarización."""
         return str(self.molar_relation)
 
     class Meta:
@@ -219,6 +235,7 @@ class Standardization(BaseModel):
         db_table = 'Standardization'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda la estandarización asignando el usuario."""
         user = get_current_user()
 
         if user:
@@ -229,8 +246,8 @@ class Standardization(BaseModel):
         return super(Standardization, self).save(*args, **kwargs)
 
 
-# Estandarización de soluciones
 class StandardizationSolution(BaseModel):
+    """Registro individual de una estandarización con cantidades y concentración calculada."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     solution = models.ForeignKey(Solution, verbose_name='Solución', on_delete=models.CASCADE)
     standard_solution = models.ForeignKey(SolutionStd, verbose_name='Solución Estándar', on_delete=models.CASCADE)
@@ -241,6 +258,7 @@ class StandardizationSolution(BaseModel):
     standarization_date = models.DateField(verbose_name='')
 
     def __str__(self):
+        """Retorna la cantidad de estándar utilizada."""
         return str(self.quantity_standard)
 
     class Meta:
@@ -249,6 +267,7 @@ class StandardizationSolution(BaseModel):
         db_table = 'StandardizationSolution'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda la estandarización de solución asignando el usuario."""
         user = get_current_user()
 
         if user:
@@ -259,8 +278,8 @@ class StandardizationSolution(BaseModel):
         return super(StandardizationSolution, self).save(*args, **kwargs)
 
 
-# Movimientos de Soluciones
 class TransactionSolution(BaseModel):
+    """Registro de movimientos de inventario de soluciones (entradas, salidas, usos)."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     solution_inventory = models.ForeignKey(Solution, verbose_name='Solución', on_delete=models.CASCADE)
     date_transaction = models.DateField(verbose_name='Fecha')
@@ -270,6 +289,7 @@ class TransactionSolution(BaseModel):
     user_transaction = models.ForeignKey(User, verbose_name='', on_delete=models.CASCADE)
 
     def __str__(self):
+        """Retorna la cantidad de la transacción."""
         return str(self.quantity)
 
     class Meta:
@@ -278,6 +298,7 @@ class TransactionSolution(BaseModel):
         db_table = 'TransactionSolution'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda la transacción de solución asignando el usuario."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -287,8 +308,8 @@ class TransactionSolution(BaseModel):
         return super(TransactionSolution, self).save(*args, **kwargs)
 
 
-# Movimientos de Soluciones Estándares
 class TransactionSolutionStd(BaseModel):
+    """Registro de movimientos de inventario de soluciones estándar (entradas, salidas, usos)."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     solution_std_inventory = models.ForeignKey(SolutionStd, verbose_name='Solución Estándar', on_delete=models.CASCADE)
     date_transaction = models.DateField(verbose_name='Fecha')
@@ -298,6 +319,7 @@ class TransactionSolutionStd(BaseModel):
     user_transaction = models.ForeignKey(User, verbose_name='', on_delete=models.CASCADE)
 
     def __str__(self):
+        """Retorna la cantidad de la transacción estándar."""
         return str(self.quantity)
 
     class Meta:
@@ -306,6 +328,7 @@ class TransactionSolutionStd(BaseModel):
         db_table = 'TransactionSolutionStd'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda la transacción de solución estándar asignando el usuario."""
         user = get_current_user()
         if user:
             if not self.user_creation:

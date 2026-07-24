@@ -1,3 +1,9 @@
+"""Formularios de la aplicación de condiciones ambientales.
+
+Define los formularios para la creación y edición de condiciones
+ambientales y sus registros de lectura.
+"""  # noqa: E501
+
 from crum import get_current_user
 from django.forms import ModelForm, TextInput, CheckboxInput, Select, Textarea, ValidationError
 from django.utils import timezone
@@ -6,7 +12,10 @@ from core.condition.models import Condition, ConditionRegister
 
 
 class ConditionForm(ModelForm):
+    """Formulario para crear y editar una condición ambiental."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario asignando clases CSS y atributos a los campos."""
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -43,7 +52,10 @@ class ConditionForm(ModelForm):
 
 
 class ConditionRegisterForm(ModelForm):
+    """Formulario para registrar una o dos lecturas de condiciones ambientales."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario agregando campos dinámicos para un segundo registro."""
         super().__init__(*args, **kwargs)
         self.fields['condition2'] = self.fields['condition'].__class__(
             queryset=Condition.objects.filter(enabled=True),
@@ -84,17 +96,16 @@ class ConditionRegisterForm(ModelForm):
         }
 
     def clean(self):
+        """Valida que el primer registro esté completo y que el segundo sea consistente."""
         cleaned_data = super().clean()
         condition = cleaned_data.get('condition')
         registered_data = cleaned_data.get('registered_data')
         condition2 = cleaned_data.get('condition2')
         registered_data2 = cleaned_data.get('registered_data2')
 
-        # Validación primer registro (obligatoriedad)
         if not condition or registered_data is None:
             raise ValidationError("El primer registro (Condición y Dato) es obligatorio.")
 
-        # Validación segundo registro (si se inicia uno, se debe completar ambos campos)
         if condition2 or registered_data2:
             if not (condition2 and registered_data2 is not None):
                 raise ValidationError("Si ingresa datos para el segundo registro, debe completar tanto la condición como el dato.")
@@ -108,17 +119,16 @@ class ConditionRegisterForm(ModelForm):
         return cleaned_data
 
     def save(self, commit=True):
+        """Guarda uno o dos registros de condición asignando el usuario y la fecha actual."""
         user = get_current_user()
         registration_date = timezone.now()
         
-        # Guardar primer registro
         instance1 = super().save(commit=False)
         instance1.registered_by_id = user.id
         instance1.registration_date = registration_date
         if commit:
             instance1.save()
         
-        # Guardar segundo registro si existe
         condition2 = self.cleaned_data.get('condition2')
         registered_data2 = self.cleaned_data.get('registered_data2')
         
@@ -137,7 +147,10 @@ class ConditionRegisterForm(ModelForm):
 
 
 class ConditionRegisterActionsForm(ModelForm):
+    """Formulario para registrar acciones o correcciones sobre un registro de condición."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario asignando clases CSS a los campos visibles."""
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -151,6 +164,7 @@ class ConditionRegisterActionsForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda las acciones asignando el usuario que las registró."""
         data = {}
         form = super()
         user = get_current_user()

@@ -1,3 +1,8 @@
+"""Formularios de la aplicación de laboratorios.
+
+Define el formulario para la creación y edición de laboratorios.
+"""  # noqa: E501
+
 from django import forms
 from django.forms import ModelForm, TextInput, Select
 
@@ -8,7 +13,10 @@ BOOLEAN = [(True, 'Si'), (False, 'No')]
 
 
 class LaboratoryForm(ModelForm):
+    """Formulario para crear y editar un laboratorio."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario filtrando sedes activas y asignando clases CSS."""
         super().__init__(*args, **kwargs)
         self.fields['site'].queryset = Site.objects.filter(site_enable=True)
         for form in self.visible_fields():
@@ -39,6 +47,7 @@ class LaboratoryForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el laboratorio y retorna los datos o un mensaje de error."""
         data = {}
         form = super()
         try:

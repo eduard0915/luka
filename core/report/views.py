@@ -1,3 +1,5 @@
+"""Vistas para la generación de reportes del módulo de muestreo y análisis."""
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.db.models import Q, Avg
@@ -17,17 +19,19 @@ from core.sampling.models import SamplingAnalysis, SamplingAnalysisProcessing
 from core.user.models import User
 
 
-# Reporte de Análisis por Método Analítico
 class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista para el reporte de análisis agrupados por método analítico."""
     model = SamplingAnalysis
     template_name = 'report/list_sampling_analysis.html'
     permission_required = 'reagent.add_reagent'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa solicitudes POST para búsqueda de datos y filtros."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -141,6 +145,7 @@ class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMix
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega el título, entidad y productos disponibles al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Reporte de Análisis por Método'
         context['entity'] = 'Reporte de Análisis por Método Analítico'
@@ -150,9 +155,11 @@ class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMix
 
 
 class SamplingAnalysisExcelView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista para exportar el reporte de análisis por método analítico a Excel."""
     permission_required = 'reagent.add_reagent'
 
     def get(self, request, *args, **kwargs):
+        """Genera y descarga el archivo Excel con el reporte de análisis."""
         try:
             product_id = request.GET.get('product')
             method_id = request.GET.get('analytical_method')
@@ -260,14 +267,18 @@ class SamplingAnalysisExcelView(LoginRequiredMixin, ValidatePermissionRequiredMi
 
 
 class SamplingAnalysisChartView(LoginRequiredMixin, ValidatePermissionRequiredMixin, TemplateView):
+    """Vista para mostrar el gráfico de control de análisis diario."""
+
     template_name = 'report/chart_sampling_analysis.html'
     permission_required = 'reagent.add_reagent'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa solicitudes POST para obtener datos del gráfico y filtros."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -452,26 +463,29 @@ class SamplingAnalysisChartView(LoginRequiredMixin, ValidatePermissionRequiredMi
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega productos ordenados y configuración del gráfico al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Análisis Diario - Gráfico'
         context['entity'] = 'Gráfico de Análisis de Diario'
-        # Aseguramos que los productos se ordenan por descripción
         context['products'] = Product.objects.filter(enable_product=True).order_by('description_product')
         context['icon'] = 'fa-solid fa-chart-line'
-        context['list_url'] = reverse_lazy('report:sampling_analysis_chart') # URL de retorno
+        context['list_url'] = reverse_lazy('report:sampling_analysis_chart')
         return context
 
 
 class SamplingAnalysisByPointListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista para el reporte de análisis agrupados por punto de muestreo."""
     model = SamplingAnalysis
     template_name = 'report/list_sampling_analysis_by_point.html'
     permission_required = 'reagent.add_reagent'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa solicitudes POST para búsqueda de datos por punto de muestreo."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -554,6 +568,7 @@ class SamplingAnalysisByPointListView(LoginRequiredMixin, ValidatePermissionRequ
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega el título, entidad y productos disponibles al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Reporte de Análisis por Punto de Muestreo'
         context['entity'] = 'Reporte de Análisis por Punto de Muestreo'
@@ -563,9 +578,11 @@ class SamplingAnalysisByPointListView(LoginRequiredMixin, ValidatePermissionRequ
 
 
 class SamplingAnalysisByPointExcelView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista para exportar el reporte de análisis por punto de muestreo a Excel."""
     permission_required = 'reagent.add_reagent'
 
     def get(self, request, *args, **kwargs):
+        """Genera y descarga el archivo Excel con el reporte por punto de muestreo."""
         try:
             product_id = request.GET.get('product')
             sample_point_id = request.GET.get('sample_point')
@@ -689,15 +706,18 @@ class SamplingAnalysisByPointExcelView(LoginRequiredMixin, ValidatePermissionReq
 
 # Procesamiento de Muestras por Analista
 class SamplingAnalysisProcessingListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista para el reporte de procesamiento de muestras por analista."""
     model = SamplingAnalysisProcessing
     template_name = 'report/list_sampling_analysis_processing.html'
     permission_required = 'reagent.add_reagent'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa solicitudes POST para búsqueda de procesamiento por filtros."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -773,6 +793,7 @@ class SamplingAnalysisProcessingListView(LoginRequiredMixin, ValidatePermissionR
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega usuarios, perfiles y configuración de la vista al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Procesamiento de Muestras'
         context['entity'] = 'Procesamiento de Muestras por Analista'
@@ -782,11 +803,12 @@ class SamplingAnalysisProcessingListView(LoginRequiredMixin, ValidatePermissionR
         return context
 
 
-# Descarga Procesamiento de Muestras por Analista
 class SamplingAnalysisProcessingExcelView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista para exportar el reporte de procesamiento de muestras por analista a Excel."""
     permission_required = 'reagent.add_reagent'
 
     def get(self, request, *args, **kwargs):
+        """Genera y descarga el archivo Excel con el procesamiento de muestras."""
         try:
             date_from = request.GET.get('date_from')
             date_to = request.GET.get('date_to')

@@ -1,3 +1,9 @@
+"""Vistas de la aplicación de observaciones.
+
+Define las vistas para crear y editar observaciones asociadas
+a procesos de muestreo.
+"""  # noqa: E501
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
@@ -12,6 +18,8 @@ from core.utils import format_form_errors
 
 
 class ObservationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para crear una nueva observación asociada a un proceso de muestreo."""
+
     model = Observation
     form_class = ObservationForm
     template_name = 'create_observation.html'
@@ -19,9 +27,11 @@ class ObservationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Exenta de CSRF y despacha la solicitud."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de creación y asocia la observación al muestreo correspondiente."""
         data = {}
         try:
             action = request.POST['action']
@@ -42,6 +52,7 @@ class ObservationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega el título y la acción al contexto de la plantilla."""
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Observaciones'
         context['action'] = 'add'
@@ -49,6 +60,8 @@ class ObservationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
 
 
 class ObservationUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para editar una observación existente."""
+
     model = Observation
     form_class = ObservationForm
     template_name = 'create_observation.html'
@@ -56,10 +69,12 @@ class ObservationUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Obtiene el objeto y despacha la solicitud exenta de CSRF."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de edición y retorna la respuesta JSON."""
         data = {}
         try:
             action = request.POST['action']
@@ -78,6 +93,7 @@ class ObservationUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega el título y la acción al contexto de la plantilla."""
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Observaciones'
         context['action'] = 'edit'

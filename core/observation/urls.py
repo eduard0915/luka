@@ -1,3 +1,5 @@
+"""Definición de rutas URL para la aplicación de observaciones."""  # noqa: E501
+
 from django.urls import path
 from core.observation.views import ObservationCreateView, ObservationUpdateView
 

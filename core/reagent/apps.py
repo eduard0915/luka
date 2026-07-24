@@ -1,12 +1,16 @@
+"""Configuración de la aplicación de reactivos para Django."""
+
 from django.apps import AppConfig
 
 
 class ReagentConfig(AppConfig):
+    """Configuración de la aplicación core.reagent."""
+
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'core.reagent'
 
     def ready(self):
-        # Importing signals to ensure they are registered when the app is ready
+        """Registra las señales de la aplicación al iniciar Django."""
         try:
             import core.reagent.signals
         except ImportError as e:

@@ -1,3 +1,7 @@
+"""Modelos de la aplicación de equipos para la gestión de equipos instrumentales,
+material instrumental, mantenimientos, calibraciones, verificaciones y patrones
+de referencia."""
+
 import uuid
 
 from crum import get_current_user
@@ -8,8 +12,9 @@ from core.models import BaseModel
 from core.user.models import User
 
 
-# Equipos Instrumentales
 class EquipmentInstrumental(BaseModel):
+    """Modelo que representa un equipo instrumental del laboratorio."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     code_equipment = models.CharField(max_length=20, verbose_name='Código')
     description_equipment = models.CharField(max_length=200, verbose_name='Descripción')
@@ -33,6 +38,7 @@ class EquipmentInstrumental(BaseModel):
     date_calibration_fix = models.DateField(verbose_name='Fecha de Calibración Inicial', null=True, blank=True)
 
     def __str__(self):
+        """Retorna la representación en texto del equipo instrumental."""
         return f'{self.code_equipment} - {self.description_equipment}, {self.brand_equipment} - {self.model_equipment}'
 
     class Meta:
@@ -41,6 +47,7 @@ class EquipmentInstrumental(BaseModel):
         db_table = 'EquipmentInstrumental'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda el equipo instrumental asignando el usuario de creación o actualización."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -50,7 +57,6 @@ class EquipmentInstrumental(BaseModel):
         return super(EquipmentInstrumental, self).save(*args, **kwargs)
 
 
-# Generador de códigos de material instrumental
 def code_instrumental_generator():
     """
     Genera el siguiente código secuencial de forma segura bloqueando la fila.
@@ -66,8 +72,9 @@ def code_instrumental_generator():
     return str(new_number)
 
 
-# Material Instrumental o de Laboratorio
 class MaterialInstrumental(BaseModel):
+    """Modelo que representa un material instrumental o de laboratorio."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     code_instrumental = models.CharField(max_length=20, verbose_name='Código', unique=True, blank=True)
     description_instrumental = models.CharField(max_length=200, verbose_name='Descripción')
@@ -80,6 +87,7 @@ class MaterialInstrumental(BaseModel):
     enable_instrumental = models.BooleanField(default=True, verbose_name='Habilitado')
 
     def __str__(self):
+        """Retorna la representación en texto del material instrumental."""
         return f'{self.code_instrumental} - {self.description_instrumental}, {self.brand_instrumental}'
 
     class Meta:
@@ -88,6 +96,7 @@ class MaterialInstrumental(BaseModel):
         db_table = 'MaterialInstrumental'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda el material instrumental asignando el usuario y generando el código automáticamente si no existe."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -95,9 +104,7 @@ class MaterialInstrumental(BaseModel):
             else:
                 self.user_updated = user
 
-        # Automatización del código con protección de concurrencia
         if not self.code_instrumental:
-            # Envolvemos en una transacción atómica para que el select_for_update funcione
             with transaction.atomic(using=kwargs.get('using')):
                 self.code_instrumental = code_instrumental_generator()
                 return super(MaterialInstrumental, self).save(*args, **kwargs)
@@ -105,8 +112,9 @@ class MaterialInstrumental(BaseModel):
         return super(MaterialInstrumental, self).save(*args, **kwargs)
 
 
-# Mantenimiento
 class Maintenance(BaseModel):
+    """Modelo que representa un mantenimiento realizado a un equipo instrumental."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     equipment_instrumental = models.ForeignKey(EquipmentInstrumental, verbose_name='Equipo Instrumental', on_delete=models.CASCADE)
     date_maintenance = models.DateField(verbose_name='Fecha')
@@ -120,6 +128,7 @@ class Maintenance(BaseModel):
     maintenance_next_completed = models.BooleanField(verbose_name='Próximo Mtto Completado', default=False)
 
     def __str__(self):
+        """Retorna la representación en texto del mantenimiento."""
         return f'{self.equipment_instrumental} - {self.date_maintenance} - {self.type_maintenance}'
 
     class Meta:
@@ -128,6 +137,7 @@ class Maintenance(BaseModel):
         db_table = 'Maintenance'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda el mantenimiento asignando el usuario de creación o actualización."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -137,8 +147,9 @@ class Maintenance(BaseModel):
         return super(Maintenance, self).save(*args, **kwargs)
 
 
-# Calibración
 class Calibration(BaseModel):
+    """Modelo que representa una calibración realizada a un equipo instrumental."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     equipment_instrumental = models.ForeignKey(EquipmentInstrumental, verbose_name='Equipo Instrumental', on_delete=models.CASCADE)
     date_calibration = models.DateField(verbose_name='Fecha')
@@ -152,6 +163,7 @@ class Calibration(BaseModel):
     calibration_next_completed = models.BooleanField(verbose_name='Próxima Calibración completada', default=False)
 
     def __str__(self):
+        """Retorna la representación en texto de la calibración."""
         return f'{self.equipment_instrumental} - {self.date_calibration} - Calibración: {"Cumple" if self.comply else "No cumple"}'
 
     class Meta:
@@ -160,6 +172,7 @@ class Calibration(BaseModel):
         db_table = 'Calibration'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda la calibración asignando el usuario de creación o actualización."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -169,8 +182,9 @@ class Calibration(BaseModel):
         return super(Calibration, self).save(*args, **kwargs)
 
 
-# Verificaciones Intermedias
 class Verification(BaseModel):
+    """Modelo que representa una verificación intermedia realizada a un equipo instrumental."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     equipment_instrumental = models.ForeignKey(EquipmentInstrumental, verbose_name='Equipo Instrumental', on_delete=models.CASCADE)
     date_verification = models.DateField(verbose_name='Fecha')
@@ -184,6 +198,7 @@ class Verification(BaseModel):
     report_verification = models.FileField(upload_to='verification/%Y%m%d', verbose_name='Reporte de Verificación', null=True, blank=True)
 
     def __str__(self):
+        """Retorna la representación en texto de la verificación."""
         return f'{self.equipment_instrumental} - {self.date_verification} - Verificación: {"Cumple" if self.comply else "No cumple"}'
 
     class Meta:
@@ -192,6 +207,7 @@ class Verification(BaseModel):
         db_table = 'Verification'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda la verificación asignando el usuario de creación o actualización."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -201,8 +217,9 @@ class Verification(BaseModel):
         return super(Verification, self).save(*args, **kwargs)
 
 
-# Patrones de Referencia
 class ReferencePattern(BaseModel):
+    """Modelo que representa un patrón de referencia utilizado en verificaciones diarias."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     equipment_instrumental = models.ForeignKey(EquipmentInstrumental, verbose_name='Instrumento', on_delete=models.CASCADE)
     description_pattern = models.CharField(max_length=150, verbose_name='Descripción del Patrón', null=True, blank=True)
@@ -212,6 +229,7 @@ class ReferencePattern(BaseModel):
     certificate_calibration = models.FileField(verbose_name='Certificado de Calibración', upload_to='calibration_certificates_pattern/', null=True, blank=True)
 
     def __str__(self):
+        """Retorna la representación en texto del patrón de referencia."""
         return f'{self.description_pattern} - {self.magnitude_pattern} {self.unit_pattern}'
 
     class Meta:
@@ -220,6 +238,7 @@ class ReferencePattern(BaseModel):
         db_table = 'ReferencePattern'
 
     def toJSON(self):
+        """Retorna el patrón de referencia como un diccionario serializable a JSON."""
         item = {
             'id': str(self.id),
             'equipment_instrumental': self.equipment_instrumental.toJSON() if hasattr(self.equipment_instrumental, 'toJSON') else str(self.equipment_instrumental),
@@ -232,6 +251,7 @@ class ReferencePattern(BaseModel):
         return item
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda el patrón de referencia asignando el usuario de creación o actualización."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -241,8 +261,9 @@ class ReferencePattern(BaseModel):
         return super(ReferencePattern, self).save(*args, **kwargs)
 
 
-# Verificación Diaria
 class DailyVerification(BaseModel):
+    """Modelo que representa una verificación diaria realizada a un equipo instrumental."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     equipment_instrumental = models.ForeignKey(EquipmentInstrumental, verbose_name='Equipo Instrumental', on_delete=models.CASCADE)
     date_verification_daily = models.DateTimeField(verbose_name='Fecha y Hora')
@@ -255,6 +276,7 @@ class DailyVerification(BaseModel):
     verified_by = models.ForeignKey(User, verbose_name='Responsable', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
+        """Retorna la representación en texto de la verificación diaria."""
         return f'{self.equipment_instrumental} - {self.date_verification_daily} - Verificación: {"Cumple" if self.comply else "No cumple"}'
 
     class Meta:
@@ -263,6 +285,7 @@ class DailyVerification(BaseModel):
         db_table = 'DailyVerification'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda la verificación diaria asignando el usuario de creación o actualización."""
         user = get_current_user()
         if user:
             if not self.user_creation:

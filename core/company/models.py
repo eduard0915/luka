@@ -1,3 +1,9 @@
+"""Modelos de datos para la gestión de empresas, plantas y procesos del LIMS.
+
+Define las entidades Company (empresa), Site (planta) y Process (proceso)
+con sus respectivas relaciones y metadatos.
+"""
+
 import uuid
 
 from django.db import models
@@ -6,8 +12,13 @@ from core.validators import validator_file_image
 from luka.settings import MEDIA_URL, STATIC_URL
 
 
-# Empresa
 class Company(models.Model):
+    """Representa una empresa dentro del sistema LIMS.
+
+    Almacena la información general de la empresa incluyendo nombre, NIT,
+    dirección, ciudad, país, logotipo, configuración de alertas de capacitación,
+    muestreo automático, habilitación de servicio y notificaciones por correo.
+    """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     company_name = models.CharField(default='Nombre Empresa', max_length=120, verbose_name='Nombre Empresa')
     company_logo = models.ImageField(
@@ -22,9 +33,11 @@ class Company(models.Model):
     notification_email = models.BooleanField(default=True, verbose_name='Notificaciones por Email')
 
     def __str__(self):
+        """Retorna el nombre de la empresa como representación en cadena."""
         return str(self.company_name)
 
     def get_logo(self):
+        """Retorna la URL del logotipo de la empresa o una imagen por defecto si no existe."""
         if self.company_logo:
             return '{}{}'.format(MEDIA_URL, self.company_logo)
         return '{}{}'.format(STATIC_URL, 'img/empty.png')
@@ -35,8 +48,12 @@ class Company(models.Model):
         db_table = 'Company'
 
 
-# Plantas
 class Site(models.Model):
+    """Representa una planta o sitio perteneciente a una empresa.
+
+    Almacena la información de ubicación de la planta (nombre, dirección,
+    ciudad, país) y su relación con la empresa a la que pertenece.
+    """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     site_name = models.CharField(max_length=120, verbose_name='Planta')
     site_address = models.CharField(max_length=60, verbose_name='Dirección')
@@ -46,6 +63,7 @@ class Site(models.Model):
     site_enable = models.BooleanField(default=True, verbose_name='Habilitado')
 
     def __str__(self):
+        """Retorna el nombre de la planta como representación en cadena."""
         return str(self.site_name)
 
     class Meta:
@@ -54,14 +72,19 @@ class Site(models.Model):
         db_table = 'Site'
 
 
-# Procesos
 class Process(models.Model):
+    """Representa un proceso asociado a una planta dentro del LIMS.
+
+    Cada proceso pertenece a una planta específica y puede ser habilitado
+    o deshabilitado según se requiera en el flujo de trabajo del laboratorio.
+    """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     process_name = models.CharField(max_length=120, verbose_name='Proceso')
     site = models.ForeignKey(Site, on_delete=models.CASCADE, verbose_name='Planta')
     enable_process = models.BooleanField(default=True, verbose_name='Habilitado')
 
     def __str__(self):
+        """Retorna el nombre del proceso como representación en cadena."""
         return str(self.process_name)
 
     class Meta:

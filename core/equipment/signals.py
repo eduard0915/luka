@@ -1,6 +1,10 @@
+"""Señales de la aplicación de equipos para la actualización automática de
+estados de calibraciones y mantenimientos."""
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from core.equipment.models import Calibration, Maintenance
+
 
 @receiver(post_save, sender=Calibration)
 def update_previous_calibrations(sender, instance, created, **kwargs):

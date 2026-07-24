@@ -1,3 +1,7 @@
+"""Formularios de la aplicación de equipos para la gestión de equipos
+instrumentales, material instrumental, mantenimientos, calibraciones,
+verificaciones y patrones de referencia."""
+
 from datetime import date
 
 import dateutil.utils
@@ -21,9 +25,12 @@ UNIT_TOLERANCE = [('No aplica', 'No aplica'), ('Kg', 'Kg'), ('g', 'g'), ('mg', '
 
 TYPE_MAINTENANCE = [('Preventivo', 'Preventivo'), ('Correctivo', 'Correctivo')]
 
-# Verificaciones
+
 class VerificationForm(ModelForm):
+    """Formulario para el registro y edición de verificaciones intermedias de equipos instrumentales."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de verificación configurando los queryset de equipos habilitados y usuarios activos."""
         super().__init__(*args, **kwargs)
         self.fields['equipment_instrumental'].queryset = EquipmentInstrumental.objects.filter(enable_equipment=True)
         self.fields['responsible_user'].queryset = User.objects.filter(is_active=True)
@@ -60,6 +67,7 @@ class VerificationForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el registro de verificación calculando la fecha de la próxima verificación."""
         data = {}
         form = super()
         try:
@@ -74,9 +82,11 @@ class VerificationForm(ModelForm):
         return data
 
 
-# Mantenimiento
 class MaintenanceForm(ModelForm):
+    """Formulario para el registro y edición de mantenimientos de equipos instrumentales."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de mantenimiento configurando el queryset de equipos habilitados."""
         super().__init__(*args, **kwargs)
         self.fields['equipment_instrumental'].queryset = EquipmentInstrumental.objects.filter(enable_equipment=True)
         for form in self.visible_fields():
@@ -112,6 +122,7 @@ class MaintenanceForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el registro de mantenimiento calculando la fecha del próximo mantenimiento."""
         data = {}
         form = super()
         try:
@@ -128,9 +139,11 @@ class MaintenanceForm(ModelForm):
         return data
 
 
-# Calibración
 class CalibrationForm(ModelForm):
+    """Formulario para el registro y edición de calibraciones de equipos instrumentales."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de calibración configurando el queryset de equipos habilitados."""
         super().__init__(*args, **kwargs)
         self.fields['equipment_instrumental'].queryset = EquipmentInstrumental.objects.filter(enable_equipment=True)
         for form in self.visible_fields():
@@ -163,6 +176,7 @@ class CalibrationForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el registro de calibración calculando la fecha de la próxima calibración."""
         data = {}
         form = super()
         try:
@@ -181,7 +195,10 @@ class CalibrationForm(ModelForm):
 
 
 class DailyVerificationForm(ModelForm):
+    """Formulario para el registro y edición de verificaciones diarias de equipos instrumentales."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de verificación diaria configurando el queryset de equipos habilitados."""
         super().__init__(*args, **kwargs)
         self.fields['equipment_instrumental'].queryset = EquipmentInstrumental.objects.filter(enable_equipment=True)
         for form in self.visible_fields():
@@ -213,6 +230,7 @@ class DailyVerificationForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el registro de verificación diaria calculando el error y determinando si cumple con la tolerancia."""
         data = {}
         form = super()
         try:
@@ -234,10 +252,11 @@ class DailyVerificationForm(ModelForm):
         return data
 
 
-
-# Creación de Equipos Instrumentales
 class EquipmentInstrumentalForm(ModelForm):
+    """Formulario para el registro y edición de equipos instrumentales."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de equipo instrumental configurando los queryset de laboratorios habilitados y usuarios activos."""
         super().__init__(*args, **kwargs)
         self.fields['laboratory'].queryset = Laboratory.objects.filter(enable_laboratory=True)
         self.fields['responsible_user'].queryset = User.objects.filter(is_active=True)
@@ -271,10 +290,10 @@ class EquipmentInstrumentalForm(ModelForm):
         }
 
     def clean_code_equipment(self):
+        """Valida que el código del equipo no exista previamente en la base de datos."""
         code_equipment = self.cleaned_data.get('code_equipment')
         if code_equipment:
             code_equipment = code_equipment.strip().upper()
-            # Validar que no exista otro equipo con el mismo código
             qs = EquipmentInstrumental.objects.filter(code_equipment__iexact=code_equipment)
             if self.instance.pk:
                 qs = qs.exclude(pk=self.instance.pk)
@@ -283,10 +302,10 @@ class EquipmentInstrumentalForm(ModelForm):
         return code_equipment
 
     def clean_serie_equipment(self):
+        """Valida que el número de serie del equipo no exista previamente en la base de datos."""
         serie_equipment = self.cleaned_data.get('serie_equipment')
         if serie_equipment:
             serie_equipment = serie_equipment.strip().upper()
-            # Validar que no exista otro equipo con el mismo número de serie
             qs = EquipmentInstrumental.objects.filter(serie_equipment__iexact=serie_equipment)
             if self.instance.pk:
                 qs = qs.exclude(pk=self.instance.pk)
@@ -295,9 +314,11 @@ class EquipmentInstrumentalForm(ModelForm):
         return serie_equipment
 
 
-# Material Instrumental o de Laboratorio
 class MaterialInstrumentalForm(ModelForm):
+    """Formulario para el registro y edición de materiales instrumentales o de laboratorio."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de material instrumental configurando el queryset de usuarios activos."""
         super().__init__(*args, **kwargs)
         self.fields['responsible_user'].queryset = User.objects.filter(is_active=True)
         for form in self.visible_fields():
@@ -319,10 +340,10 @@ class MaterialInstrumentalForm(ModelForm):
         }
 
     def clean_code_instrumental(self):
+        """Valida que el código del material no exista previamente en la base de datos."""
         code_instrumental = self.cleaned_data.get('code_instrumental')
         if code_instrumental:
             code_instrumental = code_instrumental.strip().upper()
-            # Validar que no exista otro material con el mismo código
             qs = MaterialInstrumental.objects.filter(code_instrumental__iexact=code_instrumental)
             if self.instance.pk:
                 qs = qs.exclude(pk=self.instance.pk)
@@ -331,9 +352,11 @@ class MaterialInstrumentalForm(ModelForm):
         return code_instrumental
 
 
-# Registrar Patrones de Referencia
 class ReferencePatternForm(ModelForm):
+    """Formulario para el registro de patrones de referencia asociados a un equipo instrumental."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de patrón de referencia extrayendo el equipo instrumental del contexto."""
         self.equipment_instrumental = kwargs.pop('equipment_instrumental', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -362,6 +385,7 @@ class ReferencePatternForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el registro del patrón de referencia asociándolo al equipo instrumental correspondiente."""
         data = {}
         form = super()
         try:
@@ -376,9 +400,11 @@ class ReferencePatternForm(ModelForm):
         return data
 
 
-# Editar Patrones de Referencia
 class ReferencePatternUpdateForm(ModelForm):
+    """Formulario para la edición de patrones de referencia."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de edición de patrón de referencia."""
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -406,6 +432,7 @@ class ReferencePatternUpdateForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda los cambios realizados al patrón de referencia."""
         data = {}
         form = super()
         try:

@@ -1,3 +1,5 @@
+"""Definición de rutas URL para la aplicación de condiciones ambientales."""  # noqa: E501
+
 from django.urls import path
 from core.condition.views import *
 

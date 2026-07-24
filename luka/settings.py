@@ -1,3 +1,10 @@
+"""Configuración principal del proyecto Django Luka LIS.
+
+Define las aplicaciones instaladas, middleware, base de datos,
+archivos estáticos, medios, correo electrónico, sesiones,
+almacenamiento S3 y demás parámetros del entorno.
+"""
+
 import os
 from pathlib import Path
 

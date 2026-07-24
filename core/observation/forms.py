@@ -1,10 +1,18 @@
+"""Formularios de la aplicación de observaciones.
+
+Define el formulario para la creación y edición de observaciones.
+"""  # noqa: E501
+
 from django.forms import ModelForm, Textarea
 from crum import get_current_user
 from core.observation.models import Observation
 
 
 class ObservationForm(ModelForm):
+    """Formulario para crear y editar una observación."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario desactivando el autocompletado de campos."""
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -22,6 +30,7 @@ class ObservationForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la observación asignando el usuario autenticado como autor del comentario."""
         data = {}
         form = super()
         try:

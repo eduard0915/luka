@@ -1,3 +1,5 @@
+"""Definición de rutas URL para la aplicación de muestreo."""
+
 from django.conf.urls.static import static
 from django.urls import path
 

@@ -1,7 +1,8 @@
+"""Vistas de mantenimientos para la gestión de mantenimientos preventivos y correctivos de equipos."""
+
 import os
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-# from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.template.loader import get_template
 from django.urls import reverse_lazy, reverse
@@ -19,17 +20,20 @@ from core.mixins import ValidatePermissionRequiredMixin
 from luka import settings
 
 
-# Listado de Mantenimientos
 class MaintenanceListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista de listado de mantenimientos."""
+
     model = Maintenance
     template_name = 'maintenance/list_maintenance.html'
     permission_required = 'equipment.view_maintenance'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP aplicando la exención de CSRF."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa las solicitudes POST para la búsqueda y listado de mantenimientos."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -68,6 +72,7 @@ class MaintenanceListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, L
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de listado."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Listado de Mantenimientos'
         context['create_url'] = reverse_lazy('equipment:create_maintenance')
@@ -77,17 +82,20 @@ class MaintenanceListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, L
         return context
 
 
-# Listado de Mantenimientos Vencidos sin Completar
 class MaintenanceExpireListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista de listado de mantenimientos vencidos pendientes por completar."""
+
     model = Maintenance
     template_name = 'maintenance/list_maintenance.html'
     permission_required = 'equipment.view_maintenance'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP aplicando la exención de CSRF."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa las solicitudes POST para la búsqueda de mantenimientos vencidos del usuario actual."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -123,6 +131,7 @@ class MaintenanceExpireListView(LoginRequiredMixin, ValidatePermissionRequiredMi
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de listado de vencidos."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Mantenimientos Vencidos'
         context['create_url'] = reverse_lazy('equipment:create_maintenance')
@@ -132,8 +141,9 @@ class MaintenanceExpireListView(LoginRequiredMixin, ValidatePermissionRequiredMi
         return context
 
 
-# Creación de Mantenimiento
 class MaintenanceCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista de creación de mantenimientos."""
+
     model = Maintenance
     form_class = MaintenanceForm
     template_name = 'maintenance/create_maintenance.html'
@@ -141,10 +151,12 @@ class MaintenanceCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP inicializando el objeto como nulo."""
         self.object = None
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la solicitud POST para registrar un nuevo mantenimiento."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -171,9 +183,11 @@ class MaintenanceCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de redirección después de crear un mantenimiento."""
         return reverse('equipment:list_maintenance')
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de creación."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Registrar Mantenimiento'
         context['action'] = 'add'
@@ -184,8 +198,9 @@ class MaintenanceCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         return context
 
 
-# Edición de Mantenimiento
 class MaintenanceUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista de edición de mantenimientos."""
+
     model = Maintenance
     form_class = MaintenanceForm
     template_name = 'maintenance/update_maintenance.html'
@@ -193,10 +208,12 @@ class MaintenanceUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP obteniendo el objeto a editar."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la solicitud POST para actualizar un mantenimiento existente."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -223,9 +240,11 @@ class MaintenanceUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de redirección después de editar un mantenimiento."""
         return reverse('equipment:list_maintenance')
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de edición."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Editar Mantenimiento'
         context['entity'] = 'Editar Mantenimiento'
@@ -237,13 +256,15 @@ class MaintenanceUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         return context
 
 
-# Detalle de Mantenimiento
 class MaintenanceDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """Vista de detalle de mantenimiento."""
+
     model = Maintenance
     template_name = 'maintenance/detail_maintenance.html'
     permission_required = 'equipment.view_maintenance'
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de detalle."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Detalle de Mantenimiento'
         context['entity'] = 'Detalle Registro de Mantenimiento'
@@ -254,12 +275,14 @@ class MaintenanceDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         return context
 
 
-# Reporte PDF de Mantenimiento
 class MaintenancePDFView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista de generación de reporte PDF de mantenimiento."""
+
     permission_required = 'equipment.view_maintenance'
 
     @staticmethod
     def link_callback(uri, rel):
+        """Convierte URIs HTML a rutas absolutas del sistema para que xhtml2pdf acceda a los recursos."""
         sUrl = settings.STATIC_URL
         sRoot = settings.STATIC_ROOT
         mUrl = settings.MEDIA_URL
@@ -277,6 +300,7 @@ class MaintenancePDFView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Vi
         return path
 
     def get(self, request, *args, **kwargs):
+        """Genera y retorna el reporte PDF de un mantenimiento específico."""
         try:
             template = get_template('maintenance/pdf_maintenance.html')
             maintenance = Maintenance.objects.get(pk=self.kwargs['pk'])
@@ -291,7 +315,6 @@ class MaintenancePDFView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Vi
 
             html = template.render(context)
             response = HttpResponse(content_type='application/pdf')
-            # response['Content-Disposition'] = f'attachment; filename="maintenance_{maintenance.id}.pdf"'
 
             pisa_status = pisa.CreatePDF(
                 html,

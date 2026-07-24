@@ -1,3 +1,5 @@
+"""Vistas de calibraciones para la gestión de registros de calibración de equipos instrumentales."""
+
 import os
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -19,17 +21,20 @@ from core.user.models import User
 from luka import settings
 
 
-# Listado de Calibraciones
 class CalibrationListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista de listado de calibraciones."""
+
     model = Calibration
     template_name = 'calibration/list_calibration.html'
     permission_required = 'equipment.view_calibration'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP aplicando la exención de CSRF."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa las solicitudes POST para la búsqueda y listado de calibraciones."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -69,6 +74,7 @@ class CalibrationListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, L
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de listado."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Listado de Calibraciones'
         context['create_url'] = reverse_lazy('equipment:create_calibration')
@@ -78,17 +84,20 @@ class CalibrationListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, L
         return context
 
 
-# Listado de Calibraciones Vencidas
 class CalibrationExpireListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista de listado de calibraciones vencidas pendientes por completar."""
+
     model = Calibration
     template_name = 'calibration/list_calibration.html'
     permission_required = 'equipment.view_calibration'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP aplicando la exención de CSRF."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa las solicitudes POST para la búsqueda de calibraciones vencidas del usuario actual."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -128,6 +137,7 @@ class CalibrationExpireListView(LoginRequiredMixin, ValidatePermissionRequiredMi
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de listado de vencidas."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Listado de Calibraciones'
         context['create_url'] = reverse_lazy('equipment:create_calibration')
@@ -137,8 +147,9 @@ class CalibrationExpireListView(LoginRequiredMixin, ValidatePermissionRequiredMi
         return context
 
 
-# Creación de Calibración
 class CalibrationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista de creación de calibraciones."""
+
     model = Calibration
     form_class = CalibrationForm
     template_name = 'calibration/create_calibration.html'
@@ -146,10 +157,12 @@ class CalibrationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP inicializando el objeto como nulo."""
         self.object = None
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la solicitud POST para registrar una nueva calibración."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -176,9 +189,11 @@ class CalibrationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de redirección después de crear una calibración."""
         return reverse('equipment:list_calibration')
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de creación."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Registro de Calibración'
         context['action'] = 'add'
@@ -189,8 +204,9 @@ class CalibrationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         return context
 
 
-# Edición de Calibración
 class CalibrationUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista de edición de calibraciones."""
+
     model = Calibration
     form_class = CalibrationForm
     template_name = 'calibration/update_calibration.html'
@@ -198,10 +214,12 @@ class CalibrationUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP obteniendo el objeto a editar."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la solicitud POST para actualizar una calibración existente."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -228,9 +246,11 @@ class CalibrationUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de redirección después de editar una calibración."""
         return reverse('equipment:list_calibration')
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de edición."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Editar Calibración'
         context['entity'] = 'Editar Calibración'
@@ -242,13 +262,15 @@ class CalibrationUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         return context
 
 
-# Detalle de Calibración
 class CalibrationDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """Vista de detalle de calibración."""
+
     model = Calibration
     template_name = 'calibration/detail_calibration.html'
     permission_required = 'equipment.view_calibration'
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de detalle."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Detalle de Calibración'
         context['entity'] = 'Detalle de Calibración'
@@ -259,12 +281,14 @@ class CalibrationDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         return context
 
 
-# Reporte PDF de Calibración
 class CalibrationPDFView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista de generación de reporte PDF de calibración."""
+
     permission_required = 'equipment.view_calibration'
 
     @staticmethod
     def link_callback(uri, rel):
+        """Convierte URIs HTML a rutas absolutas del sistema para que xhtml2pdf acceda a los recursos."""
         sUrl = settings.STATIC_URL
         sRoot = settings.STATIC_ROOT
         mUrl = settings.MEDIA_URL
@@ -282,6 +306,7 @@ class CalibrationPDFView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Vi
         return path
 
     def get(self, request, *args, **kwargs):
+        """Genera y retorna el reporte PDF de una calibración específica."""
         try:
             template = get_template('calibration/pdf_calibration.html')
             calibration = Calibration.objects.get(pk=self.kwargs['pk'])

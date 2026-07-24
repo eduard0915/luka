@@ -1,3 +1,5 @@
+"""Vistas para la gestión de procesos de muestreo."""
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
@@ -17,8 +19,8 @@ from core.utils import format_form_errors
 from core.analytical_method.models import AnalyticalMethodCalculateRelation, AnalyticalMethodCalculate
 
 
-# Creación de Proceso de Muestreo
 class SamplingProcessCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para la creación de procesos de muestreo."""
     model = SamplingProcess
     form_class = SamplingProcessForm
     template_name = 'process_sampling/create_process_sampling.html'
@@ -28,10 +30,12 @@ class SamplingProcessCreateView(LoginRequiredMixin, ValidatePermissionRequiredMi
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         self.object = None
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de creación de proceso de muestreo."""
         data = {}
         try:
             action = request.POST['action']
@@ -52,6 +56,7 @@ class SamplingProcessCreateView(LoginRequiredMixin, ValidatePermissionRequiredMi
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega el título y configuración de creación al contexto."""
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Creación de Muestreo'
@@ -61,8 +66,8 @@ class SamplingProcessCreateView(LoginRequiredMixin, ValidatePermissionRequiredMi
         return context
 
 
-# Edición de Proceso de Muestreo
 class SamplingProcessUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para la edición de procesos de muestreo."""
     model = SamplingProcess
     form_class = SamplingProcessForm
     template_name = 'process_sampling/create_process_sampling.html'
@@ -72,10 +77,12 @@ class SamplingProcessUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMi
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de edición de proceso de muestreo."""
         data = {}
         try:
             action = request.POST['action']
@@ -96,6 +103,7 @@ class SamplingProcessUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMi
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega el título y configuración de edición al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Edición de Muestreo'
         context['entity'] = 'Edición de Muestreo'
@@ -105,17 +113,19 @@ class SamplingProcessUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMi
         return context
 
 
-# Listado de Procesos de Muestreo
 class SamplingProcessListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista para el listado de procesos de muestreo."""
     model = SamplingProcess
     template_name = 'process_sampling/list_process_sampling.html'
     permission_required = 'reagent.add_reagent'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa solicitudes POST para la búsqueda y filtrado de procesos."""
         data = {}
         try:
             action = request.POST['action']
@@ -183,6 +193,7 @@ class SamplingProcessListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega el título, URL de creación y filtro de estado al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Muestreos'
         context['create_url'] = reverse_lazy('sampling:create_sampling_process')
@@ -193,9 +204,11 @@ class SamplingProcessListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
         return context
 
 
-# Listado de Muestreos Programados
 class SamplingProcessScheduledListView(SamplingProcessListView):
+    """Vista para el listado de muestreos programados."""
+
     def get_context_data(self, **kwargs):
+        """Agrega el filtro de estado 'Programada' al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Muestreos Programados'
         context['entity'] = 'Muestreos Programados'
@@ -203,9 +216,11 @@ class SamplingProcessScheduledListView(SamplingProcessListView):
         return context
 
 
-# Listado de Muestreos Confirmados
 class SamplingProcessConfirmedListView(SamplingProcessListView):
+    """Vista para el listado de muestreos confirmados."""
+
     def get_context_data(self, **kwargs):
+        """Agrega el filtro de estado 'Confirmada' al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Muestreos Confirmados'
         context['entity'] = 'Muestreos Confirmados'
@@ -213,9 +228,11 @@ class SamplingProcessConfirmedListView(SamplingProcessListView):
         return context
 
 
-# Listado de Muestreos en Proceso
 class SamplingProcessInProcessListView(SamplingProcessListView):
+    """Vista para el listado de muestras en proceso."""
+
     def get_context_data(self, **kwargs):
+        """Agrega el filtro de estado 'En Proceso' al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Muestras En Proceso'
         context['entity'] = 'Muestras En Proceso'
@@ -223,9 +240,11 @@ class SamplingProcessInProcessListView(SamplingProcessListView):
         return context
 
 
-# Listado de Muestreos con resultados Fuera de Límite
 class SamplingProcessOutSpecificationListView(SamplingProcessListView):
+    """Vista para el listado de muestras fuera de especificación."""
+
     def get_context_data(self, **kwargs):
+        """Agrega el filtro de fuera de especificación al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Muestras Fuera de Especificación'
         context['entity'] = 'Muestras Fuera de Especificación'
@@ -234,26 +253,27 @@ class SamplingProcessOutSpecificationListView(SamplingProcessListView):
         return context
 
 
-# Detalle de Proceso de Muestreo
 class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """Vista para el detalle de un proceso de muestreo."""
     model = SamplingProcess
     template_name = 'process_sampling/detail_process_sampling.html'
     permission_required = 'reagent.add_reagent'
 
     def get_object(self, queryset=None):
-        """Optimizar queryset del objeto principal"""
+        """Obtiene el proceso con las relaciones críticas precargadas."""
         if queryset is None:
             queryset = self.get_queryset()
-        # Cargar relaciones críticas para evitar queries adicionales
         return queryset.select_related(
             'group_sampling__sampling_point__product',
             'point_sampling__product'
         ).get(pk=self.kwargs['pk'])
 
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud de detalle del proceso."""
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
+        """Agrega especificaciones, análisis, ecuaciones y cálculos al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Detalle de Proceso de Muestreo'
         context['entity'] = self.object
@@ -369,8 +389,8 @@ class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMi
         return context
 
 
-# Actualización de Foto de la Muestra
 class SamplingProcessImageUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para actualizar la foto de la muestra."""
     model = SamplingProcess
     form_class = SamplingProcessImageForm
     template_name = 'process_sampling/confirmation_sampling.html'
@@ -378,10 +398,12 @@ class SamplingProcessImageUpdateView(LoginRequiredMixin, ValidatePermissionRequi
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la actualización de la foto de la muestra."""
         data = {}
         try:
             form = self.get_form()
@@ -396,14 +418,15 @@ class SamplingProcessImageUpdateView(LoginRequiredMixin, ValidatePermissionRequi
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega la entidad y acción al contexto."""
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Actualizar Foto de la Muestra'
         context['action'] = 'edit'
         return context
 
 
-# Confirmación de la Muestra
 class SamplingProcessConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para la confirmación de recepción de muestra."""
     model = SamplingProcess
     form_class = SamplingProcessConfirmedForm
     template_name = 'process_sampling/confirmation_sampling.html'
@@ -411,10 +434,12 @@ class SamplingProcessConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionR
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la confirmación de la muestra."""
         data = {}
         try:
             form = self.get_form()
@@ -429,6 +454,7 @@ class SamplingProcessConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionR
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega la entidad y mensaje de confirmación al contexto."""
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Confirmación Toma de Muestra'
         context['info_form'] = mark_safe('<span class="text-danger me-2">¿Está seguro de confirmar la toma de la muestra?</span>')
@@ -436,8 +462,8 @@ class SamplingProcessConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionR
         return context
 
 
-# Cambio de Estado de la Muestra a En Proceso
 class SamplingProcessInProcessUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para cambiar el estado de la muestra a 'En Proceso'."""
     model = SamplingProcess
     form_class = SamplingProcessInProcessForm
     template_name = 'process_sampling/confirmation_sampling.html'
@@ -445,10 +471,12 @@ class SamplingProcessInProcessUpdateView(LoginRequiredMixin, ValidatePermissionR
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada y obtiene el objeto."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el cambio de estado de la muestra a 'En Proceso' y redirige al análisis si existe."""
         data = {}
         try:
             form = self.get_form()
@@ -472,6 +500,7 @@ class SamplingProcessInProcessUpdateView(LoginRequiredMixin, ValidatePermissionR
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega la entidad y mensaje de inicio de procesamiento al contexto."""
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Inicio de Procesamiento de Muestra'
         context['info_form'] = mark_safe('<span class="text-danger me-2">¿Está seguro de Iniciar Procesamiento de la Muestra?</span>')
@@ -479,8 +508,8 @@ class SamplingProcessInProcessUpdateView(LoginRequiredMixin, ValidatePermissionR
         return context
 
 
-# Aprobación del procesamiento de la muestra o control de calidad
 class SamplingProcessApprovedUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para la aprobación del control de calidad de la muestra."""
     model = SamplingProcess
     form_class = SamplingProcessApprovedForm
     template_name = 'process_sampling/confirmation_sampling.html'
@@ -488,10 +517,12 @@ class SamplingProcessApprovedUpdateView(LoginRequiredMixin, ValidatePermissionRe
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la aprobación del control de calidad."""
         data = {}
         try:
             form = self.get_form()
@@ -506,6 +537,7 @@ class SamplingProcessApprovedUpdateView(LoginRequiredMixin, ValidatePermissionRe
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega la entidad y mensaje de aprobación al contexto."""
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Aprobación de Control de Calidad Muestra'
         context['info_form'] = mark_safe('<span class="text-danger me-2">¿Está seguro de aprobar el control de calidad de la muestra?</span>')

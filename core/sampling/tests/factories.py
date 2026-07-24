@@ -1,3 +1,5 @@
+"""Fábricas de datos para pruebas de la aplicación sampling."""
+
 import itertools
 from datetime import time
 
@@ -10,6 +12,7 @@ _sequence = itertools.count(1)
 
 def build_sample_point(code='PM1', enable_point=True, sample_type='En Proceso', sample_frequency=None,
                        periodicity='Diaria'):
+    """Crea un punto de muestreo con todos los objetos relacionados (compañía, sitio, producto)."""
     company = Company.objects.create()
     site = Site.objects.create(
         site_name='Planta Test',
@@ -36,6 +39,7 @@ def build_sample_point(code='PM1', enable_point=True, sample_type='En Proceso', 
 
 
 def build_sampling_group(code='PM1', first_hour='07:00:00', per_day=4, enabled=True, point=None):
+    """Crea un grupo de muestreo con su punto de muestreo asociado."""
     if point is None:
         # Coherente con la UI: N = floor(24 / sample_frequency)
         point = build_sample_point(code=code, sample_frequency=24 // per_day if per_day else None)

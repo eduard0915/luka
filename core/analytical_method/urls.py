@@ -9,6 +9,8 @@ from luka import settings
 
 app_name = 'analytical_method'
 
+"""Definición de rutas URL para la aplicación de métodos analíticos."""
+
 urlpatterns = [
     # Métodos Analíticos
     path('add/', AnalyticalMethodCreateView.as_view(), name='create_method'),

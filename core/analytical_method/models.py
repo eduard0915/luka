@@ -1,3 +1,9 @@
+"""Modelos de la aplicación de métodos analíticos.
+
+Define las entidades para la gestión de métodos analíticos, incluyendo
+soluciones, reactivos, equipos, materiales, procedimientos y cálculos.
+"""
+
 import uuid
 
 from crum import get_current_user
@@ -12,8 +18,8 @@ from core.solution.models import SolutionBase, SolutionStdBase
 from core.user.models import User
 
 
-# Métodos Analíticos
 class AnalyticalMethod(BaseModel):
+    """Modelo que representa un método analítico con sus parámetros y configuración."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     description_analytical_method = models.CharField(max_length=250, verbose_name='Descripción')
     code_analytical_method  = models.CharField(max_length=20, verbose_name='Id')
@@ -25,6 +31,7 @@ class AnalyticalMethod(BaseModel):
     version = models.PositiveSmallIntegerField(default=1, verbose_name='Versión')
 
     def __str__(self):
+        """Retorna la representación en texto del método analítico (código + descripción)."""
         return str(self.code_analytical_method) + ' '  + str(self.description_analytical_method)
 
     class Meta:
@@ -33,6 +40,7 @@ class AnalyticalMethod(BaseModel):
         db_table = 'AnalyticalMethod'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda el método analítico asignando el usuario de creación o actualización."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -42,13 +50,14 @@ class AnalyticalMethod(BaseModel):
         return super(AnalyticalMethod, self).save(*args, **kwargs)
 
 
-# Soluciones para Métodos Analíticos
 class AnalyticalMethodSolution(BaseModel):
+    """Modelo que relaciona una solución con un método analítico."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE)
     solution = models.ForeignKey(SolutionBase, verbose_name='Solución', on_delete=models.CASCADE)
 
     def __str__(self):
+        """Retorna la solución asociada al método analítico."""
         return str(self.solution)
 
     class Meta:
@@ -57,6 +66,7 @@ class AnalyticalMethodSolution(BaseModel):
         db_table = 'AnalyticalMethodSolution'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda la relación solución-método analítico asignando el usuario correspondiente."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -66,13 +76,14 @@ class AnalyticalMethodSolution(BaseModel):
         return super(AnalyticalMethodSolution, self).save(*args, **kwargs)
 
 
-# Soluciones Estándares para Métodos Analíticos
 class AnalyticalMethodSolutionStd(BaseModel):
+    """Modelo que relaciona una solución estándar con un método analítico."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE)
     solution_std = models.ForeignKey(SolutionStdBase, verbose_name='Solución Estándar', on_delete=models.CASCADE)
 
     def __str__(self):
+        """Retorna la solución estándar asociada al método analítico."""
         return str(self.solution_std)
 
     class Meta:
@@ -81,6 +92,7 @@ class AnalyticalMethodSolutionStd(BaseModel):
         db_table = 'AnalyticalMethodSolutionStd'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda la relación solución estándar-método analítico asignando el usuario correspondiente."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -90,13 +102,14 @@ class AnalyticalMethodSolutionStd(BaseModel):
         return super(AnalyticalMethodSolutionStd, self).save(*args, **kwargs)
 
 
-# Reactivos para Métodos Analíticos
 class AnalyticalMethodReagent(BaseModel):
+    """Modelo que relaciona un reactivo con un método analítico."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE)
     reagent = models.ForeignKey(Reagent, verbose_name='Reactivo', on_delete=models.CASCADE)
 
     def __str__(self):
+        """Retorna el reactivo asociado al método analítico."""
         return str(self.reagent)
 
     class Meta:
@@ -105,6 +118,7 @@ class AnalyticalMethodReagent(BaseModel):
         db_table = 'AnalyticalMethodReagent'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda la relación reactivo-método analítico asignando el usuario correspondiente."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -114,13 +128,14 @@ class AnalyticalMethodReagent(BaseModel):
         return super(AnalyticalMethodReagent, self).save(*args, **kwargs)
 
 
-# Equipos para Métodos Analíticos
 class AnalyticalMethodEquipment(BaseModel):
+    """Modelo que relaciona un equipo instrumental con un método analítico."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE)
     equipment_instrumental = models.ForeignKey(EquipmentInstrumental, verbose_name='Equipo Instrumental', on_delete=models.CASCADE)
 
     def __str__(self):
+        """Retorna el equipo instrumental asociado al método analítico."""
         return str(self.equipment_instrumental)
 
     class Meta:
@@ -129,6 +144,7 @@ class AnalyticalMethodEquipment(BaseModel):
         db_table = 'AnalyticalMethodEquipment'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda la relación equipo-método analítico asignando el usuario correspondiente."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -138,13 +154,14 @@ class AnalyticalMethodEquipment(BaseModel):
         return super(AnalyticalMethodEquipment, self).save(*args, **kwargs)
 
 
-# Material Instrumental para Métodos Analíticos
 class AnalyticalMethodMaterial(BaseModel):
+    """Modelo que relaciona un material instrumental con un método analítico."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE)
     material_instrumental = models.ForeignKey(MaterialInstrumental, verbose_name='Material Instrumental', on_delete=models.CASCADE)
 
     def __str__(self):
+        """Retorna el material instrumental asociado al método analítico."""
         return str(self.material_instrumental)
 
     class Meta:
@@ -153,6 +170,7 @@ class AnalyticalMethodMaterial(BaseModel):
         db_table = 'AnalyticalMethodMaterialInstrumental'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda la relación material-método analítico asignando el usuario correspondiente."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -162,14 +180,15 @@ class AnalyticalMethodMaterial(BaseModel):
         return super(AnalyticalMethodMaterial, self).save(*args, **kwargs)
 
 
-# Procedimiento de metodos Analítico
 class AnalyticalMethodProcedure(BaseModel):
+    """Modelo que almacena los pasos del procedimiento de un método analítico."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE)
     procedure = models.TextField(verbose_name='Procedimiento')
     step_procedure = models.PositiveSmallIntegerField(verbose_name='Paso N°')
 
     def __str__(self):
+        """Retorna el texto del procedimiento."""
         return str(self.procedure)
 
     class Meta:
@@ -178,6 +197,7 @@ class AnalyticalMethodProcedure(BaseModel):
         db_table = 'AnalyticalMethodProcedure'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda el paso del procedimiento asignando el usuario correspondiente."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -187,8 +207,8 @@ class AnalyticalMethodProcedure(BaseModel):
         return super(AnalyticalMethodProcedure, self).save(*args, **kwargs)
 
 
-# Cálculo de concentración de muestra
 class AnalyticalMethodCalculate(BaseModel):
+    """Modelo que define los cálculos de concentración de muestra para un método analítico."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analítico', on_delete=models.CASCADE)
     calculate_description = models.CharField(max_length=100, verbose_name='Descripción del Cálculo', null=True, blank=True)
@@ -200,6 +220,7 @@ class AnalyticalMethodCalculate(BaseModel):
     position = models.CharField(max_length=15, verbose_name='Posición en Ecuación', null=True, blank=True)
 
     def __str__(self):
+        """Retorna la descripción del cálculo."""
         return str(self.calculate_description)
 
     class Meta:
@@ -208,6 +229,7 @@ class AnalyticalMethodCalculate(BaseModel):
         db_table = 'AnalyticalMethodCalculate'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda el cálculo asignando el usuario correspondiente."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -217,8 +239,8 @@ class AnalyticalMethodCalculate(BaseModel):
         return super(AnalyticalMethodCalculate, self).save(*args, **kwargs)
 
 
-# Cálculos de Relacionados
 class AnalyticalMethodCalculateRelation(BaseModel):
+    """Modelo que define cálculos relacionados con productos y métodos analíticos."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     product = models.ForeignKey('product.Product', verbose_name='Producto', on_delete=models.CASCADE, null=True, blank=True)
     analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE, null=True, blank=True)
@@ -233,6 +255,7 @@ class AnalyticalMethodCalculateRelation(BaseModel):
     sig_figs = models.SmallIntegerField(verbose_name='Cifras Significativas', default=4)
 
     def __str__(self):
+        """Retorna la descripción del cálculo relacionado."""
         return str(self.calculate_description_relation)
 
     class Meta:
@@ -241,6 +264,7 @@ class AnalyticalMethodCalculateRelation(BaseModel):
         db_table = 'AnalyticalMethodCalculateRelation'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda el cálculo relacionado asignando el usuario correspondiente."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -250,14 +274,15 @@ class AnalyticalMethodCalculateRelation(BaseModel):
         return super(AnalyticalMethodCalculateRelation, self).save(*args, **kwargs)
 
 
-# Soluciones Estándares para Retrovaloración
 class SolutionStdBackValuation(BaseModel):
+    """Modelo que almacena soluciones estándar usadas para retrovaloración en métodos analíticos."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analítico', on_delete=models.CASCADE)
     solution_std = models.ForeignKey(SolutionStdBase, verbose_name='Solución Estándar', on_delete=models.CASCADE)
     volume_std_back = models.FloatField(verbose_name='Volumen Estándar (mL)', blank=True, null=True)
 
     def __str__(self):
+        """Retorna la solución estándar usada en la retrovaloración."""
         return str(self.solution_std)
 
     class Meta:
@@ -266,6 +291,7 @@ class SolutionStdBackValuation(BaseModel):
         db_table = 'SolutionStdBackValuation'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda la retrovaloración asignando el usuario correspondiente."""
         user = get_current_user()
         if user:
             if not self.user_creation:

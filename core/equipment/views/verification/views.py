@@ -1,3 +1,5 @@
+"""Vistas de verificaciones intermedias para la gestión de verificaciones periódicas de equipos."""
+
 import os
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -18,17 +20,20 @@ from core.mixins import ValidatePermissionRequiredMixin
 from luka import settings
 
 
-# Listado de Verificaciones
 class VerificationListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista de listado de verificaciones intermedias."""
+
     model = Verification
     template_name = 'verification/list_verification.html'
     permission_required = 'equipment.view_verification'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP aplicando la exención de CSRF."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa las solicitudes POST para la búsqueda y listado de verificaciones."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -67,6 +72,7 @@ class VerificationListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de listado."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Listado de Verificaciones'
         context['create_url'] = reverse_lazy('equipment:create_verification')
@@ -76,8 +82,9 @@ class VerificationListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
         return context
 
 
-# Creación de Verificación
 class VerificationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista de creación de verificaciones intermedias."""
+
     model = Verification
     form_class = VerificationForm
     template_name = 'verification/create_verification.html'
@@ -85,10 +92,12 @@ class VerificationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP inicializando el objeto como nulo."""
         self.object = None
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la solicitud POST para registrar una nueva verificación."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -115,9 +124,11 @@ class VerificationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de redirección después de crear una verificación."""
         return reverse('equipment:list_verification')
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de creación."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Registro de Verificación'
         context['action'] = 'add'
@@ -128,8 +139,9 @@ class VerificationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin
         return context
 
 
-# Edición de Verificación
 class VerificationUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista de edición de verificaciones intermedias."""
+
     model = Verification
     form_class = VerificationForm
     template_name = 'verification/update_verification.html'
@@ -137,10 +149,12 @@ class VerificationUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP obteniendo el objeto a editar."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la solicitud POST para actualizar una verificación existente."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -167,9 +181,11 @@ class VerificationUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de redirección después de editar una verificación."""
         return reverse('equipment:list_verification')
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de edición."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Editar Verificación'
         context['entity'] = 'Editar Verificación'
@@ -181,13 +197,15 @@ class VerificationUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin
         return context
 
 
-# Detalle de Verificación
 class VerificationDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """Vista de detalle de verificación intermedia."""
+
     model = Verification
     template_name = 'verification/detail_verification.html'
     permission_required = 'equipment.view_verification'
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de detalle."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Detalle de Verificación'
         context['entity'] = 'Detalle de Verificación'
@@ -198,12 +216,14 @@ class VerificationDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin
         return context
 
 
-# Reporte PDF de Verificación
 class VerificationPDFView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista de generación de reporte PDF de verificación intermedia."""
+
     permission_required = 'equipment.view_verification'
 
     @staticmethod
     def link_callback(uri, rel):
+        """Convierte URIs HTML a rutas absolutas del sistema para que xhtml2pdf acceda a los recursos."""
         sUrl = settings.STATIC_URL
         sRoot = settings.STATIC_ROOT
         mUrl = settings.MEDIA_URL
@@ -221,6 +241,7 @@ class VerificationPDFView(LoginRequiredMixin, ValidatePermissionRequiredMixin, V
         return path
 
     def get(self, request, *args, **kwargs):
+        """Genera y retorna el reporte PDF de una verificación intermedia específica."""
         try:
             template = get_template('verification/pdf_verification.html')
             verification = Verification.objects.get(pk=self.kwargs['pk'])

@@ -1,3 +1,6 @@
+"""Vistas CRUD para la gestión de soluciones estándar, incluyendo creación, listado,
+confirmación de preparación, detalle y generación de etiquetas PDF."""
+
 import os
 
 from django.contrib import messages
@@ -24,6 +27,7 @@ from luka import settings
 
 # Creación de Soluciones Estándar
 class SolutionStandardCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para la creación de una nueva solución estándar."""
     model = SolutionStd
     form_class = SolutionStandardForm
     template_name = 'solution_std/create_solution_std.html'
@@ -31,10 +35,12 @@ class SolutionStandardCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Maneja la petición inicializando el objeto como nulo."""
         self.object = None
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de creación vía AJAX y retorna la respuesta JSON."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -65,9 +71,11 @@ class SolutionStandardCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de detalle de la solución estándar recién creada."""
         return reverse('solution:detail_solution_std', kwargs={'pk': self.object.pk})
 
     def get_context_data(self, **kwargs):
+        """Agrega título, acción y URLs al contexto del template."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Preparar Solución STD'
         context['action'] = 'add'
@@ -83,6 +91,7 @@ class SolutionStandardCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
 
 # Confirmar Preparación de Sln Estándar
 class SolutionStdConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para confirmar la preparación de una solución estándar."""
     model = SolutionStd
     form_class = SolutionStdConfirmedForm
     template_name = 'solution/confirmed_solution.html'
@@ -90,10 +99,12 @@ class SolutionStdConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionRequi
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Obtiene la solución estándar a confirmar y maneja la petición."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la confirmación de preparación vía AJAX."""
         data = {}
         try:
             action = request.POST['action']
@@ -111,6 +122,7 @@ class SolutionStdConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionRequi
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega entidad, acción e información de la solución estándar al contexto."""
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Confirmación de Preparación de Solución STD'
         context['action'] = 'edit'
@@ -121,15 +133,18 @@ class SolutionStdConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionRequi
 
 # Listado de Soluciones
 class SolutionStdListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista para listar todas las soluciones estándar registradas."""
     model = SolutionStd
     template_name = 'solution/list_solution.html'
     permission_required = 'reagent.view_reagent'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Maneja la petición del listado de soluciones estándar."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la solicitud AJAX de búsqueda y retorna los datos en JSON."""
         data = {}
         try:
             action = request.POST['action']
@@ -165,6 +180,7 @@ class SolutionStdListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, L
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega título, URL de creación y fecha actual al contexto del listado."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Soluciones Estándar'
         context['create_url'] = reverse_lazy('solution:create_solution_std')
@@ -177,14 +193,17 @@ class SolutionStdListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, L
 
 # Detalle de Solución Estándar
 class SolutionStdDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """Vista de detalle de una solución estándar, mostrando transacciones y configuraciones."""
     model = SolutionStd
     template_name = 'solution_std/detail_solution_std.html'
     permission_required = 'reagent.add_reagent'
 
     def dispatch(self, request, *args, **kwargs):
+        """Maneja la petición de detalle de la solución estándar."""
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de transacciones y URLs al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Preparación de Solución Estándar'
         context['entity'] = 'Preparación de Solución Estándar'
@@ -193,7 +212,7 @@ class SolutionStdDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         #     context['back'] = reverse_lazy('user:user_list')
         context['icon'] = 'fa-solid fa-flask-vial'
         context['list_url'] = reverse_lazy('solution:list_solution_std')
-        context['transactions'] = TransactionSolutionStd.objects.filter(solution_std_inventory_id=self.object.pk)
+        context['transactions'] = TransactionSolutionStd.objects.select_related('solution_std_inventory').filter(solution_std_inventory_id=self.object.pk)
         context['std'] = reverse_lazy('solution:create_solution_std', kwargs={'pk': self.object.pk})
         return context
 
@@ -237,6 +256,7 @@ def get_inventory_reagent_data(request, reagent_id):
 
 # Etiqueta de Identificación de Solución Estándar
 class SolutionStdLabelPDFDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista para generar la etiqueta PDF de identificación de una solución estándar."""
     permission_required = 'reagent.add_reagent'
 
     @staticmethod
@@ -265,6 +285,7 @@ class SolutionStdLabelPDFDetailView(LoginRequiredMixin, ValidatePermissionRequir
         return path
 
     def get(self, request, *args, **kwargs):
+        """Genera y retorna el PDF de la etiqueta de identificación de la solución estándar."""
         try:
             template = get_template('solution_std/label_solution_std.html')
             sln = SolutionStd.objects.get(pk=self.kwargs['pk'])

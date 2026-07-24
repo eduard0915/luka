@@ -1,3 +1,10 @@
+"""Enrutador principal del proyecto Luka LIS.
+
+Define los patrones de URL globales que incluyen el panel de
+administración, la página de inicio y las rutas de cada módulo
+de la aplicación core.
+"""
+
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.http import HttpResponse

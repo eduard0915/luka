@@ -1,3 +1,5 @@
+"""Módulo: Vistas CRUD para la gestión principal de métodos analíticos (listado, creación, edición y detalle)."""
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
@@ -13,18 +15,20 @@ from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalc
     AnalyticalMethodCalculateRelation, SolutionStdBackValuation
 from core.analytical_method.forms import AnalyticalMethodForm
 
-
 # Listado de Métodos Analíticos
 class AnalyticalMethodListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """)Vista para listar todos los métodos analíticos registrados."""
     model = AnalyticalMethod
     template_name = 'method/list_method.html'
     permission_required = 'analytical_method.view_analyticalmethod'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Maneja la petición HTTP y aplica decoradores CSRF."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la solicitud AJAX de búsqueda y retorna los datos en JSON."""
         data = {}
         try:
             action = request.POST['action']
@@ -53,6 +57,7 @@ class AnalyticalMethodListView(LoginRequiredMixin, ValidatePermissionRequiredMix
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Listado de Métodos Analíticos'
         context['create_url'] = reverse_lazy('analytical_method:create_method')
@@ -61,9 +66,9 @@ class AnalyticalMethodListView(LoginRequiredMixin, ValidatePermissionRequiredMix
         context['icon'] = 'fa-solid fa-vial'
         return context
 
-
 # Creación de Métodos Analíticos
 class AnalyticalMethodCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """)Vista para la creación de un nuevo método analítico."""
     model = AnalyticalMethod
     form_class = AnalyticalMethodForm
     template_name = 'method/create_method.html'
@@ -71,10 +76,12 @@ class AnalyticalMethodCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Maneja la petición HTTP y aplica decoradores CSRF."""
         self.object = None
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario enviado vía AJAX y retorna la respuesta JSON."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -105,9 +112,11 @@ class AnalyticalMethodCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de redirección después de una operación exitosa."""
         return reverse('analytical_method:list_method')
 
     def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Crear Método Analítico'
         context['action'] = 'add'
@@ -117,9 +126,9 @@ class AnalyticalMethodCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['list_url'] = reverse_lazy('analytical_method:list_method')
         return context
 
-
 # Editar Métodos Analíticos
 class AnalyticalMethodUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """)Vista para la edición de un método analítico existente."""
     model = AnalyticalMethod
     form_class = AnalyticalMethodForm
     template_name = 'method/update_method.html'
@@ -127,10 +136,12 @@ class AnalyticalMethodUpdateView(LoginRequiredMixin, ValidatePermissionRequiredM
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Maneja la petición HTTP y aplica decoradores CSRF."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario enviado vía AJAX y retorna la respuesta JSON."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -161,9 +172,11 @@ class AnalyticalMethodUpdateView(LoginRequiredMixin, ValidatePermissionRequiredM
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de redirección después de una operación exitosa."""
         return reverse('analytical_method:list_method')
 
     def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Editar Método Analítico'
         context['entity'] = 'Editar Método Analítico'
@@ -173,17 +186,19 @@ class AnalyticalMethodUpdateView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['list_url'] = reverse_lazy('analytical_method:list_method')
         return context
 
-
 # Detalle de Métodos Analíticos
 class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """)Vista de detalle de un método analítico con toda su configuración."""
     model = AnalyticalMethod
     template_name = 'method/detail_method.html'
     permission_required = 'analytical_method.view_analyticalmethod'
 
     def dispatch(self, request, *args, **kwargs):
+        """Maneja la petición HTTP y aplica decoradores CSRF."""
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Método Analítico: ' + str(self.object.code_analytical_method)
         context['entity'] = self.object

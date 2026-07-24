@@ -1,3 +1,9 @@
+"""Servicios de negocio para el módulo de soluciones.
+
+Contiene la lógica de transferencia de reactivos del inventario
+a soluciones estándar listas para usar.
+"""
+
 from django.db import transaction
 from django.utils import timezone
 from core.reagent.models import TransactionReagent

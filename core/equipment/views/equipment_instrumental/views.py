@@ -1,3 +1,5 @@
+"""Vistas de equipos instrumentales para la gestión del inventario de equipos del laboratorio."""
+
 import os
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -18,8 +20,9 @@ from core.mixins import ValidatePermissionRequiredMixin
 from luka import settings
 
 
-# Creación de Equipos Instrumentales
 class EquipmentInstrumentalCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista de creación de equipos instrumentales."""
+
     model = EquipmentInstrumental
     form_class = EquipmentInstrumentalForm
     template_name = 'equipment_instrumental/create_equipment.html'
@@ -27,10 +30,12 @@ class EquipmentInstrumentalCreateView(LoginRequiredMixin, ValidatePermissionRequ
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP inicializando el objeto como nulo."""
         self.object = None
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la solicitud POST para registrar un nuevo equipo instrumental."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -62,9 +67,11 @@ class EquipmentInstrumentalCreateView(LoginRequiredMixin, ValidatePermissionRequ
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de redirección después de crear un equipo instrumental."""
         return reverse('equipment:list_equipment_instrumental')
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de creación."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Registrar Equipo Instrumental'
         context['action'] = 'add'
@@ -75,17 +82,20 @@ class EquipmentInstrumentalCreateView(LoginRequiredMixin, ValidatePermissionRequ
         return context
 
 
-# Listado de Equipos Instrumentales
 class EquipmentInstrumentalListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista de listado de equipos instrumentales."""
+
     model = EquipmentInstrumental
     template_name = 'equipment_instrumental/list_equipment.html'
     permission_required = 'equipment.view_equipmentinstrumental'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP aplicando la exención de CSRF."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa las solicitudes POST para la búsqueda y listado de equipos instrumentales."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -111,13 +121,10 @@ class EquipmentInstrumentalListView(LoginRequiredMixin, ValidatePermissionRequir
                     'enable_equipment'
                 ).order_by('code_equipment'))
 
-                # Formatear el nombre completo del responsable
                 for equipment in equipments:
                     first_name = equipment.get('responsible_user__first_name', '') or ''
                     last_name = equipment.get('responsible_user__last_name', '') or ''
                     equipment['responsible_user__full_name'] = f"{first_name} {last_name}".strip()
-
-                    # Formatear estado
                     equipment['enable_equipment_display'] = 'Sí' if equipment['enable_equipment'] else 'No'
 
                 return JsonResponse(equipments, safe=False)
@@ -128,6 +135,7 @@ class EquipmentInstrumentalListView(LoginRequiredMixin, ValidatePermissionRequir
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de listado."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Listado de Equipos Instrumentales'
         context['create_url'] = reverse_lazy('equipment:create_equipment_instrumental')
@@ -137,8 +145,9 @@ class EquipmentInstrumentalListView(LoginRequiredMixin, ValidatePermissionRequir
         return context
 
 
-# Edición de Equipos Instrumentales
 class EquipmentInstrumentalUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista de edición de equipos instrumentales."""
+
     model = EquipmentInstrumental
     form_class = EquipmentInstrumentalForm
     template_name = 'equipment_instrumental/update_equipment.html'
@@ -146,10 +155,12 @@ class EquipmentInstrumentalUpdateView(LoginRequiredMixin, ValidatePermissionRequ
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP obteniendo el objeto a editar."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la solicitud POST para actualizar un equipo instrumental existente."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -181,9 +192,11 @@ class EquipmentInstrumentalUpdateView(LoginRequiredMixin, ValidatePermissionRequ
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de redirección después de editar un equipo instrumental."""
         return reverse('equipment:list_equipment_instrumental')
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de edición."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Editar Equipo Instrumental'
         context['entity'] = 'Editar Equipo Instrumental'
@@ -194,41 +207,42 @@ class EquipmentInstrumentalUpdateView(LoginRequiredMixin, ValidatePermissionRequ
         return context
 
 
-# Detalle de Equipo Instrumental
 class EquipmentInstrumentalDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """Vista de detalle u hoja de vida de equipo instrumental."""
+
     model = EquipmentInstrumental
     template_name = 'equipment_instrumental/detail_equipment.html'
     permission_required = 'equipment.add_equipmentinstrumental'
     queryset = EquipmentInstrumental.objects.select_related('laboratory__site', 'responsible_user')
 
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP."""
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto incluyendo mantenimientos, calibraciones, verificaciones y patrones asociados."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Hoja de Vida de Equipo Instrumental'
         context['entity'] = 'Hoja de Vida de Equipo Instrumental'
         context['icon'] = 'fa-solid fa-microscope'
         context['list_url'] = reverse_lazy('equipment:list_equipment_instrumental')
         context['update_url'] = reverse_lazy('equipment:update_equipment_instrumental', kwargs={'pk': self.object.pk})
-        # Mantenimientos del equipo
         context['maintenances'] = self.object.maintenance_set.select_related('responsible_user').all().order_by('-date_maintenance')
-        # Calibraciones del equipo
         context['calibrations'] = self.object.calibration_set.select_related('responsible_user').all().order_by('-date_calibration')
-        # Verificaciones del equipo
         context['verifications'] = self.object.verification_set.select_related('responsible_user').all().order_by('-date_verification')
-        # Patrones de Referencia del equipo
         context['reference_patterns'] = self.object.referencepattern_set.all().order_by('description_pattern')
         context['pdf_url'] = reverse('equipment:equipment_instrumental_pdf', kwargs={'pk': self.object.pk})
         return context
 
 
-# Reporte PDF de Equipo Instrumental
 class EquipmentInstrumentalPDFView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista de generación de reporte PDF de hoja de vida de equipo instrumental."""
+
     permission_required = 'equipment.view_equipmentinstrumental'
 
     @staticmethod
     def link_callback(uri, rel):
+        """Convierte URIs HTML a rutas absolutas del sistema para que xhtml2pdf acceda a los recursos."""
         sUrl = settings.STATIC_URL
         sRoot = settings.STATIC_ROOT
         mUrl = settings.MEDIA_URL
@@ -246,6 +260,7 @@ class EquipmentInstrumentalPDFView(LoginRequiredMixin, ValidatePermissionRequire
         return path
 
     def get(self, request, *args, **kwargs):
+        """Genera y retorna el reporte PDF de hoja de vida de un equipo instrumental específico."""
         try:
             template = get_template('equipment_instrumental/pdf_equipment.html')
             object = EquipmentInstrumental.objects.select_related('laboratory__site', 'responsible_user').get(pk=self.kwargs['pk'])
@@ -263,7 +278,6 @@ class EquipmentInstrumentalPDFView(LoginRequiredMixin, ValidatePermissionRequire
 
             html = template.render(context)
             response = HttpResponse(content_type='application/pdf')
-            # response['Content-Disposition'] = f'attachment; filename="equipment_{object.code_equipment}.pdf"'
 
             pisa_status = pisa.CreatePDF(
                 html,

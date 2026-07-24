@@ -1,3 +1,5 @@
+"""Vistas para la gestión de grupos de muestreo."""
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
@@ -14,8 +16,8 @@ from core.sampling.models import SamplingGroup
 from core.utils import format_form_errors
 
 
-# Creación de Grupos de Muestreo
 class SamplingGroupCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para la creación de grupos de muestreo."""
     model = SamplingGroup
     form_class = SamplingGroupForm
     template_name = 'group_sampling/create_group_sampling.html'
@@ -25,10 +27,12 @@ class SamplingGroupCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixi
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         self.object = None
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de creación de grupo de muestreo."""
         data = {}
         try:
             action = request.POST['action']
@@ -49,6 +53,7 @@ class SamplingGroupCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixi
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega el título y configuración de la vista al contexto."""
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Creación de Grupo de Muestreo'
@@ -58,8 +63,8 @@ class SamplingGroupCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixi
         return context
 
 
-# Edición de Grupos de Muestreo
 class SamplingGroupUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para la edición de grupos de muestreo."""
     model = SamplingGroup
     form_class = SamplingGroupForm
     template_name = 'group_sampling/create_group_sampling.html'
@@ -69,10 +74,12 @@ class SamplingGroupUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixi
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de edición de grupo de muestreo."""
         data = {}
         try:
             action = request.POST['action']
@@ -93,6 +100,7 @@ class SamplingGroupUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixi
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega el título y configuración de edición al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Edición de Grupo de Muestreo'
         context['entity'] = 'Edición de Grupo de Muestreo'
@@ -102,12 +110,9 @@ class SamplingGroupUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixi
         return context
 
 
-# Vista para obtener los datos de un punto de muestreo
 @require_http_methods(["GET"])
 def get_sampling_point(request, pk):
-    """
-    API endpoint para obtener los datos de un punto de muestreo
-    """
+    """API endpoint para obtener los datos de un punto de muestreo."""
     try:
         sampling_point = SamplePoint.objects.get(pk=pk)
         data = {
@@ -123,23 +128,25 @@ def get_sampling_point(request, pk):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-# Listado de Grupos de Muestreo
 class SamplingGroupListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista para el listado de grupos de muestreo."""
     model = SamplingGroup
     template_name = 'group_sampling/list_group_sampling.html'
     permission_required = 'reagent.add_reagent'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa solicitudes POST para la búsqueda de grupos de muestreo."""
         data = {}
         try:
             action = request.POST['action']
             if action == 'searchdata':
                 data = []
-                groups = SamplingGroup.objects.filter(enable_sampling_group=True).order_by('sampling_point__sequence')
+                groups = SamplingGroup.objects.select_related('sampling_point').filter(enable_sampling_group=True).order_by('sampling_point__sequence')
                 for group in groups:
                     item = {
                         'id': group.id,
@@ -157,6 +164,7 @@ class SamplingGroupListView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega el título y configuración del listado al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Grupos de Muestreo'
         context['create_url'] = reverse_lazy('sampling:create_sampling_group')
@@ -166,16 +174,18 @@ class SamplingGroupListView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         return context
 
 
-# Detalle de Grupo de Muestreo
 class SamplingGroupDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """Vista para el detalle de un grupo de muestreo."""
     model = SamplingGroup
     template_name = 'group_sampling/detail_group_sampling.html'
     permission_required = 'reagent.add_reagent'
 
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud de detalle del grupo."""
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
+        """Agrega el título, entidad e icono al contexto del detalle."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Detalle de Grupo de Muestreo'
         context['entity'] = self.object

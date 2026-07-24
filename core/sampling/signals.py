@@ -1,3 +1,5 @@
+"""Señales de Django para la aplicación de muestreo."""
+
 from decimal import Decimal
 
 from django.db import transaction
@@ -12,13 +14,9 @@ from core.sampling.models import *
 from core.solution.models import SolutionStd, TransactionSolutionStd
 
 
-# Signal para creación de especificaciones y metodos de análisis cuando el estado de la muestra es Confirmada
 @receiver(post_save, sender=SamplingProcess)
 def create_sampling_analysis(sender, instance, created, **kwargs):
-    """
-    Crea registros de SamplingAnalysis cuando un SamplingProcess es confirmado.
-    Solo se ejecuta en updates (created=False) cuando el status es 'Confirmada'.
-    """
+    """Crea los análisis de muestra cuando un proceso de muestreo es confirmado."""
     # Retornar temprano si es creación o no está confirmada
     if created or instance.status_sampling != 'Confirmada':
         return
@@ -102,9 +100,9 @@ def create_sampling_analysis(sender, instance, created, **kwargs):
         )
 
 
-# Signal para actualización de los análisis de una muestra
 @receiver(post_save, sender=SamplingAnalysisProcessing)
 def update_sampling_analysis(sender, instance, **kwargs):
+    """Actualiza el análisis de muestra cuando se registra un procesamiento."""
     if instance.relational_calculation:
         return
 
@@ -148,23 +146,13 @@ def update_sampling_analysis(sender, instance, **kwargs):
             )
 
 def _get_sampling_point(sampling_process):
-    """Helper para obtener el sampling_point de forma consistente."""
+    """Obtiene el punto de muestreo de forma consistente desde el proceso."""
     if sampling_process.group_sampling:
         return sampling_process.group_sampling.sampling_point
     return sampling_process.point_sampling
 
 def _check_compliance(sampling_point, analytical_method, concentration_value):
-    """
-    Determina si la concentración cumple con las especificaciones.
-
-    Args:
-        sampling_point: Punto de muestreo
-        analytical_method: Método analítico
-        concentration_value: Valor de concentración a verificar
-
-    Returns:
-        str: 'Cumple', 'No Cumple', o None
-    """
+    """Determina si la concentración cumple con las especificaciones del producto."""
     # Buscar especificación con select_related para optimización
     specification = sampling_point.specification.select_related('method_test__analytical_method').filter(
         method_test__analytical_method=analytical_method).first()
@@ -197,10 +185,7 @@ def _check_compliance(sampling_point, analytical_method, concentration_value):
     return None
 
 def _update_solution_inventory(solution_id, quantity_to_subtract):
-    """
-    Actualiza el inventario de la solución estándar.
-    Usa select_for_update para evitar race conditions.
-    """
+    """Actualiza el inventario de la solución estándar usando bloqueo pesimista."""
     if solution_id is None or quantity_to_subtract is None or quantity_to_subtract <= 0:
         return
 
@@ -216,7 +201,7 @@ def _update_solution_inventory(solution_id, quantity_to_subtract):
 
 
 def _create_solution_transaction(solution_id, quantity, user_id, detail_text):
-    """Crea el registro de transacción de la solución estándar."""
+    """Crea el registro de transacción de la solución estándar por uso en análisis."""
     # Solo crear transacción si hay una cantidad válida
     if solution_id is None or quantity is None or quantity <= 0:
         return
@@ -233,10 +218,7 @@ def _create_solution_transaction(solution_id, quantity, user_id, detail_text):
 
 @receiver(post_save, sender=MillimoleReacted)
 def create_sampling_analysis_processing_from_millimole(sender, instance, created, **kwargs):
-    """
-    Crea una instancia de SamplingAnalysisProcessing cuando se genera un MillimoleReacted.
-    Lógica de cálculo similar a SamplingAnalysisProcessingGravimetryForm.
-    """
+    """Crea un procesamiento de análisis cuando se registran milimoles reaccionados."""
     if not created:
         return
 
@@ -328,9 +310,9 @@ def create_sampling_analysis_processing_from_millimole(sender, instance, created
             )
 
 
-# Registro de valores calculados en análisis de muestra
 @receiver(post_save, sender=SamplingAnalysisProcessingRelation)
 def create_processing_relation(instance, created, **kwargs):
+    """Actualiza el análisis con los valores calculados de la relación de procesamiento."""
 
     analysis = SamplingAnalysis.objects.filter(analytical_method_relation=instance.analytical_method_calculate_relation).first()
 

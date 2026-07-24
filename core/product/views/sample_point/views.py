@@ -1,3 +1,8 @@
+"""Vistas para el CRUD de puntos de muestreo asociados a productos.
+
+Incluye la creación, edición, detalle y eliminación de puntos de muestreo.
+"""
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
@@ -14,6 +19,8 @@ from core.utils import format_form_errors
 
 # Creación de Puntos de Muestreo
 class SamplePointCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para la creación de un punto de muestreo asociado a un producto."""
+
     model = SamplePoint
     form_class = SamplePointForm
     template_name = 'sample_point/create_sample_point.html'
@@ -21,10 +28,12 @@ class SamplePointCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Inicializa el objeto en None y procesa la petición sin CSRF."""
         self.object = None
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la creación del punto de muestreo vía AJAX."""
         data = {}
         try:
             action = request.POST['action']
@@ -43,12 +52,14 @@ class SamplePointCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         return JsonResponse(data)
 
     def get_form_kwargs(self):
+        """Inyecta el producto actual en los kwargs del formulario."""
         kwargs = super().get_form_kwargs()
         product = Product.objects.get(pk=self.kwargs.get('pk'))
         kwargs.update({'product': product})
         return kwargs
 
     def get_context_data(self, **kwargs):
+        """Agrega los datos de contexto para la creación del punto de muestreo."""
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Creación de Punto de Muestreo'
@@ -57,6 +68,8 @@ class SamplePointCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
 
 # Edición de Puntos de Muestreo
 class SamplePointUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para la edición de un punto de muestreo existente."""
+
     model = SamplePoint
     form_class = SamplePointUpdateForm
     template_name = 'sample_point/create_sample_point.html'
@@ -64,10 +77,12 @@ class SamplePointUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Obtiene el objeto actual y procesa la petición sin CSRF."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la edición del punto de muestreo vía AJAX."""
         data = {}
         try:
             action = request.POST['action']
@@ -86,12 +101,14 @@ class SamplePointUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         return JsonResponse(data)
 
     def get_form_kwargs(self):
+        """Inyecta el punto de muestreo actual en los kwargs del formulario."""
         kwargs = super().get_form_kwargs()
         sample = SamplePoint.objects.get(pk=self.kwargs.get('pk'))
         kwargs.update({'sample': sample})
         return kwargs
 
     def get_context_data(self, **kwargs):
+        """Agrega los datos de contexto para la edición del punto de muestreo."""
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Edición de Punto de Muestreo'
         context['action'] = 'edit'
@@ -100,11 +117,14 @@ class SamplePointUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
 
 # Detalle de Puntos de Muestreo
 class SamplePointDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """Vista para mostrar el detalle de un punto de muestreo."""
+
     model = SamplePoint
     template_name = 'sample_point/detail_sample_point.html'
     permission_required = 'company.add_company'
 
     def get_context_data(self, **kwargs):
+        """Agrega el título de detalle al contexto."""
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Detalle de Punto de Muestreo'
         return context
@@ -112,16 +132,20 @@ class SamplePointDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
 
 # Eliminación de Punto de Muestreo
 class SamplePointDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DeleteView):
+    """Vista para la eliminación de un punto de muestreo."""
+
     model = SamplePoint
     template_name = 'delete_modal.html'
     permission_required = 'reagent.add_reagent'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Obtiene el objeto actual y procesa la petición sin CSRF."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Elimina el punto de muestreo y retorna la respuesta JSON."""
         data = {}
         try:
             self.object.delete()
@@ -132,6 +156,7 @@ class SamplePointDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega los datos de confirmación al contexto del modal de eliminación."""
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Eliminar Punto de Muestreo de Producto'
         context['delete'] = '¿Está seguro de eliminar este punto de muestreo?, esta acción es irreversible.'
