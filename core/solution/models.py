@@ -13,6 +13,7 @@ from django.utils import timezone
 from core.models import BaseModel
 from core.reagent.models import Reagent, InventoryReagent
 from core.user.models import User
+from core.laboratory.models import Laboratory
 
 
 def code_solution_generator():
@@ -114,10 +115,11 @@ class Solution(BaseModel):
     deviation_std = models.FloatField(verbose_name='Media', null=True, blank=True)
     coefficient_variation = models.FloatField(verbose_name='Coeficiente de Variación', null=True, blank=True)
     preparation_confirmed = models.BooleanField(default=False)
+    laboratory = models.ForeignKey(Laboratory, on_delete=models.CASCADE, verbose_name='Laboratorio', null=True, blank=True)
 
     def __str__(self):
         """Retorna la representación en texto con la solución base y el código."""
-        return str(self.solution_base) + ' - ' + str(self.code_solution)
+        return f'{self.code_solution} - {self.solution_base} {self.quantity_available_sln}mL'
 
     class Meta:
         verbose_name = 'Solution'
@@ -187,13 +189,17 @@ class SolutionStd(BaseModel):
     quantity_solvent = models.FloatField(verbose_name='Solvente (mL)', null=True, blank=True)
     preparated_std_by = models.ForeignKey(User, verbose_name='Preparado por', on_delete=models.CASCADE, null=True, blank=True)
     preparation_confirmed = models.BooleanField(default=False)
+    laboratory = models.ForeignKey(Laboratory, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Laboratorio')
 
     def __str__(self):
         """Retorna la representación con el reactivo, concentración, código y cantidad."""
+
+        solution_std_base = f'{self.code_solution_std} - {self.solution_stb_base}'
+
         if not self.preparated_std_by:
-            return f'{self.solute_std.reagent} {self.concentration_std}{self.concentration_unit} - {self.code_solution_std} - {self.quantity_solution_std}{self.solute_std.reagent.umb}'
+            return solution_std_base + ' - ' + f'{self.quantity_solution_std}{self.solute_std.reagent.umb}'
         else:
-            return f'{self.solute_std.reagent} {self.concentration_std}{self.concentration_unit} - {self.code_solution_std} - {self.quantity_solution_std}mL'
+            return solution_std_base + ' - ' + f'{self.quantity_solution_std}mL'
 
     class Meta:
         verbose_name = 'SolutionStd'

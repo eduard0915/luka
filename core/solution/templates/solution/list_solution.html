@@ -17,10 +17,70 @@
 {#    <a href="{{ download_url }}" class="btn btn-outline-primary me-2" type="button"> Descargar</a>#}
 {% endblock %}
 
+{% block content %}
+    <div class="row mb-3">
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Laboratorio</label>
+            <select class="form-select form-select-sm filter-control" id="id_filter_laboratory">
+                <option value="">---------</option>
+                {% for lab in laboratories %}
+                    <option value="{{ lab.id }}">{{ lab.laboratory_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Descripci&oacute;n</label>
+            <input type="text" class="form-control form-control-sm filter-control" id="id_filter_description" placeholder="Buscar...">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Fecha Prep. Desde</label>
+            <input type="date" class="form-control form-control-sm filter-control" id="id_filter_prep_date_start">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Fecha Prep. Hasta</label>
+            <input type="date" class="form-control form-control-sm filter-control" id="id_filter_prep_date_end">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Vence Desde</label>
+            <input type="date" class="form-control form-control-sm filter-control" id="id_filter_expire_date_start">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Vence Hasta</label>
+            <input type="date" class="form-control form-control-sm filter-control" id="id_filter_expire_date_end">
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Vol. (mL) Desde </label>
+            <input type="number" step="any" class="form-control form-control-sm filter-control" id="id_filter_quantity_min" min="0">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Vol. (mL) Hasta</label>
+            <input type="number" step="any" class="form-control form-control-sm filter-control" id="id_filter_quantity_max" min="0">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label fw-bold">Preparado por</label>
+            <select class="form-select form-select-sm filter-control" id="id_filter_prepared_by">
+                <option value="">---------</option>
+                {% for user in prepared_users %}
+                    <option value="{{ user.id }}">{{ user.get_full_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="button" class="btn btn-sm btn-secondary" id="btn_clear_filters">
+                <i class="bi bi-x-lg"></i> Limpiar
+            </button>
+        </div>
+    </div>
+
+    {{ block.super }}
+{% endblock %}
+
 {% block columns %}
     <tr>
-        <th>Código</th>
-        <th>Descripción</th>
+        <th>C&oacute;digo</th>
+        <th>Descripci&oacute;n</th>
         <th>[ ]</th>
         <th>Fecha Prep.</th>
         <th>Vence</th>

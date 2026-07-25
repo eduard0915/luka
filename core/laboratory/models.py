@@ -21,8 +21,7 @@ class Laboratory(models.Model):
 
     def __str__(self):
         """Devuelve el nombre del laboratorio como representación legible."""
-        return str(self.laboratory_name)
-
+        return f'{self.laboratory_name} - {self.site}'
     class Meta:
         verbose_name = 'Laboratory'
         verbose_name_plural = 'Laboratories'

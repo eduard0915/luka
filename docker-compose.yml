@@ -5,9 +5,9 @@
 # Para desplegar NO se usa este archivo: producción es docker-compose.dokploy.yml, que
 # lleva el stack completo y no publica el puerto de la base.
 #
-#   docker compose up -d          # levanta base y scheduler
-#   docker compose logs -f scheduler-luka
-#   docker compose down           # -v además borra los datos
+#   docker-compose up -d          # levanta base y scheduler
+#   docker-compose logs -f scheduler-luka
+#   docker-compose down           # -v además borra los datos
 services:
   db-luka:
     image: postgres:16-alpine

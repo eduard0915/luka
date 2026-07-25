@@ -82,8 +82,7 @@ class UserListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView
         try:
             action = request.POST['action']
             if action == 'searchdata':
-                data = []
-                usuarios = list(User.objects.select_related('site').values(
+                users = User.objects.select_related('laboratory__site').values(
                     'id',
                     'date_joined',
                     'last_login',
@@ -96,9 +95,17 @@ class UserListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView
                     'first_name',
                     'last_name',
                     'slug',
-                    'site__site_name',
-                ).filter(is_superuser=False).order_by('first_name'))
-                return JsonResponse(usuarios, safe=False)
+                    'laboratory__laboratory_name',
+                    'laboratory__site__site_name',
+                ).filter(is_superuser=False).order_by('first_name')
+                data = []
+                for user in users:
+                    user_data = dict(user)
+                    lab_name = user_data.pop('laboratory__laboratory_name', '') or ''
+                    site_name = user_data.pop('laboratory__site__site_name', '') or ''
+                    user_data['laboratory'] = f'{lab_name} - {site_name}' if lab_name and site_name else lab_name or site_name
+                    data.append(user_data)
+                return JsonResponse(data, safe=False)
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
