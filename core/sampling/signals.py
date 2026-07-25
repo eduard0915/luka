@@ -296,7 +296,7 @@ def create_sampling_analysis_processing_from_millimole(sender, instance, created
                 instance.standard_solution_add_id,
                 instance.milliliter_std_add,
                 instance.user_creation_id,
-                f'Adición para Volumetría por Retroceso - Muestra {instance.sampling_analysis.sampling_process}'
+                f'Volumetría por Retroceso - Muestra {instance.sampling_analysis.sampling_process}'
             )
 
         # Solución Gastada

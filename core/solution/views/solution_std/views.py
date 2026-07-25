@@ -18,10 +18,12 @@ from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from xhtml2pdf import pisa
 
 from core.company.models import Company
+from core.laboratory.models import Laboratory
 from core.mixins import ValidatePermissionRequiredMixin
 from core.reagent.models import InventoryReagent
 from core.solution.forms import SolutionStandardForm, SolutionStdConfirmedForm
 from core.solution.models import SolutionStd, TransactionSolutionStd
+from core.user.models import User
 from luka import settings
 
 
@@ -149,7 +151,39 @@ class SolutionStdListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, L
         try:
             action = request.POST['action']
             if action == 'searchdata':
-                stds = list(SolutionStd.objects.select_related('solute_std__reagent', 'preparated_std_by').values(
+                from django.db.models import Q
+                filters = Q()
+
+                laboratory_id = request.POST.get('filter_laboratory', '').strip()
+                description = request.POST.get('filter_description', '').strip()
+                prep_date_start = request.POST.get('filter_prep_date_start', '').strip()
+                prep_date_end = request.POST.get('filter_prep_date_end', '').strip()
+                expire_date_start = request.POST.get('filter_expire_date_start', '').strip()
+                expire_date_end = request.POST.get('filter_expire_date_end', '').strip()
+                quantity_min = request.POST.get('filter_quantity_min', '').strip()
+                quantity_max = request.POST.get('filter_quantity_max', '').strip()
+                prepared_by_id = request.POST.get('filter_prepared_by', '').strip()
+
+                if laboratory_id:
+                    filters &= Q(laboratory_id=laboratory_id)
+                if description:
+                    filters &= Q(solute_std__reagent__description_reagent__icontains=description)
+                if prep_date_start:
+                    filters &= Q(preparation_std_date__gte=prep_date_start)
+                if prep_date_end:
+                    filters &= Q(preparation_std_date__lte=prep_date_end)
+                if expire_date_start:
+                    filters &= Q(expire_std_date_solution__gte=expire_date_start)
+                if expire_date_end:
+                    filters &= Q(expire_std_date_solution__lte=expire_date_end)
+                if quantity_min:
+                    filters &= Q(quantity_solution_std__gte=quantity_min)
+                if quantity_max:
+                    filters &= Q(quantity_solution_std__lte=quantity_max)
+                if prepared_by_id:
+                    filters &= Q(preparated_std_by_id=prepared_by_id)
+
+                stds = list(SolutionStd.objects.filter(filters).select_related('solute_std__reagent', 'preparated_std_by').values(
                     'id',
                     'solute_std__reagent__description_reagent',
                     'solute_std__reagent__manufacturer',
@@ -188,6 +222,8 @@ class SolutionStdListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, L
         context['div'] = '12'
         context['icon'] = 'fa-solid fa-flask-vial'
         context['today'] = timezone.now()
+        context['laboratories'] = Laboratory.objects.filter(enable_laboratory=True)
+        context['prepared_users'] = User.objects.filter(solutionstd__isnull=False).distinct()
         return context
 
 

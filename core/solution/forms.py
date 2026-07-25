@@ -10,6 +10,7 @@ from django.utils import timezone
 from core.reagent.models import InventoryReagent, Reagent
 from core.solution.models import Solution, SolutionStd, Standardization, StandardizationSolution, SolutionBase, \
     SolutionStdBase
+from core.laboratory.models import Laboratory
 
 CONC = [('', '-----'), ('%', '%'), ('g/L', 'g/L'), ('mg/L', 'mg/L'), ('M', 'M'), ('N', 'N')]
 BOOLEAN = [(True, 'Si'), (False, 'No')]
@@ -32,6 +33,7 @@ class SolutionForm(ModelForm):
         solvent_qs = InventoryReagent.objects.select_related('reagent').filter(
             date_expire__gte=timezone.localtime(), reagent__solvent=True, quantity_stock__gt=0, reagent__standard=False)
         self.fields['solvent_reagent'].queryset = solvent_qs
+        self.fields['laboratory'].queryset = Laboratory.objects.filter(enable_laboratory=True)
         self.fields['solvent_reagent'].widget.attrs['data-reagents'] = {
             str(obj.id): str(obj.reagent.id) for obj in solvent_qs
         }
@@ -45,8 +47,9 @@ class SolutionForm(ModelForm):
             'solution_base': 'col-md-4',
             'solute_reagent': 'col-md-6',
             'quantity_solution': 'col-md-2',
-            'solvent_reagent': 'col-md-6',
+            'solvent_reagent': 'col-md-5',
             'standardizable': 'col-md-2',
+            'laboratory': 'col-md-3',
         }
 
         for field_name, field in self.fields.items():
@@ -57,7 +60,8 @@ class SolutionForm(ModelForm):
 
         fields = [
             'code_solution', 'solution_base', 'solute_reagent', 'quantity_solution', 'solvent_reagent',
-            'standardizable']
+            'standardizable', 'laboratory'
+        ]
 
         widgets = {
             'code_solution': TextInput(attrs={'class': 'form-control', 'readonly': True}),
@@ -65,6 +69,7 @@ class SolutionForm(ModelForm):
             'solvent_reagent': Select(attrs={'class': 'form-control', 'required': True}),
             'standardizable': Select(attrs={'class': 'form-control', 'required': True}, choices=BOOLEAN),
             'solution_base': Select(attrs={'class': 'form-control', 'required': True}),
+            'laboratory': Select(attrs={'class': 'form-control', 'required': True}),
             'quantity_solution': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
         }
 
@@ -222,6 +227,7 @@ class SolutionStandardForm(ModelForm):
             date_expire__gte=timezone.localdate(),
             reagent__solvent=False, quantity_stock__gt=0, reagent__standard=True).exclude(reagent__ready_to_use=True)
         self.fields['solute_std'].queryset = solute_qs
+        self.fields['laboratory'].queryset = Laboratory.objects.filter(enable_laboratory=True)
         self.fields['solute_std'].widget.attrs['data-reagents'] = {
             str(obj.id): str(obj.reagent.id) for obj in solute_qs
         }
@@ -243,7 +249,8 @@ class SolutionStandardForm(ModelForm):
             'solution_std_base': 'col-md-4',
             'solute_std': 'col-md-6',
             'quantity_solution_std': 'col-md-2',
-            'solvent_reagent': 'col-md-6'
+            'solvent_reagent': 'col-md-5',
+            'laboratory': 'col-md-3',
         }
 
         for field_name, field in self.fields.items():
@@ -251,12 +258,16 @@ class SolutionStandardForm(ModelForm):
 
     class Meta:
         model = SolutionStd
-        fields = ['code_solution_std', 'solution_std_base', 'solute_std', 'quantity_solution_std', 'solvent_reagent']
+        fields = [
+            'code_solution_std', 'solution_std_base', 'solute_std', 'quantity_solution_std', 'solvent_reagent',
+            'laboratory'
+        ]
         widgets = {
             'code_solution_std': TextInput(attrs={'class': 'form-control', 'readonly': True}),
             'solution_std_base': Select(attrs={'class': 'form-control', 'required': True}),
             'solute_std': Select(attrs={'class': 'form-control', 'required': True}),
             'solvent_reagent': Select(attrs={'class': 'form-control'}),
+            'laboratory': Select(attrs={'class': 'form-control'}),
             'quantity_solution_std': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
         }
 

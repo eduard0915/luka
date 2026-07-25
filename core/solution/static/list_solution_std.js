@@ -1,7 +1,7 @@
 // Asegurarse de que jQuery esté definido antes de usar $
 document.addEventListener('DOMContentLoaded', function () {
     if (typeof $ !== 'undefined') {
-        $('#data').DataTable({
+        var table = $('#data').DataTable({
             responsive: true,
             autoWidth: false,
             destroy: true,
@@ -13,8 +13,17 @@ document.addEventListener('DOMContentLoaded', function () {
             ajax: {
                 url: window.location.pathname,
                 type: 'POST',
-                data: {
-                    'action': 'searchdata'
+                data: function (d) {
+                    d['action'] = 'searchdata';
+                    d['filter_laboratory'] = $('#id_filter_laboratory').val() || '';
+                    d['filter_description'] = $('#id_filter_description').val() || '';
+                    d['filter_prep_date_start'] = $('#id_filter_prep_date_start').val() || '';
+                    d['filter_prep_date_end'] = $('#id_filter_prep_date_end').val() || '';
+                    d['filter_expire_date_start'] = $('#id_filter_expire_date_start').val() || '';
+                    d['filter_expire_date_end'] = $('#id_filter_expire_date_end').val() || '';
+                    d['filter_quantity_min'] = $('#id_filter_quantity_min').val() || '';
+                    d['filter_quantity_max'] = $('#id_filter_quantity_max').val() || '';
+                    d['filter_prepared_by'] = $('#id_filter_prepared_by').val() || '';
                 },
                 dataSrc: ""
             },
@@ -95,6 +104,19 @@ document.addEventListener('DOMContentLoaded', function () {
             ],
             initComplete: function (settings, json) {
             }
+        });
+
+        $('.filter-control').on('change', function () {
+            table.ajax.reload();
+        });
+
+        $('#id_filter_description').on('keyup', function () {
+            table.ajax.reload();
+        });
+
+        $('#btn_clear_filters').on('click', function () {
+            $('.filter-control').val('');
+            table.ajax.reload();
         });
     } else {
         console.error("jQuery ($ variable) no está definido. Verifica que jQuery se haya cargado correctamente.");

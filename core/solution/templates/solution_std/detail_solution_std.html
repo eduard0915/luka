@@ -82,7 +82,7 @@
                         {% endif %}
                     </div>
                         <div class="row mt-1">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <b>Preparado por </b><br>
                                 <p>
                                     {% if object.preparated_std_by %}
@@ -94,7 +94,7 @@
                                     {% endif %}
                                 </p>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <b>Fecha de Preparación</b><br>
                                 <p>
                                     {% if object.preparation_std_date %}
@@ -106,7 +106,7 @@
                                     {% endif %}
                                 </p>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <b>Vencimiento</b><br>
                                 <p>
                                     {% if object.expire_std_date_solution %}
@@ -115,6 +115,10 @@
                                         <span class="text-danger">Pendiente Confirmación</span>
                                     {% endif %}
                                 </p>
+                            </div>
+                            <div class="col-md-5">
+                                <b>Laboratorio</b><br>
+                                <p>{{ object.laboratory }}</p>
                             </div>
                         </div>
 
@@ -147,7 +151,7 @@
     </div>
     {% if transactions %}
         <div class="row">
-            <div class="col-md-10">
+            <div class="col-md-11">
                 <div class="tile mb-3">
                     <div class="tile-title">
                         <h3 class="title">Detalle Consumo</h3>
