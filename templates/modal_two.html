@@ -13,7 +13,17 @@
                 <div class="row">
                     <h5>{{ info_form }}</h5>
                     <div class="{{ class }}">
-                        {{ form.as_p }}
+                        {% for field in form.visible_fields %}
+                            <div class="mb-3">
+                                <label for="id_{{ field.name }}" class="form-label">
+                                    {{ field.label }}{% if field.field.required %}*{% endif %}
+                                </label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>

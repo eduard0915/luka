@@ -48,14 +48,13 @@ class ReagentForm(ModelForm):
         model = Reagent
         fields = [
             'description_reagent', 'umb', 'manufacturer', 'site', 'technical_sheet', 'purity_unit',
-            'molecular_weight', 'gram_equivalent', 'stability_solution', 'volumetric', 'solvent', 'density_enable',
+            'molecular_weight', 'gram_equivalent', 'volumetric', 'solvent', 'density_enable',
             'standard', 'ready_to_use']
         widgets = {
             'description_reagent': TextInput(attrs={'class': 'form-control', 'required': True}),
             'manufacturer': TextInput(attrs={'class': 'form-control', 'required': True}),
             'molecular_weight': TextInput(attrs={'class': 'form-control', 'required': True}),
             'gram_equivalent': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'stability_solution': TextInput(attrs={'class': 'form-control', 'required': True}),
             'technical_sheet': FileInput(attrs={'class': 'form-control', 'type': 'file'}),
             'site': Select(attrs={'class': 'form-control', 'required': True}),
             'umb': Select(attrs={'class': 'form-control', 'required': True}, choices=UMB),
@@ -88,8 +87,8 @@ class InventoryReagentForm(ModelForm):
         """Inicializa el formulario ajustando el queryset y etiquetas según el usuario y el reactivo."""
         super().__init__(*args, **kwargs)
         user = get_current_user()
-        if user and user.site:
-            self.fields['reagent'].queryset = Reagent.objects.filter(enable_reagent=True, site_id=user.site.id)
+
+        self.fields['reagent'].queryset = Reagent.objects.filter(enable_reagent=True, site_id=user.laboratory.site.id)
 
         if self.instance.pk:
             try:
@@ -120,7 +119,7 @@ class InventoryReagentForm(ModelForm):
             'quantity_stock': TextInput(attrs={'class': 'form-control', 'required': True}),
             'purity': TextInput(attrs={'class': 'form-control', 'required': True}),
             'certificate_quality': FileInput(attrs={'class': 'form-control', 'required': True}),
-            'reagent': Select(attrs={'class': 'form-control', 'required': True}),
+            'reagent': Select(attrs={'class': 'form-control select2', 'required': True, 'placeholder': 'Seleccione un reactivo'}),
             'batch_number': TextInput(attrs={'class': 'form-control', 'required': True}),
             'density': TextInput(attrs={'class': 'form-control', 'required': True}),
             'date_expire': DateInput(attrs={'class': 'form-control', 'required': True, 'type': 'text', 'data-datepicker': '1', 'placeholder': 'yyyy-mm-dd'}),

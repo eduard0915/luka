@@ -110,14 +110,7 @@ class ReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
                     'standard',
                     'solution__id'
                 ).order_by('code_reagent')
-                data = []
-                for reagent in reagents:
-                    reagent_data = dict(reagent)
-                    reagent_data['standardization_id'] = reagent_data.pop('solution__id')
-                    reagent_data['has_standardization'] = reagent_data['standardization_id'] is not None
-                    data.append(reagent_data)
-
-                return JsonResponse(data, safe=False)
+                return JsonResponse(reagents, safe=False)
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:

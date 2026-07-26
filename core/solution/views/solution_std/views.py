@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
+from django.shortcuts import redirect
 from django.template.loader import get_template
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -21,7 +22,7 @@ from core.company.models import Company
 from core.laboratory.models import Laboratory
 from core.mixins import ValidatePermissionRequiredMixin
 from core.reagent.models import InventoryReagent
-from core.solution.forms import SolutionStandardForm, SolutionStdConfirmedForm
+from core.solution.forms import SolutionStandardForm, SolutionStdConfirmedForm, SolutionStdUpdateForm
 from core.solution.models import SolutionStd, TransactionSolutionStd
 from core.user.models import User
 from luka import settings
@@ -227,6 +228,48 @@ class SolutionStdListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, L
         return context
 
 
+# Edición de Soluciones Estándar
+class SolutionStandardUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para editar una solución estándar existente."""
+    model = SolutionStd
+    form_class = SolutionStdUpdateForm
+    template_name = 'solution_std/update_solution_std.html'
+    permission_required = 'reagent.change_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'edit':
+                form = self.get_form()
+                if form.is_valid():
+                    self.object = form.save()
+                    messages.success(request, f'Solución Estándar "{self.object.code_solution_std}" editada satisfactoriamente!')
+                else:
+                    messages.error(request, form.errors)
+                return redirect(self.get_context_data()['list_url'])
+            else:
+                data['error'] = 'No ha ingresado datos en los campos'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Editar Solución Estándar'
+        context['entity'] = 'Editar Solución Estándar'
+        context['action'] = 'edit'
+        context['div'] = '10'
+        context['icon'] = 'fa-solid fa-flask-vial'
+        context['list_url'] = reverse_lazy('solution:detail_solution_std', kwargs={'pk': self.object.pk})
+        return context
+
+
 # Detalle de Solución Estándar
 class SolutionStdDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
     """Vista de detalle de una solución estándar, mostrando transacciones y configuraciones."""
@@ -244,8 +287,6 @@ class SolutionStdDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         context['title'] = 'Preparación de Solución Estándar'
         context['entity'] = 'Preparación de Solución Estándar'
         context['label_url'] = reverse_lazy('solution:solution_label_std_pdf', kwargs={'pk': self.object.pk})
-        # if self.request.user.has_perm('user.add_user'):
-        #     context['back'] = reverse_lazy('user:user_list')
         context['icon'] = 'fa-solid fa-flask-vial'
         context['list_url'] = reverse_lazy('solution:list_solution_std')
         context['transactions'] = TransactionSolutionStd.objects.select_related('solution_std_inventory').filter(solution_std_inventory_id=self.object.pk)
@@ -363,49 +404,3 @@ class SolutionStdLabelPDFDetailView(LoginRequiredMixin, ValidatePermissionRequir
             print(f'Error al generar PDF: {error}')
 
         return HttpResponseRedirect(reverse_lazy('solution:list_solution_std'))
-# class SolutionStdLabelPDFDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
-#     permission_required = 'reagent.add_reagent'
-#
-#     @staticmethod
-#     def link_callback(uri, rel):
-#
-#         # use short variable names
-#         sUrl = settings.STATIC_URL  # Typically /static/
-#         sRoot = settings.STATIC_ROOT  # Typically /home/userX/project_static/
-#         mUrl = settings.MEDIA_URL  # Typically /static/media/
-#
-#         # convert URIs to absolute system paths
-#         if uri.startswith(mUrl):
-#             return uri
-#         elif uri.startswith(sUrl):
-#             path = os.path.join(sRoot, uri.replace(sUrl, ""))
-#             if not os.path.isfile(path):
-#                 raise Exception(
-#                     'Logo provided do not exists on path given: %s' % path
-#                 )
-#             return path
-#         return None
-#
-#     def get(self, request, *args, **kwargs):
-#         try:
-#             template = get_template('solution_std/label_solution_std.html')
-#             std = SolutionStd.objects.get(pk=self.kwargs['pk'])
-#             context = {
-#                 'std': SolutionStd.objects.get(pk=self.kwargs['pk']),
-#                 'company': Company.objects.first(),
-#                 'title': 'Etiqueta STD: ' + std.code_solution_std,
-#                 'page_size': '101.6mm 80.8mm',
-#             }
-#             html = template.render(context)
-#             response = HttpResponse(content_type='application/pdf')
-#             pisa.CreatePDF(
-#                 html, dest=response,
-#                 link_callback=self.link_callback
-#             )
-#             return response
-#         except ValueError as error:
-#             print(f'Tiene un valor errado: {error}')
-#         except TypeError as error:
-#             print(f'Tiene un error de tipo: {error}')
-#             pass
-#         return HttpResponseRedirect(reverse_lazy('solution:list_solution_std'))

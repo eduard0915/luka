@@ -73,6 +73,9 @@ class SolutionBase(BaseModel):
     concentration_base = models.FloatField(verbose_name='Concentración')
     concentration_unit_base = models.CharField(max_length=4, verbose_name='Unidad Conc.')
     enable_solution = models.BooleanField(verbose_name='Habilitado', default=True)
+    stability_solution = models.PositiveSmallIntegerField(
+        verbose_name='Días Estabilidad en Solución', null=True, blank=True)
+    standardizable = models.BooleanField(verbose_name='Estandarizable', default=False)
 
     def __str__(self):
         """Retorna la representación en texto con el reactivo y la concentración."""
@@ -115,7 +118,7 @@ class Solution(BaseModel):
     deviation_std = models.FloatField(verbose_name='Media', null=True, blank=True)
     coefficient_variation = models.FloatField(verbose_name='Coeficiente de Variación', null=True, blank=True)
     preparation_confirmed = models.BooleanField(default=False)
-    laboratory = models.ForeignKey(Laboratory, on_delete=models.CASCADE, verbose_name='Laboratorio', null=True, blank=True)
+    laboratory = models.ForeignKey(Laboratory, on_delete=models.CASCADE, verbose_name='Laboratorio')
 
     def __str__(self):
         """Retorna la representación en texto con la solución base y el código."""
@@ -152,6 +155,8 @@ class SolutionStdBase(BaseModel):
     concentration_std_base = models.FloatField(verbose_name='Concentración')
     concentration_unit_base = models.CharField(max_length=4, verbose_name='Unidad Conc.')
     enable_solution_std = models.BooleanField(verbose_name='Habilitado', default=True)
+    stability_solution = models.PositiveSmallIntegerField(verbose_name='Días Estabilidad en Solución', null=True, blank=True)
+    standardizable = models.BooleanField(verbose_name='Estandarizable', default=False)
 
     def __str__(self):
         """Retorna la representación con el estándar y la concentración."""
@@ -189,7 +194,7 @@ class SolutionStd(BaseModel):
     quantity_solvent = models.FloatField(verbose_name='Solvente (mL)', null=True, blank=True)
     preparated_std_by = models.ForeignKey(User, verbose_name='Preparado por', on_delete=models.CASCADE, null=True, blank=True)
     preparation_confirmed = models.BooleanField(default=False)
-    laboratory = models.ForeignKey(Laboratory, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Laboratorio')
+    laboratory = models.ForeignKey(Laboratory, on_delete=models.CASCADE, verbose_name='Laboratorio')
 
     def __str__(self):
         """Retorna la representación con el reactivo, concentración, código y cantidad."""
@@ -227,8 +232,9 @@ class SolutionStd(BaseModel):
 class Standardization(BaseModel):
     """Configuración de estandarización que relaciona una solución con un estándar y su relación molar."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    solution_reagent = models.ForeignKey(Reagent, verbose_name='Solución', on_delete=models.CASCADE, related_name='solution')
-    solution_std = models.ForeignKey(Reagent, verbose_name='Solución Estándar', on_delete=models.CASCADE, related_name='solution_std')
+    solution_std = models.ForeignKey(SolutionStdBase, verbose_name='Solución Estándar', on_delete=models.CASCADE, related_name='solution_std')
+    solution_base = models.ForeignKey(SolutionBase, verbose_name='Solución Base', on_delete=models.CASCADE, blank=True, null=True, related_name='solution_std_base')
+    solution_std_base = models.ForeignKey(SolutionStdBase, verbose_name='Solución Estándar Base', on_delete=models.CASCADE, blank=True, null=True)
     molar_relation = models.FloatField(verbose_name='Relación Molar', default=1)
 
     def __str__(self):

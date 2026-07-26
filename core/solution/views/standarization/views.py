@@ -9,9 +9,8 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, UpdateView
 
-from core.reagent.models import Reagent
 from core.solution.forms import StandardizationForm, StandardizationUpdateForm
-from core.solution.models import Standardization
+from core.solution.models import Standardization, SolutionStdBase, SolutionBase
 
 
 # Creación de Configuración de Estandarización
@@ -48,8 +47,9 @@ class StandardizationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMi
     def get_form_kwargs(self):
         """Agrega el reactivo a los kwargs del formulario."""
         kwargs = super().get_form_kwargs()
-        reagent = Reagent.objects.get(pk=self.kwargs.get('pk'))
-        kwargs.update({'reagent': reagent})
+        sln_std_base = SolutionStdBase.objects.filter(pk=self.kwargs.get('pk')).first()
+        sln_base = SolutionBase.objects.filter(pk=self.kwargs.get('pk')).first()
+        kwargs.update({'sln_std_base': sln_std_base, 'sln_base': sln_base})
         return kwargs
 
     def get_context_data(self, **kwargs):
