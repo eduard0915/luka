@@ -311,25 +311,57 @@ def create_sampling_analysis_processing_from_millimole(sender, instance, created
 
 
 @receiver(post_save, sender=SamplingAnalysisProcessingRelation)
-def create_processing_relation(instance, created, **kwargs):
+def create_processing_relation(sender, instance, created, **kwargs):
     """Actualiza el análisis con los valores calculados de la relación de procesamiento."""
 
-    analysis = SamplingAnalysis.objects.filter(analytical_method_relation=instance.analytical_method_calculate_relation).first()
+    analysis = instance.sampling_analysis
+    if not analysis:
+        analysis = SamplingAnalysis.objects.filter(analytical_method_relation=instance.analytical_method_calculate_relation).first()
+    if not analysis:
+        return
 
     spc = SpecificationProduct.objects.filter(method_test_relacional=instance.analytical_method_calculate_relation).first()
+    if not spc and analysis.sampling_process:
+        sampling_process = analysis.sampling_process
+        product = (
+            sampling_process.point_sampling.product
+            if sampling_process.point_sampling
+            else sampling_process.group_sampling.sampling_point.product
+        )
+        if product:
+            spc = SpecificationProduct.objects.filter(
+                product=product,
+                method_test_relacional=instance.analytical_method_calculate_relation
+            ).first()
 
-    if analysis:
-        previous_analysis = SamplingAnalysisProcessingRelation.objects.select_related(
-            'analytical_method_calculate_relation').filter(
-            analytical_method_calculate_relation=instance.analytical_method_calculate_relation)
+    previous_analysis = SamplingAnalysisProcessingRelation.objects.select_related(
+        'analytical_method_calculate_relation').filter(
+        analytical_method_calculate_relation=instance.analytical_method_calculate_relation)
 
-        stats = previous_analysis.aggregate(std=StdDev('calcule'), avg=Avg('calcule'))
+    stats = previous_analysis.aggregate(std=StdDev('calcule'), avg=Avg('calcule'))
 
-        analysis.standard_deviation = float(stats['std']) or 0
-        analysis.coefficient_variation = float(stats['std'] / stats['avg']) or 0
-        analysis.average_concentration = float(stats['avg']) or float(instance.calcule)
-        if spc.lower_limit_prod <= instance.calcule <= spc.upper_limit_prod:
-            analysis.comply = 'Cumple'
-        else:
-            analysis.comply = 'No Cumple'
-        analysis.save()
+    analysis.standard_deviation = round(stats['std'], 4) or 0
+    analysis.coefficient_variation = round(stats['std'] / stats['avg'], 2) or 0
+    analysis.average_concentration = round(stats['avg'], 4) or round(instance.calcule, 4)
+    analysis.date_analysis = timezone.now()
+
+    if spc:
+        if spc.lower_limit_prod and spc.upper_limit_prod:
+            if spc.lower_limit_prod <= instance.calcule <= spc.upper_limit_prod:
+                analysis.comply = 'Cumple'
+            else:
+                analysis.comply = 'No Cumple'
+        elif spc.lower_limit_prod and not spc.upper_limit_prod:
+            if instance.calcule >= spc.lower_limit_prod:
+                analysis.comply = 'Cumple'
+            else:
+                analysis.comply = 'No Cumple'
+        elif not spc.lower_limit_prod and spc.upper_limit_prod:
+            if instance.calcule <= spc.upper_limit_prod:
+                analysis.comply = 'Cumple'
+            else:
+                analysis.comply = 'No Cumple'
+    else:
+        analysis.comply = 'No aplica'
+
+    analysis.save()
