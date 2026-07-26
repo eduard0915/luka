@@ -345,7 +345,19 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
             analytical_method_calculate__isnull=True
         ).exclude(calculate_description_relation__in=[None, '']).first()
 
-        analysis = SamplingAnalysis.objects.select_related('sampling_process').filter(sampling_process=self.kwargs.get('pk')).first()
+        analysis = None
+        if relation:
+            analysis = SamplingAnalysis.objects.filter(
+                sampling_process=sampling,
+                analytical_method_relation=relation
+            ).first()
+            if not analysis:
+                analysis = SamplingAnalysis.objects.create(
+                    sampling_process=sampling,
+                    analytical_method_relation=relation
+                )
+        else:
+            analysis = SamplingAnalysis.objects.select_related('sampling_process').filter(sampling_process=self.kwargs.get('pk')).first()
 
         kwargs.update({
             'analysis': analysis,

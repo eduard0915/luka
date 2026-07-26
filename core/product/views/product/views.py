@@ -194,7 +194,7 @@ class ProductDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Det
             'method_test__analytical_method',
             'method_test_relacional'
         ).filter(product_id=self.object.id)
-
+        context['specification_rel'] = SpecificationProduct.objects.select_related('method_test__analytical_method').filter(product_id=self.object.id).first()
         calcules_relation = AnalyticalMethodCalculateRelation.objects.select_related('product').filter(product_id=self.object.id).order_by('-date_creation')
         context['calcules_relation'] = calcules_relation
         context['has_relations'] = calcules_relation.exists()

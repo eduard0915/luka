@@ -26,12 +26,15 @@ class SamplingAnalysisProcessingForm(ModelForm):
         """Inicializa el formulario con el análisis y configura los campos según el método."""
         self.analysis = kwargs.pop('analysis')
         super().__init__(*args, **kwargs)
+
+        user = get_current_user()
+
         calcs = AnalyticalMethodCalculate.objects.select_related('analytical_method').filter(analytical_method_id=self.analysis.analytical_method.id)
         calc_con_label = calcs.exclude(sample_quantity__in=[None, '', False]).first()
 
         std_bases = self.analysis.analytical_method.analyticalmethodsolutionstd_set.values_list('solution_std_id', flat=True)
         self.fields['standard_solution'].queryset = SolutionStd.objects.select_related('solute_std').filter(
-            solution_std_base_id__in=std_bases, preparation_confirmed=True, quantity_solution_std__gt=0)
+            solution_std_base_id__in=std_bases, preparation_confirmed=True, quantity_solution_std__gt=0, laboratory=user.laboratory)
 
         if calc_con_label and calc_con_label.sample_quantity:
             self.fields['quantity_sample'].label = str(calc_con_label.sample_quantity)
@@ -318,21 +321,6 @@ class SamplingAnalysisProcessingRelationForm(ModelForm):
         if commit:
             instance.save()
         return instance
-    #     data = {}
-    #     form = super()
-    #     try:
-    #         if form.is_valid():
-    #             data = form.save(commit=False)
-    #             data.calcule = round((data.numerator / data.denominator), self.relation.sig_figs)
-    #             data.sampling_analysis_id = self.analysis.id
-    #             data.sampling_process_id = self.sampling.id
-    #             data.analytical_method_calculate_relation_id = self.relation.id
-    #             data.save()
-    #         else:
-    #             data['error'] = form.errors
-    #     except Exception as e:
-    #         data['error'] = str(e)
-    #     return data
 
 
 class SamplingAnalysisForm(ModelForm):
@@ -626,9 +614,13 @@ class MillimoleReactedForm(ModelForm):
         self.analysis = kwargs.pop('analysis')
         super().__init__(*args, **kwargs)
 
+        user = get_current_user()
+
         std_bases = self.analysis.analytical_method.analyticalmethodsolutionstd_set.values_list('solution_std_id', flat=True)
         solutions_qs = SolutionStd.objects.select_related('solute_std').filter(
-            solution_std_base_id__in=std_bases, preparation_confirmed=True, quantity_solution_std__gt=0)
+            solution_std_base_id__in=std_bases, preparation_confirmed=True,
+            quantity_solution_std__gt=0, laboratory=user.laboratory,
+        )
 
         self.fields['standard_solution_add'].queryset = solutions_qs
         self.fields['standard_solution_spend'].queryset = solutions_qs
