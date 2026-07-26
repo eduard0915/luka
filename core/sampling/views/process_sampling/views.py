@@ -136,13 +136,16 @@ class SamplingProcessListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
 
                 user = get_current_user()
                 
+                if not user.laboratory:
+                    return JsonResponse([], safe=False)
+
                 qs = SamplingProcess.objects.select_related(
                     'group_sampling',
                     'point_sampling',
                     'sampling_created_by'
                 ).filter(
                     Q(group_sampling__sampling_point__specification__product__site=user.laboratory.site) |
-                    Q(sampling_point__specification__product__site=user.laboratory.site)
+                    Q(point_sampling__specification__product__site=user.laboratory.site)
                 )
                 
                 if status_filter:

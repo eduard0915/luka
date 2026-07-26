@@ -45,7 +45,6 @@ class Reagent(BaseModel):
     purity_unit = models.CharField(max_length=10, verbose_name='Unidad de Pureza')
     molecular_weight = models.FloatField(verbose_name='Gramos/mol')
     gram_equivalent = models.FloatField(verbose_name='Eq-gramo')
-    stability_solution = models.PositiveSmallIntegerField(verbose_name='Días Estabilidad en Solución', null=True, blank=True)
     volumetric = models.BooleanField(default=False, verbose_name='Uso Volumétrico?')
     solvent = models.BooleanField(default=False, verbose_name='Uso como Solvente?')
     density_enable = models.BooleanField(default=False, verbose_name='Usa Densidad?')

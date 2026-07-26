@@ -187,14 +187,28 @@ class SolutionBaseListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
         try:
             action = request.POST['action']
             if action == 'searchdata':
-                reagents = list(SolutionBase.objects.values(
-                    'id',
-                    'solute_reagent_base__description_reagent',
-                    'concentration_base',
-                    'concentration_unit_base',
-                    'enable_solution'
-                ).order_by('-solute_reagent_base__description_reagent'))
-                return JsonResponse(reagents, safe=False)
+                slns = SolutionBase.objects.select_related(
+                    'solute_reagent_base'
+                ).prefetch_related(
+                    'solution_std_base'
+                ).order_by('-solute_reagent_base__description_reagent')
+                rows = []
+                for sln in slns:
+                    std = sln.solution_std_base.first()
+                    sln_data = {
+                        'id': sln.id,
+                        'solution_base': sln.solute_reagent_base.description_reagent,
+                        'concentration_base': sln.concentration_base,
+                        'concentration_unit_base': sln.concentration_unit_base,
+                        'enable_solution': sln.enable_solution,
+                        'standardizable': sln.standardizable,
+                        'stability_solution': sln.stability_solution,
+                        'standardization_id': std.id if std else None,
+                        'has_standardization': std is not None,
+                    }
+                    rows.append(sln_data)
+
+                return JsonResponse(rows, safe=False)
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
@@ -207,6 +221,6 @@ class SolutionBaseListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
         context['title'] = 'Soluciones Base'
         context['create_url'] = reverse_lazy('solution:create_solution_base')
         context['entity'] = 'Maestro de Soluciones Base'
-        context['div'] = '7'
+        context['div'] = '10'
         context['icon'] = 'fa-solid fa-flask-vial'
         return context

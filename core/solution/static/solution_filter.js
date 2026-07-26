@@ -13,6 +13,13 @@
 
         const select_solvent = $('select[name="solvent_reagent"]');
 
+        function setSoluteDisabled(disabled) {
+            select_solute.prop('disabled', disabled);
+            if (disabled) {
+                select_solute.val('');
+            }
+        }
+
         function filterOptions(select, reagentId) {
             if (!select.length) return;
 
@@ -32,7 +39,7 @@
             select.find('option').each(function () {
                 const option = $(this);
                 const val = option.val();
-                if (!val) return; // Skip placeholder
+                if (!val) return;
 
                 const associatedReagentId = dataReagents[val];
                 if (associatedReagentId === reagentId) {
@@ -43,24 +50,27 @@
                 }
             });
 
-            // Si el valor actual no es válido, cambiar al primero válido o vacío
             const currentVal = select.val();
             if (currentVal && dataReagents[currentVal] !== reagentId) {
                 select.val(firstValid || "").trigger('change');
-            } else if (!currentVal && firstValid) {
-                // Opcional: auto-seleccionar si solo hay uno?
-                // select.val(firstValid).trigger('change');
             }
+        }
 
-            // Si usa select2, hay que destruir y recrear o simplemente disparar change
-            if (select.hasClass('select2-hidden-accessible')) {
-                // select.select2('destroy').select2({theme: 'bootstrap-5'});
-            }
+        // Initial state: disable solute until a base is selected
+        setSoluteDisabled(true);
+        if (select_solvent.length) {
+            select_solvent.prop('disabled', true);
         }
 
         select_base.on('change', function () {
             const id = $(this).val();
-            if (!id) return false;
+            if (!id) {
+                setSoluteDisabled(true);
+                if (select_solvent.length) {
+                    select_solvent.prop('disabled', true).val('');
+                }
+                return false;
+            }
 
             $.ajax({
                 url: '/solution/api/solution-base/' + id + '/',
@@ -68,13 +78,14 @@
                 dataType: 'json'
             }).done(function (data) {
                 if (!data.error) {
-                    // Filtrar opciones
                     filterOptions(select_solute, data.solute_reagent_id);
+                    setSoluteDisabled(false);
+
                     if (data.solvent_reagent_id) {
                         filterOptions(select_solvent, data.solvent_reagent_id);
+                        select_solvent.prop('disabled', false);
                     }
 
-                    // Opcionalmente llenar concentración si existen los campos
                     const input_conc = entity === 'Preparar Solución'
                         ? $('input[name="concentration"]')
                         : $('input[name="concentration_std"]');
@@ -94,9 +105,13 @@
                 console.error(textStatus + ': ' + errorThrown);
             });
         });
+
+        // If a base is already selected (update form), trigger the filter on load
+        if (select_base.val()) {
+            select_base.trigger('change');
+        }
     }
 
-    // Exponer la función globalmente
     window.initSolutionFilters = initSolutionFilters;
 
 })();

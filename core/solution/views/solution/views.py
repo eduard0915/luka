@@ -226,7 +226,7 @@ class SolutionListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, List
 class SolutionUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
     """Vista para editar una solución existente."""
     model = Solution
-    form_class = SolutionForm
+    form_class = SolutionUpdateForm
     template_name = 'solution/update_solution.html'
     permission_required = 'reagent.change_reagent'
 
@@ -306,7 +306,7 @@ class SolutionConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionRequired
         context['entity'] = 'Preparación de Solución ' + self.object.code_solution
         context['action'] = 'edit'
         context['class'] = 'col-md-6'
-        context['info_form'] = 'Confirma Preparación? Después de Confirmada No podrá editarse'
+        context['info_form'] = 'Confirma Preparación de la Solución?'
         return context
 
 
@@ -327,9 +327,7 @@ class SolutionDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, De
         context['title'] = 'Preparación de Solución'
         context['entity'] = 'Preparación de Solución'
         context['label_url'] = reverse_lazy('solution:solution_label_pdf', kwargs={'pk': self.object.pk})
-        # if self.request.user.has_perm('user.add_user'):
-        #     context['back'] = reverse_lazy('user:user_list')
-        context['std_config'] = Standardization.objects.filter(solution_reagent_id=self.object.solute_reagent.reagent.id).first()
+        context['std_config'] = Standardization.objects.filter(solution_base_id=self.object.solution_base.id).first()
         context['icon'] = 'fa-solid fa-flask-vial'
         context['list_url'] = reverse_lazy('solution:list_solution')
         context['standardizations'] = StandardizationSolution.objects.select_related('solution').filter(solution_id=self.object.id)

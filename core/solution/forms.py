@@ -22,9 +22,10 @@ class SolutionForm(ModelForm):
     def __init__(self, *args, **kwargs):
         """Inicializa el formulario filtrando los reactivos soluto y solvente disponibles, y asignando clases CSS."""
         super().__init__(*args, **kwargs)
+        user = get_current_user()
         solute_qs = InventoryReagent.objects.select_related('reagent').filter(
             date_expire__gte=timezone.localtime(), reagent__solvent=False, quantity_stock__gt=0,
-            reagent__standard=False)
+            reagent__standard=False, reagent__site=user.laboratory.site)
         self.fields['solute_reagent'].queryset = solute_qs
         self.fields['solute_reagent'].widget.attrs['data-reagents'] = {
             str(obj.id): str(obj.reagent.id) for obj in solute_qs
@@ -47,9 +48,8 @@ class SolutionForm(ModelForm):
             'solution_base': 'col-md-4',
             'solute_reagent': 'col-md-6',
             'quantity_solution': 'col-md-2',
-            'solvent_reagent': 'col-md-5',
-            'standardizable': 'col-md-2',
-            'laboratory': 'col-md-3',
+            'solvent_reagent': 'col-md-6',
+            'laboratory': 'col-md-4',
         }
 
         for field_name, field in self.fields.items():
@@ -59,15 +59,12 @@ class SolutionForm(ModelForm):
         model = Solution
 
         fields = [
-            'code_solution', 'solution_base', 'solute_reagent', 'quantity_solution', 'solvent_reagent',
-            'standardizable', 'laboratory'
-        ]
+            'code_solution', 'solution_base', 'solute_reagent', 'quantity_solution', 'solvent_reagent', 'laboratory']
 
         widgets = {
             'code_solution': TextInput(attrs={'class': 'form-control', 'readonly': True}),
             'solute_reagent': Select(attrs={'class': 'form-control', 'required': True}),
             'solvent_reagent': Select(attrs={'class': 'form-control', 'required': True}),
-            'standardizable': Select(attrs={'class': 'form-control', 'required': True}, choices=BOOLEAN),
             'solution_base': Select(attrs={'class': 'form-control', 'required': True}),
             'laboratory': Select(attrs={'class': 'form-control', 'required': True}),
             'quantity_solution': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
@@ -179,6 +176,7 @@ class SolutionForm(ModelForm):
 
         instance.concentration = instance.solution_base.concentration_base
         instance.concentration_unit = instance.solution_base.concentration_unit_base
+        instance.standardizable = instance.solution_base.standardizable
 
         # Usar el valor calculado en clean()
         if '_quantity_reagent' in self.cleaned_data:
@@ -217,15 +215,196 @@ class SolutionForm(ModelForm):
         return instance
 
 
+# Edición de Soluciones
+class SolutionUpdateForm(ModelForm):
+    """Formulario para la edición de soluciones."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        user = get_current_user()
+        solute_qs = InventoryReagent.objects.select_related('reagent').filter(
+            date_expire__gte=timezone.localtime(), reagent__solvent=False, quantity_stock__gt=0,
+            reagent__standard=False, reagent__site=user.laboratory.site)
+        if self.instance and self.instance.pk and self.instance.solute_reagent_id:
+            solute_qs = solute_qs | InventoryReagent.objects.filter(pk=self.instance.solute_reagent_id)
+        self.fields['solute_reagent'].queryset = solute_qs
+        self.fields['solute_reagent'].widget.attrs['data-reagents'] = {
+            str(obj.id): str(obj.reagent.id) for obj in solute_qs
+        }
+
+        solvent_qs = InventoryReagent.objects.select_related('reagent').filter(
+            date_expire__gte=timezone.localtime(), reagent__solvent=True, quantity_stock__gt=0, reagent__standard=False)
+        if self.instance and self.instance.pk and self.instance.solvent_reagent_id:
+            solvent_qs = solvent_qs | InventoryReagent.objects.filter(pk=self.instance.solvent_reagent_id)
+        self.fields['solvent_reagent'].queryset = solvent_qs
+        self.fields['laboratory'].queryset = Laboratory.objects.filter(enable_laboratory=True)
+        self.fields['solvent_reagent'].widget.attrs['data-reagents'] = {
+            str(obj.id): str(obj.reagent.id) for obj in solvent_qs
+        }
+
+        solution_base_qs = SolutionBase.objects.filter(enable_solution=True)
+        if self.instance and self.instance.pk and self.instance.solution_base_id:
+            solution_base_qs = solution_base_qs | SolutionBase.objects.filter(pk=self.instance.solution_base_id)
+        self.fields['solution_base'].queryset = solution_base_qs
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+        col_classes = {
+            'code_solution': 'col-md-2',
+            'solution_base': 'col-md-4',
+            'solute_reagent': 'col-md-6',
+            'quantity_solution': 'col-md-2',
+            'solvent_reagent': 'col-md-6',
+            'laboratory': 'col-md-4',
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
+    class Meta:
+        model = Solution
+        fields = [
+            'code_solution', 'solution_base', 'solute_reagent', 'quantity_solution', 'solvent_reagent', 'laboratory'
+        ]
+        widgets = {
+            'code_solution': TextInput(attrs={'class': 'form-control', 'readonly': True}),
+            'solute_reagent': Select(attrs={'class': 'form-control', 'required': True}),
+            'solvent_reagent': Select(attrs={'class': 'form-control', 'required': True}),
+            'solution_base': Select(attrs={'class': 'form-control', 'required': True}),
+            'laboratory': Select(attrs={'class': 'form-control', 'required': True}),
+            'quantity_solution': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        solute_reagent = cleaned_data.get('solute_reagent')
+        solution_base = cleaned_data.get('solution_base')
+        concentration = cleaned_data.get('concentration')
+        if not concentration and solution_base:
+            concentration = solution_base.concentration_base
+            cleaned_data['concentration'] = concentration
+
+        concentration_unit = cleaned_data.get('concentration_unit')
+        if not concentration_unit and solution_base:
+            concentration_unit = solution_base.concentration_unit_base
+            cleaned_data['concentration_unit'] = concentration_unit
+
+        quantity_solution = cleaned_data.get('quantity_solution')
+
+        if solution_base and solute_reagent:
+            if solute_reagent.reagent_id != solution_base.solute_reagent_base_id:
+                self.add_error('solute_reagent',
+                               f'El reactivo seleccionado ({solute_reagent.reagent.description_reagent}) no coincide con el definido en la base ({solution_base.solute_reagent_base.description_reagent})')
+
+        if not all([solute_reagent, concentration, concentration_unit, quantity_solution]):
+            return cleaned_data
+
+        if concentration <= 0:
+            self.add_error('concentration', 'La concentración debe ser mayor que cero')
+            return cleaned_data
+
+        if quantity_solution <= 0:
+            self.add_error('quantity_solution', 'La cantidad de solución debe ser mayor que cero')
+            return cleaned_data
+
+        if not solute_reagent.purity:
+            self.add_error('solute_reagent', 'El reactivo seleccionado no tiene pureza definida')
+            return cleaned_data
+
+        if not solute_reagent.density:
+            self.add_error('solute_reagent', 'El reactivo seleccionado no tiene densidad definida')
+            return cleaned_data
+
+        purity = solute_reagent.purity
+        density = solute_reagent.density
+        reagent = solute_reagent.reagent
+        sig_figs = reagent.sig_figs_solution
+
+        base_calc = quantity_solution * density
+
+        quantity_reagent = None
+
+        try:
+            if concentration_unit == '%':
+                quantity_reagent = round(base_calc * (concentration / purity), sig_figs)
+            elif concentration_unit == 'mg/L':
+                quantity_reagent = round(base_calc * (concentration * purity / 10000), sig_figs)
+            elif concentration_unit == 'M':
+                if not reagent.molecular_weight:
+                    self.add_error('solute_reagent', 'El reactivo de la solución no tiene peso molecular registrado')
+                    return cleaned_data
+                factor = (concentration * reagent.molecular_weight) / (10 * purity)
+                quantity_reagent = round(base_calc * factor, sig_figs)
+            elif concentration_unit == 'N':
+                if not reagent.gram_equivalent:
+                    self.add_error('solute_reagent', 'El reactivo seleccionado no tiene equivalente gramo registrado')
+                    return cleaned_data
+                factor = (concentration * reagent.gram_equivalent) / (10 * purity)
+                quantity_reagent = round(base_calc * factor, sig_figs)
+        except Exception as e:
+            self.add_error(None, f'Error al calcular la cantidad de reactivo: {str(e)}')
+            return cleaned_data
+
+        if quantity_reagent is not None:
+            if quantity_reagent > solute_reagent.quantity_stock:
+                umb = reagent.umb
+                error_message = (
+                    f'La cantidad requerida ({quantity_reagent:.2f} {umb}) '
+                    f'excede el stock disponible ({solute_reagent.quantity_stock:.2f} {umb})'
+                )
+                self.add_error('solute_reagent', error_message)
+                return cleaned_data
+
+            cleaned_data['_quantity_reagent'] = quantity_reagent
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.concentration = instance.solution_base.concentration_base
+        instance.concentration_unit = instance.solution_base.concentration_unit_base
+        instance.standardizable = instance.solution_base.standardizable
+
+        if '_quantity_reagent' in self.cleaned_data:
+            instance.quantity_reagent = self.cleaned_data['_quantity_reagent']
+        else:
+            solute_reagent = instance.solute_reagent
+            purity = solute_reagent.purity
+            density = solute_reagent.density
+            sig_figs = solute_reagent.reagent.sig_figs_solution
+            base_calc = instance.quantity_solution * density
+
+            if instance.solution_base.concentration_unit_base == '%':
+                instance.quantity_reagent = round(
+                    base_calc * (instance.solution_base.concentration_base / purity), sig_figs)
+            elif instance.solution_base.concentration_unit_base == 'mg/L':
+                instance.quantity_reagent = round(
+                    base_calc * (instance.solution_base.concentration_base * purity / 10000), sig_figs)
+            elif instance.solution_base.concentration_unit_base == 'M':
+                factor = (instance.solution_base.concentration_base * solute_reagent.reagent.molecular_weight) / (10 * purity)
+                instance.quantity_reagent = round(base_calc * factor, sig_figs)
+            elif instance.solution_base.concentration_unit_base == 'N':
+                factor = (instance.solution_base.concentration_base * solute_reagent.reagent.gram_equivalent) / (10 * purity)
+                instance.quantity_reagent = round(base_calc * factor, sig_figs)
+
+        instance.quantity_solvent = float(instance.quantity_solution - instance.quantity_reagent)
+
+        if commit:
+            instance.save()
+
+        return instance
+
+
 # Creación de soluciones Estándar
 class SolutionStandardForm(ModelForm):
     """Formulario para la creación de soluciones estándar a partir de reactivos certificados."""
     def __init__(self, *args, **kwargs):
         """Inicializa el formulario filtrando los estándares y solventes del inventario, y asignando clases CSS."""
         super().__init__(*args, **kwargs)
+        user = get_current_user()
         solute_qs = InventoryReagent.objects.select_related('reagent').filter(
             date_expire__gte=timezone.localdate(),
-            reagent__solvent=False, quantity_stock__gt=0, reagent__standard=True).exclude(reagent__ready_to_use=True)
+            reagent__solvent=False, quantity_stock__gt=0, reagent__standard=True,
+            reagent__site=user.laboratory.site).exclude(reagent__ready_to_use=True)
         self.fields['solute_std'].queryset = solute_qs
         self.fields['laboratory'].queryset = Laboratory.objects.filter(enable_laboratory=True)
         self.fields['solute_std'].widget.attrs['data-reagents'] = {
@@ -249,8 +428,8 @@ class SolutionStandardForm(ModelForm):
             'solution_std_base': 'col-md-4',
             'solute_std': 'col-md-6',
             'quantity_solution_std': 'col-md-2',
-            'solvent_reagent': 'col-md-5',
-            'laboratory': 'col-md-3',
+            'solvent_reagent': 'col-md-6',
+            'laboratory': 'col-md-4',
         }
 
         for field_name, field in self.fields.items():
@@ -354,6 +533,149 @@ class SolutionStandardForm(ModelForm):
         return instance
 
 
+# Edición de Soluciones Estándar
+class SolutionStdUpdateForm(ModelForm):
+    """Formulario para la edición de soluciones estándar."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        user = get_current_user()
+        solute_qs = InventoryReagent.objects.select_related('reagent').filter(
+            date_expire__gte=timezone.localdate(),
+            reagent__solvent=False, quantity_stock__gt=0, reagent__standard=True,
+            reagent__site=user.laboratory.site).exclude(reagent__ready_to_use=True)
+        if self.instance and self.instance.pk and self.instance.solution_std_base_id:
+            solute_qs = solute_qs.filter(
+                reagent_id=self.instance.solution_std_base.solute_std_base_id)
+        if self.instance and self.instance.pk and self.instance.solute_std_id:
+            solute_qs = solute_qs | InventoryReagent.objects.filter(pk=self.instance.solute_std_id)
+        self.fields['solute_std'].queryset = solute_qs
+        self.fields['laboratory'].queryset = Laboratory.objects.filter(enable_laboratory=True)
+        self.fields['solute_std'].widget.attrs['data-reagents'] = {
+            str(obj.id): str(obj.reagent.id) for obj in solute_qs
+        }
+
+        solvent_qs = InventoryReagent.objects.select_related('reagent').filter(
+            date_expire__gte=timezone.localdate(), reagent__solvent=True, quantity_stock__gt=0)
+        if self.instance and self.instance.pk and self.instance.solvent_reagent_id:
+            solvent_qs = solvent_qs | InventoryReagent.objects.filter(pk=self.instance.solvent_reagent_id)
+        self.fields['solvent_reagent'].queryset = solvent_qs
+        self.fields['solvent_reagent'].widget.attrs['data-reagents'] = {
+            str(obj.id): str(obj.reagent.id) for obj in solvent_qs
+        }
+
+        solution_std_base_qs = SolutionStdBase.objects.filter(
+            enable_solution_std=True, solute_std_base__ready_to_use=False)
+        if self.instance and self.instance.pk and self.instance.solution_std_base_id:
+            solution_std_base_qs = solution_std_base_qs | SolutionStdBase.objects.filter(pk=self.instance.solution_std_base_id)
+        self.fields['solution_std_base'].queryset = solution_std_base_qs
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+        col_classes = {
+            'code_solution_std': 'col-md-2',
+            'solution_std_base': 'col-md-4',
+            'solute_std': 'col-md-6',
+            'quantity_solution_std': 'col-md-2',
+            'solvent_reagent': 'col-md-6',
+            'laboratory': 'col-md-4',
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
+    class Meta:
+        model = SolutionStd
+        fields = [
+            'code_solution_std', 'solution_std_base', 'solute_std', 'quantity_solution_std', 'solvent_reagent',
+            'laboratory'
+        ]
+        widgets = {
+            'code_solution_std': TextInput(attrs={'class': 'form-control', 'readonly': True}),
+            'solution_std_base': Select(attrs={'class': 'form-control', 'required': True}),
+            'solute_std': Select(attrs={'class': 'form-control', 'required': True}),
+            'solvent_reagent': Select(attrs={'class': 'form-control'}),
+            'laboratory': Select(attrs={'class': 'form-control'}),
+            'quantity_solution_std': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        solution_std_base = cleaned_data.get('solution_std_base')
+        solute_std = cleaned_data.get('solute_std')
+
+        concentration_std = cleaned_data.get('concentration_std')
+        if not concentration_std and solution_std_base:
+            concentration_std = solution_std_base.concentration_std_base
+            cleaned_data['concentration_std'] = concentration_std
+
+        concentration_unit = cleaned_data.get('concentration_unit')
+        if not concentration_unit and solution_std_base:
+            concentration_unit = solution_std_base.concentration_unit_base
+            cleaned_data['concentration_unit'] = concentration_unit
+
+        if solution_std_base and solute_std:
+            if solute_std.reagent_id != solution_std_base.solute_std_base_id:
+                self.add_error('solute_std',
+                               f'El estándar seleccionado ({solute_std.reagent.description_reagent}) no coincide con el definido en la base ({solution_std_base.solute_std_base.description_reagent})')
+        return cleaned_data
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+
+        if not instance.concentration_std:
+            instance.concentration_std = instance.solution_std_base.concentration_std_base
+        if not instance.concentration_unit:
+            instance.concentration_unit = instance.solution_std_base.concentration_unit_base
+
+        if not instance.solute_std.purity:
+            raise ValidationError('El reactivo seleccionado no tiene pureza definida')
+        if not instance.solute_std.density:
+            raise ValidationError('El reactivo seleccionado no tiene densidad definida')
+
+        if not instance.solute_std.reagent.volumetric:
+            if instance.concentration_unit == '%':
+                instance.quantity_std = float(
+                    instance.quantity_solution_std * (
+                            instance.concentration_std / instance.solute_std.purity
+                    ) * instance.solute_std.density
+                )
+            elif instance.concentration_unit == 'mg/L':
+                instance.quantity_std = float(
+                    instance.quantity_solution_std * (
+                            instance.concentration_std / 10000 * instance.solute_std.purity
+                    ) * instance.solute_std.density
+                )
+            elif instance.concentration_unit == 'M':
+                if not instance.solute_std.reagent.molecular_weight:
+                    raise ValidationError('El reactivo seleccionado no tiene peso molecular registrado')
+                instance.quantity_std = float(
+                    instance.quantity_solution_std * (
+                            (instance.concentration_std * instance.solute_std.reagent.molecular_weight) /
+                            (10 * instance.solute_std.purity)
+                    ) * instance.solute_std.density
+                )
+            elif instance.concentration_unit == 'N':
+                if not instance.solute_std.reagent.gram_equivalent:
+                    raise ValidationError('El reactivo seleccionado no tiene equivalente gramo registrado')
+                instance.quantity_std = float(
+                    instance.quantity_solution_std * ((instance.concentration_std * instance.solute_std.reagent.gram_equivalent) / (10 * instance.solute_std.purity)) * instance.solute_std.density)
+        else:
+            instance.quantity_std = (instance.quantity_solution_std * instance.concentration_std) / instance.solute_std.purity
+
+        instance.quantity_solvent = float(instance.quantity_solution_std - instance.quantity_std)
+
+        if instance.quantity_std > instance.solute_std.quantity_stock:
+            raise ValidationError(
+                f'La cantidad requerida ({instance.quantity_std:.2f}) excede el stock disponible '
+                f'({instance.solute_std.quantity_stock:.2f}) del reactivo seleccionado'
+            )
+
+        if commit:
+            instance.save()
+
+        return instance
+
+
 # Confirmar preparación de Solución
 class SolutionConfirmedForm(ModelForm):
     """Formulario para confirmar la preparación de una solución."""
@@ -429,9 +751,9 @@ class SolutionStdConfirmedForm(ModelForm):
                 instance.preparation_std_date = timezone.localdate()
                 instance.preparation_confirmed = True
 
-                if instance.solute_std.reagent.stability_solution:
+                if instance.solution_std_base.stability_solution:
                     instance.expire_std_date_solution = instance.preparation_std_date + timedelta(
-                        days=instance.solute_std.reagent.stability_solution)
+                        days=instance.solution_std_base.stability_solution)
                 else:
                     raise ValidationError('El Reactivo no tiene Días Estabilidad definido')
 
