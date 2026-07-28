@@ -12,11 +12,13 @@ app_name = 'sampling'
 
 urlpatterns = [
     # Grupos de Muestreo
-    path('group/add/', SamplingGroupFullCreateView.as_view(), name='create_sampling_group_full'),
+    path('group/add/', SamplingGroupListCreateView.as_view(), name='create_sampling_group_list'),
     path('group/add/<uuid:pk>/', SamplingGroupCreateView.as_view(), name='create_sampling_group_product'),
     path('group/list/', SamplingGroupListView.as_view(), name='list_sampling_group'),
     path('group/update/<uuid:pk>/', SamplingGroupUpdateView.as_view(), name='update_sampling_group'),
+    path('group/update_list/<uuid:pk>/', SamplingGroupListUpdateView.as_view(), name='update_sampling_group_list'),
     path('group/detail/<uuid:pk>/', SamplingGroupDetailView.as_view(), name='detail_sampling_group'),
+    path('group/delete/<uuid:pk>/', SamplingGroupDeleteView.as_view(), name='delete_sampling_group'),
     path('api/sampling-point/<uuid:pk>/', get_sampling_point, name='get_sampling_point'),
     # Procesos de Muestreo
     path('process/add/', SamplingProcessCreateView.as_view(), name='create_sampling_process'),
