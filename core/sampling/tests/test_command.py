@@ -66,8 +66,9 @@ class GenerateSamplingsCommandTests(TestCase):
         group = build_sampling_group(per_day=2, enabled=False)
         run(date='2026-07-15')
         self.assertEqual(SamplingProcess.objects.count(), 0)
-        self.assertTrue(
-            SamplingGenerationLog.objects.get(sampling_group=group, target_date=date(2026, 7, 15)).skipped
+        # Los grupos deshabilitados se filtran del queryset; no se crea log
+        self.assertFalse(
+            SamplingGenerationLog.objects.filter(sampling_group=group, target_date=date(2026, 7, 15)).exists()
         )
 
         group.enable_sampling_group = True

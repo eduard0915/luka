@@ -146,7 +146,7 @@ class SamplingProcessListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
                 ).filter(
                     Q(group_sampling__sampling_point__specification__product__site=user.laboratory.site) |
                     Q(point_sampling__specification__product__site=user.laboratory.site)
-                )
+                ).distinct()
                 
                 if status_filter:
                     qs = qs.filter(status_sampling=status_filter)

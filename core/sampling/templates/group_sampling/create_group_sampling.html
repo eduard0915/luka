@@ -1,1 +1,35 @@
-{% extends 'create_two.html' %}
+{% extends 'modal_four.html' %}
+{% load static %}
+
+{% block scripts_detail %}
+    {{ block.super }}
+    <script>
+        (function() {
+            if (window._sgInitDone) return;
+            window._sgInitDone = true;
+
+            function calc($s, $i) {
+                var id = $s.val();
+                if (!id) { $i.val(''); return; }
+                axios.get('/sampling/api/sampling-point/' + id + '/')
+                    .then(function(r) {
+                        if (r.data && r.data.sample_frequency) {
+                            var f = parseInt(r.data.sample_frequency);
+                            $i.val(f > 0 ? Math.floor(24 / f) : '');
+                        } else {
+                            $i.val('');
+                        }
+                    })
+                    .catch(function() { $i.val(''); });
+            }
+
+            var $s = $('select[name="sampling_point"]');
+            var $i = $('input[name="number_sampling_day"]');
+            if ($s.length && $i.length) {
+                $i.prop('readonly', true);
+                $s.on('select2:select', function() { calc($s, $i); });
+                if ($s.val()) { calc($s, $i); }
+            }
+        })();
+    </script>
+{% endblock %}

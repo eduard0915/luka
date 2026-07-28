@@ -381,9 +381,13 @@ class SamplingGroupForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         """Inicializa el formulario excluyendo puntos de muestreo ya asignados a otros grupos."""
+        product = kwargs.pop('product', None)
         super().__init__(*args, **kwargs)
         queryset = SamplePoint.objects.filter(
             enable_point=True, sample_frequency__isnull=False, periodicity__in=DAILY_PERIODICITY)
+
+        if product:
+            queryset = queryset.filter(product=product)
 
         # IDs de sampling_point ya usados en otros SamplingGroup existentes
         used_points = SamplingGroup.objects.exclude(
@@ -426,40 +430,42 @@ class SamplingGroupForm(ModelForm):
         except Exception as e:
             data['error'] = str(e)
         return data
-# class SamplingGroupForm(ModelForm):
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         queryset = SamplePoint.objects.filter(
-#             enable_point=True, sample_frequency__isnull=False, periodicity__in=DAILY_PERIODICITY)
-#         if self.instance.sampling_point_id:
-#             queryset = queryset | SamplePoint.objects.filter(pk=self.instance.sampling_point_id)
-#         self.fields['sampling_point'].queryset = queryset.distinct()
-#         for form in self.visible_fields():
-#             form.field.widget.attrs['autocomplete'] = 'off'
-#         col_classes = {'sampling_point': 'col-md-6'}
-#         for field_name, field in self.fields.items():
-#             field.col_class = col_classes.get(field_name, 'col-md-3')
-#
-#     class Meta:
-#         model = SamplingGroup
-#         fields = ['sampling_point', 'first_hour_sampling', 'number_sampling_day']
-#         widgets = {
-#             'sampling_point': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
-#             'first_hour_sampling': TimeInput(format='%H:%M', attrs={'class': 'form-control', 'type': 'time'}),
-#             'number_sampling_day': TextInput(attrs={'class': 'form-control', 'required': True})
-#         }
-#
-#     def save(self, commit=True):
-#         data = {}
-#         form = super()
-#         try:
-#             if form.is_valid():
-#                 data = form.save()
-#             else:
-#                 data['error'] = form.errors
-#         except Exception as e:
-#             data['error'] = str(e)
-#         return data
+
+
+class SamplingGroupFullForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        queryset = SamplePoint.objects.filter(
+            enable_point=True, sample_frequency__isnull=False, periodicity__in=DAILY_PERIODICITY)
+        if self.instance.sampling_point_id:
+            queryset = queryset | SamplePoint.objects.filter(pk=self.instance.sampling_point_id)
+        self.fields['sampling_point'].queryset = queryset.distinct()
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+        col_classes = {'sampling_point': 'col-md-6'}
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
+    class Meta:
+        model = SamplingGroup
+        fields = ['sampling_point', 'first_hour_sampling', 'number_sampling_day']
+        widgets = {
+            'sampling_point': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+            'first_hour_sampling': TimeInput(format='%H:%M', attrs={'class': 'form-control', 'type': 'time'}),
+            'number_sampling_day': TextInput(attrs={'class': 'form-control', 'required': True})
+        }
+
+    def save(self, commit=True):
+        data = {}
+        form = super()
+        try:
+            if form.is_valid():
+                data = form.save()
+            else:
+                data['error'] = form.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
 
 
 class SamplingProcessForm(ModelForm):

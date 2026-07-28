@@ -10,10 +10,76 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import CreateView, UpdateView, ListView, DetailView
 
 from core.mixins import ValidatePermissionRequiredMixin
-from core.product.models import SamplePoint
-from core.sampling.forms import SamplingGroupForm
+from core.product.models import Product, SamplePoint
+from core.sampling.forms import SamplingGroupForm, SamplingGroupFullForm
 from core.sampling.models import SamplingGroup
 from core.utils import format_form_errors
+
+
+class SamplingGroupFullCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para la creación de grupos de muestreo."""
+    model = SamplingGroup
+    form_class = SamplingGroupFullForm
+    template_name = 'create_two.html'
+    success_url = reverse_lazy('sampling:list_sampling_group')
+    permission_required = 'reagent.add_reagent'
+    url_redirect = success_url
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
+        self.object = None
+        self.product = None
+        if 'pk' in kwargs:
+            try:
+                self.product = Product.objects.get(pk=kwargs['pk'])
+            except Product.DoesNotExist:
+                pass
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        """Inyecta el producto actual en los kwargs del formulario si existe."""
+        kwargs = super().get_form_kwargs()
+        if self.product:
+            kwargs.update({'product': self.product})
+        return kwargs
+
+    def get_success_url(self):
+        """Redirige al detalle del producto si se creó desde allí."""
+        if self.product:
+            return reverse_lazy('product:detail_product', kwargs={'pk': self.product.pk})
+        return self.success_url
+
+    def post(self, request, *args, **kwargs):
+        """Procesa el formulario de creación de grupo de muestreo."""
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'add':
+                form = self.get_form()
+                if form.is_valid():
+                    form.save()
+                    data['success'] = True
+                    data['redirect_url'] = str(self.get_success_url())
+                    messages.success(request, f'Grupo de Muestreo creado satisfactoriamente!')
+                else:
+                    data['error'] = format_form_errors(form)
+                    messages.error(request, f'Por favor corrija los errores: {data["error"]}')
+            else:
+                data['error'] = 'No ha ingresado datos en los campos'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        """Agrega el título y configuración de la vista al contexto."""
+        context = super().get_context_data(**kwargs)
+        context['action'] = 'add'
+        context['entity'] = 'Creación de Grupo de Muestreo'
+        context['title'] = 'Creación de Grupo de Muestreo'
+        context['div'] = '8'
+        context['list_url'] = self.get_success_url()
+        return context
 
 
 class SamplingGroupCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
@@ -29,7 +95,26 @@ class SamplingGroupCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixi
     def dispatch(self, request, *args, **kwargs):
         """Procesa la solicitud con protección CSRF exceptuada."""
         self.object = None
+        self.product = None
+        if 'pk' in kwargs:
+            try:
+                self.product = Product.objects.get(pk=kwargs['pk'])
+            except Product.DoesNotExist:
+                pass
         return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        """Inyecta el producto actual en los kwargs del formulario si existe."""
+        kwargs = super().get_form_kwargs()
+        if self.product:
+            kwargs.update({'product': self.product})
+        return kwargs
+
+    def get_success_url(self):
+        """Redirige al detalle del producto si se creó desde allí."""
+        if self.product:
+            return reverse_lazy('product:detail_product', kwargs={'pk': self.product.pk})
+        return self.success_url
 
     def post(self, request, *args, **kwargs):
         """Procesa el formulario de creación de grupo de muestreo."""
@@ -41,11 +126,11 @@ class SamplingGroupCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixi
                 if form.is_valid():
                     form.save()
                     data['success'] = True
-                    data['redirect_url'] = str(self.success_url)
+                    data['redirect_url'] = str(self.get_success_url())
                     messages.success(request, f'Grupo de Muestreo creado satisfactoriamente!')
                 else:
-                    error_messages = format_form_errors(form)
-                    messages.error(request, f'Por favor corrija los errores: {error_messages}')
+                    data['error'] = format_form_errors(form)
+                    messages.error(request, f'Por favor corrija los errores: {data["error"]}')
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -59,7 +144,7 @@ class SamplingGroupCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixi
         context['entity'] = 'Creación de Grupo de Muestreo'
         context['title'] = 'Creación de Grupo de Muestreo'
         context['div'] = '8'
-        context['list_url'] = self.success_url
+        context['list_url'] = self.get_success_url()
         return context
 
 
@@ -167,7 +252,7 @@ class SamplingGroupListView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         """Agrega el título y configuración del listado al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Grupos de Muestreo'
-        context['create_url'] = reverse_lazy('sampling:create_sampling_group')
+        context['create_url'] = reverse_lazy('sampling:create_sampling_group_full')
         context['entity'] = 'Grupos de Muestreo'
         context['div'] = '9'
         context['icon'] = 'fa-solid fa-vial-virus'
