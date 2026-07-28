@@ -362,6 +362,63 @@
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col-md-9">
+            <div class="tile">
+                <div class="tile-title-w-btn">
+                    <h3 class="title">Grupos de Muestreo</h3>
+                    <p>
+                        <a class="btn btn-primary icon-btn"
+                           onclick="open_modal('{{ create_sampling_group }}')"><i
+                                class="bi bi-plus-square me-2"></i>Nuevo
+                        </a>
+                    </p>
+                </div>
+                <div class="tile-body">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th class="text-center">Punto de Muestreo</th>
+                            <th class="text-center">Hora Primer Muestreo</th>
+                            <th class="text-center">Muestras por Día</th>
+                            <th class="text-center">Habilitado</th>
+                            <th class="text-center">Automuestreo</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for group in sampling_groups %}
+                            <tr>
+                                <td class="text-center">{{ group.sampling_point.sample_point_name }}</td>
+                                <td class="text-center">{{ group.first_hour_sampling|time:'H:i' }}</td>
+                                <td class="text-center">{{ group.number_sampling_day }}</td>
+                                <td class="text-center">
+                                    {% if group.enable_sampling_group %}
+                                        <span class="me-1 badge bg-primary">Si</span>
+                                    {% else %}
+                                        <span class="me-1 badge bg-danger">No</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if group.enable_sampling_auto %}
+                                        <span class="me-1 badge bg-primary">Si</span>
+                                    {% else %}
+                                        <span class="me-1 badge bg-danger">No</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">
+                                    No hay grupos de muestreo asociados a este producto.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Modal -->
     <div class="modal fade" id="modal_template" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     </div>
@@ -377,9 +434,10 @@
                 modal.show();
                 // Si hay select2 en el modal cargado, inicializarlo
                 $('.select2').select2({
-                    theme: 'bootstrap4',
+                    theme: 'bootstrap-5',
                     dropdownParent: $('#modal_template')
                 });
+                $(document).trigger('modal:loaded');
             });
         }
         // Initialize tooltips

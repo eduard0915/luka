@@ -16,6 +16,7 @@ from core.mixins import ValidatePermissionRequiredMixin
 from core.product.forms import ProductForm
 from core.product.models import Product, SamplePoint, AnalyticalMethodProduct, SpecificationProduct
 from core.analytical_method.models import AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation
+from core.sampling.models import SamplingGroup
 from core.utils import format_form_errors
 
 
@@ -186,6 +187,12 @@ class ProductDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Det
         context['create_sample_point'] = reverse_lazy('product:create_sample_point', kwargs={'pk': self.object.pk})
         context['sample_point'] = SamplePoint.objects.select_related('product').filter(
             enable_point=True, product_id=self.object.id).order_by('sequence')
+        context['sampling_groups'] = SamplingGroup.objects.select_related(
+            'sampling_point__product'
+        ).filter(
+            sampling_point__product_id=self.object.id
+        ).order_by('sampling_point__sequence')
+        context['create_sampling_group'] = reverse_lazy('sampling:create_sampling_group_product', kwargs={'pk': self.object.pk})
         context['create_method_product'] = reverse_lazy('product:create_method_product', kwargs={'pk': self.object.pk})
         context['analytical_methods'] = AnalyticalMethodProduct.objects.select_related('product').filter(product_id=self.object.id)
         context['create_specification_product'] = reverse_lazy('product:create_specification_product', kwargs={'pk': self.object.pk})

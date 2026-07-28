@@ -12,7 +12,8 @@ app_name = 'sampling'
 
 urlpatterns = [
     # Grupos de Muestreo
-    path('group/add/', SamplingGroupCreateView.as_view(), name='create_sampling_group'),
+    path('group/add/', SamplingGroupFullCreateView.as_view(), name='create_sampling_group_full'),
+    path('group/add/<uuid:pk>/', SamplingGroupCreateView.as_view(), name='create_sampling_group_product'),
     path('group/list/', SamplingGroupListView.as_view(), name='list_sampling_group'),
     path('group/update/<uuid:pk>/', SamplingGroupUpdateView.as_view(), name='update_sampling_group'),
     path('group/detail/<uuid:pk>/', SamplingGroupDetailView.as_view(), name='detail_sampling_group'),

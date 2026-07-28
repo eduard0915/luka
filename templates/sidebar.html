@@ -251,9 +251,8 @@
         {% url 'solution:list_solution_std_base' as list_std_base %}
 
         {% url 'sampling:list_sampling_group' as list_group %}
-        {% url 'sampling:create_sampling_group' as create_group %}
 
-        {% is_expanded list_lab create_lab list_sln_base add_sln_base list_std_base add_std_base list_prod create_prod list_group create_group as config_expanded %}
+        {% is_expanded list_lab create_lab list_sln_base add_sln_base list_std_base add_std_base list_prod create_prod list_group as config_expanded %}
 
         {% if perms.company.add_company %}
             <li class="{{ config_expanded }}">
@@ -275,7 +274,7 @@
                         <i class="icon bi bi-circle-fill"></i> Soluciones STD Base</a></li>
                     <li><a class="treeview-item {% if list_prod in request.path or create_prod in request.path %}active{% endif %}" href="{% url 'product:list_product' %}">
                         <i class="icon bi bi-circle-fill"></i> Productos</a></li>
-                    <li><a class="treeview-item {% if list_group in request.path or create_group in request.path %}active{% endif %}" href="{% url 'sampling:list_sampling_group' %}"><i class="icon bi bi-circle-fill"></i> Grupos de Muestreo</a></li>
+                    <li><a class="treeview-item {% if list_group in request.path %}active{% endif %}" href="{% url 'sampling:list_sampling_group' %}"><i class="icon bi bi-circle-fill"></i> Grupos de Muestreo</a></li>
                 </ul>
             </li>
         {% endif %}

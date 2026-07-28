@@ -19,7 +19,7 @@ class ComputeSamplingTimesTests(TestCase):
     def test_distribucion_uniforme_con_cruce_de_medianoche(self):
         """Verifica que los horarios se distribuyen uniformemente incluso cruzando la medianoche."""
         group = build_sampling_group(first_hour='07:00:00', per_day=4)
-        times = [timezone.now()(t) for t in compute_sampling_times(group, TARGET)]
+        times = [timezone.localtime(t) for t in compute_sampling_times(group, TARGET)]
         self.assertEqual(
             [(t.date(), t.time()) for t in times],
             [
@@ -44,7 +44,7 @@ class ComputeSamplingTimesTests(TestCase):
     def test_intervalo_para_frecuencia_de_8_horas(self):
         """Verifica que 3 muestras por día generan intervalos de 8 horas comenzando a las 07:00."""
         group = build_sampling_group(first_hour='07:00:00', per_day=3)  # 24h / 8h = 3
-        times = [timezone.now()(t).time() for t in compute_sampling_times(group, TARGET)]
+        times = [timezone.localtime(t).time() for t in compute_sampling_times(group, TARGET)]
         self.assertEqual(times, [time(7, 0), time(15, 0), time(23, 0)])
 
     def test_todos_los_horarios_son_aware(self):
@@ -113,8 +113,8 @@ class GenerateSamplingsForGroupTests(TestCase):
 
     def test_punto_legacy_diario_si_genera(self):
         """Verifica que un punto con periodicidad 'Diario' (legacy) sí genera muestras."""
-        point = build_sample_point(code='PM1', periodicity='Diario')  # default histórico del modelo
-        group = build_sampling_group(point=point)
+        point = build_sample_point(code='PM1', periodicity='Diario', sample_frequency=6)  # default histórico del modelo
+        group = build_sampling_group(point=point, per_day=4)
         log = generate_samplings_for_group(group, TARGET)
         self.assertFalse(log.skipped)
         self.assertEqual(log.samples_created, 4)

@@ -11,13 +11,26 @@ DAILY_PERIODICITY = {'Diaria', 'Diario'}
 
 
 def compute_sampling_times(group, target_date):
-    """Calcula los horarios de muestreo distribuidos uniformemente en 24 horas."""
-    interval = timedelta(hours=24) / group.number_sampling_day
+    """Calcula los horarios de muestreo espaciados por sample_frequency horas desde first_hour_sampling."""
+    point = group.sampling_point
+    freq = point.sample_frequency
+    if not freq or freq <= 0:
+        return []
+
     first = timezone.make_aware(
         datetime.combine(target_date, group.first_hour_sampling),
         timezone.get_current_timezone(),
     )
-    return [first + k * interval for k in range(group.number_sampling_day)]
+
+    times = []
+    current = first
+    end_of_day = first + timedelta(days=1)
+
+    while current < end_of_day:
+        times.append(current)
+        current += timedelta(hours=freq)
+
+    return times
 
 
 def should_skip_group(group):
@@ -29,6 +42,8 @@ def should_skip_group(group):
         or not point.enable_point
         or not point.sample_point_code
         or point.periodicity not in DAILY_PERIODICITY
+        or not point.sample_frequency
+        or point.sample_frequency <= 0
     )
 
 
