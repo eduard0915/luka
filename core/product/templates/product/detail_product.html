@@ -383,6 +383,7 @@
                             <th class="text-center">Muestras por Día</th>
                             <th class="text-center">Habilitado</th>
                             <th class="text-center">Automuestreo</th>
+                            <th class="text-center">Acciones</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -405,10 +406,20 @@
                                         <span class="me-1 badge bg-danger">No</span>
                                     {% endif %}
                                 </td>
+                                <td class="text-center">
+                                    <a onclick="open_modal('{% url 'sampling:update_sampling_group' group.id %}')"
+                                       title="Editar" style="cursor: pointer;">
+                                        <i class="bi bi-pencil-square text-warning me-2"></i>
+                                    </a>
+                                    <a onclick="open_modal('{% url 'sampling:delete_sampling_group' group.id %}')"
+                                       title="Eliminar" style="cursor: pointer;">
+                                        <i class="bi bi-trash text-danger me-2"></i>
+                                    </a>
+                                </td>
                             </tr>
                         {% empty %}
                             <tr>
-                                <td colspan="5" class="text-center">
+                                <td colspan="6" class="text-center">
                                     No hay grupos de muestreo asociados a este producto.
                                 </td>
                             </tr>
