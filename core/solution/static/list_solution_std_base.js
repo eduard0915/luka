@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
             columns: [
                 {'data': 'solute_std_base__description_reagent'},
                 {'data': 'concentration_std_base'},
+                {'data': 'stability_solution'},
                 {'data': 'enable_solution_std'},
                 {'data': 'id'}
             ],
@@ -30,6 +31,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     class: 'td-actions text-left'
                 },
                 {
+                    targets: [2],
+                    class: 'td-actions text-center'
+                },
+                {
                     targets: [1],
                     class: 'td-actions text-center',
                     render: function (data, type, row) {
@@ -37,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 {
-                    targets: [2],
+                    targets: [3],
                     className: 'td-actions text-center',
                     render: function (data, type, row) {
                         switch (row['enable_solution_std']) {
@@ -49,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 {
-                    targets: [3],
+                    targets: [4],
                     class: 'td-actions text-center',
                     orderable: false,
                     render: function (data, type, row) {

@@ -723,21 +723,56 @@ class SamplingAnalysisProcessingListView(LoginRequiredMixin, ValidatePermissionR
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        """Procesa solicitudes POST para la búsqueda de procesamientos."""
+        """Procesa solicitudes POST para la búsqueda de procesamientos (server-side DataTables)."""
         data = {}
         try:
             action = request.POST.get('action')
             if action == 'searchdata':
-                data = []
-                for i in SamplingAnalysisProcessing.objects.all().select_related(
+                draw = int(request.POST.get('draw', 1))
+                start = int(request.POST.get('start', 0))
+                length = int(request.POST.get('length', 10))
+
+                qs = SamplingAnalysisProcessing.objects.select_related(
                     'sample_analysis',
                     'sample_analysis__sampling_process',
                     'sample_analysis__analytical_method',
                     'analyzed_by',
                     'analytical_method_calculate',
                     'analytical_method_calculate_relation'
-                ):
-                    data.append(i.toJSON())
+                )
+                if request.user.laboratory:
+                    qs = qs.filter(
+                        Q(sample_analysis__sampling_process__group_sampling__sampling_point__product__site=request.user.laboratory.site) |
+                        Q(sample_analysis__sampling_process__point_sampling__product__site=request.user.laboratory.site)
+                    )
+                else:
+                    qs = qs.none()
+
+                records_total = qs.count()
+
+                order_column = request.POST.get('order[0][column]', '1')
+                order_dir = request.POST.get('order[0][dir]', 'desc')
+                order_map = {
+                    '0': 'analyzed_by__first_name',
+                    '1': 'analyzed_date',
+                    '2': 'sample_analysis__analytical_method__description_analytical_method',
+                    '3': 'concentration_sample',
+                    '4': 'sample_analysis__sampling_process__number_sample',
+                }
+                order_field = order_map.get(order_column, 'analyzed_date')
+                if order_dir == 'desc':
+                    order_field = '-' + order_field
+
+                qs = qs.order_by(order_field)[start:start + length]
+
+                page_data = [i.toJSON() for i in qs]
+
+                return JsonResponse({
+                    'draw': draw,
+                    'recordsTotal': records_total,
+                    'recordsFiltered': records_total,
+                    'data': page_data
+                })
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:

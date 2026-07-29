@@ -100,21 +100,24 @@ class InventoryReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMix
             action = request.POST['action']
             if action == 'searchdata':
                 data = []
-                inventory_reagents = list(InventoryReagent.objects.values(
-                    'id',
-                    'reagent__description_reagent',
-                    'reagent__code_reagent',
-                    'reagent__purity_unit',
-                    'reagent__density_enable',
-                    'reagent__umb',
-                    'batch_number',
-                    'date_expire',
-                    'quantity_stock',
-                    'date_creation',
-                    'purity',
-                    'certificate_quality',
-                    'density'
-                ).order_by('-date_creation'))
+                if request.user.laboratory:
+                    inventory_reagents = list(InventoryReagent.objects.values(
+                        'id',
+                        'reagent__description_reagent',
+                        'reagent__code_reagent',
+                        'reagent__purity_unit',
+                        'reagent__density_enable',
+                        'reagent__umb',
+                        'batch_number',
+                        'date_expire',
+                        'quantity_stock',
+                        'date_creation',
+                        'purity',
+                        'certificate_quality',
+                        'density'
+                    ).filter(reagent__site=request.user.laboratory.site).order_by('-date_creation'))
+                else:
+                    inventory_reagents = []
                 return JsonResponse(inventory_reagents, safe=False)
             else:
                 data['error'] = 'Ha ocurrido un error'

@@ -6,20 +6,21 @@ $(function () {
         autoWidth: false,
         destroy: true,
         deferRender: true,
+        processing: true,
+        serverSide: true,
         ajax: {
             url: window.location.pathname,
             type: 'POST',
             data: {
                 'action': 'searchdata'
-            },
-            dataSrc: ""
+            }
         },
         columns: [
-            {"data": "analyzed_by"},
-            {"data": "analyzed_date"},
-            {"data": "concentration_sample_display"},
-            {"data": "sample_analysis.sampling_process.number_sample"},
-            {"data": "sample_analysis.analytical_method"},
+            {"data": "analyzed_by", "orderable": true},
+            {"data": "analyzed_date", "orderable": true},
+            {"data": "sample_analysis.analytical_method", "orderable": true},
+            {"data": "concentration_sample_display", "orderable": true},
+            {"data": "sample_analysis.sampling_process.number_sample", "orderable": true}
         ],
         columnDefs: [
             {
@@ -27,8 +28,5 @@ $(function () {
                 class: 'text-center',
             },
         ],
-        initComplete: function (settings, json) {
-
-        }
     });
 });

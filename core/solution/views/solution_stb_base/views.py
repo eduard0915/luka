@@ -191,8 +191,9 @@ class SolutionStdBaseListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
                     'solute_std_base__description_reagent',
                     'concentration_std_base',
                     'concentration_unit_base',
-                    'enable_solution_std'
-                ).order_by('-solute_std_base__description_reagent'))
+                    'enable_solution_std',
+                    'stability_solution'
+                ).filter(solute_std_base__site=request.user.laboratory.site).order_by('-solute_std_base__description_reagent'))
                 return JsonResponse(reagents, safe=False)
             else:
                 data['error'] = 'Ha ocurrido un error'
@@ -206,6 +207,6 @@ class SolutionStdBaseListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
         context['title'] = 'Soluciones Estándares'
         context['create_url'] = reverse_lazy('solution:create_solution_std_base')
         context['entity'] = 'Maestro de Soluciones Estándares Base'
-        context['div'] = '7'
+        context['div'] = '9'
         context['icon'] = 'fa-solid fa-flask-vial'
         return context

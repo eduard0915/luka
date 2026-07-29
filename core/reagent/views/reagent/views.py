@@ -94,20 +94,23 @@ class ReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
         try:
             action = request.POST['action']
             if action == 'searchdata':
-                reagents = list(Reagent.objects.values(
-                    'id',
-                    'code_reagent',
-                    'description_reagent',
-                    'umb',
-                    'purity_unit',
-                    'manufacturer',
-                    'enable_reagent',
-                    'technical_sheet',
-                    'volumetric',
-                    'solvent',
-                    'density_enable',
-                    'standard'
-                ).order_by('code_reagent'))
+                if request.user.laboratory:
+                    reagents = list(Reagent.objects.values(
+                        'id',
+                        'code_reagent',
+                        'description_reagent',
+                        'umb',
+                        'purity_unit',
+                        'manufacturer',
+                        'enable_reagent',
+                        'technical_sheet',
+                        'volumetric',
+                        'solvent',
+                        'density_enable',
+                        'standard'
+                    ).filter(site=request.user.laboratory.site).order_by('code_reagent'))
+                else:
+                    reagents = []
                 return JsonResponse(reagents, safe=False)
             else:
                 data['error'] = 'Ha ocurrido un error'

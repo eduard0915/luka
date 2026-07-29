@@ -4,7 +4,7 @@ Inyecta en el contexto de todas las plantillas la información de la
 compañía y los contadores de alarmas, muestreos, mantenimientos y
 calibraciones vencidas o pendientes.
 """
-
+from django.db.models import Q
 from django.utils import timezone
 
 from core.company.models import Company
@@ -23,26 +23,67 @@ def extras_processor(request):
 
     if request.user.is_authenticated:
 
-        equipment = EquipmentInstrumental.objects.filter(enable_equipment=True).count()
-        sampling_day = SamplingProcess.objects.filter(date_sampling__date=timezone.localdate()).count()
-
         context['training_expire_count'] = Training.objects.filter(
             user__slug=request.user.slug, training_status='Vencido').count()
-        context['count_scheduled_sampling'] = SamplingProcess.objects.filter(status_sampling='Programada').count()
-        context['count_confirmed_sampling'] = SamplingProcess.objects.filter(status_sampling='Confirmada').count()
-        context['count_in_process_sampling'] = SamplingProcess.objects.filter(status_sampling='En Proceso').count()
-        context['count_sampling_end'] = SamplingProcess.objects.filter(
-            status_sampling__in=['Aprobado', 'Rechazado']).count()
-        context['count_oos_result'] = SamplingAnalysis.objects.filter(comply='No Cumple').count()
-        context['count_mtto_expire'] = Maintenance.objects.filter(next_date_maintenance__lt=timezone.localtime(),
-                                                                  maintenance_next_completed=False).count()
-        context['count_mtto_expire_responsible'] = Maintenance.objects.select_related('responsible_user').filter(
-            next_date_maintenance__lt=timezone.localtime(), responsible_user__slug=request.user.slug,
-            maintenance_next_completed=False).count()
-        context['count_calibration_expire'] = Calibration.objects.filter(
-            date_calibration_next__lt=timezone.localtime()).count()
-        context['count_calibration_expire_responsible'] = Calibration.objects.select_related('responsible_user').filter(
-            date_calibration_next__lt=timezone.localtime(), responsible_user__slug=request.user.slug).count()
+
+        user_site = getattr(getattr(request.user, 'laboratory', None), 'site', None)
+
+        if user_site is not None:
+            site_sampling_filter = (
+                Q(group_sampling__sampling_point__product__site=user_site) |
+                Q(point_sampling__product__site=user_site)
+            )
+
+            equipment = EquipmentInstrumental.objects.filter(
+                enable_equipment=True, laboratory__site=user_site).count()
+            sampling_day = SamplingProcess.objects.filter(
+                date_sampling__date=timezone.localdate()).filter(site_sampling_filter).count()
+
+            context['count_scheduled_sampling'] = SamplingProcess.objects.filter(
+                status_sampling='Programada').filter(site_sampling_filter).count()
+            context['count_confirmed_sampling'] = SamplingProcess.objects.filter(
+                status_sampling='Confirmada').filter(site_sampling_filter).count()
+            context['count_in_process_sampling'] = SamplingProcess.objects.filter(
+                status_sampling='En Proceso').filter(site_sampling_filter).count()
+            context['count_sampling_end'] = SamplingProcess.objects.filter(
+                status_sampling__in=['Aprobado', 'Rechazado']).filter(site_sampling_filter).count()
+
+            context['count_oos_result'] = SamplingAnalysis.objects.filter(comply='No Cumple').filter(
+                Q(sampling_process__group_sampling__sampling_point__product__site=user_site) |
+                Q(sampling_process__point_sampling__product__site=user_site)
+            ).count()
+
+            context['count_mtto_expire'] = Maintenance.objects.filter(
+                next_date_maintenance__lt=timezone.localtime(),
+                maintenance_next_completed=False,
+                equipment_instrumental__laboratory__site=user_site).count()
+
+            context['count_mtto_expire_responsible'] = Maintenance.objects.filter(
+                next_date_maintenance__lt=timezone.localtime(),
+                responsible_user__slug=request.user.slug,
+                maintenance_next_completed=False,
+                equipment_instrumental__laboratory__site=user_site).count()
+
+            context['count_calibration_expire'] = Calibration.objects.filter(
+                date_calibration_next__lt=timezone.localtime(),
+                equipment_instrumental__laboratory__site=user_site).count()
+
+            context['count_calibration_expire_responsible'] = Calibration.objects.filter(
+                date_calibration_next__lt=timezone.localtime(),
+                responsible_user__slug=request.user.slug,
+                equipment_instrumental__laboratory__site=user_site).count()
+        else:
+            equipment = 0
+            sampling_day = 0
+            context['count_scheduled_sampling'] = 0
+            context['count_confirmed_sampling'] = 0
+            context['count_in_process_sampling'] = 0
+            context['count_sampling_end'] = 0
+            context['count_oos_result'] = 0
+            context['count_mtto_expire'] = 0
+            context['count_mtto_expire_responsible'] = 0
+            context['count_calibration_expire'] = 0
+            context['count_calibration_expire_responsible'] = 0
         context['count_total_alarm'] = context['training_expire_count'] + context[
             'count_calibration_expire_responsible'] + context['count_mtto_expire_responsible']
 
