@@ -4,19 +4,6 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
-def backfill_solution_laboratories(apps, schema_editor):
-    Solution = apps.get_model('solution', 'Solution')
-    SolutionStd = apps.get_model('solution', 'SolutionStd')
-    Laboratory = apps.get_model('laboratory', 'Laboratory')
-
-    first_lab = Laboratory.objects.order_by('laboratory_name').first()
-    if not first_lab:
-        return
-
-    Solution.objects.filter(laboratory__isnull=True).update(laboratory=first_lab)
-    SolutionStd.objects.filter(laboratory__isnull=True).update(laboratory=first_lab)
-
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -25,17 +12,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(backfill_solution_laboratories, migrations.RunPython.noop),
         migrations.AlterField(
             model_name='solution',
             name='laboratory',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='laboratory.laboratory', verbose_name='Laboratorio'),
-            preserve_default=False,
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='laboratory.laboratory', verbose_name='Laboratorio'),
         ),
         migrations.AlterField(
             model_name='solutionstd',
             name='laboratory',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='laboratory.laboratory', verbose_name='Laboratorio'),
-            preserve_default=False,
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='laboratory.laboratory', verbose_name='Laboratorio'),
         ),
     ]
