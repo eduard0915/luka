@@ -19,6 +19,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='standardization',
             name='solution_std',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='solution_std', to='solution.solutionstdbase', verbose_name='Solución Estándar'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='solution_std', to='reagent.reagent', verbose_name='Solución Estándar'),
         ),
     ]
