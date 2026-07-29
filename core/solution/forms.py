@@ -706,9 +706,9 @@ class SolutionConfirmedForm(ModelForm):
                 instance.quantity_available_sln = instance.quantity_solution
                 instance.preparated_by_id = user.id
 
-                if instance.solute_reagent.reagent.stability_solution:
+                if instance.solution_base.stability_solution:
                     instance.expire_date_solution = instance.preparation_date + timedelta(
-                        days=instance.solute_reagent.reagent.stability_solution)
+                        days=instance.solution_base.stability_solution)
                 else:
                     raise ValidationError('El Reactivo no tiene definido Días Estabilidad en Solución')
 
@@ -771,9 +771,13 @@ class StandardizationForm(ModelForm):
     """Formulario para registrar la relación molar entre una solución y un estándar."""
     def __init__(self, *args, **kwargs):
         """Inicializa el formulario extrayendo el reactivo de los kwargs y filtrando las soluciones estándar."""
-        self.reagent = kwargs.pop('reagent')
+
+        self.sln_std_base = kwargs.pop('sln_std_base')
+        self.sln_base = kwargs.pop('sln_base')
+        user = get_current_user()
+
         super().__init__(*args, **kwargs)
-        self.fields['solution_std'].queryset = Reagent.objects.filter(standard=True, solvent=False, enable_reagent=True)
+        self.fields['solution_std'].queryset = SolutionStdBase.objects.select_related('laboratory__site').filter(laboratory__site=user.laboratory.site, enable_solution_std=True)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
@@ -792,7 +796,10 @@ class StandardizationForm(ModelForm):
         try:
             if form.is_valid():
                 data = form.save(commit=False)
-                data.solution_reagent_id = self.reagent.id
+                if self.sln_base:
+                    data.solution_base_id = self.sln_base.id
+                if self.sln_std_base:
+                    data.solution_std_base_id = self.sln_std_base.id
                 data.save()
             else:
                 data['error'] = form.errors

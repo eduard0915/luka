@@ -73,7 +73,7 @@
                                     <p class="text-danger">Pendiente Confirmación</p>
                                 {% endif %}
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <b>Fecha de Preparación</b><br>
                                 {% if object.preparation_date %}
                                     <p>{{ object.preparation_date | date:'Y-m-d' }}</p>
@@ -81,7 +81,7 @@
                                     <p class="text-danger">Pendiente Confirmación</p>
                                 {% endif %}
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <b>Vencimiento</b><br>
                                 {% if object.expire_date_solution %}
                                     <p>{{ object.expire_date_solution | date:'Y-m-d' }}</p>
@@ -89,13 +89,17 @@
                                     <p class="text-danger">Pendiente Confirmación</p>
                                 {% endif %}
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <b>Cantidad Disponible</b><br>
                                 {% if object.quantity_available_sln %}
                                     <p>{{ object.quantity_available_sln | intcomma:False }} mL</p>
                                 {% else %}
                                     <p class="text-danger">Pendiente Confirmación</p>
                                 {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <b>Laboratorio</b><br>
+                                <p>{{ object.laboratory }}</p>
                             </div>
                         </div>
                     {% endif %}
