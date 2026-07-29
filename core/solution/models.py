@@ -194,7 +194,7 @@ class SolutionStd(BaseModel):
     quantity_solvent = models.FloatField(verbose_name='Solvente (mL)', null=True, blank=True)
     preparated_std_by = models.ForeignKey(User, verbose_name='Preparado por', on_delete=models.CASCADE, null=True, blank=True)
     preparation_confirmed = models.BooleanField(default=False)
-    laboratory = models.ForeignKey(Laboratory, on_delete=models.CASCADE, verbose_name='Laboratorio')
+    laboratory = models.ForeignKey(Laboratory, blank=True, null=True, on_delete=models.CASCADE, verbose_name='Laboratorio')
 
     def __str__(self):
         """Retorna la representación con el reactivo, concentración, código y cantidad."""
