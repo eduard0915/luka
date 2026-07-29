@@ -8,6 +8,7 @@ from django.shortcuts import redirect
 from django.template.loader import get_template
 from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
+from django.db.models import Q
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -144,7 +145,7 @@ class SolutionListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, List
         try:
             action = request.POST['action']
             if action == 'searchdata':
-                from django.db.models import Q
+
                 filters = Q()
 
                 laboratory_id = request.POST.get('filter_laboratory', '').strip()
@@ -192,7 +193,7 @@ class SolutionListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, List
                     'quantity_solvent',
                     'preparation_confirmed',
                     'quantity_available_sln'
-                ).order_by('-code_solution'))
+                ).filter(laboratory=request.user.laboratory).order_by('-code_solution'))
 
                 # Formatear el nombre completo
                 for reagent in reagents:

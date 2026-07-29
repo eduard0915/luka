@@ -119,7 +119,7 @@ class EquipmentInstrumentalListView(LoginRequiredMixin, ValidatePermissionRequir
                     'responsible_user__first_name',
                     'responsible_user__last_name',
                     'enable_equipment'
-                ).order_by('code_equipment'))
+                ).filter(laboratory=request.user.laboratory).order_by('code_equipment'))
 
                 for equipment in equipments:
                     first_name = equipment.get('responsible_user__first_name', '') or ''

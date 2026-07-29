@@ -198,7 +198,7 @@ class SolutionStdListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, L
                     'preparated_std_by__last_name',
                     'preparated_std_by__cargo',
                     'preparated_std_by',
-                ).order_by('-code_solution_std'))
+                ).filter(laboratory=request.user.laboratory).order_by('-code_solution_std'))
 
                 # Formatear el nombre completo
                 for std in stds:

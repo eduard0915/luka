@@ -190,11 +190,12 @@ class SolutionBaseListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
                 slns = SolutionBase.objects.select_related(
                     'solute_reagent_base'
                 ).prefetch_related(
-                    'solution_std_base'
+                    'standardization_set'
                 ).order_by('-solute_reagent_base__description_reagent')
                 rows = []
                 for sln in slns:
-                    std = sln.solution_std_base.first()
+                    std_list = sln.standardization_set.all()
+                    std = std_list[0] if std_list else None
                     sln_data = {
                         'id': sln.id,
                         'solution_base': sln.solute_reagent_base.description_reagent,

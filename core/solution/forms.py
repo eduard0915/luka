@@ -7,10 +7,10 @@ from django.core.exceptions import ValidationError
 from django.forms import ModelForm, TextInput, FileInput, Select, DateInput, NumberInput, CheckboxInput
 from django.utils import timezone
 
-from core.reagent.models import InventoryReagent, Reagent
-from core.solution.models import Solution, SolutionStd, Standardization, StandardizationSolution, SolutionBase, \
-    SolutionStdBase
 from core.laboratory.models import Laboratory
+from core.reagent.models import InventoryReagent, Reagent
+from core.solution.models import *
+
 
 CONC = [('', '-----'), ('%', '%'), ('g/L', 'g/L'), ('mg/L', 'mg/L'), ('M', 'M'), ('N', 'N')]
 BOOLEAN = [(True, 'Si'), (False, 'No')]
@@ -23,23 +23,35 @@ class SolutionForm(ModelForm):
         """Inicializa el formulario filtrando los reactivos soluto y solvente disponibles, y asignando clases CSS."""
         super().__init__(*args, **kwargs)
         user = get_current_user()
-        solute_qs = InventoryReagent.objects.select_related('reagent').filter(
-            date_expire__gte=timezone.localtime(), reagent__solvent=False, quantity_stock__gt=0,
-            reagent__standard=False, reagent__site=user.laboratory.site)
+        if user.laboratory:
+            solute_qs = InventoryReagent.objects.select_related('reagent').filter(
+                date_expire__gte=timezone.localtime(), reagent__solvent=False, quantity_stock__gt=0,
+                reagent__standard=False, reagent__site=user.laboratory.site)
+        else:
+            solute_qs = InventoryReagent.objects.none()
         self.fields['solute_reagent'].queryset = solute_qs
         self.fields['solute_reagent'].widget.attrs['data-reagents'] = {
             str(obj.id): str(obj.reagent.id) for obj in solute_qs
         }
 
-        solvent_qs = InventoryReagent.objects.select_related('reagent').filter(
-            date_expire__gte=timezone.localtime(), reagent__solvent=True, quantity_stock__gt=0, reagent__standard=False)
+        if user.laboratory:
+            solvent_qs = InventoryReagent.objects.select_related('reagent').filter(
+                date_expire__gte=timezone.localtime(), reagent__solvent=True, quantity_stock__gt=0,
+                reagent__standard=False, reagent__site=user.laboratory.site)
+        else:
+            solvent_qs = InventoryReagent.objects.none()
         self.fields['solvent_reagent'].queryset = solvent_qs
         self.fields['laboratory'].queryset = Laboratory.objects.filter(enable_laboratory=True)
         self.fields['solvent_reagent'].widget.attrs['data-reagents'] = {
             str(obj.id): str(obj.reagent.id) for obj in solvent_qs
         }
 
-        self.fields['solution_base'].queryset = SolutionBase.objects.filter(enable_solution=True)
+        if user.laboratory:
+            self.fields['solution_base'].queryset = SolutionBase.objects.filter(
+                enable_solution=True, solute_reagent_base__site=user.laboratory.site)
+        else:
+            self.fields['solution_base'].queryset = SolutionBase.objects.none()
+
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
@@ -220,28 +232,42 @@ class SolutionUpdateForm(ModelForm):
     """Formulario para la edición de soluciones."""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         user = get_current_user()
-        solute_qs = InventoryReagent.objects.select_related('reagent').filter(
-            date_expire__gte=timezone.localtime(), reagent__solvent=False, quantity_stock__gt=0,
-            reagent__standard=False, reagent__site=user.laboratory.site)
+
+        if user.laboratory:
+            solute_qs = InventoryReagent.objects.select_related('reagent').filter(
+                date_expire__gte=timezone.localtime(), reagent__solvent=False, quantity_stock__gt=0,
+                reagent__standard=False, reagent__site=user.laboratory.site)
+        else:
+            solute_qs = InventoryReagent.objects.none()
         if self.instance and self.instance.pk and self.instance.solute_reagent_id:
             solute_qs = solute_qs | InventoryReagent.objects.filter(pk=self.instance.solute_reagent_id)
+
         self.fields['solute_reagent'].queryset = solute_qs
         self.fields['solute_reagent'].widget.attrs['data-reagents'] = {
             str(obj.id): str(obj.reagent.id) for obj in solute_qs
         }
 
-        solvent_qs = InventoryReagent.objects.select_related('reagent').filter(
-            date_expire__gte=timezone.localtime(), reagent__solvent=True, quantity_stock__gt=0, reagent__standard=False)
+        if user.laboratory:
+            solvent_qs = InventoryReagent.objects.select_related('reagent').filter(
+                date_expire__gte=timezone.localtime(), reagent__solvent=True, quantity_stock__gt=0,
+                reagent__standard=False, reagent__site=user.laboratory.site)
+        else:
+            solvent_qs = InventoryReagent.objects.none()
         if self.instance and self.instance.pk and self.instance.solvent_reagent_id:
             solvent_qs = solvent_qs | InventoryReagent.objects.filter(pk=self.instance.solvent_reagent_id)
         self.fields['solvent_reagent'].queryset = solvent_qs
+
         self.fields['laboratory'].queryset = Laboratory.objects.filter(enable_laboratory=True)
         self.fields['solvent_reagent'].widget.attrs['data-reagents'] = {
             str(obj.id): str(obj.reagent.id) for obj in solvent_qs
         }
 
-        solution_base_qs = SolutionBase.objects.filter(enable_solution=True)
+        if user.laboratory:
+            solution_base_qs = SolutionBase.objects.filter(enable_solution=True, solute_reagent_base__site=user.laboratory.site)
+        else:
+            solution_base_qs = SolutionBase.objects.none()
         if self.instance and self.instance.pk and self.instance.solution_base_id:
             solution_base_qs = solution_base_qs | SolutionBase.objects.filter(pk=self.instance.solution_base_id)
         self.fields['solution_base'].queryset = solution_base_qs
@@ -401,25 +427,36 @@ class SolutionStandardForm(ModelForm):
         """Inicializa el formulario filtrando los estándares y solventes del inventario, y asignando clases CSS."""
         super().__init__(*args, **kwargs)
         user = get_current_user()
-        solute_qs = InventoryReagent.objects.select_related('reagent').filter(
-            date_expire__gte=timezone.localdate(),
-            reagent__solvent=False, quantity_stock__gt=0, reagent__standard=True,
-            reagent__site=user.laboratory.site).exclude(reagent__ready_to_use=True)
+        if user.laboratory:
+            solute_qs = InventoryReagent.objects.select_related('reagent').filter(
+                date_expire__gte=timezone.localdate(),
+                reagent__solvent=False, quantity_stock__gt=0, reagent__standard=True,
+                reagent__site=user.laboratory.site).exclude(reagent__ready_to_use=True)
+        else:
+            solute_qs = InventoryReagent.objects.none()
         self.fields['solute_std'].queryset = solute_qs
         self.fields['laboratory'].queryset = Laboratory.objects.filter(enable_laboratory=True)
         self.fields['solute_std'].widget.attrs['data-reagents'] = {
             str(obj.id): str(obj.reagent.id) for obj in solute_qs
         }
 
-        solvent_qs = InventoryReagent.objects.select_related('reagent').filter(
-            date_expire__gte=timezone.localdate(), reagent__solvent=True, quantity_stock__gt=0)
+        if user.laboratory:
+            solvent_qs = InventoryReagent.objects.select_related('reagent').filter(
+                date_expire__gte=timezone.localdate(), reagent__solvent=True, quantity_stock__gt=0,
+                reagent__site=user.laboratory.site)
+        else:
+            solvent_qs = InventoryReagent.objects.none()
         self.fields['solvent_reagent'].queryset = solvent_qs
         self.fields['solvent_reagent'].widget.attrs['data-reagents'] = {
             str(obj.id): str(obj.reagent.id) for obj in solvent_qs
         }
 
-        self.fields['solution_std_base'].queryset = SolutionStdBase.objects.filter(
-            enable_solution_std=True, solute_std_base__ready_to_use=False)
+        if user.laboratory:
+            self.fields['solution_std_base'].queryset = SolutionStdBase.objects.filter(
+                enable_solution_std=True, solute_std_base__ready_to_use=False, solute_std_base__site=user.laboratory.site)
+        else:
+            self.fields['solution_std_base'].queryset = SolutionStdBase.objects.none()
+
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
@@ -539,10 +576,13 @@ class SolutionStdUpdateForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         user = get_current_user()
-        solute_qs = InventoryReagent.objects.select_related('reagent').filter(
-            date_expire__gte=timezone.localdate(),
-            reagent__solvent=False, quantity_stock__gt=0, reagent__standard=True,
-            reagent__site=user.laboratory.site).exclude(reagent__ready_to_use=True)
+        if user.laboratory:
+            solute_qs = InventoryReagent.objects.select_related('reagent').filter(
+                date_expire__gte=timezone.localdate(),
+                reagent__solvent=False, quantity_stock__gt=0, reagent__standard=True,
+                reagent__site=user.laboratory.site).exclude(reagent__ready_to_use=True)
+        else:
+            solute_qs = InventoryReagent.objects.none()
         if self.instance and self.instance.pk and self.instance.solution_std_base_id:
             solute_qs = solute_qs.filter(
                 reagent_id=self.instance.solution_std_base.solute_std_base_id)
@@ -554,8 +594,12 @@ class SolutionStdUpdateForm(ModelForm):
             str(obj.id): str(obj.reagent.id) for obj in solute_qs
         }
 
-        solvent_qs = InventoryReagent.objects.select_related('reagent').filter(
-            date_expire__gte=timezone.localdate(), reagent__solvent=True, quantity_stock__gt=0)
+        if user.laboratory:
+            solvent_qs = InventoryReagent.objects.select_related('reagent').filter(
+                date_expire__gte=timezone.localdate(), reagent__solvent=True, quantity_stock__gt=0,
+                reagente__site=user.laboratory.site)
+        else:
+            solvent_qs = InventoryReagent.objects.none()
         if self.instance and self.instance.pk and self.instance.solvent_reagent_id:
             solvent_qs = solvent_qs | InventoryReagent.objects.filter(pk=self.instance.solvent_reagent_id)
         self.fields['solvent_reagent'].queryset = solvent_qs
@@ -563,8 +607,11 @@ class SolutionStdUpdateForm(ModelForm):
             str(obj.id): str(obj.reagent.id) for obj in solvent_qs
         }
 
-        solution_std_base_qs = SolutionStdBase.objects.filter(
-            enable_solution_std=True, solute_std_base__ready_to_use=False)
+        if user.laboratory:
+            solution_std_base_qs = SolutionStdBase.objects.filter(
+                enable_solution_std=True, solute_std_base__ready_to_use=False, solute_std_base__site=user.laboratory.site)
+        else:
+            solution_std_base_qs = SolutionStdBase.objects.none()
         if self.instance and self.instance.pk and self.instance.solution_std_base_id:
             solution_std_base_qs = solution_std_base_qs | SolutionStdBase.objects.filter(pk=self.instance.solution_std_base_id)
         self.fields['solution_std_base'].queryset = solution_std_base_qs
@@ -777,7 +824,12 @@ class StandardizationForm(ModelForm):
         user = get_current_user()
 
         super().__init__(*args, **kwargs)
-        self.fields['solution_std'].queryset = SolutionStdBase.objects.select_related('laboratory__site').filter(laboratory__site=user.laboratory.site, enable_solution_std=True)
+        if user.laboratory:
+            self.fields['solution_std'].queryset = SolutionStdBase.objects.select_related('laboratory__site').filter(
+                laboratory__site=user.laboratory.site, enable_solution_std=True)
+        else:
+            self.fields['solution_std'].queryset = SolutionStdBase.objects.none()
+
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
@@ -814,7 +866,15 @@ class StandardizationUpdateForm(ModelForm):
     def __init__(self, *args, **kwargs):
         """Inicializa el formulario filtrando las soluciones estándar habilitadas."""
         super().__init__(*args, **kwargs)
-        self.fields['solution_std'].queryset = Reagent.objects.filter(standard=True, solvent=False, enable_reagent=True)
+
+        user = get_current_user()
+
+        if user.laboratory:
+            self.fields['solution_std'].queryset = SolutionStdBase.objects.select_related('laboratory__site').filter(
+                laboratory__site=user.laboratory.site, enable_solution_std=True)
+        else:
+            self.fields['solution_std'].queryset = SolutionStdBase.objects.none()
+
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
@@ -848,9 +908,15 @@ class StandardizationSolutionForm(ModelForm):
         self.std = kwargs.pop('std')
         self.sln = kwargs.pop('sln')
         super().__init__(*args, **kwargs)
+
+        user = get_current_user()
+
         self.fields['quantity_standard'].label = str(self.std.solution_std.umb) + ' de Estándar'
-        self.fields['standard_solution'].queryset = SolutionStd.objects.select_related('solute_std').filter(
-            solute_std__reagent_id=self.std.solution_std.id, quantity_solution_std__gt=0)
+        if user.laboratory:
+            self.fields['standard_solution'].queryset = SolutionStd.objects.select_related('solute_std').filter(
+                solute_std__reagent_id=self.std.solution_std.id, quantity_solution_std__gt=0, laboratory=user.laboratory)
+        else:
+            self.fields['standard_solution'].queryset = SolutionStdBase.objects.none()
 
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -916,10 +982,17 @@ class SolutionBaseForm(ModelForm):
     def __init__(self, *args, **kwargs):
         """Inicializa el formulario filtrando los reactivos base y asignando clases CSS a los campos."""
         super().__init__(*args, **kwargs)
-        self.fields['solute_reagent_base'].queryset = Reagent.objects.filter(enable_reagent=True, solvent=False,
-                                                                             standard=False)
-        self.fields['solvent_reagent_base'].queryset = Reagent.objects.filter(enable_reagent=True, solvent=True,
-                                                                              standard=False)
+
+        user = get_current_user()
+        if user.laboratory:
+            self.fields['solute_reagent_base'].queryset = Reagent.objects.filter(
+                enable_reagent=True, solvent=False, standard=False, site=user.laboratory.site)
+            self.fields['solvent_reagent_base'].queryset = Reagent.objects.filter(
+                enable_reagent=True, solvent=True, standard=False, site=user.laboratory.site)
+        else:
+            self.fields['solute_reagent_base'].queryser = Reagent.objects.none()
+            self.fields['solvent_reagent_base'].queryser = Reagent.objects.none()
+
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
@@ -963,9 +1036,16 @@ class SolutionStdBaseForm(ModelForm):
     def __init__(self, *args, **kwargs):
         """Inicializa el formulario filtrando los estándares base y asignando clases CSS a los campos."""
         super().__init__(*args, **kwargs)
-        self.fields['solute_std_base'].queryset = Reagent.objects.filter(enable_reagent=True, solvent=False,
-                                                                         standard=True)
-        self.fields['solvent_reagent_base'].queryset = Reagent.objects.filter(enable_reagent=True, solvent=True)
+
+        user = get_current_user()
+        if user.laboratory:
+            self.fields['solute_std_base'].queryset = Reagent.objects.filter(
+                enable_reagent=True, solvent=False, standard=True, site=user.laboratory.site)
+            self.fields['solvent_reagent_base'].queryset = Reagent.objects.filter(
+                enable_reagent=True, solvent=True, site=user.laboratory.site)
+        else:
+            self.fields['solute_std_base'].queryset = Reagent.objects.none()
+            self.fields['solvent_reagent_base'].queryset = Reagent.objects.none()
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 

@@ -4,77 +4,82 @@
 {% block content %}
 
     <div class="row">
-        <!-- Muestras por Recolectar Card -->
-        <div class="col-md-6 col-lg-3">
-            <div class="info-card">
-                <div class="info-card-content">
-                    <div class="info-card-title">Muestras por Recolectar</div>
-                    <div class="info-card-value">{{ count_scheduled_sampling }}</div>
-                    <div class="info-card-change positive">
-                        {{ percent_sampling_scheduled }}% <span style="color: #6c757d; font-weight: 400;">por Recoger</span>
-                    </div>
-                </div>
-                <div class="info-card-icon">
-                    <a href="{% url 'sampling:list_sampling_process_scheduled' %}" title="Ver Listado">
-                        <i class="bi bi-basket text-white"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
 
-        <!-- Muestras Confirmadas Card -->
-        <div class="col-md-6 col-lg-3">
-            <div class="info-card">
-                <div class="info-card-content">
-                    <div class="info-card-title">Muestras Confirmadas</div>
-                    <div class="info-card-value">{{ count_confirmed_sampling }}</div>
-                    <div class="info-card-change positive">
-                        {{ percent_sampling_confirmed }}% <span style="color: #6c757d; font-weight: 400;">por Procesar</span>
+        {% if request.user.laboratory %}
+            <!-- Muestras por Recolectar Card -->
+            <div class="col-md-6 col-lg-3">
+                <div class="info-card">
+                    <div class="info-card-content">
+                        <div class="info-card-title">Muestras por Recolectar</div>
+                        <div class="info-card-value">{{ count_scheduled_sampling }}</div>
+                        <div class="info-card-change positive">
+                            {{ percent_sampling_scheduled }}% <span style="color: #6c757d; font-weight: 400;">por Confirmar</span>
+                        </div>
+                    </div>
+                    <div class="info-card-icon">
+                        <a href="{% url 'sampling:list_sampling_process_scheduled' %}" title="Ver Listado">
+                            <i class="bi bi-basket text-white"></i>
+                        </a>
                     </div>
                 </div>
-                <div class="info-card-icon">
-                    <a href="{% url 'sampling:list_sampling_process_confirmed' %}" title="Ver Listado">
-                        <i class="bi bi-bag-check text-white"></i>
-                    </a>
-                </div>
             </div>
-        </div>
 
-        <!-- Ads Views Card -->
-        <div class="col-md-6 col-lg-3">
-            <div class="info-card">
-                <div class="info-card-content">
-                    <div class="info-card-title">Muestras en Proceso</div>
-                    <div class="info-card-value">{{ count_in_process_sampling }}</div>
-                    <div class="info-card-change negative">
-                        {{ percent_sampling_end }}% <span style="color: #6c757d; font-weight: 400;">por Finalizar</span>
+            <!-- Muestras Confirmadas Card -->
+            <div class="col-md-6 col-lg-3">
+                <div class="info-card">
+                    <div class="info-card-content">
+                        <div class="info-card-title">Muestras Confirmadas</div>
+                        <div class="info-card-value">{{ count_confirmed_sampling }}</div>
+                        <div class="info-card-change positive">
+                            {{ percent_sampling_confirmed }}% <span style="color: #6c757d; font-weight: 400;">por Procesar</span>
+                        </div>
+                    </div>
+                    <div class="info-card-icon">
+                        <a href="{% url 'sampling:list_sampling_process_confirmed' %}" title="Ver Listado">
+                            <i class="bi bi-bag-check text-white"></i>
+                        </a>
                     </div>
                 </div>
-                <div class="info-card-icon">
-                    <a href="{% url 'sampling:list_sampling_process_in_process' %}" title="Ver Listado">
-                        <i class="bi bi-measuring-cup text-white"></i>
-                    </a>
-                </div>
             </div>
-        </div>
 
-        <!-- Muestras con resultados fuera de especificación Card -->
-        <div class="col-md-6 col-lg-3">
-            <div class="info-card">
-                <div class="info-card-content">
-                    <div class="info-card-title">Resultados con OSS</div>
-                    <div class="info-card-value">{{ count_oos_result }}</div>
-                    <div class="info-card-change negative">
-                        {{ percent_oos_result }}% <span style="color: #6c757d; font-weight: 400; width: 100%">de Muestras en Proceso</span>
+            <!-- Ads Views Card -->
+            <div class="col-md-6 col-lg-3">
+                <div class="info-card">
+                    <div class="info-card-content">
+                        <div class="info-card-title">Muestras en Proceso</div>
+                        <div class="info-card-value">{{ count_in_process_sampling }}</div>
+{#                        <div class="info-card-change negative">#}
+                        <div class="info-card-change positive">
+                            {{ percent_sampling_end }}% <span
+                                style="color: #6c757d; font-weight: 400;">Finalizadas</span>
+                        </div>
+                    </div>
+                    <div class="info-card-icon">
+                        <a href="{% url 'sampling:list_sampling_process_in_process' %}" title="Ver Listado">
+                            <i class="bi bi-measuring-cup text-white"></i>
+                        </a>
                     </div>
                 </div>
-                <div class="danger-card-icon">
-                    <a href="{% url 'sampling:list_sampling_process_out_specification' %}" title="Ver Listado">
-                        <i class="bi bi-exclamation-octagon text-white"></i>
-                    </a>
+            </div>
+
+            <!-- Muestras con resultados fuera de especificación Card -->
+            <div class="col-md-6 col-lg-3">
+                <div class="info-card">
+                    <div class="info-card-content">
+                        <div class="info-card-title">Resultados con OSS</div>
+                        <div class="info-card-value">{{ count_oos_result }}</div>
+                        <div class="info-card-change negative">
+                            {{ percent_oos_result }}% <span style="color: #6c757d; font-weight: 400; width: 100%">de Muestras en Proceso</span>
+                        </div>
+                    </div>
+                    <div class="danger-card-icon">
+                        <a href="{% url 'sampling:list_sampling_process_out_specification' %}" title="Ver Listado">
+                            <i class="bi bi-exclamation-octagon text-white"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
+        {% endif %}
 
         {% if request.user|has_group:"Administrador" %}
 

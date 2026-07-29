@@ -33,8 +33,14 @@ class AnalyticalMethodListView(LoginRequiredMixin, ValidatePermissionRequiredMix
         try:
             action = request.POST['action']
             if action == 'searchdata':
+                if request.user.laboratory:
+                    methods_qs = AnalyticalMethod.objects.select_related('laboratory').filter(
+                        laboratory__site=request.user.laboratory.site
+                    )
+                else:
+                    methods_qs = AnalyticalMethod.objects.none()
                 methods = list(
-                    AnalyticalMethod.objects.select_related('laboratory').values(
+                    methods_qs.values(
                         'id',
                         'code_analytical_method',
                         'description_analytical_method',
