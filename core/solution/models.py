@@ -118,7 +118,7 @@ class Solution(BaseModel):
     deviation_std = models.FloatField(verbose_name='Media', null=True, blank=True)
     coefficient_variation = models.FloatField(verbose_name='Coeficiente de Variación', null=True, blank=True)
     preparation_confirmed = models.BooleanField(default=False)
-    laboratory = models.ForeignKey(Laboratory, on_delete=models.CASCADE, verbose_name='Laboratorio')
+    laboratory = models.ForeignKey(Laboratory, on_delete=models.CASCADE, verbose_name='Laboratorio', blank=True, null=True)
 
     def __str__(self):
         """Retorna la representación en texto con la solución base y el código."""
