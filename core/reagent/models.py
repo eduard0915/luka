@@ -51,6 +51,8 @@ class Reagent(BaseModel):
     sig_figs_solution = models.PositiveSmallIntegerField(default=2, verbose_name='Cifras Significativas')
     standard = models.BooleanField(default=False, verbose_name='Es Estándar?')
     ready_to_use = models.BooleanField(verbose_name='STD Listo para Usar?', default=False)
+    site = models.ForeignKey(Site, verbose_name='Planta', on_delete=models.CASCADE, blank=True, null=True)
+
 
     def __str__(self):
         """Retorna una representación legible del reactivo con código y descripción."""

@@ -101,16 +101,6 @@
                     <p class="info-value">{{ object.gram_equivalent }}</p>
                 </div>
                 <div class="col-md-3">
-                    <div class="info-label">Estabilidad en Sln</div>
-                    <p class="info-value">
-                        {% if object.stability_solution %}
-                            {{ object.stability_solution }} días
-                        {% else %}
-                            <span class="text-muted">No especificado</span>
-                        {% endif %}
-                    </p>
-                </div>
-                <div class="col-md-3">
                     <div class="info-label">Cifras Significativas</div>
                     <p class="info-value">{{ object.sig_figs_solution }}</p>
                 </div>
