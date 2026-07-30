@@ -239,6 +239,33 @@ class AnalyticalMethodCalculate(BaseModel):
         return super(AnalyticalMethodCalculate, self).save(*args, **kwargs)
 
 
+class DependentCalculation(BaseModel):
+    """Modelo para asignar consecutivo de cálculo."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    calcule_description = models.CharField(max_length=100, verbose_name='Nombre del Calculo')
+    product = models.ForeignKey('product.Product', verbose_name='Producto', on_delete=models.CASCADE)
+    consecutive = models.PositiveSmallIntegerField(verbose_name='Consecutivo')
+
+    def __str__(self):
+        """Retorna la descripción del cálculo."""
+        return str(self.calcule_description)
+
+    class Meta:
+        verbose_name = 'DependentCalculation'
+        verbose_name_plural = 'DependentCalculations'
+        db_table = 'DependentCalculation'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda el cálculo asignando el usuario correspondiente."""
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(DependentCalculation, self).save(*args, **kwargs)
+
+
 class AnalyticalMethodCalculateRelation(BaseModel):
     """Modelo que define cálculos relacionados con productos y métodos analíticos."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
@@ -253,6 +280,9 @@ class AnalyticalMethodCalculateRelation(BaseModel):
     sample_quantity = models.CharField(max_length=50, verbose_name='Muestra', null=True, blank=True)
     position = models.CharField(max_length=15, verbose_name='Posición en Ecuación', null=True, blank=True)
     sig_figs = models.SmallIntegerField(verbose_name='Cifras Significativas', default=4)
+    consecutive_calcule = models.ForeignKey(DependentCalculation, verbose_name='Consecutivo', on_delete=models.CASCADE, null=True, blank=True)
+    calculate_relation_related = models.ForeignKey(
+        'self', verbose_name='Cálculo Relacionado Add', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         """Retorna la descripción del cálculo relacionado."""

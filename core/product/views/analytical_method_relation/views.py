@@ -15,10 +15,11 @@ from django.views.decorators.csrf import csrf_exempt
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.forms import (
     ProductCalculateRelationDescriptionForm, ProductCalculateRelationForm,
-    ProductVolumenStdRelationForm, ProductFactorRelationForm, ProductSampleGramRelationForm
+    ProductVolumenStdRelationForm, ProductFactorRelationForm, ProductSampleGramRelationForm,
+    ProductCalculateRelationAddForm
 )
 from core.product.models import Product
-from core.analytical_method.models import AnalyticalMethodCalculateRelation
+from core.analytical_method.models import AnalyticalMethodCalculateRelation, DependentCalculation
 
 
 class BaseProductCalculateRelationView(ValidatePermissionRequiredMixin):
@@ -39,7 +40,9 @@ class BaseProductCalculateRelationView(ValidatePermissionRequiredMixin):
             action = request.POST.get('action')
             if action == 'add':
                 product = Product.objects.get(pk=self.kwargs.get('pk'))
-                form = self.get_form_class()(request.POST, product=product)
+                dependent_calculation = DependentCalculation.objects.get(pk=self.kwargs.get('dep_pk'))
+                form = self.get_form_class()(
+                    request.POST, product=product, dependent_calculation=dependent_calculation)
             elif action == 'edit':
                 self.object = self.get_object()
                 form = self.get_form()
@@ -73,6 +76,13 @@ class ProductCalculateRelationDescriptionCreateView(LoginRequiredMixin, BaseProd
 
     model = AnalyticalMethodCalculateRelation
     form_class = ProductCalculateRelationDescriptionForm
+
+    def get_form_kwargs(self):
+        """Inyecta el producto actual en los kwargs del formulario."""
+        kwargs = super().get_form_kwargs()
+        product = Product.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'product': product})
+        return kwargs
 
     def get_context_data(self, **kwargs):
         """Agrega el título y la acción al contexto del modal."""
@@ -131,11 +141,54 @@ class ProductCalculateRelationUpdateView(LoginRequiredMixin, BaseProductCalculat
         return context
 
 
+class ProductCalculateRelationAddCreateView(LoginRequiredMixin, BaseProductCalculateRelationView, CreateView):
+    """Vista para relacionar un cálculo registrado en un consecutivo anterior."""
+
+    model = AnalyticalMethodCalculateRelation
+    form_class = ProductCalculateRelationAddForm
+
+    def get_form_kwargs(self):
+        """Inyecta el producto y el cálculo dependiente actual en los kwargs del formulario."""
+        kwargs = super().get_form_kwargs()
+        product = Product.objects.get(pk=self.kwargs.get('pk'))
+        dependent_calculation = DependentCalculation.objects.get(pk=self.kwargs.get('dep_pk'))
+        kwargs.update({'product': product, 'dependent_calculation': dependent_calculation})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        """Agrega el título y la acción al contexto del modal."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Agregar Cálculo Relacionado Add'
+        context['action'] = 'add'
+        return context
+
+
+class ProductCalculateRelationAddUpdateView(LoginRequiredMixin, BaseProductCalculateRelationView, UpdateView):
+    """Vista para editar la relación con un cálculo de un consecutivo anterior."""
+
+    model = AnalyticalMethodCalculateRelation
+    form_class = ProductCalculateRelationAddForm
+
+    def get_context_data(self, **kwargs):
+        """Agrega el título y la acción al contexto del modal."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Editar Cálculo Relacionado Add'
+        context['action'] = 'edit'
+        return context
+
+
 class ProductVolumenStdRelationCreateView(LoginRequiredMixin, BaseProductCalculateRelationView, CreateView):
     """Vista para crear una relación de volumen estándar en un cálculo."""
 
     model = AnalyticalMethodCalculateRelation
     form_class = ProductVolumenStdRelationForm
+
+    def get_form_kwargs(self):
+        """Inyecta el producto actual en los kwargs del formulario."""
+        kwargs = super().get_form_kwargs()
+        product = Product.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'product': product})
+        return kwargs
 
     def get_context_data(self, **kwargs):
         """Agrega el título y la acción al contexto del modal."""
@@ -192,6 +245,13 @@ class ProductSampleGramRelationCreateView(LoginRequiredMixin, BaseProductCalcula
 
     model = AnalyticalMethodCalculateRelation
     form_class = ProductSampleGramRelationForm
+
+    def get_form_kwargs(self):
+        """Inyecta el producto actual en los kwargs del formulario."""
+        kwargs = super().get_form_kwargs()
+        product = Product.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'product': product})
+        return kwargs
 
     def get_context_data(self, **kwargs):
         """Agrega el título y la acción al contexto del modal."""

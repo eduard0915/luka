@@ -1,5 +1,28 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "instructions": ["AGENTS.md"],
-  "shell": "/bin/bash"
+  "shell": "/bin/bash",
+  "model": "moonshotai/kimi-k3",
+  "provider": {
+    "moonshotai": {
+      "options": {
+        "apiKey": "sk-rvemT9Nik7bxanIUeUWeknqrfnaU8ndiugvkm6LbwqWpoSFT"
+      },
+      "models": {
+        "kimi-k3": {
+          "variants": {
+            "low": {
+              "reasoningEffort": "low"
+            },
+            "high": {
+              "reasoningEffort": "high"
+            },
+            "max": {
+              "reasoningEffort": "max"
+            }
+          }
+        }
+      }
+    }
+  }
 }

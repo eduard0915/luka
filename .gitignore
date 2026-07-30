@@ -15,6 +15,7 @@ media
 .junie
 .opencode
 AGENTS.md
+opencode.json
 django_errors.log
 .django_errors.log
 .env.example
