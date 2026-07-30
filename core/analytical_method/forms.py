@@ -23,10 +23,13 @@ TYPE_METHOD = [
 ]
 
 UNIT_CALCULATE = [
+    ('', '----'),
     ('%p/p', '%p/p'),
     ('%p/v', '%p/v'),
+    ('g/mL', 'g/mL'),
     ('mg/L', 'mg/L'),
-    ('ppm', 'ppm')
+    ('ppm', 'ppm'),
+    ('ppb', 'ppb')
 ]
 
 POSITION = [('Numerador', 'Numerador'), ('Denominador', 'Denominador')]
@@ -735,6 +738,41 @@ class SolutionStdBackValuationSpentForm(ModelForm):
                 if self.analytical_method:
                     instance.analytical_method = self.analytical_method
                 self.volume_std_back = 0
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+class DependentCalculationForm(ModelForm):
+    """Formulario para crear/editar un cálculo dependiente con consecutivo autoasignado."""
+
+    def __init__(self, *args, **kwargs):
+        self.product = kwargs.pop('product', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = DependentCalculation
+        fields = ['calcule_description']
+        widgets = {
+            'calcule_description': TextInput(attrs={'class': 'form-control', 'required': True}),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.product:
+                    instance.product = self.product
+                    last = DependentCalculation.objects.filter(product=self.product).order_by('consecutive').last()
+                    instance.consecutive = last.consecutive + 1 if last else 1
                 instance.save()
                 data = instance
             else:

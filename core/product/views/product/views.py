@@ -15,7 +15,7 @@ from django.views.generic import CreateView, UpdateView, ListView, DetailView, D
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.forms import ProductForm
 from core.product.models import Product, SamplePoint, AnalyticalMethodProduct, SpecificationProduct
-from core.analytical_method.models import AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation
+from core.analytical_method.models import AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation, DependentCalculation
 from core.sampling.models import SamplingGroup
 from core.utils import format_form_errors
 
@@ -166,6 +166,65 @@ class ProductListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
 
 
 # Detalle de Producto
+def _build_relation_equation(relations):
+    """Construye la ecuación LaTeX a partir de un conjunto de relaciones de cálculo.
+
+    Retorna None si no existe una descripción de cálculo entre las relaciones.
+    """
+    num_terms_rel = []
+    den_terms_rel = []
+    gen_terms_rel = []
+    rel_desc = ""
+    rel_unit = ""
+
+    for cr in relations:
+        parts_rel = []
+        if cr.calculate_description_relation:
+            rel_desc = cr.calculate_description_relation
+            rel_unit = cr.unit_measure_calculate
+        if cr.analytical_method_calculate:
+            term = f"\\text{{{cr.analytical_method_calculate.calculate_description}}}"
+            if cr.analytical_method_calculate.unit_measure_calculate:
+                term += f" \\text{{ ({cr.analytical_method_calculate.unit_measure_calculate})}}"
+            parts_rel.append(term)
+        if cr.calculate_relation_related:
+            term = f"\\text{{{cr.calculate_relation_related.calculate_description_relation}}}"
+            if cr.calculate_relation_related.unit_measure_calculate:
+                term += f" \\text{{ ({cr.calculate_relation_related.unit_measure_calculate})}}"
+            parts_rel.append(term)
+        if cr.volumen_std:
+            parts_rel.append(f"\\text{{{cr.volumen_std}}}")
+        if cr.factor:
+            parts_rel.append(str(cr.factor))
+        if cr.sample_quantity:
+            parts_rel.append(f"\\text{{{cr.sample_quantity}}}")
+
+        item_text_rel = " \\times ".join(parts_rel)
+        if not item_text_rel:
+            continue
+
+        if cr.position == 'Numerador':
+            num_terms_rel.append(item_text_rel)
+        elif cr.position == 'Denominador':
+            den_terms_rel.append(item_text_rel)
+        elif cr.position == 'General':
+            gen_terms_rel.append(item_text_rel)
+
+    if not rel_desc:
+        return None
+
+    str_num_rel = " \\times ".join(num_terms_rel) if num_terms_rel else "1"
+    str_den_rel = " \\times ".join(den_terms_rel) if den_terms_rel else ""
+    str_gen_rel = f" \\times {' \\times '.join(gen_terms_rel)}" if gen_terms_rel else ""
+
+    label_rel = f"\\text{{{rel_desc}}}"
+    if rel_unit:
+        label_rel += f" \\text{{ ({rel_unit})}}"
+    if str_den_rel:
+        return f"{label_rel} = \\frac{{{str_num_rel}}}{{{str_den_rel}}}{str_gen_rel}"
+    return f"{label_rel} = {str_num_rel}{str_gen_rel}"
+
+
 class ProductDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
     """Vista de detalle de producto con puntos de muestreo, métodos, especificaciones y ecuaciones."""
 
@@ -205,48 +264,37 @@ class ProductDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Det
         calcules_relation = AnalyticalMethodCalculateRelation.objects.select_related('product').filter(product_id=self.object.id).order_by('-date_creation')
         context['calcules_relation'] = calcules_relation
         context['has_relations'] = calcules_relation.exists()
+        dependent_calculations = DependentCalculation.objects.filter(product_id=self.object.id).order_by('consecutive')
+        context['dependent_calculations'] = dependent_calculations
+        context['create_dependent_calculation'] = reverse_lazy('product:add_dependent_calculation', kwargs={'pk': self.object.pk})
+        first_dep = dependent_calculations.first()
+        context['first_dependent_calculation'] = first_dep
+        deps_with_description = set(AnalyticalMethodCalculateRelation.objects.filter(
+            consecutive_calcule__in=dependent_calculations,
+            calculate_description_relation__isnull=False
+        ).values_list('consecutive_calcule_id', flat=True))
+        context['deps_with_description'] = deps_with_description
+        deps_with_sample_gram = set(AnalyticalMethodCalculateRelation.objects.filter(
+            consecutive_calcule__in=dependent_calculations,
+            sample_quantity__isnull=False
+        ).values_list('consecutive_calcule_id', flat=True))
+        context['deps_with_sample_gram'] = deps_with_sample_gram
+        calcules_by_dep = {}
+        for dep in dependent_calculations:
+            dep_calcules = [cr for cr in calcules_relation if cr.consecutive_calcule_id == dep.id]
+            if dep_calcules:
+                calcules_by_dep[dep.id] = dep_calcules
+        context['calcules_by_dep'] = calcules_by_dep
 
         if calcules_relation.exists():
-            num_terms_rel = []
-            den_terms_rel = []
-            gen_terms_rel = []
-            rel_desc = ""
-            rel_unit = ""
+            context['final_equation_relation'] = _build_relation_equation(calcules_relation)
 
-            for cr in calcules_relation:
-                parts_rel = []
-                if cr.calculate_description_relation:
-                    rel_desc = cr.calculate_description_relation
-                    rel_unit = cr.unit_measure_calculate
-                if cr.analytical_method_calculate:
-                    parts_rel.append(f"\\text{{{cr.analytical_method_calculate.calculate_description}}}")
-                if cr.volumen_std:
-                    parts_rel.append(str(cr.volumen_std))
-                if cr.factor:
-                    parts_rel.append(str(cr.factor))
-                if cr.sample_quantity:
-                    parts_rel.append(str(cr.sample_quantity))
-
-                item_text_rel = " \cdot ".join(parts_rel)
-                if not item_text_rel:
-                    continue
-
-                if cr.position == 'Numerador':
-                    num_terms_rel.append(item_text_rel)
-                elif cr.position == 'Denominador':
-                    den_terms_rel.append(item_text_rel)
-                elif cr.position == 'General':
-                    gen_terms_rel.append(item_text_rel)
-
-            str_num_rel = " \cdot ".join(num_terms_rel) if num_terms_rel else "1"
-            str_den_rel = " \cdot ".join(den_terms_rel) if den_terms_rel else "1"
-            str_gen_rel = f" \cdot {' \cdot '.join(gen_terms_rel)}" if gen_terms_rel else ""
-
-            if rel_desc:
-                label_rel = f"\\text{{{rel_desc}}}"
-                if rel_unit:
-                    label_rel += f" \\text{{ ({rel_unit})}}"
-                context['final_equation_relation'] = f"{label_rel} = \\frac{{{str_num_rel}}}{{{str_den_rel}}}{str_gen_rel}"
+        equations_by_dep = {}
+        for dep_id, dep_calcules in calcules_by_dep.items():
+            equation = _build_relation_equation(dep_calcules)
+            if equation:
+                equations_by_dep[dep_id] = equation
+        context['equations_by_dep'] = equations_by_dep
 
         return context
 

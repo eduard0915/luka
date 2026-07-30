@@ -20,7 +20,7 @@ class SamplingGroupListCreateView(LoginRequiredMixin, ValidatePermissionRequired
     """Vista para la creación de grupos de muestreo."""
     model = SamplingGroup
     form_class = SamplingGroupFullForm
-    template_name = 'create_two.html'
+    template_name = 'group_sampling/create_group_sampling_list.html'
     success_url = reverse_lazy('sampling:list_sampling_group')
     permission_required = 'reagent.add_reagent'
     url_redirect = success_url

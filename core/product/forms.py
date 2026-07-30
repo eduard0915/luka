@@ -8,7 +8,7 @@ a cada modelo del módulo product.
 
 from crum import get_current_user
 from django.core.exceptions import ValidationError
-from django.forms import ModelForm, TextInput, Select, SelectMultiple
+from django.forms import ModelForm, ModelChoiceField, TextInput, Select, SelectMultiple
 
 from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation
 from core.analytical_method.forms import UNIT_CALCULATE, POSITION
@@ -472,6 +472,7 @@ class ProductCalculateRelationDescriptionForm(ModelForm):
     def __init__(self, *args, **kwargs):
         """Inicializa el formulario de descripción de cálculo."""
         self.product = kwargs.pop('product', None)
+        self.dependent_calculation = kwargs.pop('dependent_calculation', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
@@ -488,13 +489,15 @@ class ProductCalculateRelationDescriptionForm(ModelForm):
         }
 
     def save(self, commit=True):
-        """Guarda la descripción del cálculo relacional asignándole el producto."""
+        """Guarda la descripción del cálculo relacional asignándole el producto y el consecutivo."""
         data = {}
         try:
             if self.is_valid():
                 instance = super().save(commit=False)
                 if self.product:
                     instance.product = self.product
+                if self.dependent_calculation:
+                    instance.consecutive_calcule = self.dependent_calculation
                 instance.save()
                 data = instance
             else:
@@ -509,11 +512,19 @@ class ProductCalculateRelationForm(ModelForm):
     """Formulario para la asignación de un método de cálculo analítico a un producto."""
 
     def __init__(self, *args, **kwargs):
-        """Inicializa el formulario filtrando los cálculos analíticos disponibles."""
+        """Inicializa el formulario filtrando los cálculos de los métodos asociados al producto."""
         self.product = kwargs.pop('product', None)
+        self.dependent_calculation = kwargs.pop('dependent_calculation', None)
         super().__init__(*args, **kwargs)
-        self.fields['analytical_method_calculate'].queryset = AnalyticalMethodCalculate.objects.filter(
+        if self.product is None and self.instance and self.instance.pk:
+            self.product = self.instance.product
+        queryset = AnalyticalMethodCalculate.objects.filter(
             calculate_description__isnull=False).exclude(calculate_description='')
+        if self.product:
+            queryset = queryset.filter(
+                analytical_method__in=AnalyticalMethodProduct.objects.filter(
+                    product=self.product).values_list('analytical_method_id', flat=True))
+        self.fields['analytical_method_calculate'].queryset = queryset
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -528,13 +539,15 @@ class ProductCalculateRelationForm(ModelForm):
         }
 
     def save(self, commit=True):
-        """Guarda la relación de cálculo asignándole el producto."""
+        """Guarda la relación de cálculo asignándole el producto y el consecutivo."""
         data = {}
         try:
             if self.is_valid():
                 instance = super().save(commit=False)
                 if self.product:
                     instance.product = self.product
+                if self.dependent_calculation:
+                    instance.consecutive_calcule = self.dependent_calculation
                 instance.save()
                 data = instance
             else:
@@ -550,6 +563,7 @@ class ProductVolumenStdRelationForm(ModelForm):
     def __init__(self, *args, **kwargs):
         """Inicializa el formulario de volumen estándar."""
         self.product = kwargs.pop('product', None)
+        self.dependent_calculation = kwargs.pop('dependent_calculation', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
@@ -565,13 +579,15 @@ class ProductVolumenStdRelationForm(ModelForm):
         }
 
     def save(self, commit=True):
-        """Guarda el volumen estándar en la relación de cálculo."""
+        """Guarda el volumen estándar en la relación de cálculo asignando el consecutivo."""
         data = {}
         try:
             if self.is_valid():
                 instance = super().save(commit=False)
                 if self.product:
                     instance.product = self.product
+                if self.dependent_calculation:
+                    instance.consecutive_calcule = self.dependent_calculation
                 instance.save()
                 data = instance
             else:
@@ -587,6 +603,7 @@ class ProductFactorRelationForm(ModelForm):
     def __init__(self, *args, **kwargs):
         """Inicializa el formulario de factor constante."""
         self.product = kwargs.pop('product', None)
+        self.dependent_calculation = kwargs.pop('dependent_calculation', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
@@ -602,13 +619,15 @@ class ProductFactorRelationForm(ModelForm):
         }
 
     def save(self, commit=True):
-        """Guarda el factor constante en la relación de cálculo."""
+        """Guarda el factor constante en la relación de cálculo asignando el consecutivo."""
         data = {}
         try:
             if self.is_valid():
                 instance = super().save(commit=False)
                 if self.product:
                     instance.product = self.product
+                if self.dependent_calculation:
+                    instance.consecutive_calcule = self.dependent_calculation
                 instance.save()
                 data = instance
             else:
@@ -624,6 +643,7 @@ class ProductSampleGramRelationForm(ModelForm):
     def __init__(self, *args, **kwargs):
         """Inicializa el formulario de cantidad de muestra."""
         self.product = kwargs.pop('product', None)
+        self.dependent_calculation = kwargs.pop('dependent_calculation', None)
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
@@ -639,13 +659,85 @@ class ProductSampleGramRelationForm(ModelForm):
         }
 
     def save(self, commit=True):
-        """Guarda la cantidad de muestra en la relación de cálculo."""
+        """Guarda la cantidad de muestra en la relación de cálculo asignando el consecutivo."""
         data = {}
         try:
             if self.is_valid():
                 instance = super().save(commit=False)
                 if self.product:
                     instance.product = self.product
+                if self.dependent_calculation:
+                    instance.consecutive_calcule = self.dependent_calculation
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+class ProductCalculateRelationAddForm(ModelForm):
+    """Formulario para relacionar un cálculo registrado en un consecutivo anterior."""
+
+    calculate_relation_related = ModelChoiceField(
+        queryset=AnalyticalMethodCalculateRelation.objects.none(),
+        label='Cálculo Relacionado Add',
+        widget=Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+    )
+
+    @staticmethod
+    def _label_relation_add(obj):
+        """Retorna la etiqueta del select: consecutivo, descripción y unidad de medida."""
+        label = obj.calculate_description_relation
+        if obj.unit_measure_calculate:
+            label += f' ({obj.unit_measure_calculate})'
+        if obj.consecutive_calcule:
+            label = f'{obj.consecutive_calcule.consecutive} - {label}'
+        return label
+
+    def __init__(self, *args, **kwargs):
+        """Inicializa el formulario filtrando los cálculos de consecutivos anteriores del producto."""
+        self.product = kwargs.pop('product', None)
+        self.dependent_calculation = kwargs.pop('dependent_calculation', None)
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            if self.product is None:
+                self.product = self.instance.product
+            if self.dependent_calculation is None:
+                self.dependent_calculation = self.instance.consecutive_calcule
+        queryset = AnalyticalMethodCalculateRelation.objects.filter(
+            calculate_description_relation__isnull=False).exclude(calculate_description_relation='')
+        if self.product:
+            queryset = queryset.filter(product=self.product)
+        if self.dependent_calculation:
+            queryset = queryset.filter(
+                consecutive_calcule__consecutive__lt=self.dependent_calculation.consecutive)
+        field = self.fields['calculate_relation_related']
+        field.queryset = queryset
+        field.label_from_instance = self._label_relation_add
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        """Metadatos del formulario ProductCalculateRelationAddForm."""
+        model = AnalyticalMethodCalculateRelation
+        fields = ['calculate_relation_related', 'position']
+        widgets = {
+            'position': Select(attrs={'class': 'form-control'}, choices=POSITION),
+        }
+
+    def save(self, commit=True):
+        """Guarda la relación con el cálculo anterior asignando producto y consecutivo."""
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.product:
+                    instance.product = self.product
+                if self.dependent_calculation:
+                    instance.consecutive_calcule = self.dependent_calculation
                 instance.save()
                 data = instance
             else:

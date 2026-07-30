@@ -119,7 +119,7 @@ class AnalyticalMethodCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
 
     def get_success_url(self):
         """Retorna la URL de redirección después de una operación exitosa."""
-        return reverse('analytical_method:list_method')
+        return reverse('analytical_method:detail_method', kwargs={'pk': self.object.pk})
 
     def get_context_data(self, **kwargs):
         """Agrega variables de contexto adicionales al template."""

@@ -4,6 +4,161 @@
 {% block scripts_detail %}
     {{ block.super }}
     <script>
+        function initModalTimePickers() {
+            document.querySelectorAll('[data-timepicker="1"]').forEach(function (input) {
+                if (input.dataset.tpInit) return;
+                input.dataset.tpInit = '1';
+
+                if (!input.classList.contains('form-control')) input.classList.add('form-control');
+
+                var group = input.parentNode;
+                if (!group.classList.contains('input-group')) {
+                    group = document.createElement('div');
+                    group.className = 'input-group';
+                    input.parentNode.insertBefore(group, input);
+                    group.appendChild(input);
+                }
+
+                if (group.querySelector('.tp-btn')) return;
+
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-outline-secondary tp-btn';
+                btn.setAttribute('aria-label', 'Seleccionar hora');
+                btn.innerHTML = '<i class="bi bi-clock"></i>';
+                group.appendChild(btn);
+                group.style.position = 'relative';
+
+                var tpId = 'tp-' + Math.random().toString(36).substr(2, 9);
+                var dropdown = document.createElement('div');
+                dropdown.className = 'timepicker-dropdown';
+
+                function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+                var state = { h: 0, m: 0 };
+
+                function render() {
+                    dropdown.innerHTML =
+                        '<div class="tp-header">Seleccionar Hora</div>' +
+                        '<div class="tp-row">' +
+                            '<div class="tp-col">' +
+                                '<button type="button" class="tp-spin-btn" data-spin="h-up"><i class="bi bi-chevron-up"></i></button>' +
+                                '<div class="tp-value" id="' + tpId + '-hv">' + pad(state.h) + '</div>' +
+                                '<button type="button" class="tp-spin-btn" data-spin="h-dn"><i class="bi bi-chevron-down"></i></button>' +
+                                '<label>Horas</label>' +
+                            '</div>' +
+                            '<div class="tp-sep">:</div>' +
+                            '<div class="tp-col">' +
+                                '<button type="button" class="tp-spin-btn" data-spin="m-up"><i class="bi bi-chevron-up"></i></button>' +
+                                '<div class="tp-value" id="' + tpId + '-mv">' + pad(state.m) + '</div>' +
+                                '<button type="button" class="tp-spin-btn" data-spin="m-dn"><i class="bi bi-chevron-down"></i></button>' +
+                                '<label>Minutos</label>' +
+                            '</div>' +
+                        '</div>' +
+                        '<button type="button" class="btn btn-outline-secondary tp-now" id="' + tpId + '-now"><i class="bi bi-clock-fill"></i>Hora Actual</button>' +
+                        '<div class="tp-footer">' +
+                            '<button type="button" class="btn btn-secondary" id="' + tpId + '-cancel">Cancelar</button>' +
+                            '<button type="button" class="btn btn-primary" id="' + tpId + '-ok">Aceptar</button>' +
+                        '</div>';
+                }
+
+                function updateDisplay() {
+                    var hv = document.getElementById(tpId + '-hv');
+                    var mv = document.getElementById(tpId + '-mv');
+                    if (hv) hv.textContent = pad(state.h);
+                    if (mv) mv.textContent = pad(state.m);
+                }
+
+                function handleSpin(action) {
+                    switch (action) {
+                        case 'h-up': state.h = (state.h + 1) % 24; break;
+                        case 'h-dn': state.h = (state.h + 23) % 24; break;
+                        case 'm-up': state.m = (state.m + 1) % 60; break;
+                        case 'm-dn': state.m = (state.m + 59) % 60; break;
+                    }
+                    updateDisplay();
+                }
+
+                function open() {
+                    var val = input.value;
+                    if (val && /^\d{2}:\d{2}$/.test(val)) {
+                        state.h = parseInt(val.split(':')[0], 10) || 0;
+                        state.m = parseInt(val.split(':')[1], 10) || 0;
+                    } else {
+                        var now = new Date();
+                        state.h = now.getHours();
+                        state.m = now.getMinutes();
+                    }
+                    state.h = Math.min(23, Math.max(0, state.h));
+                    state.m = Math.min(59, Math.max(0, state.m));
+
+                    render();
+                    document.body.appendChild(dropdown);
+
+                    var rect = group.getBoundingClientRect();
+                    var top = rect.bottom + window.scrollY;
+                    var left = rect.left + window.scrollX;
+                    var dpHeight = dropdown.offsetHeight || 280;
+                    if (top + dpHeight > window.innerHeight + window.scrollY && rect.top > dpHeight) {
+                        top = rect.top + window.scrollY - dpHeight;
+                    }
+                    dropdown.style.top = top + 'px';
+                    dropdown.style.left = left + 'px';
+                    dropdown.style.width = Math.max(rect.width, 220) + 'px';
+                    dropdown.classList.add('show');
+
+                    dropdown.querySelectorAll('[data-spin]').forEach(function (el) {
+                        el.onclick = function (e) {
+                            e.stopPropagation();
+                            handleSpin(this.dataset.spin);
+                        };
+                    });
+
+                    document.getElementById(tpId + '-now').onclick = function (e) {
+                        e.stopPropagation();
+                        var n = new Date();
+                        state.h = n.getHours();
+                        state.m = n.getMinutes();
+                        updateDisplay();
+                    };
+
+                    document.getElementById(tpId + '-ok').onclick = function (e) {
+                        e.stopPropagation();
+                        input.value = pad(state.h) + ':' + pad(state.m);
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                        close();
+                    };
+
+                    document.getElementById(tpId + '-cancel').onclick = function (e) {
+                        e.stopPropagation();
+                        close();
+                    };
+
+                    setTimeout(function () {
+                        function docClose(e) {
+                            if (!dropdown.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+                                close();
+                                document.removeEventListener('mousedown', docClose);
+                            }
+                        }
+                        document.addEventListener('mousedown', docClose);
+                    }, 0);
+                }
+
+                function close() {
+                    dropdown.classList.remove('show');
+                    if (dropdown.parentNode) dropdown.parentNode.removeChild(dropdown);
+                }
+
+                btn.onclick = function (e) {
+                    e.preventDefault();
+                    if (dropdown.classList.contains('show')) { close(); } else { open(); }
+                };
+            });
+        }
+        initModalTimePickers();
+    </script>
+    <script>
         (function() {
             if (window._sgInitDone) return;
             window._sgInitDone = true;

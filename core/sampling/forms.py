@@ -414,8 +414,8 @@ class SamplingGroupForm(ModelForm):
         fields = ['sampling_point', 'first_hour_sampling', 'number_sampling_day']
         widgets = {
             'sampling_point': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
-            'first_hour_sampling': TimeInput(format='%H:%M', attrs={'class': 'form-control', 'type': 'time'}),
-            'number_sampling_day': TextInput(attrs={'class': 'form-control', 'required': True})
+            'first_hour_sampling': TimeInput(format='%H:%M', attrs={'class': 'form-control', 'data-timepicker': '1', 'placeholder': 'HH:MM', 'autocomplete': 'off'}),
+            'number_sampling_day': TextInput(attrs={'class': 'form-control', 'readonly': True})
         }
 
     def save(self, commit=True):
@@ -451,7 +451,7 @@ class SamplingGroupFullForm(ModelForm):
         fields = ['sampling_point', 'first_hour_sampling', 'number_sampling_day']
         widgets = {
             'sampling_point': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
-            'first_hour_sampling': TimeInput(format='%H:%M', attrs={'class': 'form-control', 'type': 'time'}),
+            'first_hour_sampling': TimeInput(format='%H:%M', attrs={'class': 'form-control', 'data-timepicker': '1', 'placeholder': 'HH:MM', 'autocomplete': 'off'}),
             'number_sampling_day': TextInput(attrs={'class': 'form-control', 'required': True})
         }
 
