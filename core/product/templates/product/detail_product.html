@@ -66,11 +66,23 @@
                         {% endfor %}
                         </tbody>
                     </table>
+                    <div class="d-flex gap-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="toggle_dependent_calcules"
+                                   {% if dependent_calculations or has_relations %}checked{% endif %}>
+                            <label class="form-check-label" for="toggle_dependent_calcules">Cálculos Dependientes</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="toggle_sampling_groups"
+                                   {% if sampling_groups %}checked{% endif %}>
+                            <label class="form-check-label" for="toggle_sampling_groups">Grupos de Muestreo</label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="row">
+    <div class="row" id="dependent-calculations-row">
         <div class="col-md-9">
             <div class="tile mb-3">
                 <div class="tile-title-w-btn">
@@ -429,7 +441,7 @@
             </div>
         </div>
     </div>
-    <div class="row">
+    <div class="row" id="sampling-groups-row">
         <div class="col-md-9">
             <div class="tile">
                 <div class="tile-title-w-btn">
@@ -526,6 +538,32 @@
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
+
+            const toggleDependentCalcules = document.getElementById('toggle_dependent_calcules');
+            const dependentCalculesRow = document.getElementById('dependent-calculations-row');
+
+            if (toggleDependentCalcules) {
+                const updateDependentCalculesVisibility = function () {
+                    if (dependentCalculesRow) {
+                        dependentCalculesRow.style.display = toggleDependentCalcules.checked ? '' : 'none';
+                    }
+                };
+                toggleDependentCalcules.addEventListener('change', updateDependentCalculesVisibility);
+                updateDependentCalculesVisibility();
+            }
+
+            const toggleSamplingGroups = document.getElementById('toggle_sampling_groups');
+            const samplingGroupsRow = document.getElementById('sampling-groups-row');
+
+            if (toggleSamplingGroups) {
+                const updateSamplingGroupsVisibility = function () {
+                    if (samplingGroupsRow) {
+                        samplingGroupsRow.style.display = toggleSamplingGroups.checked ? '' : 'none';
+                    }
+                };
+                toggleSamplingGroups.addEventListener('change', updateSamplingGroupsVisibility);
+                updateSamplingGroupsVisibility();
+            }
         });
     </script>
 

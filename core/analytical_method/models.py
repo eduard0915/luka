@@ -285,8 +285,11 @@ class AnalyticalMethodCalculateRelation(BaseModel):
         'self', verbose_name='Cálculo Relacionado Add', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
-        """Retorna la descripción del cálculo relacionado."""
-        return str(self.calculate_description_relation)
+        """Retorna la descripción del cálculo relacionado con su unidad de medida."""
+        label = str(self.calculate_description_relation)
+        if self.unit_measure_calculate:
+            label += ' ({})'.format(self.unit_measure_calculate)
+        return label
 
     class Meta:
         verbose_name = 'AnalyticalMethodCalculateRelation'
@@ -329,3 +332,29 @@ class SolutionStdBackValuation(BaseModel):
             else:
                 self.user_updated = user
         return super(SolutionStdBackValuation, self).save(*args, **kwargs)
+
+
+class HeavyMetal(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='', on_delete=models.CASCADE)
+    metal_description = models.CharField(max_length=50, verbose_name='Descripción Metal')
+    unit_measure = models.CharField(max_length=10, verbose_name='Unidad a Calcular')
+    detection_limit = models.FloatField(verbose_name='Limite de Detección', null=True, blank=True)
+    quantification_limit = models.FloatField(verbose_name='Limite de Cuantificación', null=True, blank=True)
+
+    def __str__(self):
+        return str(self.metal_description)
+
+    class Meta:
+        verbose_name = 'HeavyMetal'
+        verbose_name_plural = 'HeavyMetals'
+        db_table = 'HeavyMetal'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(HeavyMetal, self).save(*args, **kwargs)

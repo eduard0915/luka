@@ -217,6 +217,7 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['equipments'] = self.object.analyticalmethodequipment_set.all()
         context['materials'] = self.object.analyticalmethodmaterial_set.all()
         context['procedures'] = self.object.analyticalmethodprocedure_set.all()
+        context['heavy_metals'] = self.object.heavymetal_set.all()
 
         calcules = AnalyticalMethodCalculate.objects.select_related('analytical_method').filter(analytical_method=self.object).order_by('-date_creation')
         calcules_back = SolutionStdBackValuation.objects.select_related('analytical_method').filter(

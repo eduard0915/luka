@@ -29,7 +29,8 @@ UNIT_CALCULATE = [
     ('g/mL', 'g/mL'),
     ('mg/L', 'mg/L'),
     ('ppm', 'ppm'),
-    ('ppb', 'ppb')
+    ('ppb', 'ppb'),
+    ('mg/Kg', 'mg/Kg')
 ]
 
 POSITION = [('Numerador', 'Numerador'), ('Denominador', 'Denominador')]
@@ -738,6 +739,43 @@ class SolutionStdBackValuationSpentForm(ModelForm):
                 if self.analytical_method:
                     instance.analytical_method = self.analytical_method
                 self.volume_std_back = 0
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+class HeavyMetalForm(ModelForm):
+    """Formulario para la creación y edición de componentes de corridas (metales pesados)."""
+    def __init__(self, *args, **kwargs):
+        """Inicializa el formulario asignando el método analítico de la instancia actual."""
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = HeavyMetal
+        fields = ['metal_description', 'unit_measure', 'detection_limit', 'quantification_limit']
+        widgets = {
+            'metal_description': TextInput(attrs={'class': 'form-control', 'required': True, 'placeholder': 'Descripción del metal'}),
+            'unit_measure': Select(attrs={'class': 'form-control', 'required': True}, choices=UNIT_CALCULATE),
+            'detection_limit': TextInput(attrs={'class': 'form-control', 'step': 'any'}),
+            'quantification_limit': TextInput(attrs={'class': 'form-control', 'step': 'any'}),
+        }
+
+    def save(self, commit=True):
+        """Guarda el componente de corrida asignando el método analítico."""
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
                 instance.save()
                 data = instance
             else:

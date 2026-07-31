@@ -8,7 +8,7 @@ from django.db import models, transaction
 from django.forms import model_to_dict
 from django.utils import timezone
 
-from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculateRelation
+from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculateRelation, HeavyMetal
 from core.models import BaseModel
 from core.product.models import SamplePoint
 from core.solution.models import SolutionStd
@@ -297,8 +297,6 @@ class SamplingAnalysisProcessingRelation(BaseModel):
                 self.user_creation = user
             else:
                 self.user_updated = user
-        # if self.calcule:
-        #     self.calcule = round(self.calcule, 6)
         return super(SamplingAnalysisProcessingRelation, self).save(*args, **kwargs)
 
 
@@ -330,6 +328,61 @@ class MillimoleReacted(BaseModel):
                 self.user_creation = user
             else:
                 self.user_updated = user
-        # if self.millimole:
-        #     self.millimole = round(self.millimole, 6)
         return super(MillimoleReacted, self).save(*args, **kwargs)
+
+
+class MassiveSampleAnalysis(BaseModel):
+    """Modelo que representa el análisis de una muestra con un método analítico."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    sampling_process = models.ForeignKey(SamplingProcess, verbose_name='Muestra', on_delete=models.CASCADE)
+    analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE, blank=True, null=True)
+    heavy_metal = models.ForeignKey(HeavyMetal, verbose_name='Metal', on_delete=models.CASCADE, blank=True, null=True)
+    result = models.FloatField(verbose_name='Resultado', null=True, blank=True)
+    standard_deviation = models.FloatField(verbose_name='Desviación Estándar', null=True, blank=True)
+    coefficient_variation = models.FloatField(verbose_name='Coeficiente de Variación', null=True, blank=True)
+    comply = models.CharField(max_length=10, verbose_name='Concepto', null=True, blank=True)
+    date_analysis = models.DateTimeField(verbose_name='Fecha de Análisis', null=True, blank=True, db_index=True)
+    analized_by = models.ForeignKey(User, verbose_name='Analizado por', on_delete=models.CASCADE, related_name='analized_by', null=True, blank=True)
+
+    def __str__(self):
+        return str(self.result)
+
+    def toJSON(self):
+        """Serializa el análisis masivo excluyendo desviación, coeficiente y concepto."""
+        item = model_to_dict(self, exclude=['standard_deviation', 'coefficient_variation', 'comply'])
+        item['sampling_process'] = self.sampling_process.number_sample
+        if self.sampling_process.point_sampling:
+            product = self.sampling_process.point_sampling.product
+        elif self.sampling_process.group_sampling:
+            product = self.sampling_process.group_sampling.sampling_point.product
+        else:
+            product = None
+        item['product'] = product.description_product if product else ''
+        item['analytical_method'] = self.analytical_method.description_analytical_method if self.analytical_method else ''
+        if self.heavy_metal:
+            item['metal'] = self.heavy_metal.metal_description
+        elif self.analytical_method:
+            item['metal'] = ', '.join(
+                m.metal_description for m in self.analytical_method.heavymetal_set.all()
+            )
+        else:
+            item['metal'] = ''
+        item['result'] = format(self.result, '.4f') if self.result is not None else ''
+        item['date_analysis'] = timezone.localtime(self.date_analysis).strftime('%Y-%m-%d %H:%M:%S') if self.date_analysis else ''
+        item['analized_by'] = self.analized_by.get_full_name() if self.analized_by else ''
+        return item
+
+    class Meta:
+        verbose_name = 'MassiveSampleAnalysis'
+        verbose_name_plural = 'MassSampleAnalysis'
+        db_table = 'MassiveSampleAnalysis'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda el registro de milimoles asignando el usuario de creación o actualización."""
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(MassiveSampleAnalysis, self).save(*args, **kwargs)
