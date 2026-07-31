@@ -901,10 +901,10 @@ class StandardizationSolutionForm(ModelForm):
 
         user = get_current_user()
 
-        self.fields['quantity_standard'].label = str(self.std.solution_std.umb) + ' de Estándar'
+        self.fields['quantity_standard'].label = str(self.std.solution_std_base.solute_std_base.umb) + ' de Sln a Estándarizar'
         if user.laboratory:
-            self.fields['standard_solution'].queryset = SolutionStd.objects.select_related('solute_std').filter(
-                solute_std__reagent_id=self.std.solution_std.id, quantity_solution_std__gt=0, laboratory=user.laboratory)
+            self.fields['standard_solution'].queryset = SolutionStd.objects.filter(
+                solution_std_base_id=self.std.solution_std_base.id, quantity_solution_std__gt=0, laboratory=user.laboratory)
         else:
             self.fields['standard_solution'].queryset = SolutionStdBase.objects.none()
 
@@ -955,7 +955,7 @@ class StandardizationSolutionForm(ModelForm):
         cleaned = super().clean()
         quantity_standard = cleaned.get('quantity_standard')
         stock_standard = cleaned.get('standard_solution').quantity_solution_std
-        umb = self.std.solution_std.umb
+        umb = self.std.solution_std_base.solute_std_base.umb
 
         if quantity_standard > stock_standard:
             raise ValidationError(
