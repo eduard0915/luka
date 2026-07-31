@@ -48,7 +48,7 @@ class StandardizationSolutionCreateView(LoginRequiredMixin, ValidatePermissionRe
         """Agrega los objetos de estandarización y solución a los kwargs del formulario."""
         kwargs = super().get_form_kwargs()
         sln = Solution.objects.get(pk=self.kwargs.get('pk'))
-        std = Standardization.objects.get(solution_reagent_id=sln.solute_reagent.reagent.id)
+        std = Standardization.objects.get(solution_base_id=sln.solution_base.id)
         kwargs.update({'std': std, 'sln': sln})
         return kwargs
 
