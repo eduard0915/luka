@@ -72,6 +72,11 @@ urlpatterns = [
     path('detail/solution_std_back/add/<uuid:pk>/', SolutionStdBackValuationCreateView.as_view(), name='add_solution_std_back'),
     path('detail/solution_std_spent/add/<uuid:pk>/', SolutionStdBackValuationSpentCreateView.as_view(), name='add_solution_std_spent'),
     path('detail/solution_std_back/delete/<uuid:pk>/', SolutionStdBackValuationDeleteView.as_view(), name='delete_solution_std_back'),
+
+    # Componentes de Corridas (Metales Pesados)
+    path('detail/heavy_metal/add/<uuid:pk>/', HeavyMetalCreateView.as_view(), name='add_heavy_metal'),
+    path('detail/heavy_metal/update/<uuid:pk>/', HeavyMetalUpdateView.as_view(), name='update_heavy_metal'),
+    path('detail/heavy_metal/delete/<uuid:pk>/', HeavyMetalDeleteView.as_view(), name='delete_heavy_metal'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

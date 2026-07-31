@@ -7,7 +7,7 @@ la construcción de ecuaciones para los cálculos dependientes.
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, UpdateView, ListView, DetailView, DeleteView
@@ -27,9 +27,8 @@ class ProductCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
     model = Product
     form_class = ProductForm
     template_name = 'product/create_product.html'
-    success_url = reverse_lazy('product:list_product')
     permission_required = 'reagent.add_reagent'
-    url_redirect = success_url
+    url_redirect = reverse_lazy('product:list_product')
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -45,9 +44,9 @@ class ProductCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
             if action == 'add':
                 form = self.get_form()
                 if form.is_valid():
-                    form.save()
+                    self.object = form.save()
                     data['success'] = True
-                    data['redirect_url'] = str(self.success_url)
+                    data['redirect_url'] = self.get_success_url()
                     messages.success(request, f'Producto creado satisfactoriamente!')
                 else:
                     data['error'] = format_form_errors(form)
@@ -58,6 +57,10 @@ class ProductCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
             data['error'] = str(e)
         return JsonResponse(data)
 
+    def get_success_url(self):
+        """Retorna la URL de redirección al detalle del producto creado."""
+        return reverse('product:detail_product', kwargs={'pk': self.object.pk})
+
     def get_context_data(self, **kwargs):
         """Agrega los datos de contexto específicos para la creación de producto."""
         context = super().get_context_data(**kwargs)
@@ -65,7 +68,7 @@ class ProductCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
         context['entity'] = 'Creación de Producto'
         context['title'] = 'Creación de Producto'
         context['div'] = '8'
-        context['list_url'] = self.success_url
+        context['list_url'] = self.url_redirect
         return context
 
 

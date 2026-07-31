@@ -6,6 +6,8 @@ from django.urls import path
 from core.sampling.views.group_sampling.views import *
 from core.sampling.views.process_sampling.views import *
 from core.sampling.views.analysis_sampling.views import *
+from core.sampling.views.massive_analysis_sampling.views import MassiveSampleAnalysisListView, \
+    MassiveSampleAnalysisUploadView, MassiveSampleAnalysisTemplateView
 from luka import settings
 
 app_name = 'sampling'
@@ -32,6 +34,7 @@ urlpatterns = [
     path('process/update-image/<uuid:pk>/', SamplingProcessImageUpdateView.as_view(), name='update_image_sample'),
     path('process/confirmed/<uuid:pk>/', SamplingProcessConfirmedUpdateView.as_view(), name='confirmed_sampling_process'),
     path('process/approved/<uuid:pk>/', SamplingProcessApprovedUpdateView.as_view(), name='approved_sampling_process'),
+    path('process/certificate/<uuid:pk>/', SamplingProcessQualityCertificatePDFView.as_view(), name='quality_certificate_pdf'),
     path('analysis/inprocess/<uuid:pk>/<uuid:analysis_id>/', SamplingProcessInProcessUpdateView.as_view(), name='sampling_in_process_with_analysis'),
     # Procesamiento de la muestra
     path('analysis/detail/<uuid:pk>/', SamplingAnalysisDetailView.as_view(), name='detail_sampling_analysis'),
@@ -46,6 +49,9 @@ urlpatterns = [
     # Análisis de la Muestra (CRUD)
     path('analysis/list/', SamplingAnalysisListView.as_view(), name='list_sampling_analysis'), # Sin usar
     path('analysis/processing/list/', SamplingAnalysisProcessingListView.as_view(), name='list_sampling_analysis_processing'),
+    path('analysis/massive/list/', MassiveSampleAnalysisListView.as_view(), name='list_massive_sample_analysis'),
+    path('analysis/massive/upload/', MassiveSampleAnalysisUploadView.as_view(), name='upload_massive_sample_analysis'),
+    path('analysis/massive/template/', MassiveSampleAnalysisTemplateView.as_view(), name='download_massive_sample_analysis_template'),
     path('analysis/add/<uuid:pk>/', SamplingAnalysisCreateView.as_view(), name='create_sampling_analysis'),
     path('analysis/delete/<uuid:pk>/', SamplingAnalysisDeleteView.as_view(), name='delete_sampling_analysis'),
 ]

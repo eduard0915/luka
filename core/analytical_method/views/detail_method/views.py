@@ -294,3 +294,34 @@ class SolutionStdBackValuationDeleteView(AnalyticalMethodDetailDeleteView):
         context['entity'] = 'Eliminar Variable de Ecuación'
         context['delete'] = 'Está seguro de eliminar la variable de la ecuación?'
         return context
+
+# Componentes de Corridas (Metales Pesados)
+class HeavyMetalCreateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, CreateView):
+    """)Vista para agregar un componente de corrida a un método analítico espectroscópico."""
+    model = HeavyMetal
+    form_class = HeavyMetalForm
+
+    def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Agregar Componente de Corrida'
+        context['action'] = 'add'
+        return context
+
+class HeavyMetalUpdateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, UpdateView):
+    """)Vista para editar un componente de corrida."""
+    model = HeavyMetal
+    form_class = HeavyMetalForm
+
+    def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Editar Componente de Corrida'
+        context['action'] = 'edit'
+        return context
+
+class HeavyMetalDeleteView(AnalyticalMethodDetailDeleteView):
+    """)Vista para eliminar un componente de corrida."""
+    model = HeavyMetal
+    template_name = 'method/delete_method_calcule.html'
+    permission_required = 'analytical_method.view_analyticalmethod'

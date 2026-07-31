@@ -70,6 +70,24 @@
                                         <span class="badge bg-danger">Deshabilitado</span>
                                     {% endif %}
                                 </div>
+                                {% if object.type_method == 'Espectroscopico' %}
+                                    <div class="col-md-2">
+                                        <b>Componentes de Corridas</b><br>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="toggle_heavy_metals"
+                                                   {% if heavy_metals %}checked{% endif %}>
+                                            <label class="form-check-label" for="toggle_heavy_metals">Habilitar</label>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                <div class="col-md-2">
+                                    <b>Variables de Cálculo</b><br>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="toggle_calcules"
+                                               {% if calcules %}checked{% endif %}>
+                                        <label class="form-check-label" for="toggle_calcules">Habilitar</label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <!-- Cards: Soluciones, Soluciones Estándar, Reactivos, Materiales y Equipos -->
@@ -324,7 +342,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row mt-2">
+                        <div class="row mt-2" id="calcules-row">
                             <!-- Botones Cálculo -->
                             <div class="col-lg-6 col-md-6 mb-3">
                                 <div class="card h-100">
@@ -333,12 +351,6 @@
                                             <h5 class="card-title mb-0">
                                                 <i class="bi bi-calculator me-2"></i> Variables de Cálculo
                                             </h5>
-{#                                            {% if show_dependent_toggle %}#}
-{#                                                <div class="form-check form-switch">#}
-{#                                                    <input class="form-check-input" type="checkbox" id="toggle_dependent_vars">#}
-{#                                                    <label class="form-check-label" for="toggle_dependent_vars">Calculo Dependiente</label>#}
-{#                                                </div>#}
-{#                                            {% endif %}#}
                                         </div>
                                         {% if object.type_method == 'Volumetrico' %}
                                             <div class="row g-2">
@@ -904,6 +916,55 @@
                             </div>
 
                         </div>
+                        <!-- Componentes de Corridas -->
+                        {% if object.type_method == 'Espectroscopico' %}
+                            <div class="row mt-2">
+                                <div class="col-lg-4 col-md-6 mb-3" id="heavy-metals-card" style="display: none;">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <h5 class="card-title mb-0">
+                                                    <i class="bi bi-radar me-2"></i> Componentes de Corridas
+                                                </h5>
+                                                <a href="javascript:void(0);"
+                                                   onclick="open_modal('{% url 'analytical_method:add_heavy_metal' object.id %}')"
+                                                   class="btn btn-primary btn-sm" title="Agregar Componente de Corrida">
+                                                    <i class="bi bi-plus-square m-0"></i>
+                                                </a>
+                                            </div>
+                                            <div class="list-container mb-3" id="heavy-metals-container">
+                                                <ol class="list-group list-group-numbered list-group-flush">
+                                                    {% for item in heavy_metals %}
+                                                        <li class="list-group-item py-1 p-1 border-0 d-flex align-items-center">
+                                                            <span class="flex-grow-1">
+                                                                {{ item.metal_description }} ({{ item.unit_measure }})
+                                                            </span>
+                                                            <a href="javascript:void(0);"
+                                                               onclick="open_modal('{% url 'analytical_method:update_heavy_metal' item.id %}')"
+                                                               class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </a>
+                                                            <a href="javascript:void(0);"
+                                                               onclick="open_modal('{% url 'analytical_method:delete_heavy_metal' item.id %}')"
+                                                               class="btn btn-link btn-sm p-0 text-primary">
+                                                                <i class="bi bi-trash-fill text-danger"></i>
+                                                            </a>
+                                                        </li>
+                                                    {% empty %}
+                                                        <li class="py-1 border-0 text-muted">No hay componentes de corridas registrados</li>
+                                                    {% endfor %}
+                                                </ol>
+                                            </div>
+                                            {% if heavy_metals|length > 5 %}
+                                                <button class="btn btn-link btn-sm p-0 mb-3 toggle-expand"
+                                                        data-target="heavy-metals-container">Ver más
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
                     </div>
 
                     <div class="card-footer d-flex justify-content-end">
@@ -949,6 +1010,32 @@
                         dependentVarsContent.style.display = display;
                     }
                 });
+            }
+
+            const toggleHeavyMetals = document.getElementById('toggle_heavy_metals');
+            const heavyMetalsCard = document.getElementById('heavy-metals-card');
+
+            if (toggleHeavyMetals) {
+                const updateHeavyMetalsVisibility = function () {
+                    if (heavyMetalsCard) {
+                        heavyMetalsCard.style.display = toggleHeavyMetals.checked ? '' : 'none';
+                    }
+                };
+                toggleHeavyMetals.addEventListener('change', updateHeavyMetalsVisibility);
+                updateHeavyMetalsVisibility();
+            }
+
+            const toggleCalcules = document.getElementById('toggle_calcules');
+            const calculesRow = document.getElementById('calcules-row');
+
+            if (toggleCalcules) {
+                const updateCalculesVisibility = function () {
+                    if (calculesRow) {
+                        calculesRow.style.display = toggleCalcules.checked ? '' : 'none';
+                    }
+                };
+                toggleCalcules.addEventListener('change', updateCalculesVisibility);
+                updateCalculesVisibility();
             }
 
             const toggleButtons = document.querySelectorAll('.toggle-expand');

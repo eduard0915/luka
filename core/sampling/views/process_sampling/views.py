@@ -1,22 +1,28 @@
 """Vistas para la gestión de procesos de muestreo."""
 
+import os
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.template.loader import get_template
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.safestring import mark_safe
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, UpdateView, ListView, DetailView
+from xhtml2pdf import pisa
 
-from django.db.models import Q
+from core.analytical_method.models import AnalyticalMethodCalculateRelation, AnalyticalMethodCalculate
+from core.company.models import Company
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.models import SpecificationProduct
 from core.sampling.forms import *
 from core.sampling.models import SamplingProcess, SamplingAnalysis, SamplingAnalysisProcessingRelation
 from core.utils import format_form_errors
-from core.analytical_method.models import AnalyticalMethodCalculateRelation, AnalyticalMethodCalculate
+from luka import settings
 
 
 class SamplingProcessCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
@@ -545,3 +551,136 @@ class SamplingProcessApprovedUpdateView(LoginRequiredMixin, ValidatePermissionRe
         context['info_form'] = mark_safe('<span class="text-danger me-2">¿Está seguro de aprobar el control de calidad de la muestra?</span>')
         context['action'] = 'edit'
         return context
+
+
+class SamplingProcessQualityCertificatePDFView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista para la generación del Certificado de Calidad de un proceso de muestreo."""
+
+    permission_required = 'reagent.add_reagent'
+    allowed_status = ['Aprobado', 'Rechazado']
+
+    @staticmethod
+    def link_callback(uri, rel):
+        """Convierte URIs HTML a rutas absolutas del sistema para que xhtml2pdf acceda a los recursos."""
+        sUrl = settings.STATIC_URL
+        sRoot = settings.STATIC_ROOT
+        mUrl = settings.MEDIA_URL
+        mRoot = settings.MEDIA_ROOT
+
+        if uri.startswith(mUrl):
+            path = os.path.join(mRoot, uri.replace(mUrl, ""))
+        elif uri.startswith(sUrl):
+            path = os.path.join(sRoot, uri.replace(sUrl, ""))
+        else:
+            return uri
+
+        if not os.path.isfile(path):
+            return None
+        return path
+
+    def get_object(self):
+        """Obtiene el proceso con las relaciones críticas precargadas."""
+        return SamplingProcess.objects.select_related(
+            'group_sampling__sampling_point__product',
+            'point_sampling__product'
+        ).get(pk=self.kwargs['pk'])
+
+    def get(self, request, *args, **kwargs):
+        """Genera y retorna el Certificado de Calidad en PDF."""
+        try:
+            sampling_process = self.get_object()
+
+            if sampling_process.status_sampling not in self.allowed_status:
+                messages.error(request, 'El Certificado de Calidad solo está disponible para muestras aprobadas o rechazadas')
+                return HttpResponseRedirect(reverse_lazy('sampling:detail_sampling_process', kwargs={'pk': sampling_process.pk}))
+
+            company = Company.objects.exclude(company_logo__isnull=True).exclude(company_logo='').first() or Company.objects.first()
+
+            sampling_point = (
+                sampling_process.group_sampling.sampling_point if sampling_process.group_sampling
+                else sampling_process.point_sampling
+            )
+
+            specifications = (
+                sampling_point.specification.select_related('product', 'method_test__analytical_method').order_by('type_test', 'test_prod')
+                if sampling_point else SpecificationProduct.objects.none()
+            )
+
+            sampling_analysis = SamplingAnalysis.objects.select_related(
+                'sampling_process', 'analytical_method'
+            ).filter(sampling_process_id=sampling_process.id)
+
+            result_calcule_relation = SamplingAnalysisProcessingRelation.objects.select_related(
+                'analytical_method_calculate_relation'
+            ).filter(sampling_process_id=sampling_process.id)
+
+            # Mapear unidades y especificaciones de SpecificationProduct
+            if sampling_point:
+                specs = sampling_point.specification.all()
+                spec_units = {
+                    (spec.method_test or spec.method_test_relacional).analytical_method_id: spec.unit_measure
+                    for spec in specs
+                    if spec.method_test or spec.method_test_relacional
+                }
+
+                spec_by_method = {
+                    spec.method_test.analytical_method_id: spec
+                    for spec in specs if spec.method_test
+                }
+                spec_by_relation = {
+                    spec.method_test_relacional_id: spec
+                    for spec in specs if spec.method_test_relacional
+                }
+
+                method_ids = [sa.analytical_method_id for sa in sampling_analysis]
+                calculates = AnalyticalMethodCalculate.objects.filter(analytical_method_id__in=method_ids)
+                calculate_units = {c.analytical_method_id: c.unit_measure_calculate for c in calculates}
+
+                for sa in sampling_analysis:
+                    sa.unit_measure_prod = spec_units.get(sa.analytical_method_id) or calculate_units.get(sa.analytical_method_id)
+                    sa.spec_prod = (
+                        spec_by_method.get(sa.analytical_method_id)
+                        or spec_by_relation.get(sa.analytical_method_relation_id)
+                    )
+
+                for cr in result_calcule_relation:
+                    cr.spec_prod = spec_by_relation.get(cr.analytical_method_calculate_relation_id)
+
+            template = get_template('process_sampling/pdf_quality_certificate.html')
+            context = {
+                'object': sampling_process,
+                'company': company,
+                'sampling_point': sampling_point,
+                'specifications': specifications,
+                'sampling_analysis': sampling_analysis,
+                'result_calcule_relation': result_calcule_relation,
+                'title': f'Certificado de Calidad: {sampling_process.number_sample}',
+                'today': timezone.now(),
+            }
+
+            if company and company.company_logo:
+                logo_path = os.path.join(settings.MEDIA_ROOT, str(company.company_logo))
+                if os.path.isfile(logo_path):
+                    context['company_logo_path'] = logo_path
+
+            html = template.render(context)
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = f'inline; filename="certificado_calidad_{sampling_process.number_sample}.pdf"'
+
+            pisa_status = pisa.CreatePDF(
+                html,
+                dest=response,
+                link_callback=self.link_callback
+            )
+
+            if pisa_status.err:
+                raise Exception('Error al generar el PDF')
+
+            return response
+
+        except SamplingProcess.DoesNotExist:
+            messages.error(request, 'El proceso de muestreo no existe')
+        except Exception as error:
+            messages.error(request, f'Error al generar el PDF: {error}')
+
+        return HttpResponseRedirect(reverse_lazy('sampling:list_sampling_process'))

@@ -39,6 +39,7 @@ UM = [
     ('mg/L', 'mg/L'),
     ('ppm', 'ppm'),
     ('ppb', 'ppb'),
+    ('mg/Kg', 'mg/Kg'),
 ]
 
 TYPE_TEST = [('Rango', 'Rango'), ('Descriptivo', 'Descriptivo')]

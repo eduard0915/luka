@@ -1,7 +1,7 @@
 """Formularios para la aplicación de muestreo del laboratorio."""
 
 from django.db.models import Q
-from django.forms import ModelForm, TextInput, Select, TimeInput, DateTimeInput, FloatField
+from django.forms import ModelForm, Form, TextInput, Select, TimeInput, DateTimeInput, FloatField, FileField, FileInput
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from crum import get_current_user
@@ -475,7 +475,8 @@ class SamplingProcessForm(ModelForm):
         """Inicializa el formulario configurando los campos de punto y grupo de muestreo."""
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
-            self.fields['point_sampling'].queryset = SamplePoint.objects.filter(enable_point=True, sample_type='Producto Terminado', sample_frequency__isnull=True)
+            self.fields['point_sampling'].queryset = SamplePoint.objects.filter(enable_point=True, sample_type='Producto Terminado')
+            # self.fields['point_sampling'].queryset = SamplePoint.objects.filter(enable_point=True, sample_type='Producto Terminado', sample_frequency__isnull=True)
             form.field.widget.attrs['autocomplete'] = 'off'
         col_classes = {'point_sampling': 'col-md-4', 'group_sampling': 'col-md-4', 'batch_number': 'col-md-2'}
         for field_name, field in self.fields.items():
@@ -673,6 +674,24 @@ class MillimoleReactedForm(ModelForm):
             return instance
         except Exception as e:
             raise ValidationError({'error': str(e)})
+
+
+class MassiveSampleAnalysisUploadForm(Form):
+    """Formulario para el cargue masivo de análisis de metales pesados desde Excel (.xlsx)."""
+
+    file = FileField(
+        label='Archivo Excel',
+        widget=FileInput(attrs={'class': 'form-control', 'accept': '.xlsx', 'required': True})
+    )
+
+    def clean_file(self):
+        """Valida que el archivo sea .xlsx y no supere los 10 MB."""
+        excel_file = self.cleaned_data['file']
+        if not excel_file.name.lower().endswith('.xlsx'):
+            raise ValidationError('El archivo debe tener extensión .xlsx')
+        if excel_file.size > 10 * 1024 * 1024:
+            raise ValidationError('El archivo no debe superar los 10 MB.')
+        return excel_file
 
 
 class SamplingProcessApprovedForm(ModelForm):
