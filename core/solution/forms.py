@@ -821,23 +821,19 @@ class StandardizationForm(ModelForm):
 
         self.sln_std_base = kwargs.pop('sln_std_base')
         self.sln_base = kwargs.pop('sln_base')
-        user = get_current_user()
 
         super().__init__(*args, **kwargs)
-        if user.laboratory:
-            self.fields['solution_std'].queryset = SolutionStdBase.objects.select_related('laboratory__site').filter(
-                laboratory__site=user.laboratory.site, enable_solution_std=True)
-        else:
-            self.fields['solution_std'].queryset = SolutionStdBase.objects.none()
+        self.fields['solution_std_base'].queryset = SolutionStdBase.objects.filter(enable_solution_std=True)
+
 
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
     class Meta:
         model = Standardization
-        fields = ['solution_std', 'molar_relation']
+        fields = ['solution_std_base', 'molar_relation']
         widgets = {
-            'solution_std': Select(attrs={'class': 'form-control select2', 'required': True, 'style': 'width: 100%'}),
+            'solution_std_base': Select(attrs={'class': 'form-control select2', 'required': True, 'style': 'width: 100%'}),
             'molar_relation': TextInput(attrs={'class': 'form-control', 'required': True})
         }
 
@@ -867,22 +863,16 @@ class StandardizationUpdateForm(ModelForm):
         """Inicializa el formulario filtrando las soluciones estándar habilitadas."""
         super().__init__(*args, **kwargs)
 
-        user = get_current_user()
-
-        if user.laboratory:
-            self.fields['solution_std'].queryset = SolutionStdBase.objects.select_related('laboratory__site').filter(
-                laboratory__site=user.laboratory.site, enable_solution_std=True)
-        else:
-            self.fields['solution_std'].queryset = SolutionStdBase.objects.none()
+        self.fields['solution_std_base'].queryset = SolutionStdBase.objects.filter(enable_solution_std=True)
 
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
     class Meta:
         model = Standardization
-        fields = ['solution_std', 'molar_relation']
+        fields = ['solution_std_base', 'molar_relation']
         widgets = {
-            'solution_std': Select(attrs={'class': 'form-control select2', 'required': True, 'style': 'width: 100%'}),
+            'solution_std_base': Select(attrs={'class': 'form-control select2', 'required': True, 'style': 'width: 100%'}),
             'molar_relation': TextInput(attrs={'class': 'form-control', 'required': True})
         }
 
@@ -1008,11 +998,12 @@ class SolutionBaseForm(ModelForm):
 
     class Meta:
         model = SolutionBase
-        fields = ['solute_reagent_base', 'solvent_reagent_base', 'concentration_base', 'concentration_unit_base']
+        fields = ['solute_reagent_base', 'solvent_reagent_base', 'concentration_base', 'concentration_unit_base', 'stability_solution']
         widgets = {
             'solute_reagent_base': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
             'solvent_reagent_base': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
             'concentration_base': TextInput(attrs={'class': 'form-control', 'placeholder': '0.00'}),
+            'stability_solution': TextInput(attrs={'class': 'form-control', 'placeholder': '0'}),
             'concentration_unit_base': Select(attrs={'class': 'form-control'}, choices=CONC),
         }
 
@@ -1061,11 +1052,12 @@ class SolutionStdBaseForm(ModelForm):
 
     class Meta:
         model = SolutionStdBase
-        fields = ['solute_std_base', 'solvent_reagent_base', 'concentration_std_base', 'concentration_unit_base']
+        fields = ['solute_std_base', 'solvent_reagent_base', 'concentration_std_base', 'concentration_unit_base', 'stability_solution']
         widgets = {
             'solute_std_base': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
             'solvent_reagent_base': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
             'concentration_std_base': TextInput(attrs={'class': 'form-control', 'placeholder': '0.00'}),
+            'stability_solution': TextInput(attrs={'class': 'form-control', 'placeholder': '0'}),
             'concentration_unit_base': Select(attrs={'class': 'form-control'}, choices=CONC),
         }
 
