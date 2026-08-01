@@ -105,3 +105,229 @@
 @keyframes spinner-border {
     to { transform: rotate(360deg); }
 }
+
+.app-header {
+    flex-wrap: nowrap;
+}
+
+.app-nav {
+    min-width: 0;
+}
+
+.app-nav__lab {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    margin: 0;
+    padding: 0 8px;
+}
+
+.app-nav__lab span {
+    display: block;
+    white-space: nowrap;
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .app-sidebar__toggle {
+        -webkit-box-ordinal-group: 0;
+        -ms-flex-order: -1;
+        order: -1;
+    }
+
+    .app-header__logo {
+        width: 200px;
+    }
+
+    .app-nav__lab span {
+        max-width: 140px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .app {
+        overflow-x: hidden;
+    }
+
+    .app-content {
+        margin-left: 0;
+    }
+
+    .app .app-sidebar {
+        left: -230px;
+    }
+
+    .app .app-sidebar__overlay {
+        visibility: hidden;
+    }
+
+    .app.sidenav-toggled .app-content {
+        margin-left: 0;
+    }
+
+    .app.sidenav-toggled .app-sidebar,
+    .app.sidenav-toggled .app-sidebar:hover {
+        left: 0;
+        width: 230px;
+        overflow: auto;
+    }
+
+    .app.sidenav-toggled .app-sidebar__overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        z-index: 9;
+        visibility: visible;
+    }
+
+    .sidebar-mini.sidenav-toggled .app-sidebar__user-name,
+    .sidebar-mini.sidenav-toggled .app-sidebar__user-designation,
+    .sidebar-mini.sidenav-toggled .treeview-indicator {
+        display: block;
+    }
+
+    .sidebar-mini.sidenav-toggled .app-sidebar__user-avatar {
+        width: 45px;
+        height: auto;
+    }
+
+    .sidebar-mini.sidenav-toggled .app-menu__item,
+    .sidebar-mini.sidenav-toggled .app-menu__item:hover {
+        overflow: visible;
+    }
+
+    .sidebar-mini.sidenav-toggled .app-menu__label {
+        display: block;
+        position: static;
+        left: auto;
+        min-width: 0;
+        padding: 0;
+        margin: 0;
+        line-height: inherit;
+        opacity: 1;
+        background: transparent;
+        border-radius: 0;
+    }
+
+    .sidebar-mini.sidenav-toggled .treeview-menu {
+        position: static;
+        left: auto;
+        min-width: 0;
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        opacity: 1;
+        border-radius: 0;
+        z-index: auto;
+        visibility: visible;
+        -webkit-transition: max-height 0.3s ease;
+        transition: max-height 0.3s ease;
+    }
+
+    .sidebar-mini.sidenav-toggled .treeview:hover .treeview-menu,
+    .sidebar-mini.sidenav-toggled .treeview.is-expanded .treeview-menu {
+        max-height: 100vh;
+        opacity: 1;
+        visibility: visible;
+        z-index: auto;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .app-header__logo {
+        -webkit-box-flex: 0;
+        -ms-flex: 0 1 auto;
+        flex: 0 1 auto;
+        min-width: 0;
+        padding: 0 8px;
+    }
+
+    .app-header__logo .logo img {
+        max-width: 100%;
+        max-height: 40px;
+        width: auto;
+        height: auto;
+    }
+
+    .app-nav__lab span {
+        max-width: 90px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .app-nav__item {
+        padding: 15px 10px;
+    }
+
+    .app-notification,
+    .settings-menu {
+        min-width: 0;
+        width: calc(100vw - 20px);
+        max-width: 320px;
+    }
+
+    .app-title {
+        padding: 15px 15px;
+    }
+
+    .app-breadcrumb {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        text-align: right;
+    }
+
+    .app-breadcrumb .breadcrumb-item a.btn {
+        white-space: normal;
+    }
+}
+
+@media (max-width: 479.98px) {
+    .app-nav__lab {
+        display: none;
+    }
+
+    .app-header__logo .logo img {
+        max-height: 30px;
+    }
+
+    .app-nav__item {
+        padding: 15px 8px;
+    }
+
+    .app-title > div {
+        -webkit-box-flex: 0;
+        -ms-flex: 0 1 auto;
+        flex: 0 1 auto;
+        width: 100%;
+    }
+
+    .app-breadcrumb {
+        width: 100%;
+    }
+}
+
+.app-title {
+    min-width: 0;
+}
+
+.app-title > div {
+    min-width: 0;
+}
+
+.app-title h1,
+.app-title p {
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+@media (min-width: 480px) {
+    .app-title > div {
+        -webkit-box-flex: 1;
+        -ms-flex: 1 1 0;
+        flex: 1 1 0;
+    }
+}
