@@ -998,13 +998,14 @@ class SolutionBaseForm(ModelForm):
 
     class Meta:
         model = SolutionBase
-        fields = ['solute_reagent_base', 'solvent_reagent_base', 'concentration_base', 'concentration_unit_base', 'stability_solution']
+        fields = ['solute_reagent_base', 'solvent_reagent_base', 'concentration_base', 'concentration_unit_base', 'stability_solution', 'standardizable']
         widgets = {
             'solute_reagent_base': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
             'solvent_reagent_base': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
             'concentration_base': TextInput(attrs={'class': 'form-control', 'placeholder': '0.00'}),
             'stability_solution': TextInput(attrs={'class': 'form-control', 'placeholder': '0'}),
             'concentration_unit_base': Select(attrs={'class': 'form-control'}, choices=CONC),
+            'standardizable': Select(attrs={'class': 'form-control'}, choices=BOOLEAN),
         }
 
     def save(self, commit=True):
