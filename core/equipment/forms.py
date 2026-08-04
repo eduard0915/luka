@@ -18,10 +18,13 @@ from core.user.views.user.views import User
 BOOLEAN = [(True, 'Si'), (False, 'No')]
 
 PARAMETER = [
-    ('Temperatura', 'Temperatura'), ('Humedad', 'Humedad'), ('Masa', 'Masa'), ('Presión', 'Presión'), ('pH', 'pH'), ('No aplica', 'No aplica')
+    ('Temperatura', 'Temperatura'), ('Humedad', 'Humedad'), ('Masa', 'Masa'), ('Volumen', 'Volumen'),
+    ('Presión', 'Presión'), ('pH', 'pH'), ('No aplica', 'No aplica')
 ]
 
-UNIT_TOLERANCE = [('No aplica', 'No aplica'), ('Kg', 'Kg'), ('g', 'g'), ('mg', 'mg'), ('mL', 'mL'), ('%v/v', '%v/v'), ('nm', 'nm')]
+UNIT_TOLERANCE = [
+    ('No aplica', 'No aplica'), ('Kg', 'Kg'), ('g', 'g'), ('mg', 'mg'), ('mL', 'mL'), ('%v/v', '%v/v'), ('nm', 'nm')
+]
 
 TYPE_MAINTENANCE = [('Preventivo', 'Preventivo'), ('Correctivo', 'Correctivo')]
 
@@ -266,10 +269,10 @@ class EquipmentInstrumentalForm(ModelForm):
     class Meta:
         model = EquipmentInstrumental
         fields = [
-            'code_equipment', 'description_equipment', 'supplier_equipment',
-            'brand_equipment', 'model_equipment', 'serie_equipment', 'frequency_calibration',
-            'intermediate_verification', 'unit_tolerance', 'tolerance',
-            'laboratory', 'responsible_user', 'photo_equipment', 'manual_equipment', 'date_calibration_fix'
+            'code_equipment', 'description_equipment', 'supplier_equipment', 'brand_equipment', 'model_equipment',
+            'serie_equipment', 'frequency_calibration','intermediate_verification', 'unit_tolerance', 'tolerance',
+            'laboratory', 'responsible_user', 'photo_equipment', 'manual_equipment', 'date_calibration_fix',
+            'date_start_use'
         ]
         widgets = {
             'code_equipment': TextInput(attrs={'class': 'form-control', 'required': True}),
@@ -287,6 +290,7 @@ class EquipmentInstrumentalForm(ModelForm):
             'photo_equipment': FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
             'manual_equipment': FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.doc,.docx'}),
             'date_calibration_fix': DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'required': True, 'data-datepicker': '1', 'autocomplete': 'off'}),
+            'date_start_use': DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'required': True, 'data-datepicker': '1', 'autocomplete': 'off'}),
         }
 
     def clean_code_equipment(self):

@@ -156,7 +156,7 @@
                                                 <td class="info-value">
                                                     {% if object.time_use %}
                                                         <i class="fas fa-clock text-info"></i>
-                                                        <strong>{{ object.time_use }}</strong> horas
+                                                        <strong>{{ object.time_use }}</strong> Años
                                                     {% else %}
                                                         <span class="badge bg-warning text-dark">
                                                             <i class="fas fa-exclamation-triangle"></i> Pendiente
@@ -179,11 +179,11 @@
                                             <table class="table table-bordered table-hover" id="tblVerifications">
                                                 <thead class="table-light">
                                                     <tr>
-                                                        <th>Fecha</th>
-                                                        <th>Cumple</th>
-                                                        <th>Realizado por</th>
-                                                        <th>Parámetro</th>
-                                                        <th>Responsable</th>
+                                                        <th class="text-center">Fecha</th>
+                                                        <th class="text-center">Cumple</th>
+                                                        <th class="text-center">Realizado por</th>
+                                                        <th class="text-center">Parámetro</th>
+                                                        <th class="text-center">Responsable</th>
                                                         <th class="text-center">Reporte</th>
                                                     </tr>
                                                 </thead>
@@ -198,9 +198,9 @@
                                                                     <span class="badge bg-danger">No</span>
                                                                 {% endif %}
                                                             </td>
-                                                            <td>{{ ver.verified_by }}</td>
-                                                            <td>{{ ver.parameter_verified|default:"-" }}</td>
-                                                            <td>{{ ver.responsible_user.get_full_name }}</td>
+                                                            <td class="text-center">{{ ver.verified_by }}</td>
+                                                            <td class="text-center">{{ ver.parameter_verified|default:"-" }}</td>
+                                                            <td class="text-center">{{ ver.responsible_user.get_full_name }}</td>
                                                             <td class="text-center">
                                                                 {% if ver.report_verification %}
                                                                     <a href="{{ ver.report_verification.url }}"
@@ -236,18 +236,18 @@
                                             <table class="table table-bordered table-hover" id="tblCalibrations">
                                                 <thead class="table-light">
                                                     <tr>
-                                                        <th>Fecha</th>
-                                                        <th>Cumple</th>
-                                                        <th>Realizado por</th>
-                                                        <th>Parámetro</th>
-                                                        <th>Responsable</th>
-                                                        <th class="text-center">Certificado</th>
+                                                        <th class="text-center">Fecha</th>
+                                                        <th class="text-center">Cumple</th>
+                                                        <th class="text-center">Realizado por</th>
+                                                        <th class="text-center">Parámetro</th>
+                                                        <th class="text-center">Responsable</th>
+                                                        <th class="text-center">CoA</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     {% for cal in calibrations %}
                                                         <tr>
-                                                            <td>{{ cal.date_calibration|date:"d/m/Y" }}</td>
+                                                            <td class="text-center">{{ cal.date_calibration|date:"d/m/Y" }}</td>
                                                             <td class="text-center">
                                                                 {% if cal.comply %}
                                                                     <span class="badge bg-success">Sí</span>
@@ -255,9 +255,9 @@
                                                                     <span class="badge bg-danger">No</span>
                                                                 {% endif %}
                                                             </td>
-                                                            <td>{{ cal.calibrated_by }}</td>
-                                                            <td>{{ cal.parameter|default:"-" }}</td>
-                                                            <td>{{ cal.responsible_user.get_full_name }}</td>
+                                                            <td class="text-center">{{ cal.calibrated_by }}</td>
+                                                            <td class="text-center">{{ cal.parameter|default:"-" }}</td>
+                                                            <td class="text-center">{{ cal.responsible_user.get_full_name }}</td>
                                                             <td class="text-center">
                                                                 {% if cal.certificate_calibration %}
                                                                     <a href="{{ cal.certificate_calibration.url }}"
@@ -299,10 +299,10 @@
                                             <table class="table table-bordered table-hover" id="tblReferencePatterns">
                                                 <thead class="table-light">
                                                 <tr>
-                                                    <th>Descripción</th>
-                                                    <th>Magnitud</th>
-                                                    <th>Unidad</th>
-                                                    <th>Expira</th>
+                                                    <th class="text-center">Descripción</th>
+                                                    <th class="text-center">Magnitud</th>
+                                                    <th class="text-center">Unidad</th>
+                                                    <th class="text-center">Expira</th>
                                                     <th class="text-center">Certificado</th>
                                                     <th class="text-center">Acciones</th>
                                                 </tr>
@@ -310,10 +310,10 @@
                                                 <tbody>
                                                 {% for pattern in reference_patterns %}
                                                     <tr>
-                                                        <td>{{ pattern.description_pattern }}</td>
-                                                        <td>{{ pattern.magnitude_pattern|default:"-" }}</td>
-                                                        <td>{{ pattern.unit_pattern|default:"-" }}</td>
-                                                        <td>
+                                                        <td class="text-center">{{ pattern.description_pattern }}</td>
+                                                        <td class="text-center">{{ pattern.magnitude_pattern|default:"-" }}</td>
+                                                        <td class="text-center">{{ pattern.unit_pattern|default:"-" }}</td>
+                                                        <td class="text-center">
                                                             {% if pattern.date_expire_calibration %}
                                                                 {{ pattern.date_expire_calibration|date:"d/m/Y" }}
                                                             {% else %}

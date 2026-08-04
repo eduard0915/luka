@@ -1,6 +1,9 @@
 """Vistas de equipos instrumentales para la gestión del inventario de equipos del laboratorio."""
 
 import os
+from datetime import date
+
+from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
@@ -133,6 +136,22 @@ class EquipmentInstrumentalListView(LoginRequiredMixin, ValidatePermissionRequir
         except Exception as e:
             data['error'] = str(e)
         return JsonResponse(data, safe=False)
+
+    def update_time_use_equipment(self):
+        """Actualiza el tiempo de uso en años de los equipos restando la fecha de inicio de uso a la fecha actual."""
+        today = date.today()
+        equipments = list(
+            EquipmentInstrumental.objects.exclude(date_start_use__isnull=True).only('id', 'time_use', 'date_start_use')
+        )
+        for equipment in equipments:
+            delta = relativedelta(today, equipment.date_start_use)
+            equipment.time_use = round(delta.years + delta.months / 12, 2)
+        EquipmentInstrumental.objects.bulk_update(equipments, ['time_use'])
+
+    def get(self, request, *args, **kwargs):
+        """Atiende la solicitud GET actualizando el tiempo de uso antes de renderizar el listado."""
+        self.update_time_use_equipment()
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         """Agrega datos de contexto adicionales para la plantilla de listado."""
