@@ -57,6 +57,7 @@ class StandardizationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMi
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Configuración de Estandarización'
+        context['subtitle'] = 'Escoger Estándar o Solución Estándar'
         return context
 
 

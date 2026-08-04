@@ -57,6 +57,9 @@ class StandardizationSolutionCreateView(LoginRequiredMixin, ValidatePermissionRe
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Registro de Estandarización'
+        sln = Solution.objects.get(pk=self.kwargs.get('pk'))
+        std = Standardization.objects.get(solution_base_id=sln.solution_base.id)
+        context['uses_solution_base'] = bool(std.solution_std_base_id)
         return context
 
 
