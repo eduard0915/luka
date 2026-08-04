@@ -25,7 +25,7 @@ class EquipmentInstrumental(BaseModel):
     laboratory = models.ForeignKey(Laboratory, verbose_name='Ubicación', on_delete=models.CASCADE)
     date_start_use = models.DateField(verbose_name='Fecha de Inicio Uso', null=True, blank=True)
     date_disabled = models.DateField(verbose_name='Fecha de Inactivación', null=True, blank=True)
-    time_use = models.FloatField(verbose_name='Tiempo de Uso (Horas)', null=True, blank=True)
+    time_use = models.FloatField(verbose_name='Tiempo de Uso (Años)', null=True, blank=True)
     responsible_user = models.ForeignKey(User, verbose_name='Responsable', on_delete=models.CASCADE)
     photo_equipment = models.FileField(upload_to='equipment/instrumental/%Y%m%d', verbose_name='Foto del Equipo', null=True, blank=True)
     manual_equipment = models.FileField(upload_to='equipment/instrumental/%Y%m%d', verbose_name='Manual de Operación', null=True, blank=True)
