@@ -232,6 +232,7 @@ class SolutionStd(BaseModel):
 class Standardization(BaseModel):
     """Configuración de estandarización que relaciona una solución con un estándar y su relación molar."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    reagent_std = models.ForeignKey(Reagent, blank=True, null=True, on_delete=models.CASCADE, verbose_name='Estándar')
     solution_base = models.ForeignKey(SolutionBase, verbose_name='Solución Base', on_delete=models.CASCADE, blank=True, null=True)
     solution_std_base = models.ForeignKey(SolutionStdBase, verbose_name='Solución Estándar Base', on_delete=models.CASCADE, blank=True, null=True)
     molar_relation = models.FloatField(verbose_name='Relación Molar', default=1)
@@ -261,7 +262,8 @@ class StandardizationSolution(BaseModel):
     """Registro individual de una estandarización con cantidades y concentración calculada."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     solution = models.ForeignKey(Solution, verbose_name='Solución', on_delete=models.CASCADE)
-    standard_solution = models.ForeignKey(SolutionStd, verbose_name='Solución Estándar', on_delete=models.CASCADE)
+    standard_solution = models.ForeignKey(SolutionStd, verbose_name='Solución Estándar', on_delete=models.CASCADE, blank=True, null=True)
+    standard_reagent = models.ForeignKey(InventoryReagent, verbose_name='Estándar', on_delete=models.CASCADE, blank=True, null=True)
     quantity_standard = models.FloatField(verbose_name=' Cantidad de Estándar')
     quantity_solution = models.FloatField(verbose_name='mL de Solución Gastados')
     concentration_sln = models.FloatField(verbose_name='Concentración Sln')

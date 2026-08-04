@@ -32,7 +32,6 @@ def code_reagent_generator():
 
 class Reagent(BaseModel):
     """Modelo que representa un reactivo químico en el laboratorio."""
-
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     description_reagent = models.CharField(max_length=200, verbose_name='Descripción')
     code_reagent = models.CharField(max_length=20, verbose_name='Código', unique=True, blank=True)

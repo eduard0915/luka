@@ -103,12 +103,20 @@ def discount_inventory_std_solution(sender, instance, created, **kwargs):
     # Usar transacción atómica para garantizar consistencia
     with transaction.atomic():
 
-        # Actualizar SolutionStd
-        std_solution = SolutionStd.objects.select_for_update().get(pk=instance.standard_solution_id)
-        std_solution.quantity_solution_std = round(
-            float(std_solution.quantity_solution_std) - float(instance.quantity_standard), 2
-        )
-        std_solution.save(update_fields=['quantity_solution_std'])
+        # Actualizar estándar (solución estándar o reactivo pesado)
+        if instance.standard_solution_id:
+            std_solution = SolutionStd.objects.select_for_update().get(pk=instance.standard_solution_id)
+            std_solution.quantity_solution_std = round(
+                float(std_solution.quantity_solution_std) - float(instance.quantity_standard), 2
+            )
+            std_solution.save(update_fields=['quantity_solution_std'])
+        elif instance.standard_reagent_id:
+            standard_reagent = InventoryReagent.objects.select_for_update().get(pk=instance.standard_reagent_id)
+            InventoryReagent.objects.filter(pk=instance.standard_reagent_id).update(
+                quantity_stock=round(
+                    float(standard_reagent.quantity_stock) - float(instance.quantity_standard), 2
+                )
+            )
 
         # Actualizar Solution
         solution = Solution.objects.select_for_update().get(pk=instance.solution_id)
@@ -130,15 +138,25 @@ def discount_inventory_std_solution(sender, instance, created, **kwargs):
             user_transaction_id=instance.standardized_by_id,
         )
 
-        # Crear transacción de solución estándar
-        TransactionSolutionStd.objects.create(
-            solution_std_inventory_id=instance.standard_solution.id,
-            type_transaction='Uso - Estandarización',
-            date_transaction=current_time,
-            detail_transaction=detail_text,
-            quantity=instance.quantity_standard,
-            user_transaction_id=instance.user_creation.id,
-        )
+        # Crear transacción del estándar
+        if instance.standard_solution_id:
+            TransactionSolutionStd.objects.create(
+                solution_std_inventory_id=instance.standard_solution.id,
+                type_transaction='Uso - Estandarización',
+                date_transaction=current_time,
+                detail_transaction=detail_text,
+                quantity=instance.quantity_standard,
+                user_transaction_id=instance.user_creation.id,
+            )
+        elif instance.standard_reagent_id:
+            TransactionReagent.objects.create(
+                reagent_inventory_id=instance.standard_reagent.id,
+                type_transaction='Uso - Estandarización',
+                date_transaction=current_time,
+                detail_transaction=detail_text,
+                quantity=instance.quantity_standard,
+                user_transaction_id=instance.user_creation.id,
+            )
 
         # Calcular estadísticas de forma eficiente
         stats = StandardizationSolution.objects.filter(

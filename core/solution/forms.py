@@ -12,7 +12,7 @@ from core.reagent.models import InventoryReagent, Reagent
 from core.solution.models import *
 
 
-CONC = [('', '-----'), ('%', '%'), ('g/L', 'g/L'), ('mg/L', 'mg/L'), ('M', 'M'), ('N', 'N')]
+CONC = [('', '-----'), ('%', '%'), ('g/L', 'g/L'), ('mg/L', 'mg/L'), ('mg/mL', 'mg/mL'), ('M', 'M'), ('N', 'N')]
 BOOLEAN = [(True, 'Si'), (False, 'No')]
 
 
@@ -597,7 +597,7 @@ class SolutionStdUpdateForm(ModelForm):
         if user.laboratory:
             solvent_qs = InventoryReagent.objects.select_related('reagent').filter(
                 date_expire__gte=timezone.localdate(), reagent__solvent=True, quantity_stock__gt=0,
-                reagente__site=user.laboratory.site)
+                reagent__site=user.laboratory.site)
         else:
             solvent_qs = InventoryReagent.objects.none()
         if self.instance and self.instance.pk and self.instance.solvent_reagent_id:
@@ -824,15 +824,16 @@ class StandardizationForm(ModelForm):
 
         super().__init__(*args, **kwargs)
         self.fields['solution_std_base'].queryset = SolutionStdBase.objects.filter(enable_solution_std=True)
-
+        self.fields['reagent_std'].queryset = Reagent.objects.filter(standard=True, enable_reagent=True)
 
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
     class Meta:
         model = Standardization
-        fields = ['solution_std_base', 'molar_relation']
+        fields = ['reagent_std', 'solution_std_base', 'molar_relation']
         widgets = {
+            'reagent_std': Select(attrs={'class': 'form-control select2', 'required': True, 'style': 'width: 100%'}),
             'solution_std_base': Select(attrs={'class': 'form-control select2', 'required': True, 'style': 'width: 100%'}),
             'molar_relation': TextInput(attrs={'class': 'form-control', 'required': True})
         }
@@ -864,14 +865,16 @@ class StandardizationUpdateForm(ModelForm):
         super().__init__(*args, **kwargs)
 
         self.fields['solution_std_base'].queryset = SolutionStdBase.objects.filter(enable_solution_std=True)
+        self.fields['reagent_std'].queryset = Reagent.objects.filter(standard=True, enable_reagent=True)
 
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
     class Meta:
         model = Standardization
-        fields = ['solution_std_base', 'molar_relation']
+        fields = ['reagent_std', 'solution_std_base', 'molar_relation']
         widgets = {
+            'reagent_std': Select(attrs={'class': 'form-control select2', 'required': True, 'style': 'width: 100%'}),
             'solution_std_base': Select(attrs={'class': 'form-control select2', 'required': True, 'style': 'width: 100%'}),
             'molar_relation': TextInput(attrs={'class': 'form-control', 'required': True})
         }
@@ -901,10 +904,15 @@ class StandardizationSolutionForm(ModelForm):
 
         user = get_current_user()
 
-        self.fields['quantity_standard'].label = str(self.std.solution_std_base.solute_std_base.umb) + ' de Sln a Estándarizar'
         if user.laboratory:
-            self.fields['standard_solution'].queryset = SolutionStd.objects.filter(
-                solution_std_base_id=self.std.solution_std_base.id, quantity_solution_std__gt=0, laboratory=user.laboratory)
+            if self.std.solution_std_base:
+                self.fields['standard_solution'].queryset = SolutionStd.objects.filter(
+                    solution_std_base=self.std.solution_std_base, quantity_solution_std__gt=0, laboratory=user.laboratory)
+                self.fields['quantity_standard'].label = 'mL de Estándar'
+            else:
+                self.fields['standard_reagent'].queryset = InventoryReagent.objects.filter(
+                    quantity_stock__gt=0, reagent=self.std.reagent_std)
+                self.fields['quantity_standard'].label = self.std.reagent_std.umb + ' de Estándar'
         else:
             self.fields['standard_solution'].queryset = SolutionStdBase.objects.none()
 
@@ -913,9 +921,14 @@ class StandardizationSolutionForm(ModelForm):
 
     class Meta:
         model = StandardizationSolution
-        fields = ['standard_solution', 'quantity_standard', 'quantity_solution']
+        fields = ['standard_solution', 'standard_reagent', 'quantity_standard', 'quantity_solution']
         widgets = {
             'standard_solution': Select(attrs={
+                'class': 'form-control select2',
+                'required': True,
+                'style': 'width: 100%'
+            }),
+            'standard_reagent': Select(attrs={
                 'class': 'form-control select2',
                 'required': True,
                 'style': 'width: 100%'
@@ -933,15 +946,107 @@ class StandardizationSolutionForm(ModelForm):
             instance.standardized_by_id = user.id
             instance.standarization_date = timezone.localdate()
 
-            aliquot = float(instance.quantity_standard)
+            target = self.sln.concentration_unit
+            molar_relation = self.std.molar_relation
+            reagent_sln = self.sln.solution_base.solute_reagent_base
+            pm_sln = reagent_sln.molecular_weight
+            pe_sln = reagent_sln.gram_equivalent
 
-            if self.sln.concentration_unit == 'M':
-                mol_solute = (
-                                         instance.quantity_solution * instance.standard_solution.concentration_std) / self.std.molar_relation
-                instance.concentration_sln = round((mol_solute / aliquot), 3)
-            elif self.sln.concentration_unit == 'N':
-                eq_solute = instance.quantity_solution * instance.standard_solution.concentration_std
-                instance.concentration_sln = round((eq_solute / aliquot), 3)
+            mmol_analyte = None
+            meq_analyte = None
+
+            # Cantidad de analito según la fuente del estándar
+            if instance.standard_solution:
+                # Caso A: el estándar es una solución estándar
+                vol = float(instance.quantity_standard)
+                gasto = float(instance.quantity_solution)
+                unit_std = instance.standard_solution.concentration_unit
+                conc_std = instance.standard_solution.concentration_std
+
+                if unit_std == 'M':
+                    mmol_analyte = (gasto * conc_std) / molar_relation
+                elif unit_std == 'N':
+                    meq_analyte = gasto * conc_std
+                elif unit_std in ('%', 'g/L', 'mg/L', 'mg/mL'):
+                    std_reagent = instance.standard_solution.solution_std_base.solute_std_base
+                    pm_std = std_reagent.molecular_weight
+                    if not pm_std:
+                        raise ValidationError('El soluto de la solución estándar no tiene peso molecular registrado')
+                    if unit_std == '%':
+                        mg_std = gasto * conc_std * 10
+                    elif unit_std == 'mg/L':
+                        mg_std = gasto * conc_std / 1000
+                    else:  # g/L o mg/mL
+                        mg_std = gasto * conc_std
+                    mmol_analyte = (mg_std / pm_std) / molar_relation
+                else:
+                    raise ValidationError(f'Unidad de concentración del estándar no soportada: {unit_std}')
+
+            elif instance.standard_reagent:
+                # Caso B: el estándar es pesado directamente (reactivo)
+                vol = float(instance.quantity_solution)
+                cantidad_std = float(instance.quantity_standard)
+                purity = instance.standard_reagent.purity
+                if not purity:
+                    raise ValidationError('El estándar pesado no tiene pureza/concentración definida')
+                reagent_std = instance.standard_reagent.reagent
+                unit_std = reagent_std.purity_unit
+
+                if unit_std == '%':
+                    if not reagent_std.molecular_weight:
+                        raise ValidationError('El estándar no tiene peso molecular registrado')
+                    mmol_analyte = (cantidad_std * purity * 10 / reagent_std.molecular_weight) / molar_relation
+                elif unit_std == 'M':
+                    mmol_analyte = (cantidad_std * purity) / molar_relation
+                elif unit_std == 'N':
+                    meq_analyte = cantidad_std * purity
+                elif unit_std in ('g/L', 'mg/L', 'mg/mL'):
+                    if not reagent_std.molecular_weight:
+                        raise ValidationError('El estándar no tiene peso molecular registrado')
+                    if unit_std == 'mg/L':
+                        mg_std = cantidad_std * purity / 1000
+                    else:  # g/L o mg/mL
+                        mg_std = cantidad_std * purity
+                    mmol_analyte = (mg_std / reagent_std.molecular_weight) / molar_relation
+                else:
+                    raise ValidationError(f'Unidad de pureza del estándar no soportada: {unit_std}')
+
+            else:
+                raise ValidationError('Debe seleccionar una solución estándar o un estándar pesado')
+
+            if mmol_analyte is None and meq_analyte is None:
+                raise ValidationError('No fue posible determinar la cantidad de analito')
+
+            # Concentración resultante según la unidad de la solución
+            if target == 'M':
+                if mmol_analyte is None:
+                    if not pm_sln or not pe_sln:
+                        raise ValidationError('Se requiere peso molecular y equivalente gramo del soluto de la solución')
+                    mmol_analyte = meq_analyte * (pe_sln / pm_sln)
+                instance.concentration_sln = round((mmol_analyte / vol), 3)
+            elif target == 'N':
+                if meq_analyte is None:
+                    if not pm_sln or not pe_sln:
+                        raise ValidationError('Se requiere peso molecular y equivalente gramo del soluto de la solución')
+                    meq_analyte = mmol_analyte * (pm_sln / pe_sln)
+                instance.concentration_sln = round((meq_analyte / vol), 3)
+            elif target in ('%', 'g/L', 'mg/L', 'mg/mL'):
+                if mmol_analyte is not None:
+                    if not pm_sln:
+                        raise ValidationError('El soluto de la solución no tiene peso molecular registrado')
+                    mg_analyte = mmol_analyte * pm_sln
+                else:
+                    if not pe_sln:
+                        raise ValidationError('El soluto de la solución no tiene equivalente gramo registrado')
+                    mg_analyte = meq_analyte * pe_sln
+                if target == '%':
+                    instance.concentration_sln = round((mg_analyte / (10 * vol)), 3)
+                elif target == 'mg/L':
+                    instance.concentration_sln = round((mg_analyte / vol) * 1000, 3)
+                else:  # g/L o mg/mL
+                    instance.concentration_sln = round((mg_analyte / vol), 3)
+            else:
+                raise ValidationError(f'Unidad de concentración de la solución no soportada: {target}')
 
             if commit:
                 instance.save()
@@ -954,14 +1059,25 @@ class StandardizationSolutionForm(ModelForm):
         """Valida que la cantidad de estándar no exceda el stock disponible."""
         cleaned = super().clean()
         quantity_standard = cleaned.get('quantity_standard')
-        stock_standard = cleaned.get('standard_solution').quantity_solution_std
-        umb = self.std.solution_std_base.solute_std_base.umb
+        standard_solution = cleaned.get('standard_solution')
+        standard_reagent = cleaned.get('standard_reagent')
 
-        if quantity_standard > stock_standard:
-            raise ValidationError(
-                f'La cantidad requerida ({quantity_standard:.2f}{umb}) excede el stock disponible '
-                f'({stock_standard:.2f}{umb}) del reactivo seleccionado'
-            )
+        if quantity_standard and standard_solution:
+            stock_standard = standard_solution.quantity_solution_std
+            umb = 'mL'
+            if quantity_standard > stock_standard:
+                raise ValidationError(
+                    f'La cantidad requerida ({quantity_standard:.2f}{umb}) excede el stock disponible '
+                    f'({stock_standard:.2f}{umb}) del estándar seleccionado'
+                )
+        elif quantity_standard and standard_reagent:
+            stock_standard = standard_reagent.quantity_stock
+            umb = standard_reagent.reagent.umb
+            if quantity_standard > stock_standard:
+                raise ValidationError(
+                    f'La cantidad requerida ({quantity_standard:.2f}{umb}) excede el stock disponible '
+                    f'({stock_standard:.2f}{umb}) del estándar seleccionado'
+                )
 
         return cleaned
 
@@ -980,8 +1096,8 @@ class SolutionBaseForm(ModelForm):
             self.fields['solvent_reagent_base'].queryset = Reagent.objects.filter(
                 enable_reagent=True, solvent=True, standard=False, site=user.laboratory.site)
         else:
-            self.fields['solute_reagent_base'].queryser = Reagent.objects.none()
-            self.fields['solvent_reagent_base'].queryser = Reagent.objects.none()
+            self.fields['solute_reagent_base'].queryset = Reagent.objects.none()
+            self.fields['solvent_reagent_base'].queryset = Reagent.objects.none()
 
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
