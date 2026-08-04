@@ -239,9 +239,9 @@
                                 <tr>
                                     <th style="width:10%">Fecha</th>
                                     <th style="width:35%">Solución STD</th>
-                                    <th style="width:10%">mL Alícuota STD</th>
-                                    <th style="width:10%">mL Solución </th>
-                                    <th style="width:10%">[ ]</th>
+                                    <th style="width:10%">Cant. STD</th>
+                                    <th style="width:10%">mL Sln Gastados</th>
+                                    <th style="width:10%">[Sln]</th>
                                     <th style="width:20%">Realizado por</th>
                                     <th style="width:5%">Acciones</th>
                                 </tr>
@@ -250,8 +250,21 @@
                                 {% for std in standardizations %}
                                     <tr>
                                         <td class="text-center">{{ std.standarization_date | date:'Y-m-d' }}</td>
-                                        <td class="text-center">{{ std.standard_solution }}</td>
-                                        <td class="text-center">{{ std.quantity_standard | unlocalize}}</td>
+                                        <td class="text-center">
+                                            {% if std.standard_reagent %}
+                                                {{ std.standard_reagent.reagent.code_reagent }}
+                                                {{ std.standard_reagent.reagent.description_reagent }} Lote N°:
+                                                {{ std.standard_reagent.batch_number }}
+                                                {{ std.standard_reagent.purity }}
+                                                {{ std.standard_reagent.reagent.purity_unit }}
+                                            {% else %}
+                                                {{ std.standard_solution.code_solution_std }} {{ std.standard_solution.solution_std_base }}
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {{ std.quantity_standard | unlocalize}}
+                                            {% if std.standard_reagent %}g{% else %}mL{% endif %}
+                                        </td>
                                         <td class="text-center">{{ std.quantity_solution | unlocalize }}</td>
                                         <td class="text-center">
                                             <b>{{ std.concentration_sln | unlocalize }} {{ std.solution.concentration_unit }}</b>
@@ -353,7 +366,7 @@
                         autoWidth: false,
                         searching: false,
                         info: false,
-                        order: [[3, 'desc']],
+                        order: [[0, 'desc']],
                         language: {
                             url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
                         },

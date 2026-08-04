@@ -14,6 +14,7 @@ media
 .claude
 .junie
 .opencode
+.agents
 AGENTS.md
 opencode.json
 django_errors.log
@@ -21,6 +22,7 @@ django_errors.log
 .env.example
 .dockerignore
 README.md
+INFRAESTRUCTURA.md
 
 # User-specific stuff
 .idea/**/workspace.xml
