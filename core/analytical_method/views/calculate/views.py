@@ -3,9 +3,10 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
+from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import CreateView, UpdateView, DeleteView
+from django.views.generic import CreateView, UpdateView, DeleteView, View
 
 from core.analytical_method.forms import *
 from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate
@@ -114,6 +115,7 @@ class AnalyticalMethodVolumenStdUpdateView(LoginRequiredMixin, BaseAnalyticalMet
         context['entity'] = 'Editar Volumen Estándar en la Ecuación'
         context['action'] = 'edit'
         return context
+
 
 # Creación Factor
 class AnalyticalMethodFactorCreateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, CreateView):

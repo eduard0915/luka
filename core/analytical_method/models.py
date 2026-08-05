@@ -218,10 +218,11 @@ class AnalyticalMethodCalculate(BaseModel):
     factor = models.FloatField(verbose_name='Constante', null=True, blank=True)
     sample_quantity = models.CharField(max_length=50, verbose_name='Variable Muestra', null=True, blank=True)
     position = models.CharField(max_length=15, verbose_name='Posición en Ecuación', null=True, blank=True)
+    subtract_blank = models.BooleanField(default=False, verbose_name='Restar Blanco?')
 
     def __str__(self):
         """Retorna la descripción del cálculo."""
-        return str(self.calculate_description)
+        return f'{self.calculate_description} {self.unit_measure_calculate}'
 
     class Meta:
         verbose_name = 'AnalyticalMethodCalculate'
@@ -266,6 +267,14 @@ class DependentCalculation(BaseModel):
         return super(DependentCalculation, self).save(*args, **kwargs)
 
 
+OPERATION = [
+    ('multiply', 'Multiplicar (×)'),
+    ('add', 'Sumar (+)'),
+    ('subtract', 'Restar (−)'),
+    ('divide', 'Dividir (÷)'),
+]
+
+
 class AnalyticalMethodCalculateRelation(BaseModel):
     """Modelo que define cálculos relacionados con productos y métodos analíticos."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
@@ -282,7 +291,13 @@ class AnalyticalMethodCalculateRelation(BaseModel):
     sig_figs = models.SmallIntegerField(verbose_name='Cifras Significativas', default=4)
     consecutive_calcule = models.ForeignKey(DependentCalculation, verbose_name='Consecutivo', on_delete=models.CASCADE, null=True, blank=True)
     calculate_relation_related = models.ForeignKey(
-        'self', verbose_name='Cálculo Relacionado Add', on_delete=models.CASCADE, null=True, blank=True)
+        'self', verbose_name='Cálculo Relacionado Add', on_delete=models.CASCADE, null=True, blank=True,
+        related_name='added_in_relations')
+    operation = models.CharField(
+        max_length=10, choices=OPERATION, verbose_name='Operación con el Término Anterior', null=True, blank=True)
+    parent = models.ForeignKey(
+        'self', verbose_name='Agrupado Dentro de', on_delete=models.CASCADE, null=True, blank=True,
+        related_name='children')
 
     def __str__(self):
         """Retorna la descripción del cálculo relacionado con su unidad de medida."""
