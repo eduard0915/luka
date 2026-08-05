@@ -4,7 +4,7 @@ Define los formularios para la creación y edición de métodos analíticos,
 incluyendo soluciones, reactivos, equipos, materiales, procedimientos y cálculos.
 """
 
-from django.forms import ModelForm, TextInput, Select, Textarea
+from django.forms import ModelForm, TextInput, Select, Textarea, CheckboxInput
 
 from core.analytical_method.models import *
 from core.laboratory.models import Laboratory
@@ -363,14 +363,49 @@ class AnalyticalMethodVolumenStdForm(ModelForm):
 
     class Meta:
         model = AnalyticalMethodCalculate
-        fields = ['volumen_std', 'position']
+        fields = ['volumen_std', 'position', 'subtract_blank']
         widgets = {
             'volumen_std': TextInput(attrs={'class': 'form-control'}),
-            'position': Select(attrs={'class': 'form-control'}, choices=POSITION)
+            'position': Select(attrs={'class': 'form-control'}, choices=POSITION),
+            'subtract_blank': Select(attrs={'class': 'form-control'}, choices=BOOLEAN)
         }
 
     def save(self, commit=True):
         """Guarda el volumen estándar del cálculo."""
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Activar o Desactivar Resta de Blanco
+class AnalyticalMethodSubtractBlankForm(ModelForm):
+    """Formulario para activar o desactivar la resta de blanco en el cálculo."""
+    def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de resta de blanco."""
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        self.fields['subtract_blank'].label = 'Restar Blanco'
+        self.fields['subtract_blank'].help_text = 'Al activarse, la ecuación resta el Blanco al Volumen Estándar.'
+
+    class Meta:
+        model = AnalyticalMethodCalculate
+        fields = ['subtract_blank']
+        widgets = {
+            'subtract_blank': CheckboxInput(attrs={'class': 'form-check-input'})
+        }
+
+    def save(self, commit=True):
+        """Guarda el estado de la resta de blanco del cálculo."""
         data = {}
         try:
             if self.is_valid():

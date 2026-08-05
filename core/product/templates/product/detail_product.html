@@ -115,12 +115,21 @@
                                                 <small>Descripción Cálculo</small>
                                             </button>
                                         {% endif %}
+                                    {% if has_mezcla_method %}
+                                    <button type="button"
+                                            class="btn btn-outline-primary btn-sm"
+                                            onclick="open_modal('{% url 'product:add_calc_relation_operation' object.id dep.id %}')">
+                                        <i class="bi bi-link me-1"></i>
+                                        <small>Cálculo con Operación</small>
+                                    </button>
+                                    {% else %}
                                     <button type="button"
                                             class="btn btn-outline-primary btn-sm"
                                             onclick="open_modal('{% url 'product:add_calc_relation' object.id dep.id %}')">
                                         <i class="bi bi-link me-1"></i>
                                         <small>Cálculo Relacionado</small>
                                     </button>
+                                    {% endif %}
                                     {% if dep.consecutive > 1 %}
                                         <button type="button"
                                                 class="btn btn-outline-primary btn-sm"
@@ -165,14 +174,23 @@
                                             {% for calc in calcules_by_dep|index:dep.id %}
                                                 <tr>
                                                     <td class="text-left align-middle">
+                                                    {% if calc.operation == 'add' %}<span class="badge bg-secondary me-1">+</span>{% elif calc.operation == 'subtract' %}<span class="badge bg-secondary me-1">−</span>{% elif calc.operation == 'divide' %}<span class="badge bg-secondary me-1">÷</span>{% endif %}
                                                     {% if calc.calculate_description_relation %}
                                                         Descripción: {{ calc.calculate_description_relation }}
+                                                        {% if calc.unit_measure_calculate %}
+                                                            {{ calc.unit_measure_calculate }}
+                                                        {% endif %}
                                                     {% elif calc.analytical_method_calculate %}
                                                         Relación:
                                                         {{ calc.analytical_method_calculate.calculate_description }}
+                                                        {% if calc.analytical_method_calculate.unit_measure_calculate %}
+                                                            {{ calc.analytical_method_calculate.unit_measure_calculate }}
+                                                        {% endif %}
                                                     {% elif calc.calculate_relation_related %}
                                                         Relación Add:
                                                         {{ calc.calculate_relation_related.calculate_description_relation }}
+                                                    {% elif calc.children.exists %}
+                                                        Grupo (sub-expresión)
                                                     {% elif calc.volumen_std %}
                                                             Volumen STD: {{ calc.volumen_std }}
                                                         {% elif calc.factor %}
@@ -190,14 +208,28 @@
                                                                 <i class="bi bi-pencil-square text-warning"></i>
                                                             </a>
                                                     {% elif calc.analytical_method_calculate %}
+                                                        {% if calc.operation or calc.parent %}
+                                                        <a href="javascript:void(0);"
+                                                           onclick="open_modal('{% url 'product:edit_calc_relation_operation' calc.id %}')"
+                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                            <i class="bi bi-pencil-square text-warning"></i>
+                                                        </a>
+                                                        {% else %}
                                                         <a href="javascript:void(0);"
                                                            onclick="open_modal('{% url 'product:edit_calc_relation' calc.id %}')"
                                                            class="btn btn-link btn-sm p-0 text-primary me-2">
                                                             <i class="bi bi-pencil-square text-warning"></i>
                                                         </a>
+                                                        {% endif %}
                                                     {% elif calc.calculate_relation_related %}
                                                         <a href="javascript:void(0);"
                                                            onclick="open_modal('{% url 'product:edit_calc_relation_related' calc.id %}')"
+                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                            <i class="bi bi-pencil-square text-warning"></i>
+                                                        </a>
+                                                    {% elif calc.children.exists %}
+                                                        <a href="javascript:void(0);"
+                                                           onclick="open_modal('{% url 'product:edit_calc_relation_operation' calc.id %}')"
                                                            class="btn btn-link btn-sm p-0 text-primary me-2">
                                                             <i class="bi bi-pencil-square text-warning"></i>
                                                         </a>

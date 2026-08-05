@@ -56,7 +56,7 @@ class AnalyticalMethodProduct(BaseModel):
 
     def __str__(self):
         """Retorna el nombre del método analítico asociado."""
-        return str(self.analytical_method)
+        return f'{self.analytical_method}'
 
     class Meta:
         """Metadatos del modelo AnalyticalMethodProduct."""

@@ -237,6 +237,9 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
 
         context['inst_desc'] = inst_desc
 
+        volumen_std_calcule = calcules.exclude(volumen_std__isnull=True).exclude(volumen_std='').first()
+        context['subtract_blank'] = volumen_std_calcule.subtract_blank if volumen_std_calcule else False
+
         show_dependent_toggle = False
 
         for calc in calcules:
@@ -287,7 +290,10 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                 # Construir partes válidas
                 parts = []
                 if is_valid_value(calc.volumen_std):
-                    parts.append(str(calc.volumen_std))
+                    if calc.subtract_blank:
+                        parts.append(f"\\left({calc.volumen_std} - \\text{{Blanco}}\\right)")
+                    else:
+                        parts.append(str(calc.volumen_std))
                 if is_valid_value(calc.factor):
                     parts.append(str(calc.factor))
                 if is_valid_value(calc.sample_quantity):

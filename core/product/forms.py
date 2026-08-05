@@ -10,7 +10,7 @@ from crum import get_current_user
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm, ModelChoiceField, TextInput, Select, SelectMultiple
 
-from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation
+from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation, OPERATION
 from core.analytical_method.forms import UNIT_CALCULATE, POSITION
 from core.product.models import SamplePoint, Product, AnalyticalMethodProduct, SpecificationProduct
 
@@ -746,3 +746,88 @@ class ProductCalculateRelationAddForm(ModelForm):
         except Exception as e:
             data['error'] = str(e)
         return data
+
+
+class ProductCalculateRelationOperationForm(ProductCalculateRelationForm):
+    """Formulario para cálculos relacionados con operaciones (+, −, ×, ÷) y agrupaciones.
+
+    Extiende ProductCalculateRelationForm agregando la operación con la que el
+    término se combina con el anterior dentro de su grupo, y la referencia al
+    término padre para construir sub-expresiones con paréntesis.
+    """
+
+    parent = ModelChoiceField(
+        queryset=AnalyticalMethodCalculateRelation.objects.none(),
+        required=False,
+        label='Agrupado Dentro de',
+        widget=Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+    )
+
+    @staticmethod
+    def _label_parent(obj):
+        """Retorna una etiqueta legible del término candidato a ser padre."""
+        if obj.analytical_method_calculate:
+            label = str(obj.analytical_method_calculate.calculate_description)
+        elif obj.calculate_relation_related:
+            label = str(obj.calculate_relation_related.calculate_description_relation)
+        elif obj.volumen_std:
+            label = f'Vol. STD: {obj.volumen_std}'
+        elif obj.factor is not None:
+            label = f'Constante: {obj.factor}'
+        elif obj.sample_quantity:
+            label = f'Muestra: {obj.sample_quantity}'
+        else:
+            label = 'Grupo'
+        if obj.position:
+            label += f' ({obj.position})'
+        return label
+
+    def __init__(self, *args, **kwargs):
+        """Inicializa el formulario filtrando los posibles padres del mismo cálculo."""
+        super().__init__(*args, **kwargs)
+        parent_qs = AnalyticalMethodCalculateRelation.objects.filter(
+            calculate_description_relation__in=[None, ''])
+        if self.product:
+            parent_qs = parent_qs.filter(product=self.product)
+        if self.dependent_calculation:
+            parent_qs = parent_qs.filter(consecutive_calcule=self.dependent_calculation)
+        if self.instance and self.instance.pk:
+            parent_qs = parent_qs.exclude(pk=self.instance.pk)
+        field = self.fields['parent']
+        field.queryset = parent_qs
+        field.label_from_instance = self._label_parent
+
+        col_classes = {
+            'analytical_method_calculate': 'col-md-12',
+            'operation': 'col-md-6',
+            'position': 'col-md-6',
+            'parent': 'col-md-12',
+        }
+        for field_name, form_field in self.fields.items():
+            form_field.col_class = col_classes.get(field_name, 'col-md-6')
+
+    class Meta(ProductCalculateRelationForm.Meta):
+        """Metadatos del formulario ProductCalculateRelationOperationForm."""
+        fields = ['analytical_method_calculate', 'operation', 'position', 'parent']
+        widgets = {
+            **ProductCalculateRelationForm.Meta.widgets,
+            'operation': Select(attrs={'class': 'form-control'}, choices=[('', 'Multiplicar (×)')] + OPERATION[1:]),
+        }
+
+    def clean_operation(self):
+        """Normaliza la operación vacía a None (equivale a multiplicar)."""
+        return self.cleaned_data.get('operation') or None
+
+    def clean(self):
+        """Valida que el término no se agrupe dentro de sí mismo ni de sus descendientes."""
+        cleaned_data = super().clean()
+        parent = cleaned_data.get('parent')
+        if parent and self.instance and self.instance.pk:
+            ancestor = parent
+            while ancestor is not None:
+                if ancestor.pk == self.instance.pk:
+                    raise ValidationError({
+                        'parent': 'Un término no puede agruparse dentro de sí mismo ni de sus descendientes.'
+                    })
+                ancestor = ancestor.parent
+        return cleaned_data

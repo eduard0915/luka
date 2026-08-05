@@ -16,7 +16,7 @@ from core.mixins import ValidatePermissionRequiredMixin
 from core.product.forms import (
     ProductCalculateRelationDescriptionForm, ProductCalculateRelationForm,
     ProductVolumenStdRelationForm, ProductFactorRelationForm, ProductSampleGramRelationForm,
-    ProductCalculateRelationAddForm
+    ProductCalculateRelationAddForm, ProductCalculateRelationOperationForm
 )
 from core.product.models import Product
 from core.analytical_method.models import AnalyticalMethodCalculateRelation, DependentCalculation
@@ -177,6 +177,42 @@ class ProductCalculateRelationAddUpdateView(LoginRequiredMixin, BaseProductCalcu
         return context
 
 
+class ProductCalculateRelationOperationCreateView(LoginRequiredMixin, BaseProductCalculateRelationView, CreateView):
+    """Vista para crear una relación de cálculo con operaciones (+, −, ×, ÷) y agrupaciones."""
+
+    model = AnalyticalMethodCalculateRelation
+    form_class = ProductCalculateRelationOperationForm
+
+    def get_form_kwargs(self):
+        """Inyecta el producto y el cálculo dependiente actual en los kwargs del formulario."""
+        kwargs = super().get_form_kwargs()
+        product = Product.objects.get(pk=self.kwargs.get('pk'))
+        dependent_calculation = DependentCalculation.objects.get(pk=self.kwargs.get('dep_pk'))
+        kwargs.update({'product': product, 'dependent_calculation': dependent_calculation})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        """Agrega el título y la acción al contexto del modal."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Agregar Cálculo con Operación'
+        context['action'] = 'add'
+        return context
+
+
+class ProductCalculateRelationOperationUpdateView(LoginRequiredMixin, BaseProductCalculateRelationView, UpdateView):
+    """Vista para editar una relación de cálculo con operaciones de un producto."""
+
+    model = AnalyticalMethodCalculateRelation
+    form_class = ProductCalculateRelationOperationForm
+
+    def get_context_data(self, **kwargs):
+        """Agrega el título y la acción al contexto del modal."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Editar Cálculo con Operación'
+        context['action'] = 'edit'
+        return context
+
+
 class ProductVolumenStdRelationCreateView(LoginRequiredMixin, BaseProductCalculateRelationView, CreateView):
     """Vista para crear una relación de volumen estándar en un cálculo."""
 
@@ -285,5 +321,6 @@ class ProductCalculateRelationDeleteView(LoginRequiredMixin, BaseProductCalculat
         """Agrega el título y la acción al contexto del modal de eliminación."""
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Eliminar Cálculo'
+        context['info_delete'] = 'Está seguro de eliminar la variable del cálculo?'
         context['action'] = 'delete'
         return context
