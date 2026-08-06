@@ -369,7 +369,14 @@ class MassiveSampleAnalysis(BaseModel):
         else:
             item['metal'] = ''
         item['result'] = format(self.result, '.4f') if self.result is not None else ''
-        item['date_analysis'] = timezone.localtime(self.date_analysis).strftime('%Y-%m-%d %H:%M:%S') if self.date_analysis else ''
+        if self.date_analysis:
+            local_date = timezone.localtime(self.date_analysis)
+            if local_date.hour == 0 and local_date.minute == 0:
+                item['date_analysis'] = local_date.strftime('%Y-%m-%d')
+            else:
+                item['date_analysis'] = local_date.strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            item['date_analysis'] = ''
         item['analized_by'] = self.analized_by.get_full_name() if self.analized_by else ''
         return item
 

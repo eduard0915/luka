@@ -495,7 +495,7 @@ def send_oss_notification_email(analysis):
     method_desc = method.description_analytical_method if method else None
 
     subject = (
-        f"Resultado OSS - {sampling_process.number_sample}"
+        f"Resultado (OOS) - {sampling_process.number_sample}"
         f" - {method_desc or ''}"
     )
 
