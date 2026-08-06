@@ -1,14 +1,55 @@
 """Formularios de la aplicación de inicio de sesión.
 
 Define el formulario de validación de correo electrónico para
-la recuperación de contraseñas.
+la recuperación de contraseñas y el formulario de autenticación
+con mensajes de error personalizados.
 """  # noqa: E501
 
-from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth import authenticate
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.contrib.auth.tokens import default_token_generator
 from django.core.exceptions import ValidationError
 
 from core.user.models import User
+
+
+class LoginAuthenticationForm(AuthenticationForm):
+    """Formulario de autenticación con mensajes de error diferenciados
+    para usuario inexistente y usuario inactivo."""
+
+    error_messages = {
+        'invalid_login': 'Usuario y/o Contraseña Incorrectos',
+    }
+
+    def clean(self):
+        username = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
+
+        if username is not None and password:
+            try:
+                self.user_cache = User.objects.get_by_natural_key(username)
+            except User.DoesNotExist:
+                raise ValidationError(
+                    'Usuario Inexistente',
+                    code='invalid_login',
+                )
+
+            if not self.user_cache.is_active:
+                raise ValidationError(
+                    'Usuario Inactivo',
+                    code='inactive',
+                )
+
+            self.user_cache = authenticate(
+                self.request, username=username, password=password
+            )
+            if self.user_cache is None:
+                raise ValidationError(
+                    self.error_messages['invalid_login'],
+                    code='invalid_login',
+                )
+
+        return self.cleaned_data
 
 
 class EmailValidationForgotPassword(PasswordResetForm):

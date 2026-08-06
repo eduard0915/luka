@@ -1,4 +1,4 @@
-# Infraestructura del Proyecto Luka LIMS
+# Infraestructura del Proyecto PadLims
 
 Documentación de referencia para replicar la arquitectura e infraestructura en otros proyectos Django.
 

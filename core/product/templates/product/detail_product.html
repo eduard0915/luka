@@ -99,183 +99,201 @@
                         <!-- Una fila de botones por cada cálculo dependiente del producto -->
                         {% if dependent_calculations %}
                             {% for dep in dependent_calculations %}
-                                <div class="col-12">
-                                    <div class="d-flex gap-2 flex-wrap align-items-center">
-                                        <span class="fw-bold me-2">{{ dep.consecutive }} - {{ dep.calcule_description }}</span>
-                                        <a href="javascript:void(0);"
-                                           onclick="open_modal('{% url 'product:edit_dependent_calculation' dep.id %}')"
-                                           title="Editar cálculo dependiente">
-                                            <i class="bi bi-pencil-square text-warning"></i>
-                                        </a>
-                                        {% if dep.id not in deps_with_description %}
+                                <div class="card h-100 mb-3">
+                                    <div class="col-12 m-2">
+                                        <div class="d-flex gap-2 flex-wrap align-items-center">
+                                            <div class="d-flex gap-2 flex-wrap align-items-center">
+                                                <span class="fw-bold me-2">{{ dep.consecutive }} - {{ dep.calcule_description }}</span>
+                                            {% if dep.id not in deps_with_description %}
+                                                <button type="button"
+                                                        class="btn btn-outline-primary btn-sm"
+                                                        onclick="open_modal('{% url 'product:add_calc_relation_description' object.id dep.id %}')">
+                                                    <i class="bi bi-file-text me-1"></i>
+                                                    <small>Descripción Cálculo</small>
+                                                </button>
+                                            {% endif %}
+                                            {% if has_mezcla_method %}
+                                                <button type="button"
+                                                        class="btn btn-outline-primary btn-sm"
+                                                        onclick="open_modal('{% url 'product:add_calc_relation_operation' object.id dep.id %}')">
+                                                    <i class="bi bi-link me-1"></i>
+                                                    <small>Cálculo con Operación</small>
+                                                </button>
+                                            {% else %}
+                                                <button type="button"
+                                                        class="btn btn-outline-primary btn-sm"
+                                                        onclick="open_modal('{% url 'product:add_calc_relation' object.id dep.id %}')">
+                                                    <i class="bi bi-link me-1"></i>
+                                                    <small>Cálculo Relacionado</small>
+                                                </button>
+                                            {% endif %}
+                                            {% if dep.consecutive > 1 %}
+                                                <button type="button"
+                                                        class="btn btn-outline-primary btn-sm"
+                                                        onclick="open_modal('{% url 'product:add_calc_relation_related' object.id dep.id %}')">
+                                                    <i class="bi bi-plus-lg me-1"></i>
+                                                    <small>Calculo Relacionado Add</small>
+                                                </button>
+                                            {% endif %}
                                             <button type="button"
                                                     class="btn btn-outline-primary btn-sm"
-                                                    onclick="open_modal('{% url 'product:add_calc_relation_description' object.id dep.id %}')">
-                                                <i class="bi bi-file-text me-1"></i>
-                                                <small>Descripción Cálculo</small>
+                                                    onclick="open_modal('{% url 'product:add_factor_relation' object.id dep.id %}')">
+                                                <i class="bi bi-123 me-1"></i>
+                                                <small>Constante</small>
                                             </button>
-                                        {% endif %}
-                                    {% if has_mezcla_method %}
-                                    <button type="button"
-                                            class="btn btn-outline-primary btn-sm"
-                                            onclick="open_modal('{% url 'product:add_calc_relation_operation' object.id dep.id %}')">
-                                        <i class="bi bi-link me-1"></i>
-                                        <small>Cálculo con Operación</small>
-                                    </button>
-                                    {% else %}
-                                    <button type="button"
-                                            class="btn btn-outline-primary btn-sm"
-                                            onclick="open_modal('{% url 'product:add_calc_relation' object.id dep.id %}')">
-                                        <i class="bi bi-link me-1"></i>
-                                        <small>Cálculo Relacionado</small>
-                                    </button>
-                                    {% endif %}
-                                    {% if dep.consecutive > 1 %}
-                                        <button type="button"
-                                                class="btn btn-outline-primary btn-sm"
-                                                onclick="open_modal('{% url 'product:add_calc_relation_related' object.id dep.id %}')">
-                                            <i class="bi bi-plus-lg me-1"></i>
-                                            <small>Calculo Relacionado Add</small>
-                                        </button>
-                                    {% endif %}
-                                        <button type="button"
-                                                class="btn btn-outline-primary btn-sm"
-                                                onclick="open_modal('{% url 'product:add_factor_relation' object.id dep.id %}')">
-                                            <i class="bi bi-123 me-1"></i>
-                                            <small>Constante</small>
-                                        </button>
-{#                                        <button type="button"#}
-{#                                                class="btn btn-outline-primary btn-sm"#}
-{#                                                onclick="open_modal('{% url 'product:add_volume_relation_std' object.id dep.id %}')">#}
-{#                                            <i class="bi bi-droplet me-1"></i>#}
-{#                                            <small>Volumen Estándar</small>#}
-{#                                        </button>#}
-                                        {% if dep.id not in deps_with_sample_gram %}
-                                            <button type="button"
-                                                    class="btn btn-outline-primary btn-sm"
-                                                    onclick="open_modal('{% url 'product:add_sample_gram_relation' object.id dep.id %}')">
-                                                <i class="bi bi-droplet me-1"></i>
-                                                <small>Cantidad de Muestra</small>
-                                            </button>
-                                        {% endif %}
+                                            {% if dep.id not in deps_with_sample_gram %}
+                                                <button type="button"
+                                                        class="btn btn-outline-primary btn-sm"
+                                                        onclick="open_modal('{% url 'product:add_sample_gram_relation' object.id dep.id %}')">
+                                                    <i class="bi bi-droplet me-1"></i>
+                                                    <small>Cantidad de Muestra</small>
+                                                </button>
+                                            {% endif %}
+                                            </div>
+                                            <div class="d-flex gap-2 flex-shrink-0 ms-4">
+                                                <a href="javascript:void(0);"
+                                                   onclick="open_modal('{% url 'product:edit_dependent_calculation' dep.id %}')"
+                                                   class="btn btn-warning btn-sm" title="Editar">
+                                                    <i class="bi bi-pencil-square m-0"></i>
+                                                </a>
+                                                <a href="javascript:void(0);"
+                                                   onclick="open_modal('{% url 'product:delete_dependent_calculation' dep.id %}')"
+                                                   class="btn btn-danger btn-sm" title="Eliminar">
+                                                    <i class="bi bi-trash m-0"></i>
+                                                </a>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                {% if dep.id in calcules_by_dep %}
-                                    <div class="col-12 mt-2">
-                                        <table class="table table-sm table-bordered">
-                                            <thead>
-                                            <tr>
-                                                <th class="text-center" style="width: 59%;">Descripción</th>
-                                                <th class="text-center" style="width: 24%;">Posición</th>
-                                                <th class="text-center" style="width: 17%;">Acciones</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            {% for calc in calcules_by_dep|index:dep.id %}
-                                                <tr>
-                                                    <td class="text-left align-middle">
-                                                    {% if calc.operation == 'add' %}<span class="badge bg-secondary me-1">+</span>{% elif calc.operation == 'subtract' %}<span class="badge bg-secondary me-1">−</span>{% elif calc.operation == 'divide' %}<span class="badge bg-secondary me-1">÷</span>{% endif %}
-                                                    {% if calc.calculate_description_relation %}
-                                                        Descripción: {{ calc.calculate_description_relation }}
-                                                        {% if calc.unit_measure_calculate %}
-                                                            {{ calc.unit_measure_calculate }}
-                                                        {% endif %}
-                                                    {% elif calc.analytical_method_calculate %}
-                                                        Relación:
-                                                        {{ calc.analytical_method_calculate.calculate_description }}
-                                                        {% if calc.analytical_method_calculate.unit_measure_calculate %}
-                                                            {{ calc.analytical_method_calculate.unit_measure_calculate }}
-                                                        {% endif %}
-                                                    {% elif calc.calculate_relation_related %}
-                                                        Relación Add:
-                                                        {{ calc.calculate_relation_related.calculate_description_relation }}
-                                                    {% elif calc.children.exists %}
-                                                        Grupo (sub-expresión)
-                                                    {% elif calc.volumen_std %}
-                                                            Volumen STD: {{ calc.volumen_std }}
-                                                        {% elif calc.factor %}
-                                                            Constante: {{ calc.factor }}
-                                                        {% elif calc.sample_quantity %}
-                                                            Cant. Muestra: {{ calc.sample_quantity }}
-                                                        {% endif %}
-                                                    </td>
-                                                    <td class="text-center">{{ calc.position|default:"No aplica" }}</td>
-                                                    <td class="text-center">
-                                                        {% if calc.calculate_description_relation %}
-                                                            <a href="javascript:void(0);"
-                                                               onclick="open_modal('{% url 'product:edit_calc_relation_description' calc.id %}')"
-                                                               class="btn btn-link btn-sm p-0 text-primary me-2">
-                                                                <i class="bi bi-pencil-square text-warning"></i>
-                                                            </a>
-                                                    {% elif calc.analytical_method_calculate %}
-                                                        {% if calc.operation or calc.parent %}
-                                                        <a href="javascript:void(0);"
-                                                           onclick="open_modal('{% url 'product:edit_calc_relation_operation' calc.id %}')"
-                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
-                                                            <i class="bi bi-pencil-square text-warning"></i>
-                                                        </a>
+                                    {% if dep.id in calcules_by_dep %}
+                                        <div class="col-12 mb-2">
+                                            <div class="row">
+                                                <div class="col-md-7">
+                                                    <table class="table table-sm table-bordered mb-0">
+                                                        <thead>
+                                                        <tr>
+                                                            <th class="text-center" style="width: 59%;">Descripción</th>
+                                                            <th class="text-center" style="width: 24%;">Posición</th>
+                                                            <th class="text-center" style="width: 17%;">Acciones</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        {% for calc in calcules_by_dep|index:dep.id %}
+                                                            <tr>
+                                                                <td class="text-left align-middle">
+                                                                    {% if calc.operation == 'add' %}
+                                                                        <span class="badge bg-secondary me-1">+</span>{% elif calc.operation == 'subtract' %}
+                                                                        <span class="badge bg-secondary me-1">−</span>{% elif calc.operation == 'divide' %}
+                                                                        <span class="badge bg-secondary me-1">÷</span>{% endif %}
+                                                                    {% if calc.calculate_description_relation %}
+                                                                        Descripción:
+                                                                        {{ calc.calculate_description_relation }}
+                                                                        {% if calc.unit_measure_calculate %}
+                                                                            {{ calc.unit_measure_calculate }}
+                                                                        {% endif %}
+                                                                    {% elif calc.analytical_method_calculate %}
+                                                                        Relación:
+                                                                        {{ calc.analytical_method_calculate.calculate_description }}
+                                                                        {% if calc.analytical_method_calculate.unit_measure_calculate %}
+                                                                            {{ calc.analytical_method_calculate.unit_measure_calculate }}
+                                                                        {% endif %}
+                                                                    {% elif calc.calculate_relation_related %}
+                                                                        Relación Add:
+                                                                        {{ calc.calculate_relation_related.calculate_description_relation }}
+                                                                    {% elif calc.children.exists %}
+                                                                        Grupo (sub-expresión)
+                                                                    {% elif calc.volumen_std %}
+                                                                        Volumen STD: {{ calc.volumen_std }}
+                                                                    {% elif calc.factor %}
+                                                                        Constante: {{ calc.factor }}
+                                                                    {% elif calc.sample_quantity %}
+                                                                        Cant. Muestra: {{ calc.sample_quantity }}
+                                                                    {% endif %}
+                                                                </td>
+                                                                <td class="text-center">{{ calc.position|default:"No aplica" }}</td>
+                                                                <td class="text-center">
+                                                                    {% if calc.calculate_description_relation %}
+                                                                        <a href="javascript:void(0);"
+                                                                           onclick="open_modal('{% url 'product:edit_calc_relation_description' calc.id %}')"
+                                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                            <i class="bi bi-pencil-square text-warning"></i>
+                                                                        </a>
+                                                                    {% elif calc.analytical_method_calculate %}
+                                                                        {% if calc.operation or calc.parent %}
+                                                                            <a href="javascript:void(0);"
+                                                                               onclick="open_modal('{% url 'product:edit_calc_relation_operation' calc.id %}')"
+                                                                               class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                                <i class="bi bi-pencil-square text-warning"></i>
+                                                                            </a>
+                                                                        {% else %}
+                                                                            <a href="javascript:void(0);"
+                                                                               onclick="open_modal('{% url 'product:edit_calc_relation' calc.id %}')"
+                                                                               class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                                <i class="bi bi-pencil-square text-warning"></i>
+                                                                            </a>
+                                                                        {% endif %}
+                                                                    {% elif calc.calculate_relation_related %}
+                                                                        <a href="javascript:void(0);"
+                                                                           onclick="open_modal('{% url 'product:edit_calc_relation_related' calc.id %}')"
+                                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                            <i class="bi bi-pencil-square text-warning"></i>
+                                                                        </a>
+                                                                    {% elif calc.children.exists %}
+                                                                        <a href="javascript:void(0);"
+                                                                           onclick="open_modal('{% url 'product:edit_calc_relation_operation' calc.id %}')"
+                                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                            <i class="bi bi-pencil-square text-warning"></i>
+                                                                        </a>
+                                                                    {% elif calc.volumen_std %}
+                                                                        <a href="javascript:void(0);"
+                                                                           onclick="open_modal('{% url 'product:edit_volume_relation_std' calc.id %}')"
+                                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                            <i class="bi bi-pencil-square text-warning"></i>
+                                                                        </a>
+                                                                    {% elif calc.factor %}
+                                                                        <a href="javascript:void(0);"
+                                                                           onclick="open_modal('{% url 'product:edit_factor_relation' calc.id %}')"
+                                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                            <i class="bi bi-pencil-square text-warning"></i>
+                                                                        </a>
+                                                                    {% elif calc.sample_quantity %}
+                                                                        <a href="javascript:void(0);"
+                                                                           onclick="open_modal('{% url 'product:edit_sample_gram_relation' calc.id %}')"
+                                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                            <i class="bi bi-pencil-square text-warning"></i>
+                                                                        </a>
+                                                                    {% endif %}
+                                                                    <a href="javascript:void(0);"
+                                                                       onclick="open_modal('{% url 'product:delete_calc_relation' calc.id %}')"
+                                                                       class="btn btn-link btn-sm p-0 text-primary">
+                                                                        <i class="bi bi-trash text-danger"></i>
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <div class="col-md-5">
+                                                    {% with eq=equations_by_dep|index:dep.id %}
+                                                        {% if eq %}
+                                                            <div class="bg-light border rounded text-center d-flex align-items-center justify-content-center h-100"
+                                                                 style="min-height: 100px;">
+                                                                <div style="font-size: 0.9rem; overflow-x: auto; font-family: 'Times New Roman', serif; padding: 1rem;">
+                                                                    $${{ eq }}$$
+                                                                </div>
+                                                            </div>
                                                         {% else %}
-                                                        <a href="javascript:void(0);"
-                                                           onclick="open_modal('{% url 'product:edit_calc_relation' calc.id %}')"
-                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
-                                                            <i class="bi bi-pencil-square text-warning"></i>
-                                                        </a>
+                                                            <div class="bg-light border rounded text-center d-flex align-items-center justify-content-center h-100 text-muted"
+                                                                 style="min-height: 100px;">
+                                                                <i class="bi bi-inbox"></i> Sin ecuación
+                                                            </div>
                                                         {% endif %}
-                                                    {% elif calc.calculate_relation_related %}
-                                                        <a href="javascript:void(0);"
-                                                           onclick="open_modal('{% url 'product:edit_calc_relation_related' calc.id %}')"
-                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
-                                                            <i class="bi bi-pencil-square text-warning"></i>
-                                                        </a>
-                                                    {% elif calc.children.exists %}
-                                                        <a href="javascript:void(0);"
-                                                           onclick="open_modal('{% url 'product:edit_calc_relation_operation' calc.id %}')"
-                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
-                                                            <i class="bi bi-pencil-square text-warning"></i>
-                                                        </a>
-                                                    {% elif calc.volumen_std %}
-                                                            <a href="javascript:void(0);"
-                                                               onclick="open_modal('{% url 'product:edit_volume_relation_std' calc.id %}')"
-                                                               class="btn btn-link btn-sm p-0 text-primary me-2">
-                                                                <i class="bi bi-pencil-square text-warning"></i>
-                                                            </a>
-                                                        {% elif calc.factor %}
-                                                            <a href="javascript:void(0);"
-                                                               onclick="open_modal('{% url 'product:edit_factor_relation' calc.id %}')"
-                                                               class="btn btn-link btn-sm p-0 text-primary me-2">
-                                                                <i class="bi bi-pencil-square text-warning"></i>
-                                                            </a>
-                                                        {% elif calc.sample_quantity %}
-                                                            <a href="javascript:void(0);"
-                                                               onclick="open_modal('{% url 'product:edit_sample_gram_relation' calc.id %}')"
-                                                               class="btn btn-link btn-sm p-0 text-primary me-2">
-                                                                <i class="bi bi-pencil-square text-warning"></i>
-                                                            </a>
-                                                        {% endif %}
-                                                        <a href="javascript:void(0);"
-                                                           onclick="open_modal('{% url 'product:delete_calc_relation' calc.id %}')"
-                                                           class="btn btn-link btn-sm p-0 text-primary">
-                                                            <i class="bi bi-trash text-danger"></i>
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    {% with eq=equations_by_dep|index:dep.id %}
-                                        {% if eq %}
-                                            <div class="col-12 mt-0">
-                                                <div class="bg-light rounded text-center pb-4">
-                                                    <div style="font-size: 0.9rem; overflow-x: auto; font-family: 'Times New Roman', serif;">
-                                                        $${{ eq }}$$
-                                                    </div>
+                                                    {% endwith %}
                                                 </div>
                                             </div>
-                                        {% endif %}
-                                    {% endwith %}
-                                    <br>
-                                {% endif %}
+                                        </div>
+                                    {% endif %}
+                                </div>
                             {% endfor %}
                         {% endif %}
                     </div>

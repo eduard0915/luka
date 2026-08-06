@@ -155,7 +155,7 @@ def build_excel_upload(rows, headers=None):
     workbook = Workbook()
     sheet = workbook.active
     sheet.append(headers or [
-        'Muestra', 'Método de Análisis', 'Fecha de Análisis', 'Realizado por', 'Plomo', 'Cadmio',
+        'Metal', 'Metodo', 'Realizado por', 'Fecha', 'Muestra', 'Resultado',
     ])
     for row in rows:
         sheet.append(row)
@@ -218,15 +218,16 @@ class MassiveSampleAnalysisUploadViewTests(TestCase):
         self.assertContains(response, 'upload_progress_bar')
 
     def test_cargue_crea_un_registro_por_metal(self):
-        """Una fila con dos metales crea dos registros con su metal asociado."""
-        excel = build_excel_upload([[
-            'MP2-20260101-1', 'Metales Pesados', '2026-01-15 10:30', 'cargador', 1.5, 0.25,
-        ]])
+        """Cada fila con un metal crea un registro con su metal asociado."""
+        excel = build_excel_upload([
+            ['Plomo', 'Metales Pesados', 'cargador', '2026-01-15 10:30', 'MP2-20260101-1', 1.5],
+            ['Cadmio', 'Metales Pesados', 'cargador', '2026-01-15 10:30', 'MP2-20260101-1', 0.25],
+        ])
         response = self.client.post(self.url, {'action': 'upload', 'file': excel})
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         self.assertEqual(payload['created'], 2)
-        self.assertEqual(payload['total_rows'], 1)
+        self.assertEqual(payload['total_rows'], 2)
         self.assertEqual(payload['errors'], [])
 
         registros = MassiveSampleAnalysis.objects.filter(sampling_process=self.sampling)
@@ -237,11 +238,37 @@ class MassiveSampleAnalysisUploadViewTests(TestCase):
         self.assertEqual(por_metal['Plomo'].analized_by, self.user)
         self.assertEqual(por_metal['Plomo'].analytical_method, self.method)
 
+    def test_cargue_cambia_estado_muestra_a_en_proceso(self):
+        """Tras el cargue la muestra pasa de 'Confirmada' a 'En Proceso'."""
+        self.sampling.status_sampling = 'Confirmada'
+        self.sampling.save()
+        excel = build_excel_upload([[
+            'Plomo', 'Metales Pesados', 'cargador', '2026-01-15 10:30', 'MP2-20260101-1', 1.5,
+        ]])
+        payload = self.client.post(self.url, {'action': 'upload', 'file': excel}).json()
+        self.assertEqual(payload['created'], 1)
+        self.sampling.refresh_from_db()
+        self.assertEqual(self.sampling.status_sampling, 'En Proceso')
+
+    def test_cargue_con_error_no_cambia_estado(self):
+        """Si hay novedades, el cargue atómico no guarda ni cambia el estado."""
+        self.sampling.status_sampling = 'Confirmada'
+        self.sampling.save()
+        excel = build_excel_upload([[
+            'Plomo', 'Metales Pesados', 'fantasma', '2026-01-15 10:30', 'MP2-20260101-1', 1.5,
+        ]])
+        payload = self.client.post(self.url, {'action': 'upload', 'file': excel}).json()
+        self.assertEqual(payload['created'], 0)
+        self.assertEqual(len(payload['errors']), 1)
+        self.sampling.refresh_from_db()
+        self.assertEqual(self.sampling.status_sampling, 'Confirmada')
+
     def test_resultado_cero_o_negativo_usa_limite_cuantificacion(self):
         """Resultados <= 0 se reemplazan por el límite de cuantificación del metal."""
-        excel = build_excel_upload([[
-            'MP2-20260101-1', 'MET-01', '2026-01-15', 'cargador', 0, -3.2,
-        ]])
+        excel = build_excel_upload([
+            ['Plomo', 'MET-01', 'cargador', '2026-01-15', 'MP2-20260101-1', 0],
+            ['Cadmio', 'MET-01', 'cargador', '2026-01-15', 'MP2-20260101-1', -3.2],
+        ])
         payload = self.client.post(self.url, {'action': 'upload', 'file': excel}).json()
         self.assertEqual(payload['created'], 2)
         por_metal = {r.heavy_metal.metal_description: r for r in
@@ -252,9 +279,9 @@ class MassiveSampleAnalysisUploadViewTests(TestCase):
     def test_fila_con_datos_invalidos_reporta_errores(self):
         """Filas con muestra, método o analista inexistentes no se crean y se reportan."""
         excel = build_excel_upload([
-            ['NO-EXISTE', 'Metales Pesados', '2026-01-15', 'cargador', 1.0, 1.0],
-            ['MP2-20260101-1', 'Método Falso', '2026-01-15', 'cargador', 1.0, 1.0],
-            ['MP2-20260101-1', 'Metales Pesados', '2026-01-15', 'fantasma', 1.0, 1.0],
+            ['Plomo', 'Metales Pesados', 'cargador', '2026-01-15', 'NO-EXISTE', 1.0],
+            ['Plomo', 'Método Falso', 'cargador', '2026-01-15', 'MP2-20260101-1', 1.0],
+            ['Plomo', 'Metales Pesados', 'fantasma', '2026-01-15', 'MP2-20260101-1', 1.0],
         ])
         payload = self.client.post(self.url, {'action': 'upload', 'file': excel}).json()
         self.assertEqual(payload['created'], 0)
@@ -264,8 +291,8 @@ class MassiveSampleAnalysisUploadViewTests(TestCase):
     def test_estructura_invalida_retorna_error(self):
         """Un Excel sin las columnas fijas esperadas retorna error."""
         excel = build_excel_upload(
-            [['MP2-20260101-1', 'Metales Pesados', '2026-01-15', 'cargador', 1.0]],
-            headers=['Sample', 'Método de Análisis', 'Fecha de Análisis', 'Realizado por', 'Plomo'],
+            [['Plomo', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', 1.0]],
+            headers=['Sample', 'Metodo', 'Realizado por', 'Fecha', 'Muestra', 'Resultado'],
         )
         payload = self.client.post(self.url, {'action': 'upload', 'file': excel}).json()
         self.assertIn('error', payload)
@@ -276,8 +303,8 @@ class MassiveSampleAnalysisUploadViewTests(TestCase):
         from datetime import date as date_class
         serial = (date_class(2026, 1, 15) - date_class(1899, 12, 30)).days
         excel = build_excel_upload([[
-            'MP2-20260101-1', 'Metales Pesados', float(serial), 'cargador', 1.5,
-        ]], headers=['Muestra', 'Método de Análisis', 'Fecha de Análisis', 'Realizado por', 'Plomo'])
+            'Plomo', 'Metales Pesados', 'cargador', float(serial), 'MP2-20260101-1', 1.5,
+        ]], headers=['Metal', 'Metodo', 'Realizado por', 'Fecha', 'Muestra', 'Resultado'])
         payload = self.client.post(self.url, {'action': 'upload', 'file': excel}).json()
         self.assertEqual(payload['created'], 1)
         registro = MassiveSampleAnalysis.objects.get()
@@ -286,8 +313,8 @@ class MassiveSampleAnalysisUploadViewTests(TestCase):
     def test_fecha_serial_invalida_reporta_error_de_formato(self):
         """Un serial fuera de rango reporta error de formato, no de obligatoriedad."""
         excel = build_excel_upload([[
-            'MP2-20260101-1', 'Metales Pesados', 999999999999, 'cargador', 1.5,
-        ]], headers=['Muestra', 'Método de Análisis', 'Fecha de Análisis', 'Realizado por', 'Plomo'])
+            'Plomo', 'Metales Pesados', 'cargador', 999999999999, 'MP2-20260101-1', 1.5,
+        ]], headers=['Metal', 'Metodo', 'Realizado por', 'Fecha', 'Muestra', 'Resultado'])
         payload = self.client.post(self.url, {'action': 'upload', 'file': excel}).json()
         self.assertEqual(payload['created'], 0)
         self.assertIn('formato válido', payload['errors'][0])
@@ -295,8 +322,8 @@ class MassiveSampleAnalysisUploadViewTests(TestCase):
     def test_fecha_vacia_reporta_obligatoriedad(self):
         """Una celda de fecha vacía reporta que la fecha es obligatoria."""
         excel = build_excel_upload([[
-            'MP2-20260101-1', 'Metales Pesados', None, 'cargador', 1.5,
-        ]], headers=['Muestra', 'Método de Análisis', 'Fecha de Análisis', 'Realizado por', 'Plomo'])
+            'Plomo', 'Metales Pesados', 'cargador', None, 'MP2-20260101-1', 1.5,
+        ]], headers=['Metal', 'Metodo', 'Realizado por', 'Fecha', 'Muestra', 'Resultado'])
         payload = self.client.post(self.url, {'action': 'upload', 'file': excel}).json()
         self.assertEqual(payload['created'], 0)
         self.assertIn('obligatoria', payload['errors'][0])
@@ -309,10 +336,10 @@ class MassiveSampleAnalysisUploadViewTests(TestCase):
 
     def test_cargue_soporta_1000_filas(self):
         """El cargue procesa al menos 1000 filas en una sola petición."""
-        filas = [['MP2-20260101-1', 'Metales Pesados', '2026-01-15 10:30', 'cargador', 1.5]
+        filas = [['Plomo', 'Metales Pesados', 'cargador', '2026-01-15 10:30', 'MP2-20260101-1', 1.5]
                  for _ in range(1000)]
         excel = build_excel_upload(filas, headers=[
-            'Muestra', 'Método de Análisis', 'Fecha de Análisis', 'Realizado por', 'Plomo',
+            'Metal', 'Metodo', 'Realizado por', 'Fecha', 'Muestra', 'Resultado',
         ])
         payload = self.client.post(self.url, {'action': 'upload', 'file': excel}).json()
         self.assertEqual(payload['total_rows'], 1000)
@@ -346,9 +373,10 @@ class MassiveSampleAnalysisUploadViewTests(TestCase):
 
     def test_suma_resultados_crea_sampling_analysis(self):
         """La suma de resultados se asigna al average_concentration del SamplingAnalysis."""
-        payload = self._upload([[
-            'MP2-20260101-1', 'Metales Pesados', '2026-01-15 10:30', 'cargador', 1.5, 0.25,
-        ]])
+        payload = self._upload([
+            ['Plomo', 'Metales Pesados', 'cargador', '2026-01-15 10:30', 'MP2-20260101-1', 1.5],
+            ['Cadmio', 'Metales Pesados', 'cargador', '2026-01-15 10:30', 'MP2-20260101-1', 0.25],
+        ])
         self.assertEqual(payload['created'], 2)
 
         analysis = SamplingAnalysis.objects.get(
@@ -364,18 +392,20 @@ class MassiveSampleAnalysisUploadViewTests(TestCase):
             sampling_process=self.sampling, analytical_method=self.method,
             average_concentration=9.9,
         )
-        self._upload([[
-            'MP2-20260101-1', 'Metales Pesados', '2026-01-15 10:30', 'cargador', 1.0, 1.0,
-        ]])
+        self._upload([
+            ['Plomo', 'Metales Pesados', 'cargador', '2026-01-15 10:30', 'MP2-20260101-1', 1.0],
+            ['Cadmio', 'Metales Pesados', 'cargador', '2026-01-15 10:30', 'MP2-20260101-1', 1.0],
+        ])
         existente.refresh_from_db()
         self.assertAlmostEqual(existente.average_concentration, 2.0)
         self.assertEqual(SamplingAnalysis.objects.count(), 1)
 
     def test_resultado_negativo_suma_limite_cuantificacion(self):
         """Un resultado negativo aporta el límite de cuantificación a la suma."""
-        self._upload([[
-            'MP2-20260101-1', 'Metales Pesados', '2026-01-15', 'cargador', -1.0, 0.25,
-        ]])
+        self._upload([
+            ['Plomo', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', -1.0],
+            ['Cadmio', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', 0.25],
+        ])
         analysis = SamplingAnalysis.objects.get(
             sampling_process=self.sampling, analytical_method=self.method
         )
@@ -385,9 +415,10 @@ class MassiveSampleAnalysisUploadViewTests(TestCase):
         """Comply es 'Cumple' cuando la suma está dentro o igual a los límites."""
         self._build_spec(lower=1.0, upper=2.0)
 
-        self._upload([[
-            'MP2-20260101-1', 'Metales Pesados', '2026-01-15', 'cargador', 1.5, 0.25,
-        ]])
+        self._upload([
+            ['Plomo', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', 1.5],
+            ['Cadmio', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', 0.25],
+        ])
         analysis = SamplingAnalysis.objects.get(
             sampling_process=self.sampling, analytical_method=self.method
         )
@@ -397,9 +428,10 @@ class MassiveSampleAnalysisUploadViewTests(TestCase):
     def test_comply_cumple_en_limite_exacto(self):
         """Comply es 'Cumple' cuando la suma es igual al límite superior."""
         self._build_spec(lower=1.0, upper=2.0)
-        self._upload([[
-            'MP2-20260101-1', 'Metales Pesados', '2026-01-15', 'cargador', 1.0, 1.0,
-        ]])
+        self._upload([
+            ['Plomo', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', 1.0],
+            ['Cadmio', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', 1.0],
+        ])
         analysis = SamplingAnalysis.objects.get(
             sampling_process=self.sampling, analytical_method=self.method
         )
@@ -409,9 +441,10 @@ class MassiveSampleAnalysisUploadViewTests(TestCase):
     def test_comply_no_cumple_fuera_de_rango(self):
         """Comply es 'No Cumple' cuando la suma supera el límite superior."""
         self._build_spec(lower=1.0, upper=2.0)
-        self._upload([[
-            'MP2-20260101-1', 'Metales Pesados', '2026-01-15', 'cargador', 2.0, 1.5,
-        ]])
+        self._upload([
+            ['Plomo', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', 2.0],
+            ['Cadmio', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', 1.5],
+        ])
         analysis = SamplingAnalysis.objects.get(
             sampling_process=self.sampling, analytical_method=self.method
         )
@@ -421,9 +454,10 @@ class MassiveSampleAnalysisUploadViewTests(TestCase):
     def test_comply_no_cumple_bajo_limite_inferior(self):
         """Comply es 'No Cumple' cuando la suma está por debajo del límite inferior."""
         self._build_spec(lower=1.0, upper=5.0)
-        self._upload([[
-            'MP2-20260101-1', 'Metales Pesados', '2026-01-15', 'cargador', 0.3, 0.2,
-        ]])
+        self._upload([
+            ['Plomo', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', 0.3],
+            ['Cadmio', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', 0.2],
+        ])
         analysis = SamplingAnalysis.objects.get(
             sampling_process=self.sampling, analytical_method=self.method
         )
@@ -432,9 +466,10 @@ class MassiveSampleAnalysisUploadViewTests(TestCase):
     def test_comply_vacio_con_limites_nulos(self):
         """Comply queda vacío cuando la especificación tiene los límites nulos."""
         self._build_spec(lower=None, upper=None)
-        self._upload([[
-            'MP2-20260101-1', 'Metales Pesados', '2026-01-15', 'cargador', 1.0, 1.0,
-        ]])
+        self._upload([
+            ['Plomo', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', 1.0],
+            ['Cadmio', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', 1.0],
+        ])
         analysis = SamplingAnalysis.objects.get(
             sampling_process=self.sampling, analytical_method=self.method
         )
@@ -444,9 +479,10 @@ class MassiveSampleAnalysisUploadViewTests(TestCase):
         """La suma se guarda redondeada a las cifras significativas del método (sig_figs_result)."""
         self.method.sig_figs_result = 3
         self.method.save()
-        self._upload([[
-            'MP2-20260101-1', 'Metales Pesados', '2026-01-15', 'cargador', 1.23456, 0.00001,
-        ]])
+        self._upload([
+            ['Plomo', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', 1.23456],
+            ['Cadmio', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', 0.00001],
+        ])
         analysis = SamplingAnalysis.objects.get(
             sampling_process=self.sampling, analytical_method=self.method
         )
@@ -454,9 +490,10 @@ class MassiveSampleAnalysisUploadViewTests(TestCase):
 
     def test_average_concentration_cifras_significativas_por_defecto(self):
         """Con sig_figs_result por defecto (2) la suma se redondea a 2 decimales."""
-        self._upload([[
-            'MP2-20260101-1', 'Metales Pesados', '2026-01-15', 'cargador', 1.257, None,
-        ]])
+        self._upload([
+            ['Plomo', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', 1.257],
+            ['Cadmio', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', None],
+        ])
         analysis = SamplingAnalysis.objects.get(
             sampling_process=self.sampling, analytical_method=self.method
         )
@@ -468,24 +505,26 @@ class MassiveSampleAnalysisUploadViewTests(TestCase):
             analytical_method=self.method, metal_description='Zinc', unit_measure='mg/L'
         )
         payload = self._upload(
-            [['MP2-20260101-1', 'Metales Pesados', '2026-01-15', 'cargador', 1.5, -2.0]],
-            headers=['Muestra', 'Método de Análisis', 'Fecha de Análisis', 'Realizado por',
-                     'Plomo', 'Zinc'],
+            [
+                ['Plomo', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', 1.5],
+                ['Zinc', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', -2.0],
+            ],
+            headers=['Metal', 'Metodo', 'Realizado por', 'Fecha', 'Muestra', 'Resultado'],
         )
-        self.assertEqual(payload['created'], 1)  # Solo Plomo
+        self.assertEqual(payload['created'], 0)  # Cargue atómico: nada se guarda si hay error
         self.assertEqual(len(payload['errors']), 1)
         self.assertIn('Zinc', payload['errors'][0])
         self.assertIn('límite de cuantificación', payload['errors'][0])
 
-        # El negativo no queda guardado ni afecta la suma
+        # Al haber una novedad no se guarda ningún registro (ni siquiera el válido)
         self.assertFalse(
-            MassiveSampleAnalysis.objects.filter(heavy_metal__metal_description='Zinc').exists()
+            MassiveSampleAnalysis.objects.filter(heavy_metal__metal_description='Plomo').exists()
         )
-        analysis = SamplingAnalysis.objects.get(
-            sampling_process=self.sampling, analytical_method=self.method
+        self.assertFalse(
+            SamplingAnalysis.objects.filter(
+                sampling_process=self.sampling, analytical_method=self.method
+            ).exists()
         )
-        self.assertAlmostEqual(analysis.average_concentration, 1.5)
-        self.assertGreaterEqual(analysis.average_concentration, 0)
 
     def test_resultado_cero_sin_limite_configurado_reporta_error(self):
         """Un cero de un metal sin límite de cuantificación tampoco se carga."""
@@ -493,19 +532,30 @@ class MassiveSampleAnalysisUploadViewTests(TestCase):
             analytical_method=self.method, metal_description='Zinc', unit_measure='mg/L'
         )
         payload = self._upload(
-            [['MP2-20260101-1', 'Metales Pesados', '2026-01-15', 'cargador', 0]],
-            headers=['Muestra', 'Método de Análisis', 'Fecha de Análisis', 'Realizado por', 'Zinc'],
+            [['Zinc', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', 0]],
+            headers=['Metal', 'Metodo', 'Realizado por', 'Fecha', 'Muestra', 'Resultado'],
         )
         self.assertEqual(payload['created'], 0)
         self.assertEqual(len(payload['errors']), 1)
         self.assertFalse(MassiveSampleAnalysis.objects.exists())
 
+    def test_filas_metal_sin_resultado_se_ignoran(self):
+        """Las filas pre-diligenciadas de la plantilla sin resultado no se validan."""
+        payload = self._upload([
+            ['Cadmio', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', 0.5],
+            ['Plomo', None, None, None, None, None],  # Metal pre-diligenciado sin datos
+            ['Plomo', '', '', '', '', ''],            # Fila vacía
+            ['Plomo', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', 0.7],
+        ])
+        self.assertEqual(payload['created'], 2)  # Cadmio y Plomo
+        self.assertEqual(payload['errors'], [])
+
     def test_comply_se_evalua_con_valor_redondeado(self):
         """El concepto se evalúa con el average_concentration ya redondeado."""
         self._build_spec(lower=1.0, upper=2.0)
-        self._upload([[
-            'MP2-20260101-1', 'Metales Pesados', '2026-01-15', 'cargador', 2.004, None,
-        ]])
+        self._upload([
+            ['Plomo', 'Metales Pesados', 'cargador', '2026-01-15', 'MP2-20260101-1', 2.004],
+        ])
         analysis = SamplingAnalysis.objects.get(
             sampling_process=self.sampling, analytical_method=self.method
         )
@@ -561,17 +611,18 @@ class MassiveSampleAnalysisTemplateViewTests(TestCase):
         )
         self.assertIn('Plantilla_Metales_Pesados.xlsx', response['Content-Disposition'])
 
-    def test_encabezados_fijos_y_metales_ordenados(self):
-        """La hoja Datos tiene las 4 columnas fijas y una columna por metal."""
+    def test_encabezados_fijos_y_metales_prellenados(self):
+        """La hoja Datos tiene las 6 columnas fijas y la columna Metal pre-diligenciada."""
         workbook = self._load_template(self.client.get(self.url))
         sheet = workbook['Datos']
         headers = [cell.value for cell in sheet[1]]
         self.assertEqual(
             headers,
-            ['Muestra', 'Método de Análisis', 'Fecha de Análisis', 'Realizado por', 'Cadmio', 'Plomo'],
+            ['Metal', 'Metodo', 'Realizado por', 'Fecha', 'Muestra', 'Resultado'],
         )
-        # Solo encabezados: lista para pegar o digitar registros
-        self.assertEqual(sheet.max_row, 1)
+        # Columna A con una fila por metal
+        col_a = [cell.value for cell in sheet['A']]
+        self.assertEqual(col_a, ['Metal', 'Cadmio', 'Plomo'])
 
     def test_hoja_instrucciones_documenta_metales_por_metodo(self):
         """La hoja Instrucciones existe y lista los metales del método."""
@@ -585,7 +636,7 @@ class MassiveSampleAnalysisTemplateViewTests(TestCase):
         self.assertIn('Cadmio', contenido)
 
     def test_sin_laboratorio_plantilla_solo_con_columnas_fijas(self):
-        """Un usuario sin laboratorio descarga la plantilla solo con las columnas fijas."""
+        """Un usuario sin laboratorio descarga la plantilla solo con la fila de encabezados."""
         sin_lab = User.objects.create_user(username='sinlab2', password='x1234567')
         sin_lab.user_permissions.add(
             Permission.objects.get(codename='add_reagent')
@@ -594,8 +645,9 @@ class MassiveSampleAnalysisTemplateViewTests(TestCase):
         workbook = self._load_template(self.client.get(self.url))
         headers = [cell.value for cell in workbook['Datos'][1]]
         self.assertEqual(
-            headers, ['Muestra', 'Método de Análisis', 'Fecha de Análisis', 'Realizado por']
+            headers, ['Metal', 'Metodo', 'Realizado por', 'Fecha', 'Muestra', 'Resultado']
         )
+        self.assertEqual(workbook['Datos'].max_row, 1)
 
     def test_sin_permiso_redirige(self):
         """Un usuario sin permiso de consulta es redirigido."""

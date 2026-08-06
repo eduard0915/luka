@@ -157,8 +157,12 @@ class SamplingProcessListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
                 if status_filter:
                     qs = qs.filter(status_sampling=status_filter)
 
+                user_site = request.user.laboratory.site
+
                 if out_specification == 'True':
-                    qs = qs.filter(samplinganalysis__comply='No Cumple').distinct()
+                    qs = qs.filter(samplinganalysis__comply='No Cumple').filter(
+                        Q(group_sampling__sampling_point__product__site=user_site) |
+                        Q(point_sampling__product__site=user_site))
 
                 data = list(qs.values(
                     'id',
@@ -262,7 +266,6 @@ class SamplingProcessOutSpecificationListView(SamplingProcessListView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Muestras Fuera de Especificación'
         context['entity'] = 'Muestras Fuera de Especificación'
-        context['status_filter'] = 'En Proceso'
         context['out_specification'] = 'True'
         return context
 

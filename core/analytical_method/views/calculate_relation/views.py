@@ -115,6 +115,32 @@ class AnalyticalMethodCalculateRelationUpdateView(LoginRequiredMixin, BaseAnalyt
         context['action'] = 'edit'
         return context
 
+# Creación de Cálculo Relacionado con Operación
+class AnalyticalMethodCalculateRelationOperationCreateView(LoginRequiredMixin, BaseAnalyticalMethodCalculateRelationDetailView, CreateView):
+    """)Vista para crear una relación de cálculo del método con operaciones (+, −, ×, ÷) y agrupaciones."""
+    model = AnalyticalMethodCalculateRelation
+    form_class = AnalyticalMethodCalculateRelationOperationForm
+
+    def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Agregar Cálculo con Operación en la Ecuación'
+        context['action'] = 'add'
+        return context
+
+# Edición de Cálculo Relacionado con Operación
+class AnalyticalMethodCalculateRelationOperationUpdateView(LoginRequiredMixin, BaseAnalyticalMethodCalculateRelationDetailView, UpdateView):
+    """)Vista para editar una relación de cálculo del método con operaciones."""
+    model = AnalyticalMethodCalculateRelation
+    form_class = AnalyticalMethodCalculateRelationOperationForm
+
+    def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Editar Cálculo con Operación en la Ecuación'
+        context['action'] = 'edit'
+        return context
+
 # Creación Volumen de Estándar Relacional
 class AnalyticalMethodVolumenStdRelationCreateView(LoginRequiredMixin, BaseAnalyticalMethodCalculateRelationDetailView, CreateView):
     """)Vista para agregar volumen estándar a un cálculo relacionado."""

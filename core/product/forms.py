@@ -1,5 +1,5 @@
 """Formularios para la gestión de productos, puntos de muestreo,
-especificaciones y métodos analíticos dentro del sistema Luka LIMS.
+especificaciones y métodos analíticos dentro del sistema PadLims.
 
 Define las listas de opciones (frecuencia, periodicidad, unidades de medida,
 tipo de ensayo, tipo de muestra y secuencia) y los formularios asociados

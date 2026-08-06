@@ -1,4 +1,4 @@
-"""Formularios de la aplicación de reactivos para el sistema Luka LIMS.
+"""Formularios de la aplicación de reactivos para el sistema PadLims.
 
 Define los formularios basados en modelos para la creación, edición y
 transferencia de reactivos, inventario de reactivos y transacciones.

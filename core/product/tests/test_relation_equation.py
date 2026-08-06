@@ -6,7 +6,7 @@ from core.product.tests.factories import (
     create_calculate_relation, create_dependent_calculation, create_method_calculate,
     create_product
 )
-from core.product.views.product.views import _build_relation_equation
+from core.analytical_method.services import _build_relation_equation
 
 
 class BuildRelationEquationTest(TestCase):

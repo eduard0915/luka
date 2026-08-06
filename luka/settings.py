@@ -151,6 +151,9 @@ LOGOUT_REDIRECT_URL = '/login/'
 
 LOGIN_URL = '/login/'
 
+# Base URL (dominio) para construir enlaces absolutos en correos
+SITE_URL = config('SITE_URL', default='http://localhost:8000')
+
 # Email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = config('EMAIL_HOST')

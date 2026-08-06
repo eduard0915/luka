@@ -4,7 +4,7 @@ from django.apps import AppConfig
 
 
 class EquipmentConfig(AppConfig):
-    """Configuración de la aplicación de equipos del sistema Luka LIMS."""
+    """Configuración de la aplicación de equipos del sistema PadLims."""
 
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'core.equipment'
