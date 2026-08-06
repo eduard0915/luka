@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.views.generic import TemplateView
 
 from core.company.models import Company
+from core.login.forms import LoginAuthenticationForm
 from core.user.models import PasswordHistoryUser
 from luka import settings
 
@@ -69,6 +70,7 @@ class LoginFormView(LoginView):
     """Vista de inicio de sesión que valida la expiración de la contraseña del usuario autenticado."""
 
     template_name = 'login.html'
+    form_class = LoginAuthenticationForm
 
     def dispatch(self, request, *args, **kwargs):
         """Verifica el estado del servicio y la expiración de la contraseña antes de procesar la solicitud."""

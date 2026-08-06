@@ -86,5 +86,6 @@ class DependentCalculationDeleteView(LoginRequiredMixin, BaseDependentCalculatio
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Eliminar Cálculo Dependiente'
+        context['info_delete'] = 'Está seguro de eliminar el Cálculo? esta acción es irreversible'
         context['action'] = 'delete'
         return context

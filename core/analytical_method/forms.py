@@ -4,7 +4,8 @@ Define los formularios para la creación y edición de métodos analíticos,
 incluyendo soluciones, reactivos, equipos, materiales, procedimientos y cálculos.
 """
 
-from django.forms import ModelForm, TextInput, Select, Textarea, CheckboxInput
+from django.core.exceptions import ValidationError
+from django.forms import ModelForm, ModelChoiceField, TextInput, Select, Textarea, CheckboxInput
 
 from core.analytical_method.models import *
 from core.laboratory.models import Laboratory
@@ -583,10 +584,11 @@ class AnalyticalMethodVolumenStdRelationForm(ModelForm):
 
     class Meta:
         model = AnalyticalMethodCalculateRelation
-        fields = ['volumen_std', 'position']
+        fields = ['volumen_std', 'position', 'subtract_blank']
         widgets = {
             'volumen_std': TextInput(attrs={'class': 'form-control'}),
-            'position': Select(attrs={'class': 'form-control'}, choices=POSITION)
+            'position': Select(attrs={'class': 'form-control'}, choices=POSITION),
+            'subtract_blank': Select(attrs={'class': 'form-control'}, choices=BOOLEAN)
         }
 
     def save(self, commit=True):
@@ -674,6 +676,88 @@ class AnalyticalMethodSampleGramRelationForm(ModelForm):
         except Exception as e:
             data['error'] = str(e)
         return data
+
+
+# Cálculo Relacionado con Operación
+class AnalyticalMethodCalculateRelationOperationForm(AnalyticalMethodCalculateRelationForm):
+    """Formulario para cálculos relacionados del método con operaciones (+, −, ×, ÷) y agrupaciones.
+
+    Extiende AnalyticalMethodCalculateRelationForm agregando la operación con la que el
+    término se combina con el anterior dentro de su grupo, y la referencia al
+    término padre para construir sub-expresiones con paréntesis.
+    """
+
+    parent = ModelChoiceField(
+        queryset=AnalyticalMethodCalculateRelation.objects.none(),
+        required=False,
+        label='Agrupado Dentro de',
+        widget=Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+    )
+
+    @staticmethod
+    def _label_parent(obj):
+        """Retorna una etiqueta legible del término candidato a ser padre."""
+        if obj.analytical_method_calculate:
+            label = str(obj.analytical_method_calculate.calculate_description)
+        elif obj.volumen_std:
+            label = f'Vol. STD: {obj.volumen_std}'
+        elif obj.factor is not None:
+            label = f'Constante: {obj.factor}'
+        elif obj.sample_quantity:
+            label = f'Muestra: {obj.sample_quantity}'
+        else:
+            label = 'Grupo'
+        if obj.position:
+            label += f' ({obj.position})'
+        return label
+
+    def __init__(self, *args, **kwargs):
+        """Inicializa el formulario filtrando los posibles padres del mismo método."""
+        super().__init__(*args, **kwargs)
+        parent_qs = AnalyticalMethodCalculateRelation.objects.filter(
+            calculate_description_relation__in=[None, ''])
+        if self.analytical_method:
+            parent_qs = parent_qs.filter(analytical_method=self.analytical_method)
+        if self.instance and self.instance.pk:
+            parent_qs = parent_qs.exclude(pk=self.instance.pk)
+        field = self.fields['parent']
+        field.queryset = parent_qs
+        field.label_from_instance = self._label_parent
+
+        col_classes = {
+            'analytical_method_calculate': 'col-md-12',
+            'operation': 'col-md-6',
+            'position': 'col-md-6',
+            'parent': 'col-md-12',
+        }
+        for field_name, form_field in self.fields.items():
+            form_field.col_class = col_classes.get(field_name, 'col-md-6')
+
+    class Meta(AnalyticalMethodCalculateRelationForm.Meta):
+        """Metadatos del formulario AnalyticalMethodCalculateRelationOperationForm."""
+        fields = ['analytical_method_calculate', 'operation', 'position', 'parent']
+        widgets = {
+            **AnalyticalMethodCalculateRelationForm.Meta.widgets,
+            'operation': Select(attrs={'class': 'form-control'}, choices=[('', 'Multiplicar (×)')] + OPERATION[1:]),
+        }
+
+    def clean_operation(self):
+        """Normaliza la operación vacía a None (equivale a multiplicar)."""
+        return self.cleaned_data.get('operation') or None
+
+    def clean(self):
+        """Valida que el término no se agrupe dentro de sí mismo ni de sus descendientes."""
+        cleaned_data = super().clean()
+        parent = cleaned_data.get('parent')
+        if parent and self.instance and self.instance.pk:
+            ancestor = parent
+            while ancestor is not None:
+                if ancestor.pk == self.instance.pk:
+                    raise ValidationError({
+                        'parent': 'Un término no puede agruparse dentro de sí mismo ni de sus descendientes.'
+                    })
+                ancestor = ancestor.parent
+        return cleaned_data
 
 
 # Agregar Variable a calculo

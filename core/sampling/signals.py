@@ -4,14 +4,33 @@ from decimal import Decimal
 
 from django.db import transaction
 from django.db.models.aggregates import Avg, StdDev
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
 from core.analytical_method.models import AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation
 from core.product.models import SpecificationProduct
 from core.sampling.models import *
+from core.sampling.services import send_oss_notification_email
 from core.solution.models import SolutionStd, TransactionSolutionStd
+
+
+@receiver(pre_save, sender=SamplingAnalysis)
+def track_sampling_analysis_comply(sender, instance, **kwargs):
+    """Registra el valor previo de comply para detectar cambios a 'No Cumple'."""
+    try:
+        instance._previous_comply = SamplingAnalysis.objects.values_list(
+            'comply', flat=True).get(pk=instance.pk)
+    except SamplingAnalysis.DoesNotExist:
+        instance._previous_comply = None
+
+
+@receiver(post_save, sender=SamplingAnalysis)
+def send_oss_notification_on_comply(sender, instance, created, **kwargs):
+    """Envía correo de notificación cuando el concepto cambia a 'No Cumple'."""
+    previous = getattr(instance, '_previous_comply', None)
+    if instance.comply == 'No Cumple' and previous != 'No Cumple':
+        send_oss_notification_email(instance)
 
 
 @receiver(post_save, sender=SamplingProcess)

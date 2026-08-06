@@ -1,5 +1,5 @@
 """Modelos de datos para la gestión de productos, métodos analíticos,
-especificaciones y puntos de muestreo del sistema Luka LIMS.
+especificaciones y puntos de muestreo del sistema PadLims.
 
 Define las entidades principales del módulo product y sus relaciones
 con los módulos analytical_method y company.

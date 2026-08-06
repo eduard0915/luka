@@ -1,4 +1,4 @@
-"""Modelos de datos de la aplicación de reactivos para Luka LIMS.
+"""Modelos de datos de la aplicación de reactivos para PadLims.
 
 Define los modelos Reagent, InventoryReagent y TransactionReagent junto con
 el generador de códigos secuenciales para reactivos.

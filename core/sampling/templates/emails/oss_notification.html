@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Resultado Fuera de Especificación</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f4f7f6; font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#212529;">
+    <div style="max-width:620px; margin:0 auto; padding:24px 16px;">
+
+        <!-- Encabezado -->
+        <div style="background-color:#00695C; border-radius:8px 8px 0 0; padding:24px 28px; text-align:center;">
+            <div style="font-size:28px; font-weight:700; color:#ffffff; letter-spacing:1px;">Resultado Fuera de Especificación</div>
+            <div style="margin-top:6px; font-size:14px; color:#cde8e2;">Notificación de Resultado OOS de la Muestra</div>
+        </div>
+
+        <!-- Cuerpo -->
+        <div style="background-color:#ffffff; border-radius:0 0 8px 8px; padding:28px; box-shadow:0 2px 6px rgba(0,0,0,.08); border-top:4px solid #dc3545;">
+
+            <p style="margin:0 0 16px; font-size:15px; line-height:1.6;">Hola,</p>
+            <p style="margin:0 0 20px; font-size:15px; line-height:1.6;">
+                Le informamos que el análisis de la muestra <strong>{{ sample.number_sample }}</strong>
+                ha presentado un <strong>Resultado Fuera de Especificación (OSS)</strong> en el sistema
+                <strong>PadLims</strong>. A continuación se detalla la información de la muestra.
+            </p>
+
+            <!-- Datos de la muestra -->
+            <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%; border-collapse:collapse; margin-bottom:22px; font-size:14px;">
+                <tr>
+                    <td style="padding:10px 14px; background-color:#f8f9fa; border:1px solid #dee2e6; font-weight:600; width:150px;">Punto de Muestreo</td>
+                    <td style="padding:10px 14px; border:1px solid #dee2e6;">{{ sampling_point.sample_point_name }}</td>
+                </tr>
+                <tr>
+                    <td style="padding:10px 14px; background-color:#f8f9fa; border:1px solid #dee2e6; font-weight:600;">N° de Muestra</td>
+                    <td style="padding:10px 14px; border:1px solid #dee2e6;">{{ sample.number_sample }}</td>
+                </tr>
+                <tr>
+                    <td style="padding:10px 14px; background-color:#f8f9fa; border:1px solid #dee2e6; font-weight:600;">Producto</td>
+                    <td style="padding:10px 14px; border:1px solid #dee2e6;">{{ product.description_product|default:"-" }}</td>
+                </tr>
+                <tr>
+                    <td style="padding:10px 14px; background-color:#f8f9fa; border:1px solid #dee2e6; font-weight:600;">Planta</td>
+                    <td style="padding:10px 14px; border:1px solid #dee2e6;">{{ plant.site_name|default:"-" }}</td>
+                </tr>
+                <tr>
+                    <td style="padding:10px 14px; background-color:#f8f9fa; border:1px solid #dee2e6; font-weight:600;">Método Analítico</td>
+                    <td style="padding:10px 14px; border:1px solid #dee2e6;">{{ method.description_analytical_method|default:"-" }}</td>
+                </tr>
+                <tr>
+                    <td style="padding:10px 14px; background-color:#f8f9fa; border:1px solid #dee2e6; font-weight:600;">Resultado</td>
+                    <td style="padding:10px 14px; border:1px solid #dee2e6;">{{ result_display }}</td>
+                </tr>
+                <tr>
+                    <td style="padding:10px 14px; background-color:#f8f9fa; border:1px solid #dee2e6; font-weight:600;">Concepto</td>
+                    <td style="padding:10px 14px; border:1px solid #dee2e6;">
+                        <span style="display:inline-block; padding:4px 12px; border-radius:12px; font-size:13px; font-weight:700; color:#ffffff; background-color:#dc3545;">No Cumple</span>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Botón de acceso -->
+            <div style="text-align:center; margin:24px 0 6px;">
+                <a href="{{ result_url }}" style="display:inline-block; background-color:#00695C; color:#ffffff; text-decoration:none; padding:14px 32px; border-radius:6px; font-size:15px; font-weight:600;">
+                    Ver Resultados Fuera de Especificación
+                </a>
+            </div>
+
+            <p style="margin:22px 0 0; font-size:13px; line-height:1.5; color:#6c757d; text-align:center;">
+                Este es un correo generado automáticamente por PadLims. Por favor no responda a este mensaje.
+            </p>
+        </div>
+
+        <!-- Pie -->
+        <div style="text-align:center; padding:16px 0 0; font-size:12px; color:#6c757d;">
+            &copy; {% now "Y" %} PadLims. Laboratorio de Información y Gestión de Muestras.
+        </div>
+    </div>
+</body>
+</html>

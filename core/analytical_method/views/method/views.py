@@ -14,6 +14,7 @@ from core.mixins import ValidatePermissionRequiredMixin
 from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate, \
     AnalyticalMethodCalculateRelation, SolutionStdBackValuation
 from core.analytical_method.forms import AnalyticalMethodForm
+from core.analytical_method.services import _build_relation_equation
 
 # Listado de Métodos Analíticos
 class AnalyticalMethodListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
@@ -231,6 +232,13 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         calcules_relation = AnalyticalMethodCalculateRelation.objects.select_related('analytical_method').filter(analytical_method=self.object).order_by('-date_creation')
         context['calcules_relation'] = calcules_relation
         context['has_relations'] = calcules_relation.exists()
+        context['relation_has_description'] = calcules_relation.exclude(
+            calculate_description_relation__isnull=True).exclude(calculate_description_relation='').exists()
+        context['relation_has_sample_gram'] = calcules_relation.exclude(
+            sample_quantity__isnull=True).exclude(sample_quantity='').exists()
+
+        if calcules_relation.exists():
+            context['final_equation_relation'] = _build_relation_equation(calcules_relation)
 
         inst_desc = calcules.exclude(calculate_description__isnull=True).exclude(calculate_description="").first()
         inst_unit = calcules.exclude(unit_measure_calculate__isnull=True).exclude(unit_measure_calculate="").first()
@@ -319,46 +327,6 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
             str_num = " \cdot ".join(num_terms) if num_terms else "1"
             str_den = " \cdot ".join(den_terms) if den_terms else "1"
             str_gen = f" \cdot {' \cdot '.join(gen_terms)}" if gen_terms else ""
-
-            # 4. Cálculos Relacionados
-            num_terms_rel = []
-            den_terms_rel = []
-            gen_terms_rel = []
-            # rel_desc = ""
-            # rel_unit = ""
-            #
-            # for cr in calcules_relation:
-            #     parts_rel = []
-            #     if cr.calculate_description_relation:
-            #         rel_desc = cr.calculate_description_relation
-            #         rel_unit = cr.unit_measure_calculate
-            #     if cr.analytical_method_calculate: parts_rel.append(
-            #         f"\\text{{{cr.analytical_method_calculate.calculate_description}}}")
-            #     if cr.volumen_std: parts_rel.append(str(cr.volumen_std))
-            #     if cr.factor: parts_rel.append(str(cr.factor))
-            #     if cr.sample_quantity: parts_rel.append(str(cr.sample_quantity))
-            #
-            #     item_text_rel = " \cdot ".join(parts_rel)
-            #     if not item_text_rel: continue
-            #
-            #     if cr.position == 'Numerador':
-            #         num_terms_rel.append(item_text_rel)
-            #     elif cr.position == 'Denominador':
-            #         den_terms_rel.append(item_text_rel)
-            #     elif cr.position == 'General':
-            #         gen_terms_rel.append(item_text_rel)
-            #
-            # str_num_rel = " \cdot ".join(num_terms_rel) if num_terms_rel else "1"
-            # str_den_rel = " \cdot ".join(den_terms_rel) if den_terms_rel else "1"
-            # str_gen_rel = f" \cdot {' \cdot '.join(gen_terms_rel)}" if gen_terms_rel else ""
-
-            # if num_terms_rel or den_terms_rel or gen_terms_rel:
-            #     if not rel_desc:
-            #         rel_desc = "Cálculo Relacionado"
-            #     label_rel = f"\\text{{{rel_desc}}}"
-            #     if rel_unit:
-            #         label_rel += f" \\text{{ ({rel_unit})}}"
-            #     context['final_equation_relation'] = f"{label_rel} = \\frac{{{str_num_rel}}}{{{str_den_rel}}}{str_gen_rel}"
 
             if num_terms or den_terms or gen_terms:
                 # Construcción de la etiqueta con formato
