@@ -358,15 +358,20 @@ class AnalyticalMethodVolumenStdForm(ModelForm):
         """Inicializa el formulario de volumen estándar."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
+
+        std_ids = AnalyticalMethodSolutionStd.objects.filter(
+            analytical_method=self.analytical_method).values_list('solution_std', flat=True)
+
+        self.fields['sln_std_base'].queryset = SolutionStdBase.objects.filter(pk__in=std_ids)
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
             form.field.widget.attrs['autocomplete'] = 'off'
 
     class Meta:
         model = AnalyticalMethodCalculate
-        fields = ['volumen_std', 'position', 'subtract_blank']
+        fields = ['sln_std_base', 'position', 'subtract_blank']
         widgets = {
-            'volumen_std': TextInput(attrs={'class': 'form-control'}),
+            'sln_std_base': Select(attrs={'class': 'form-control'}),
             'position': Select(attrs={'class': 'form-control'}, choices=POSITION),
             'subtract_blank': Select(attrs={'class': 'form-control'}, choices=BOOLEAN)
         }
@@ -379,6 +384,7 @@ class AnalyticalMethodVolumenStdForm(ModelForm):
                 instance = super().save(commit=False)
                 if self.analytical_method:
                     instance.analytical_method = self.analytical_method
+                self.volumen_std = 'mL Gastados'
                 instance.save()
                 data = instance
             else:
@@ -578,15 +584,20 @@ class AnalyticalMethodVolumenStdRelationForm(ModelForm):
         """Inicializa el formulario de volumen estándar relacionado."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
+
+        std_ids = AnalyticalMethodSolutionStd.objects.filter(
+            analytical_method=self.analytical_method).values_list('solution_std', flat=True)
+
+        self.fields['standard_base'].queryset = SolutionStdBase.objects.filter(pk__in=std_ids)
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
             form.field.widget.attrs['autocomplete'] = 'off'
 
     class Meta:
         model = AnalyticalMethodCalculateRelation
-        fields = ['volumen_std', 'position', 'subtract_blank']
+        fields = ['standard_base', 'position', 'subtract_blank']
         widgets = {
-            'volumen_std': TextInput(attrs={'class': 'form-control'}),
+            'standard_base': Select(attrs={'class': 'form-control'}),
             'position': Select(attrs={'class': 'form-control'}, choices=POSITION),
             'subtract_blank': Select(attrs={'class': 'form-control'}, choices=BOOLEAN)
         }
@@ -599,6 +610,7 @@ class AnalyticalMethodVolumenStdRelationForm(ModelForm):
                 instance = super().save(commit=False)
                 if self.analytical_method:
                     instance.analytical_method = self.analytical_method
+                instance.volumen_std = 'mL Gastados'
                 instance.save()
                 data = instance
             else:
@@ -678,6 +690,43 @@ class AnalyticalMethodSampleGramRelationForm(ModelForm):
         return data
 
 
+# Agregar Variable Relacional
+class AnalyticalMethodVariableRelationForm(ModelForm):
+    """Formulario para la variable adicional en cálculo relacionado."""
+    def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de variable relacionada."""
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        self.fields['variable'].required = True
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodCalculateRelation
+        fields = ['variable', 'position']
+        widgets = {
+            'variable': TextInput(attrs={'class': 'form-control'}),
+            'position': Select(attrs={'class': 'form-control'}, choices=POSITION),
+        }
+
+    def save(self, commit=True):
+        """Guarda la variable del cálculo relacionado."""
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
 # Cálculo Relacionado con Operación
 class AnalyticalMethodCalculateRelationOperationForm(AnalyticalMethodCalculateRelationForm):
     """Formulario para cálculos relacionados del método con operaciones (+, −, ×, ÷) y agrupaciones.
@@ -695,6 +744,12 @@ class AnalyticalMethodCalculateRelationOperationForm(AnalyticalMethodCalculateRe
     )
 
     @staticmethod
+    def _is_group(obj):
+        """Indica si el término es un nodo contenedor (grupo) sin contenido propio."""
+        return not (obj.analytical_method_calculate or obj.volumen_std or obj.standard_base
+                    or obj.factor is not None or obj.variable or obj.sample_quantity)
+
+    @staticmethod
     def _label_parent(obj):
         """Retorna una etiqueta legible del término candidato a ser padre."""
         if obj.analytical_method_calculate:
@@ -703,6 +758,10 @@ class AnalyticalMethodCalculateRelationOperationForm(AnalyticalMethodCalculateRe
             label = f'Vol. STD: {obj.volumen_std}'
         elif obj.factor is not None:
             label = f'Constante: {obj.factor}'
+        elif obj.standard_base:
+            label = f'Sol. STD: {obj.standard_base}'
+        elif obj.variable:
+            label = f'Variable: {obj.variable}'
         elif obj.sample_quantity:
             label = f'Muestra: {obj.sample_quantity}'
         else:
@@ -711,9 +770,19 @@ class AnalyticalMethodCalculateRelationOperationForm(AnalyticalMethodCalculateRe
             label += f' ({obj.position})'
         return label
 
+    def _build_group_consecutive(self, parent_qs):
+        """Construye un mapeo pk -> consecutivo para los grupos según orden de creación."""
+        groups = [cr.pk for cr in parent_qs.order_by('date_creation') if self._is_group(cr)]
+        return {pk: idx + 1 for idx, pk in enumerate(groups)}
+
     def __init__(self, *args, **kwargs):
         """Inicializa el formulario filtrando los posibles padres del mismo método."""
         super().__init__(*args, **kwargs)
+
+        std_ids = AnalyticalMethodSolutionStd.objects.filter(
+            analytical_method=self.analytical_method).values_list('solution_std', flat=True)
+        self.fields['standard_base'].queryset = SolutionStdBase.objects.filter(pk__in=std_ids)
+
         parent_qs = AnalyticalMethodCalculateRelation.objects.filter(
             calculate_description_relation__in=[None, ''])
         if self.analytical_method:
@@ -722,22 +791,43 @@ class AnalyticalMethodCalculateRelationOperationForm(AnalyticalMethodCalculateRe
             parent_qs = parent_qs.exclude(pk=self.instance.pk)
         field = self.fields['parent']
         field.queryset = parent_qs
-        field.label_from_instance = self._label_parent
+        group_consec = self._build_group_consecutive(parent_qs)
+
+        def _label_for(obj):
+            if obj.pk in group_consec:
+                label = f'Grupo (sub-expresión) -{group_consec[obj.pk]}'
+                if obj.position:
+                    label += f' ({obj.position})'
+                return label
+            return self._label_parent(obj)
+
+        field.label_from_instance = _label_for
 
         col_classes = {
-            'analytical_method_calculate': 'col-md-12',
-            'operation': 'col-md-6',
-            'position': 'col-md-6',
-            'parent': 'col-md-12',
+            'analytical_method_calculate': 'col-md-4',
+            'subtract_blank': 'col-md-2',
+            'factor': 'col-md-2',
+            'standard_base': 'col-md-4',
+            'operation': 'col-md-4',
+            'position': 'col-md-3',
+            'parent': 'col-md-3',
+            'sample_quantity': 'col-md-2',
         }
         for field_name, form_field in self.fields.items():
             form_field.col_class = col_classes.get(field_name, 'col-md-6')
 
     class Meta(AnalyticalMethodCalculateRelationForm.Meta):
         """Metadatos del formulario AnalyticalMethodCalculateRelationOperationForm."""
-        fields = ['analytical_method_calculate', 'operation', 'position', 'parent']
+        fields = [
+            'analytical_method_calculate', 'standard_base', 'subtract_blank', 'factor', 'operation', 'position',
+            'sample_quantity', 'parent'
+        ]
         widgets = {
             **AnalyticalMethodCalculateRelationForm.Meta.widgets,
+            'subtract_blank': Select(attrs={'class': 'form-control'}, choices=BOOLEAN),
+            'factor': TextInput(attrs={'class': 'form-control'}),
+            'sample_quantity': TextInput(attrs={'class': 'form-control'}),
+            'standard_base': Select(attrs={'class': 'form-control'}),
             'operation': Select(attrs={'class': 'form-control'}, choices=[('', 'Multiplicar (×)')] + OPERATION[1:]),
         }
 

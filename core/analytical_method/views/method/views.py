@@ -299,9 +299,12 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                 parts = []
                 if is_valid_value(calc.volumen_std):
                     if calc.subtract_blank:
-                        parts.append(f"\\left({calc.volumen_std} - \\text{{Blanco}}\\right)")
+                        vol_str = f"\\left({calc.volumen_std} - \\text{{Blanco}}\\right)"
                     else:
-                        parts.append(str(calc.volumen_std))
+                        vol_str = str(calc.volumen_std)
+                    if calc.sln_std_base:
+                        vol_str += f" \\times \\text{{{calc.sln_std_base}}}"
+                    parts.append(vol_str)
                 if is_valid_value(calc.factor):
                     parts.append(str(calc.factor))
                 if is_valid_value(calc.sample_quantity):
