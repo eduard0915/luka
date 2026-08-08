@@ -120,6 +120,7 @@ class AnalyticalMethodCalculateRelationOperationCreateView(LoginRequiredMixin, B
     """)Vista para crear una relación de cálculo del método con operaciones (+, −, ×, ÷) y agrupaciones."""
     model = AnalyticalMethodCalculateRelation
     form_class = AnalyticalMethodCalculateRelationOperationForm
+    template_name = 'modal_four.html'
 
     def get_context_data(self, **kwargs):
         """Agrega variables de contexto adicionales al template."""
@@ -133,6 +134,7 @@ class AnalyticalMethodCalculateRelationOperationUpdateView(LoginRequiredMixin, B
     """)Vista para editar una relación de cálculo del método con operaciones."""
     model = AnalyticalMethodCalculateRelation
     form_class = AnalyticalMethodCalculateRelationOperationForm
+    template_name = 'modal_four.html'
 
     def get_context_data(self, **kwargs):
         """Agrega variables de contexto adicionales al template."""
@@ -216,6 +218,32 @@ class AnalyticalMethodSampleGramRelationUpdateView(LoginRequiredMixin, BaseAnaly
         """Agrega variables de contexto adicionales al template."""
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Editar Descripción Cantidad de Muestra Relacional'
+        context['action'] = 'edit'
+        return context
+
+# Agregar Variable Relacional
+class AnalyticalMethodVariableRelationCreateView(LoginRequiredMixin, BaseAnalyticalMethodCalculateRelationDetailView, CreateView):
+    """)Vista para agregar una variable a un cálculo relacionado."""
+    model = AnalyticalMethodCalculateRelation
+    form_class = AnalyticalMethodVariableRelationForm
+
+    def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Agregar Variable Relacional en la Ecuación'
+        context['action'] = 'add'
+        return context
+
+# Editar Variable Relacional
+class AnalyticalMethodVariableUpdateView(LoginRequiredMixin, BaseAnalyticalMethodCalculateRelationDetailView, UpdateView):
+    """)Vista para editar la variable de un cálculo relacionado."""
+    model = AnalyticalMethodCalculateRelation
+    form_class = AnalyticalMethodVariableRelationForm
+
+    def get_context_data(self, **kwargs):
+        """Agrega variables adicionales al template."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Editar Variable Relacional en la Ecuación'
         context['action'] = 'edit'
         return context
 

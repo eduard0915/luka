@@ -19,13 +19,19 @@ def _build_leaf_latex(cr):
         if cr.calculate_relation_related.unit_measure_calculate:
             term += f" \\text{{ ({cr.calculate_relation_related.unit_measure_calculate})}}"
         parts_rel.append(term)
-    if cr.volumen_std:
+    if cr.volumen_std or cr.standard_base:
         if cr.subtract_blank:
-            parts_rel.append(f"\\left({cr.volumen_std} - \\text{{Blanco}}\\right)")
+            vol_str = f"\\left({cr.volumen_std or 'mL Gastados'} - \\text{{Blanco}}\\right)"
         else:
-            parts_rel.append(f"\\text{{{cr.volumen_std}}}")
+            vol_str = f"\\text{{{cr.volumen_std}}}" if cr.volumen_std else ""
+        if cr.standard_base:
+            vol_str += f" \\times \\text{{[{cr.standard_base}]}}"
+        if vol_str:
+            parts_rel.append(vol_str)
     if cr.factor:
         parts_rel.append(str(cr.factor))
+    if cr.variable:
+        parts_rel.append(f"\\text{{{cr.variable}}}")
     if cr.sample_quantity:
         parts_rel.append(f"\\text{{{cr.sample_quantity}}}")
     return " \\times ".join(parts_rel)

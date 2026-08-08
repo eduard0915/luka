@@ -89,7 +89,8 @@ class AnalyticalMethodSolutionUpdateView(LoginRequiredMixin, BaseAnalyticalMetho
         context['action'] = 'edit'
         return context
 
-# Soluciones Estándar
+
+# Soluciones Estándar Creación
 class AnalyticalMethodSolutionStdCreateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, CreateView):
     """)Vista para asociar una solución estándar a un método analítico."""
     model = AnalyticalMethodSolutionStd
@@ -102,6 +103,8 @@ class AnalyticalMethodSolutionStdCreateView(LoginRequiredMixin, BaseAnalyticalMe
         context['action'] = 'add'
         return context
 
+
+# Soluciones Estándar Edición
 class AnalyticalMethodSolutionStdUpdateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, UpdateView):
     """)Vista para editar la solución estándar asociada."""
     model = AnalyticalMethodSolutionStd

@@ -219,6 +219,7 @@ class AnalyticalMethodCalculate(BaseModel):
     sample_quantity = models.CharField(max_length=50, verbose_name='Variable Muestra', null=True, blank=True)
     position = models.CharField(max_length=15, verbose_name='Posición en Ecuación', null=True, blank=True)
     subtract_blank = models.BooleanField(default=False, verbose_name='Restar Blanco?')
+    sln_std_base = models.ForeignKey(SolutionStdBase, verbose_name='Solución Estándar', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         """Retorna la descripción del cálculo."""
@@ -287,6 +288,7 @@ class AnalyticalMethodCalculateRelation(BaseModel):
     volumen_std = models.CharField(max_length=100, verbose_name='Volúmen Estándar', null=True, blank=True)
     subtract_blank = models.BooleanField(default=False, verbose_name='Restar Blanco?')
     factor = models.FloatField(verbose_name='Constante', null=True, blank=True)
+    variable = models.CharField(max_length=100, verbose_name='Variable', null=True, blank=True)
     sample_quantity = models.CharField(max_length=50, verbose_name='Muestra', null=True, blank=True)
     position = models.CharField(max_length=15, verbose_name='Posición en Ecuación', null=True, blank=True)
     sig_figs = models.SmallIntegerField(verbose_name='Cifras Significativas', default=4)
@@ -299,6 +301,7 @@ class AnalyticalMethodCalculateRelation(BaseModel):
     parent = models.ForeignKey(
         'self', verbose_name='Agrupado Dentro de', on_delete=models.CASCADE, null=True, blank=True,
         related_name='children')
+    standard_base = models.ForeignKey(SolutionStdBase, verbose_name='Solución Estándar', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         """Retorna la descripción del cálculo relacionado con su unidad de medida."""

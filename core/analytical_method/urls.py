@@ -68,6 +68,8 @@ urlpatterns = [
     path('detail/calculate_relation/edit_factor_den/<uuid:pk>/', AnalyticalMethodFactorRelationUpdateView.as_view(), name='edit_factor_relation'),
     path('detail/calculate_relation/add_sample_gram/<uuid:pk>/', AnalyticalMethodSampleGramRelationCreateView.as_view(), name='add_sample_gram_relation'),
     path('detail/calculate_relation/edit_sample_gram/<uuid:pk>/', AnalyticalMethodSampleGramRelationUpdateView.as_view(), name='edit_sample_gram_relation'),
+    path('detail/calculate_relation/add_variable/<uuid:pk>/', AnalyticalMethodVariableRelationCreateView.as_view(), name='add_variable_relation'),
+    path('detail/calculate_relation/edit_variable/<uuid:pk>/', AnalyticalMethodVariableUpdateView.as_view(), name='edit_variable_relation'),
     path('detail/calculate_relation/delete/<uuid:pk>/', AnalyticalMethodCalculateRelationDeleteView.as_view(), name='delete_analytical_method_calcule_relation'),
 
     # Soluciones Estándar por Retroceso
