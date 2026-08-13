@@ -84,6 +84,7 @@ class SamplingAnalysisProcessingForm(ModelForm):
 
             qty_std = float(instance.quantity_standard)
             qty_sample = float(instance.quantity_sample)
+            conc_std = float(instance.standard_solution.concentration_std)
             cifras_sign = instance.sample_analysis.analytical_method.sig_figs_result
 
             if qty_sample > 0:
@@ -91,6 +92,7 @@ class SamplingAnalysisProcessingForm(ModelForm):
                 factor_num = 1
                 sample_num = 1
                 std_num = 1
+                conc_std_num = 1
 
                 for num in var_num:
                     if num.factor is not None:
@@ -102,11 +104,15 @@ class SamplingAnalysisProcessingForm(ModelForm):
                     if num.volumen_std is not None:
                         std_num = qty_std
 
-                numerator = std_num * factor_num * sample_num
+                    if num.sln_std_base is not None:
+                        conc_std_num = conc_std
+
+                numerator = std_num * conc_std_num * factor_num * sample_num
 
                 factor_den = 1
                 sample_den = 1
                 std_den = 1
+                conc_std_den = 1
 
                 for den in var_den:
 
@@ -119,7 +125,10 @@ class SamplingAnalysisProcessingForm(ModelForm):
                     if den.volumen_std is not None:
                         std_den = qty_std
 
-                denominator = std_den * factor_den * sample_den
+                    if den.sln_std_base is not None:
+                        conc_std_den = conc_std
+
+                denominator = std_den * conc_std_den * factor_den * sample_den
 
                 instance.concentration_sample = round((numerator / denominator), cifras_sign)
             else:
