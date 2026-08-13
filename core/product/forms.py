@@ -533,10 +533,11 @@ class ProductCalculateRelationForm(ModelForm):
     class Meta:
         """Metadatos del formulario ProductCalculateRelationForm."""
         model = AnalyticalMethodCalculateRelation
-        fields = ['analytical_method_calculate', 'position']
+        fields = ['analytical_method_calculate', 'factor', 'position']
         widgets = {
             'analytical_method_calculate': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
-            'position': Select(attrs={'class': 'form-control'}, choices=POSITION)
+            'position': Select(attrs={'class': 'form-control'}, choices=POSITION),
+            'factor': TextInput(attrs={'class': 'form-control'}),
         }
 
     def save(self, commit=True):
@@ -798,17 +799,25 @@ class ProductCalculateRelationOperationForm(ProductCalculateRelationForm):
         field.label_from_instance = self._label_parent
 
         col_classes = {
-            'analytical_method_calculate': 'col-md-12',
-            'operation': 'col-md-6',
-            'position': 'col-md-6',
-            'parent': 'col-md-12',
+            # 'analytical_method_calculate': 'col-md-12',
+            # 'operation': 'col-md-6',
+            # 'position': 'col-md-6',
+            # 'parent': 'col-md-12',
+            'analytical_method_calculate': 'col-md-4',
+            'subtract_blank': 'col-md-2',
+            'factor': 'col-md-2',
+            'standard_base': 'col-md-4',
+            'operation': 'col-md-4',
+            'position': 'col-md-3',
+            'parent': 'col-md-3',
+            'sample_quantity': 'col-md-2',
         }
         for field_name, form_field in self.fields.items():
             form_field.col_class = col_classes.get(field_name, 'col-md-6')
 
     class Meta(ProductCalculateRelationForm.Meta):
         """Metadatos del formulario ProductCalculateRelationOperationForm."""
-        fields = ['analytical_method_calculate', 'operation', 'position', 'parent']
+        fields = ['analytical_method_calculate', 'operation', 'position', 'factor', 'parent']
         widgets = {
             **ProductCalculateRelationForm.Meta.widgets,
             'operation': Select(attrs={'class': 'form-control'}, choices=[('', 'Multiplicar (×)')] + OPERATION[1:]),

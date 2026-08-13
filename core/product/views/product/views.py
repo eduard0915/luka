@@ -244,6 +244,3 @@ class ProductDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Det
         context['equations_by_dep'] = equations_by_dep
 
         return context
-
-
-# Vistas para Cálculos Dependientes de Productos
