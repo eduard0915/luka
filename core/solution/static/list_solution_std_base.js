@@ -62,9 +62,26 @@ document.addEventListener('DOMContentLoaded', function () {
                         actions += '<a href="/solution/update_std_base/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a> &nbsp;';
                         
                         if (row['enable_solution_std']) {
-                            actions += '<a onclick="change_status(\'/solution/disable_std_base/' + row['id'] + '/\')" type="button" title="Deshabilitar"><i class="bi bi-toggle-on text-primary"></i></a>';
+                            actions += '<a onclick="change_status(\'/solution/disable_std_base/' + row['id'] + '/\')" type="button" title="Deshabilitar"><i class="bi bi-toggle-on text-primary"></i></a> &nbsp;';
                         } else {
-                            actions += '<a onclick="change_status(\'/solution/enable_std_base/' + row['id'] + '/\')" type="button" title="Habilitar"><i class="bi bi-toggle-off text-danger"></i></a>';
+                            actions += '<a onclick="change_status(\'/solution/enable_std_base/' + row['id'] + '/\')" type="button" title="Habilitar"><i class="bi bi-toggle-off text-danger"></i></a> &nbsp;';
+                        }
+
+                        // Validar si puede tener estandarización
+                        if (row['standardizable'] === true ) {
+
+                            // Si NO tiene estandarización: mostrar botón para CREAR
+                            if (row['has_standardization'] === false) {
+                                actions += '<a onclick="open_modal(\'/solution/add_standardization/' + row['id'] + '/\')" ';
+                                actions += 'type="button" title="Agregar Estandarización a la Solución">';
+                                actions += '<i class="bi bi-plus-circle text-primary"></i></a>';
+                            }
+                            // Si YA tiene estandarización: mostrar botón para EDITAR
+                            else {
+                                actions += '<a onclick="open_modal(\'/solution/update_standardization/' + row['standardization_id'] + '/\')" ';
+                                actions += 'type="button" title="Editar Estandarización">';
+                                actions += '<i class="bi bi-award-fill text-primary"></i></a>';
+                            }
                         }
                         
                         return actions;

@@ -186,15 +186,30 @@ class SolutionStdBaseListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
         try:
             action = request.POST['action']
             if action == 'searchdata':
-                reagents = list(SolutionStdBase.objects.values(
-                    'id',
-                    'solute_std_base__description_reagent',
-                    'concentration_std_base',
-                    'concentration_unit_base',
-                    'enable_solution_std',
-                    'stability_solution'
-                ).filter(solute_std_base__site=request.user.laboratory.site).order_by('-solute_std_base__description_reagent'))
-                return JsonResponse(reagents, safe=False)
+                slns = SolutionStdBase.objects.filter(
+                    solute_std_base__site=request.user.laboratory.site
+                ).select_related(
+                    'solute_std_base'
+                ).prefetch_related(
+                    'standardization_set'
+                ).order_by('-solute_std_base__description_reagent')
+                rows = []
+                for sln in slns:
+                    std_list = sln.standardization_set.all()
+                    std = std_list[0] if std_list else None
+                    sln_data = {
+                        'id': sln.id,
+                        'solute_std_base__description_reagent': sln.solute_std_base.description_reagent,
+                        'concentration_std_base': sln.concentration_std_base,
+                        'concentration_unit_base': sln.concentration_unit_base,
+                        'enable_solution_std': sln.enable_solution_std,
+                        'standardizable': sln.standardizable,
+                        'stability_solution': sln.stability_solution,
+                        'standardization_id': std.id if std else None,
+                        'has_standardization': std is not None,
+                    }
+                    rows.append(sln_data)
+                return JsonResponse(rows, safe=False)
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:

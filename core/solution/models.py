@@ -232,9 +232,9 @@ class SolutionStd(BaseModel):
 class Standardization(BaseModel):
     """Configuración de estandarización que relaciona una solución con un estándar y su relación molar."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    reagent_std = models.ForeignKey(Reagent, blank=True, null=True, on_delete=models.CASCADE, verbose_name='Estándar')
+    reagent_std = models.ForeignKey(Reagent, blank=True, null=True, on_delete=models.CASCADE, verbose_name='Estándar Primario')
     solution_base = models.ForeignKey(SolutionBase, verbose_name='Solución Base', on_delete=models.CASCADE, blank=True, null=True)
-    solution_std_base = models.ForeignKey(SolutionStdBase, verbose_name='Solución Estándar Base', on_delete=models.CASCADE, blank=True, null=True)
+    solution_std_base = models.ForeignKey(SolutionStdBase, verbose_name='Solución Estándar Base (Primario)', on_delete=models.CASCADE, blank=True, null=True)
     molar_relation = models.FloatField(verbose_name='Relación Molar', default=1)
 
     def __str__(self):
