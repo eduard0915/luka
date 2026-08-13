@@ -10,7 +10,7 @@ from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import CreateView, UpdateView
+from django.views.generic import CreateView, UpdateView, DeleteView
 
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.models import Product, AnalyticalMethodProduct
@@ -39,6 +39,11 @@ class BaseAnalyticalMethodProductView(ValidatePermissionRequiredMixin):
             elif action == 'edit':
                 self.object = self.get_object()
                 form = self.get_form()
+            elif action == 'delete':
+                self.object = self.get_object()
+                self.object.delete()
+                messages.success(request, 'Método analítico eliminado satisfactoriamente')
+                return JsonResponse(data)
             else:
                 data['error'] = 'No ha ingresado una acción válida'
                 return JsonResponse(data)
@@ -84,4 +89,20 @@ class AnalyticalMethodProductUpdateView(LoginRequiredMixin, BaseAnalyticalMethod
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Editar Método Analítico'
         context['action'] = 'edit'
+        return context
+
+
+class AnalyticalMethodProductDeleteView(LoginRequiredMixin, BaseAnalyticalMethodProductView, DeleteView):
+    """Vista para eliminar la asignación de un método analítico a un producto."""
+
+    model = AnalyticalMethodProduct
+    template_name = 'delete_modal.html'
+
+    def get_context_data(self, **kwargs):
+        """Agrega el título, la acción y el mensaje de confirmación al contexto del modal."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Eliminar Método Analítico de Producto'
+        context['action'] = 'delete'
+        context['delete'] = '¿Está seguro de eliminar este registro?, esta acción es irreversible.'
+        context['info_delete'] = f'Se eliminará el método analítico: {self.object.analytical_method}'
         return context

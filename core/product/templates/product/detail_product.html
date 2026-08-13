@@ -55,6 +55,10 @@
                                        title="Editar" style="cursor: pointer;">
                                         <i class="bi bi-pencil-square text-warning me-2"></i>
                                     </a>
+                                    <a onclick="open_modal('{% url 'product:delete_method_product' item.id %}')"
+                                       title="Eliminar" style="cursor: pointer;">
+                                        <i class="bi bi-trash text-danger me-2"></i>
+                                    </a>
                                 </td>
                             </tr>
                         {% empty %}

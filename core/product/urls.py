@@ -33,6 +33,7 @@ urlpatterns = [
     # Métodos Analíticos
     path('add_method/<uuid:pk>/', AnalyticalMethodProductCreateView.as_view(), name='create_method_product'),
     path('update_method/<uuid:pk>/', AnalyticalMethodProductUpdateView.as_view(), name='update_method_product'),
+    path('delete_method/<uuid:pk>/', AnalyticalMethodProductDeleteView.as_view(), name='delete_method_product'),
 
     # Especificaciones
     path('add_specification/<uuid:pk>/', SpecificationProductCreateView.as_view(), name='create_specification_product'),

@@ -13,13 +13,15 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="alert alert-info py-2 small mb-3">
-                            El archivo Excel (.xlsx) debe tener las columnas
-                            <strong>Metal, Metodo, Realizado por, Fecha, Muestra y Resultado</strong>.
-                            Cada fila corresponde al análisis de un metal con su resultado en la
-                            columna Resultado. La columna Metal debe contener la descripción del
-                            metal del método indicado. Resultados de 0 o negativos se reemplazan
-                            por el límite de cuantificación del metal; si el metal no tiene límite
-                            configurado, la fila se reporta como novedad y no se carga.
+                            El archivo Excel (.xlsx) debe tener las columnas fijas
+                            <strong>Metal, Metodo, Realizado por y Fecha</strong>
+                            y una columna por muestra desde la columna E. Escriba el número de
+                            cada muestra en la fila 1 (columna E en adelante) y digite los
+                            resultados de cada metal en la columna de su muestra. La columna
+                            Metal debe contener la descripción del metal del método indicado.
+                            Resultados de 0 o negativos se reemplazan por el límite de
+                            cuantificación del metal; si el metal no tiene límite configurado,
+                            el dato se reporta como novedad y no se carga.
                             <a href="{% url 'sampling:download_massive_sample_analysis_template' %}"
                                class="alert-link">
                                 <i class="bi bi-file-earmark-excel"></i> Descargue la plantilla aquí
@@ -140,13 +142,13 @@
                     var message;
                     if (data.created === 0) {
                         message = 'No se cargaron registros. ' +
-                            (data.skipped ? (data.skipped + ' fila(s) se omitieron por tener la columna Resultado vacía. ') : '') +
-                            'Verifique que cada fila contenga dato en Muestra, Metodo, Realizado por, Fecha y Resultado.';
+                            (data.skipped ? (data.skipped + ' fila(s) se omitieron por no tener resultados en ninguna muestra. ') : '') +
+                            'Verifique que cada fila contenga dato en Metodo, Realizado por, Fecha y los resultados por muestra.';
                         showResult(true, message, data.errors || []);
                     } else {
                         message = 'Cargue exitoso: ' + data.created + ' registros creados de ' +
                             data.total_rows + ' filas procesadas.' +
-                            (data.skipped ? ' Se omitieron ' + data.skipped + ' filas sin resultado.' : '');
+                            (data.skipped ? ' Se omitieron ' + data.skipped + ' filas sin resultados.' : '');
                         if (data.errors && data.errors.length) {
                             message += ' Se encontraron ' + data.errors.length + ' novedades:';
                         }
