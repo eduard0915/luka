@@ -17,6 +17,7 @@ TYPE_METHOD = [
     ('Volumetrico', 'Volumétrico'),
     ('Volumetrico por Retroceso', 'Volumétrico por Retroceso'),
     ('Volumetrico - Mezcla', 'Volumétrico - Mezcla'),
+    ('Volumetrico por Retroceso - Mezcla', 'Volumétrico por Retroceso - Mezcla'),
     ('Gravimetrico', 'Gravimétrico'),
     ('Espectrofotometrico', 'Espectrofotométrico'),
     ('Espectroscopico', 'Espectroscópico'),
@@ -508,11 +509,9 @@ class AnalyticalMethodCalculateRelationForm(ModelForm):
         """Inicializa el formulario de cálculo relacionado."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
-        if self.analytical_method:
-            self.fields['analytical_method_calculate'].queryset = AnalyticalMethodCalculate.objects.filter(
-                analytical_method__analyticalmethodproduct__product__analyticalmethodproduct__analytical_method=self.analytical_method
-            ).exclude(calculate_description__isnull=True).exclude(
-                calculate_description__exact='').distinct()
+        self.fields['analytical_method_calculate'].queryset = AnalyticalMethodCalculate.objects.exclude(
+            calculate_description__isnull=True
+        ).exclude(calculate_description__exact='')
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
             form.field.widget.attrs['autocomplete'] = 'off'

@@ -104,7 +104,7 @@ DATE_INPUT_FORMATS = (
     '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d',
     '%d/%m/%Y %H:%M:%S', '%d/%m/%Y %H:%M', '%d/%m/%Y',
 )
-EXPECTED_FIXED_HEADERS = ('metal', 'metodo', 'realizado por', 'fecha', 'muestra', 'resultado')
+EXPECTED_FIXED_HEADERS = ('metal', 'metodo', 'realizado por', 'fecha')
 
 
 def _normalize_header(value):
@@ -152,10 +152,11 @@ def _parse_date_analysis(value):
 
 
 def _read_excel_rows(excel_file):
-    """Lee el Excel y retorna las filas crudas. Valida la estructura del nuevo formato.
+    """Lee el Excel y retorna las muestras de la fila 1 y las filas de metales.
 
-    Cada fila representa el análisis de un metal: Metal, Metodo, Realizado por,
-    Fecha, Muestra y Resultado (una sola columna de resultado).
+    Fila 1: Metal, Metodo, Realizado por, Fecha y una columna por cada muestra
+    (número de sampling_process) desde la columna E en adelante.
+    Filas 2+: una fila por metal con sus resultados en cada columna de muestra.
     """
     try:
         workbook = load_workbook(excel_file, read_only=True, data_only=True)
@@ -165,29 +166,31 @@ def _read_excel_rows(excel_file):
         sheet = workbook.active
         rows = sheet.iter_rows(values_only=True)
         headers = next(rows, None)
-        if not headers or len(headers) < 6:
+        if not headers or len(headers) < 5:
             raise ValueError('El archivo no tiene la estructura esperada (faltan columnas).')
 
-        fixed = tuple(_normalize_header(h) for h in headers[:6])
+        fixed = tuple(_normalize_header(h) for h in headers[:4])
         if fixed != EXPECTED_FIXED_HEADERS:
             raise ValueError(
-                'Las columnas deben ser: Metal, Metodo, Realizado por, Fecha, '
-                'Muestra y Resultado.'
+                'Las columnas fijas deben ser: Metal, Metodo, Realizado por, '
+                'Fecha y una columna por muestra desde la columna E.'
             )
+
+        sample_headers = [str(h).strip() if h is not None else '' for h in headers[4:]]
 
         raw_rows = []
         for row in rows:
             if row is None or all(cell is None or str(cell).strip() == '' for cell in row):
                 continue
             raw_rows.append(row)
-        return raw_rows
+        return sample_headers, raw_rows
     finally:
         workbook.close()
 
 
-def _build_lookup_maps(raw_rows, site, laboratory):
+def _build_lookup_maps(sample_headers, raw_rows, site, laboratory):
     """Precarga muestras, métodos, analistas y metales referenciados en el archivo."""
-    sample_numbers = {str(r[4]).strip() for r in raw_rows if len(r) > 4 and r[4] is not None}
+    sample_numbers = {s.strip() for s in sample_headers if s and s.strip()}
     method_names = {_normalize_header(r[1]) for r in raw_rows if len(r) > 1 and r[1] is not None}
     analyst_names = {str(r[2]).strip() for r in raw_rows if len(r) > 2 and r[2] is not None}
 
@@ -225,11 +228,13 @@ def _build_lookup_maps(raw_rows, site, laboratory):
 def process_massive_analysis_excel(excel_file, user):
     """Procesa el cargue masivo de análisis de metales pesados desde un Excel.
 
-    Estructura del archivo (una columna por dato, una fila por metal):
-    Metal | Metodo | Realizado por | Fecha | Muestra | Resultado.
+    Estructura del archivo (una columna por muestra, una fila por metal):
+      Fila 1: Metal | Metodo | Realizado por | Fecha | Muestra1 | Muestra2 | ...
+      Filas 2+: una fila por metal y una columna de resultado por cada muestra.
 
-    La columna Metal contiene la descripción del metal y cada fila representa
-    el análisis de un metal con su resultado en la única columna correspondiente.
+    El número de muestra (sampling_process) se escribe en la fila 1 a partir de
+    la columna E. Cada celda (fila de metal, columna de muestra) con un valor
+    crea un MassiveSampleAnalysis para esa muestra y ese metal.
 
     Si un resultado es 0 o negativo se asigna el límite de cuantificación
     del metal correspondiente. La suma de los resultados de cada muestra y
@@ -241,9 +246,9 @@ def process_massive_analysis_excel(excel_file, user):
     if not user.laboratory:
         raise ValueError('El usuario no tiene un laboratorio asignado.')
 
-    raw_rows = _read_excel_rows(excel_file)
+    sample_headers, raw_rows = _read_excel_rows(excel_file)
     sample_map, method_map, metal_map, analyst_map = _build_lookup_maps(
-        raw_rows, user.laboratory.site, user.laboratory
+        sample_headers, raw_rows, user.laboratory.site, user.laboratory
     )
 
     objects = []
@@ -256,18 +261,14 @@ def process_massive_analysis_excel(excel_file, user):
             errors.append(f'Se alcanzó el máximo de {MAX_ROW_ERRORS} errores reportados.')
             break
 
-        # Las filas sin resultado (columna Resultado vacía) se ignoran: son
-        # metales pre-diligenciados que el usuario no midió en esa muestra.
-        if len(row) <= 5 or row[5] is None or str(row[5]).strip() == '':
+        # Las filas sin resultado en ninguna muestra se ignoran: son metales
+        # pre-diligenciados de la plantilla que el usuario no midió.
+        if not _row_has_results(row, len(sample_headers)):
             skipped += 1
             continue
 
         row_errors = []
-        metal_desc = str(row[0]).strip() if row[0] is not None else ''
-
-        sample = sample_map.get(str(row[4]).strip().lower()) if len(row) > 4 and row[4] is not None else None
-        if sample is None:
-            row_errors.append('la muestra no existe en el sitio')
+        metal_desc = str(row[0]).strip() if len(row) > 0 and row[0] is not None else ''
 
         method = method_map.get(_normalize_header(row[1])) if len(row) > 1 and row[1] is not None else None
         if method is None:
@@ -285,45 +286,71 @@ def process_massive_analysis_excel(excel_file, user):
             date_analysis = None
             row_errors.append(str(exc))
 
+        metal = None
+        if method is not None and metal_desc:
+            metal = metal_map.get((method.id, _normalize_header(metal_desc)))
+            if metal is None:
+                row_errors.append(
+                    f'el metal "{metal_desc}" no está asociado '
+                    f'al método "{method.description_analytical_method}"'
+                )
+
         if row_errors:
             errors.append(f'Fila {row_number}: ' + '; '.join(row_errors))
             continue
 
-        metal = metal_map.get((method.id, _normalize_header(metal_desc)))
-        if metal is None:
-            errors.append(
-                f'Fila {row_number}: el metal "{metal_desc}" no está asociado '
-                f'al método "{method.description_analytical_method}"'
-            )
-            continue
+        for col_index, sample_ref in enumerate(sample_headers, start=5):
+            value = row[col_index - 1] if len(row) > col_index - 1 else None
+            if value is None or str(value).strip() == '':
+                continue
 
-        try:
-            result = float(row[5])
-        except (TypeError, ValueError):
-            errors.append(f'Fila {row_number}: el resultado no es numérico ({row[5]})')
-            continue
-
-        if result <= 0:
-            if metal.quantification_limit is None:
+            col_letter = get_column_letter(col_index)
+            if not sample_ref:
                 errors.append(
-                    f'Fila {row_number}: el resultado es {result} pero el metal '
-                    f'"{metal.metal_description}" no tiene límite de cuantificación configurado'
+                    f'Fila {row_number}, columna {col_letter}: hay un resultado pero la '
+                    f'columna no tiene número de muestra en la fila 1'
                 )
                 continue
-            result = metal.quantification_limit
 
-        objects.append(MassiveSampleAnalysis(
-            sampling_process=sample,
-            analytical_method=method,
-            heavy_metal=metal,
-            result=result,
-            date_analysis=date_analysis,
-            analized_by=analyst,
-            user_creation=user,
-        ))
-        key = (sample.id, method.id)
-        totals.setdefault(key, {'sample': sample, 'method': method, 'total': 0.0})
-        totals[key]['total'] += result
+            sample = sample_map.get(sample_ref.strip().lower())
+            if sample is None:
+                errors.append(
+                    f'Fila {row_number}, columna {col_letter}: '
+                    f'la muestra "{sample_ref}" no existe en el sitio'
+                )
+                continue
+
+            try:
+                result = float(value)
+            except (TypeError, ValueError):
+                errors.append(
+                    f'Fila {row_number}, columna {col_letter} '
+                    f'({metal_desc}, muestra {sample_ref}): el resultado no es numérico ({value})'
+                )
+                continue
+
+            if result <= 0:
+                if metal.quantification_limit is None:
+                    errors.append(
+                        f'Fila {row_number}, columna {col_letter}: '
+                        f'el resultado es {result} pero el metal "{metal_desc}" no tiene '
+                        f'límite de cuantificación configurado'
+                    )
+                    continue
+                result = metal.quantification_limit
+
+            objects.append(MassiveSampleAnalysis(
+                sampling_process=sample,
+                analytical_method=method,
+                heavy_metal=metal,
+                result=result,
+                date_analysis=date_analysis,
+                analized_by=analyst,
+                user_creation=user,
+            ))
+            key = (sample.id, method.id)
+            totals.setdefault(key, {'sample': sample, 'method': method, 'total': 0.0})
+            totals[key]['total'] += result
 
     if errors:
         # Cargue atómico: si hay filas o datos no válidos no se guarda nada.
@@ -348,6 +375,14 @@ def process_massive_analysis_excel(excel_file, user):
         'saved': True,
         'errors': errors,
     }
+
+
+def _row_has_results(row, n_samples):
+    """Indica si una fila tiene al menos un resultado en las columnas de muestra."""
+    for col in range(4, 4 + n_samples):
+        if len(row) > col and row[col] is not None and str(row[col]).strip() != '':
+            return True
+    return False
 
 
 def _set_samples_en_proceso(totals):
@@ -539,15 +574,19 @@ def send_oss_notification_email(analysis):
     message.send()
 
 
-FIXED_TEMPLATE_HEADERS = ('Metal', 'Metodo', 'Realizado por', 'Fecha', 'Muestra', 'Resultado')
+FIXED_TEMPLATE_HEADERS = ('Metal', 'Metodo', 'Realizado por', 'Fecha')
+SAMPLE_TEMPLATE_COLUMNS = 12
 
 
 def build_massive_analysis_template(user):
     """Construye la plantilla Excel para el cargue masivo de metales pesados.
 
-    La hoja "Datos" tiene las 6 columnas fijas (Metal, Metodo, Realizado por,
-    Fecha, Muestra, Resultado) y la columna Metal pre-diligenciada con una fila
-    por cada metal de los métodos habilitados del laboratorio del usuario.
+    La hoja "Datos" tiene las columnas fijas (Metal, Metodo, Realizado por,
+    Fecha) y una columna por muestra desde la columna E en adelante; el usuario
+    escribe el número de muestra (sampling_process) en la fila 1 y los
+    resultados de cada metal en la columna de su muestra. La columna Metal
+    viene pre-diligenciada con una fila por cada metal de los métodos
+    habilitados del laboratorio del usuario.
     La hoja "Instrucciones" documenta el formato de cargue.
 
     Retorna un BytesIO con el contenido del archivo .xlsx.
@@ -577,8 +616,9 @@ def build_massive_analysis_template(user):
     sheet.title = 'Datos'
     header_font = Font(bold=True, color='FFFFFF')
     header_fill = PatternFill(fill_type='solid', start_color='4472C4')
+    sample_fill = PatternFill(fill_type='solid', start_color='EDEDED')
     headers = list(FIXED_TEMPLATE_HEADERS)
-    widths = {'Metal': 22, 'Metodo': 22, 'Realizado por': 22, 'Fecha': 18, 'Muestra': 22, 'Resultado': 14}
+    widths = {'Metal': 22, 'Metodo': 22, 'Realizado por': 22, 'Fecha': 18}
     for index, title in enumerate(headers, start=1):
         cell = sheet.cell(row=1, column=index, value=title)
         cell.font = header_font
@@ -586,10 +626,20 @@ def build_massive_analysis_template(user):
         cell.alignment = Alignment(horizontal='center', vertical='center')
         sheet.column_dimensions[get_column_letter(index)].width = widths.get(title, max(len(title) + 4, 18))
 
+    # Columnas de muestra desde la columna E (índice 5): vacías y estilizadas,
+    # listas para escribir el número de muestra en la fila 1.
+    for offset in range(SAMPLE_TEMPLATE_COLUMNS):
+        column = 5 + offset
+        cell = sheet.cell(row=1, column=column)
+        cell.font = header_font
+        cell.fill = sample_fill
+        cell.alignment = Alignment(horizontal='center', vertical='center')
+        sheet.column_dimensions[get_column_letter(column)].width = 16
+
     # Una fila por cada metal disponible
     for offset, metal in enumerate(metal_headers):
         sheet.cell(row=2 + offset, column=1, value=metal)
-    sheet.freeze_panes = 'A2'
+    sheet.freeze_panes = 'E2'
 
     # Hoja de instrucciones
     info = workbook.create_sheet('Instrucciones')
@@ -597,16 +647,16 @@ def build_massive_analysis_template(user):
     lines = [
         'Plantilla para el cargue masivo de análisis de Metales Pesados.',
         '',
-        '1. Diligencie la hoja "Datos" a partir de la fila 2 (cada fila es el análisis de un metal).',
-        '2. No modifique ni elimine la fila de encabezados (fila 1) ni los valores de la columna Metal.',
-        '3. Metal: descripción del metal. Ya viene pre-diligenciada una fila por metal.',
-        '4. Metodo: código o descripción del método analítico (ej: MET-01).',
-        '5. Realizado por: usuario o nombre completo del analista registrado en el sistema.',
-        '6. Fecha: formato aaaa-mm-dd o dd/mm/aaaa (puede incluir hora).',
-        '7. Muestra: número de muestra existente en el sistema (ej: MP1-20260101-1).',
-        '8. Resultado: valor numérico del metal; déjelo vacío si el metal no aplica para la fila.',
+        '1. Escriba el número de cada muestra (N° de Muestreo) en la fila 1 a partir de la columna E.',
+        '2. Cada fila desde la 2 es el análisis de un metal (la columna Metal ya viene pre-diligenciada).',
+        '3. Digite el resultado de cada metal en la columna de la muestra correspondiente.',
+        '4. Deje vacía la celda si ese metal no aplica para esa muestra.',
+        '5. Metal: descripción del metal. No modifique la columna A.',
+        '6. Metodo: código o descripción del método analítico (ej: MET-01).',
+        '7. Realizado por: usuario o nombre completo del analista registrado en el sistema.',
+        '8. Fecha: formato aaaa-mm-dd o dd/mm/aaaa (puede incluir hora).',
         '9. Resultados de 0 o negativos se reemplazan por el límite de cuantificación del metal; '
-        'si el metal no tiene límite configurado, la fila se reporta como novedad y no se carga.',
+        'si el metal no tiene límite configurado, el dato se reporta como novedad y no se carga.',
         '',
         'Metales por método de análisis:',
     ]
