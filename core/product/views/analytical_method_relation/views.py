@@ -182,6 +182,7 @@ class ProductCalculateRelationOperationCreateView(LoginRequiredMixin, BaseProduc
 
     model = AnalyticalMethodCalculateRelation
     form_class = ProductCalculateRelationOperationForm
+    template_name = 'modal_four.html'
 
     def get_form_kwargs(self):
         """Inyecta el producto y el cálculo dependiente actual en los kwargs del formulario."""
@@ -204,6 +205,7 @@ class ProductCalculateRelationOperationUpdateView(LoginRequiredMixin, BaseProduc
 
     model = AnalyticalMethodCalculateRelation
     form_class = ProductCalculateRelationOperationForm
+    template_name = 'modal_four.html'
 
     def get_context_data(self, **kwargs):
         """Agrega el título y la acción al contexto del modal."""
