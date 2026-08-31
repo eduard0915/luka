@@ -5,7 +5,7 @@ incluyendo soluciones, reactivos, equipos, materiales, procedimientos y cálculo
 """
 
 from django.core.exceptions import ValidationError
-from django.forms import ModelForm, ModelChoiceField, TextInput, Select, Textarea, CheckboxInput
+from django.forms import ModelForm, ModelChoiceField, TextInput, Select, Textarea, CheckboxInput, widgets
 
 from core.analytical_method.models import *
 from core.laboratory.models import Laboratory
@@ -473,6 +473,7 @@ class AnalyticalMethodSampleGramForm(ModelForm):
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
         self.fields['sample_quantity'].required = True
+        self.fields['sample_quantity'].initial = 'Gramos de Muestra'
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -660,6 +661,9 @@ class AnalyticalMethodSampleGramRelationForm(ModelForm):
         """Inicializa el formulario de muestra relacionada."""
         self.analytical_method = kwargs.pop('analytical_method', None)
         super().__init__(*args, **kwargs)
+        self.fields['sample_quantity'].required = True
+        if not self.instance.sample_quantity:
+            self.fields['sample_quantity'].widget.attrs['value'] = 'Gramos de Muestra'
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -668,7 +672,7 @@ class AnalyticalMethodSampleGramRelationForm(ModelForm):
         model = AnalyticalMethodCalculateRelation
         fields = ['sample_quantity', 'position']
         widgets = {
-            'sample_quantity': TextInput(attrs={'class': 'form-control'}),
+            'sample_quantity': TextInput(attrs={'class': 'form-control', 'placeholder': 'Gramos de Muestra'}),
             'position': Select(attrs={'class': 'form-control'}, choices=POSITION),
         }
 
@@ -855,8 +859,25 @@ class AnalyticalMethodVariableForm(ModelForm):
     def __init__(self, *args, **kwargs):
         """Inicializa el formulario de variable adicional."""
         self.analytical_method = kwargs.pop('analytical_method', None)
+
+        GRAVIMETRY = [('Peso Bruto', 'Peso Bruto'), ('Peso Filtro', 'Peso Filtro')]
+
+        instance = kwargs.get('instance')
+        if instance and not getattr(instance, 'variable', None):
+            if self.analytical_method and self.analytical_method.type_method == 'Gravimetrico':
+                instance.variable = 'Peso Bruto'
+
         super().__init__(*args, **kwargs)
         self.fields['variable'].required = True
+        if self.analytical_method.type_method == 'Gravimetrico':
+            self.fields['variable'].widget = Select(attrs={'class': 'form-control', 'required': True})
+            self.fields['variable'].widget.choices = GRAVIMETRY
+            if not instance:
+                self.fields['variable'].initial = 'Peso Bruto'
+        else:
+            self.fields['variable'].widget = TextInput(attrs={'class': 'form-control', 'required': True})
+            if not getattr(instance, 'variable', None):
+                self.fields['variable'].widget.attrs['value'] = 'Gramos de Muestra'
         for form in self.visible_fields():
             form.field.widget.attrs['class'] = 'form-control'
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -865,7 +886,7 @@ class AnalyticalMethodVariableForm(ModelForm):
         model = AnalyticalMethodCalculate
         fields = ['variable', 'position']
         widgets = {
-            'variable': TextInput(attrs={'class': 'form-control', 'required': True, 'placeholder': 'Descripción de la variable'}),
+            'variable': Select(attrs={'class': 'form-control', 'required': True}),
             'position': Select(attrs={'class': 'form-control'}, choices=POSITION)
         }
 
@@ -1019,6 +1040,61 @@ class DependentCalculationForm(ModelForm):
                     instance.product = self.product
                     last = DependentCalculation.objects.filter(product=self.product).order_by('consecutive').last()
                     instance.consecutive = last.consecutive + 1 if last else 1
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Formulario de Operación para AnalyticalMethodCalculate
+class AnalyticalMethodCalculateOperationForm(ModelForm):
+    """Formulario para crear cálculos con operaciones (+, −, ×, ÷) en el método analítico."""
+
+    def __init__(self, *args, **kwargs):
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+
+        std_ids = AnalyticalMethodSolutionStd.objects.filter(
+            analytical_method=self.analytical_method).values_list('solution_std', flat=True)
+        self.fields['sln_std_base'].queryset = SolutionStdBase.objects.filter(pk__in=std_ids)
+
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+        col_classes = {
+            'factor': 'col-md-2',
+            'position': 'col-md-2',
+            'sample_quantity': 'col-md-2',
+            'variable': 'col-md-3',
+            'sln_std_base': 'col-md-4',
+            'subtract_blank': 'col-md-2',
+            'operation': 'col-md-3',
+        }
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-4')
+
+    class Meta:
+        model = AnalyticalMethodCalculate
+        fields = ['factor', 'position', 'sample_quantity', 'variable', 'sln_std_base', 'subtract_blank']
+        widgets = {
+            'factor': TextInput(attrs={'class': 'form-control'}),
+            'position': Select(attrs={'class': 'form-control'}, choices=POSITION),
+            'sample_quantity': TextInput(attrs={'class': 'form-control'}),
+            'variable': TextInput(attrs={'class': 'form-control'}),
+            'sln_std_base': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+            'subtract_blank': Select(attrs={'class': 'form-control'}, choices=BOOLEAN),
+        }
+
+    def save(self, commit=True):
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
                 instance.save()
                 data = instance
             else:

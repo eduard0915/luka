@@ -216,6 +216,7 @@ class AnalyticalMethodCalculate(BaseModel):
     volumen_std = models.CharField(max_length=100, verbose_name='Variable Volúmen Estándar', null=True, blank=True)
     variable = models.CharField(max_length=100, verbose_name='Variable', null=True, blank=True)
     weight_of_filter = models.CharField(max_length=100, verbose_name='Peso Filtro', null=True, blank=True)
+    gross_weight = models.CharField(max_length=100, verbose_name='Peso Bruto', null=True, blank=True)
     factor = models.FloatField(verbose_name='Constante', null=True, blank=True)
     sample_quantity = models.CharField(max_length=50, verbose_name='Variable Muestra', null=True, blank=True)
     position = models.CharField(max_length=15, verbose_name='Posición en Ecuación', null=True, blank=True)

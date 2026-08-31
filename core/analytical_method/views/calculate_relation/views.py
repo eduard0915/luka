@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, UpdateView, DeleteView
 
 from core.analytical_method.forms import *
-from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculateRelation
+from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation
 from core.mixins import ValidatePermissionRequiredMixin
 
 class BaseAnalyticalMethodCalculateRelationDetailView(ValidatePermissionRequiredMixin):
@@ -274,4 +274,19 @@ class AnalyticalMethodCalculateRelationDeleteView(LoginRequiredMixin, ValidatePe
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Eliminar Variable de Ecuación Relacional'
         context['delete'] = 'Está seguro de eliminar la variable de la ecuación relacional?'
+        return context
+
+
+# Creación de Cálculo con Operación para AnalyticalMethodCalculate
+class AnalyticalMethodCalculateOperationCreateView(LoginRequiredMixin, BaseAnalyticalMethodCalculateRelationDetailView, CreateView):
+    """Vista para crear un cálculo con operaciones (+, −, ×, ÷) en el método analítico usando AnalyticalMethodCalculate."""
+    model = AnalyticalMethodCalculate
+    form_class = AnalyticalMethodCalculateOperationForm
+    template_name = 'modal_four.html'
+
+    def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Agregar Cálculo con Operación en la Ecuación'
+        context['action'] = 'add'
         return context

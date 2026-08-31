@@ -211,12 +211,12 @@ def _update_solution_inventory(solution_id, quantity_to_subtract):
     std_solution = SolutionStd.objects.select_for_update().get(pk=solution_id)
 
     # Usar Decimal para operaciones numéricas precisas
-    current_quantity = Decimal(str(std_solution.quantity_solution_std))
+    current_quantity = Decimal(str(std_solution.quantity_available_std))
     used_quantity = Decimal(str(quantity_to_subtract))
     new_quantity = current_quantity - used_quantity
 
-    std_solution.quantity_solution_std = float(round(new_quantity, 2))
-    std_solution.save(update_fields=['quantity_solution_std'])
+    std_solution.quantity_available_std = float(round(new_quantity, 2))
+    std_solution.save(update_fields=['quantity_available_std'])
 
 
 def _create_solution_transaction(solution_id, quantity, user_id, detail_text):
