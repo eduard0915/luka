@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='standardization',
             name='solution_stb_base_to_standardize',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='solution_stb_base_to_standardize', to='solution.solutionstdbase', verbose_name='Solución Estándar Base a Estándarizar'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='solution_stb_base_to_standardize', to='solution.solutionstdbase', verbose_name='Solución Estándar Base a Estándarizar'),
         ),
         migrations.AlterField(
             model_name='standardization',
