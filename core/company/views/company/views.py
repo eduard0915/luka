@@ -70,11 +70,7 @@ class CompanyCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
 
 
 class CompanyUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
-    """Vista para la edición de los datos de la empresa.
-
-    Permite modificar la información general de la empresa configurada
-    en el sistema.
-    """
+    """Vista para la edición de los datos de la empresa. """
     model = Company
     form_class = CompanyForm
     template_name = 'company/create_company.html'
@@ -95,7 +91,7 @@ class CompanyUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
                 if form.is_valid():
                     form.save()
                     messages.success(request, f'La Empresa se ha editado satisfactoriamente!')
-                    return redirect(self.get_context_data()['list_url'])
+                    return JsonResponse({'success': True, 'redirect_url': reverse_lazy('company:company_detail', kwargs={'pk': self.kwargs['pk']})})
                 else:
                     messages.error(request, form.errors)
                     data['error'] = form.errors
