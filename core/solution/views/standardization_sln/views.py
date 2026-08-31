@@ -2,6 +2,7 @@
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
@@ -10,7 +11,7 @@ from django.views.generic import DetailView, CreateView, DeleteView
 
 from core.mixins import ValidatePermissionRequiredMixin
 from core.solution.forms import StandardizationSolutionForm
-from core.solution.models import StandardizationSolution, Standardization, Solution
+from core.solution.models import StandardizationSolution, Standardization, Solution, SolutionStd
 
 
 # Registro de Estandarización
@@ -34,8 +35,11 @@ class StandardizationSolutionCreateView(LoginRequiredMixin, ValidatePermissionRe
             if action == 'add':
                 form = self.get_form()
                 if form.is_valid():
-                    form.save()
-                    messages.success(request, '¡Estandarización Registrada Satisfactoriamente!')
+                    try:
+                        form.save()
+                        messages.success(request, '¡Estandarización Registrada Satisfactoriamente!')
+                    except ValidationError as e:
+                        messages.error(request, e.messages[0])
                 else:
                     messages.error(request, form.errors)
             else:
@@ -47,8 +51,8 @@ class StandardizationSolutionCreateView(LoginRequiredMixin, ValidatePermissionRe
     def get_form_kwargs(self):
         """Agrega los objetos de estandarización y solución a los kwargs del formulario."""
         kwargs = super().get_form_kwargs()
-        sln = Solution.objects.get(pk=self.kwargs.get('pk'))
-        std = Standardization.objects.get(solution_base_id=sln.solution_base.id)
+        sln = SolutionStd.objects.get(pk=self.kwargs.get('pk'))
+        std = Standardization.objects.get(solution_stb_base_to_standardize_id=sln.solution_std_base.id)
         kwargs.update({'std': std, 'sln': sln})
         return kwargs
 
@@ -57,8 +61,8 @@ class StandardizationSolutionCreateView(LoginRequiredMixin, ValidatePermissionRe
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Registro de Estandarización'
-        sln = Solution.objects.get(pk=self.kwargs.get('pk'))
-        std = Standardization.objects.get(solution_base_id=sln.solution_base.id)
+        sln = SolutionStd.objects.get(pk=self.kwargs.get('pk'))
+        std = Standardization.objects.get(solution_stb_base_to_standardize_id=sln.solution_std_base.id)
         context['uses_solution_base'] = bool(std.solution_std_base_id)
         return context
 

@@ -513,6 +513,8 @@ class SolutionStandardForm(ModelForm):
         """Guarda la instancia calculando las cantidades de soluto y solvente."""
         instance = super().save(commit=False)
 
+        instance.quantity_available_std = instance.quantity_solution_std
+
         # Usar los valores del formulario si están presentes, de lo contrario usar los de la base
         if not instance.concentration_std:
             instance.concentration_std = instance.solution_std_base.concentration_std_base
@@ -820,7 +822,6 @@ class StandardizationForm(ModelForm):
         """Inicializa el formulario extrayendo el reactivo de los kwargs y filtrando las soluciones estándar."""
 
         self.sln_std_base = kwargs.pop('sln_std_base')
-        self.sln_base = kwargs.pop('sln_base')
 
         super().__init__(*args, **kwargs)
         self.fields['solution_std_base'].queryset = SolutionStdBase.objects.filter(enable_solution_std=True)
@@ -845,10 +846,9 @@ class StandardizationForm(ModelForm):
         try:
             if form.is_valid():
                 data = form.save(commit=False)
-                if self.sln_base:
-                    data.solution_base_id = self.sln_base.id
+
                 if self.sln_std_base:
-                    data.solution_std_base_id = self.sln_std_base.id
+                    data.solution_stb_base_to_standardize_id = self.sln_std_base.id
                 data.save()
             else:
                 data['error'] = form.errors
@@ -907,8 +907,8 @@ class StandardizationSolutionForm(ModelForm):
         if user.laboratory:
             if self.std.solution_std_base:
                 self.fields['standard_solution'].queryset = SolutionStd.objects.filter(
-                    solution_std_base=self.std.solution_std_base, quantity_solution_std__gt=0, laboratory=user.laboratory)
-                self.fields['quantity_standard'].label = 'mL de Estándar'
+                    solution_std_base=self.std.solution_std_base, quantity_available_std__gt=0, laboratory=user.laboratory)
+                self.fields['quantity_standard'].label = 'mL de Solución a Estándarizar'
             else:
                 self.fields['standard_reagent'].queryset = InventoryReagent.objects.filter(
                     quantity_stock__gt=0, reagent=self.std.reagent_std)
@@ -921,7 +921,7 @@ class StandardizationSolutionForm(ModelForm):
 
     class Meta:
         model = StandardizationSolution
-        fields = ['standard_solution', 'standard_reagent', 'quantity_standard', 'quantity_solution']
+        fields = ['standard_solution', 'standard_reagent', 'quantity_solution', 'quantity_standard']
         widgets = {
             'standard_solution': Select(attrs={
                 'class': 'form-control select2',
@@ -942,15 +942,14 @@ class StandardizationSolutionForm(ModelForm):
         user = get_current_user()
         try:
             instance = super().save(commit=False)
-            instance.solution_id = self.sln.id
+            instance.solution_to_standardize_id = self.sln.id
             instance.standardized_by_id = user.id
-            instance.standarization_date = timezone.localdate()
+            instance.standarization_date = timezone.now()
 
             target = self.sln.concentration_unit
             molar_relation = self.std.molar_relation
-            reagent_sln = self.sln.solution_base.solute_reagent_base
-            pm_sln = reagent_sln.molecular_weight
-            pe_sln = reagent_sln.gram_equivalent
+            pm_sln = self.sln.solute_std.reagent.molecular_weight
+            pe_sln = self.sln.solute_std.reagent.gram_equivalent
 
             mmol_analyte = None
             meq_analyte = None
