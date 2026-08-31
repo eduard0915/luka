@@ -238,7 +238,7 @@ class Standardization(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     reagent_std = models.ForeignKey(Reagent, blank=True, null=True, on_delete=models.CASCADE, verbose_name='Estándar Primario')
     solution_base= models.ForeignKey(SolutionBase, verbose_name='Solución Base a Estándarizar', on_delete=models.CASCADE, blank=True, null=True)
-    solution_stb_base_to_standardize = models.ForeignKey(SolutionStdBase, verbose_name='Solución Estándar Base a Estándarizar', on_delete=models.CASCADE, related_name='solution_stb_base_to_standardize')
+    solution_stb_base_to_standardize = models.ForeignKey(SolutionStdBase, verbose_name='Solución Estándar Base a Estándarizar', on_delete=models.CASCADE, blank=True, null=True, related_name='solution_stb_base_to_standardize')
     solution_std_base = models.ForeignKey(SolutionStdBase, verbose_name='Solución Estándar Base (Primario)', on_delete=models.CASCADE, blank=True, null=True, related_name='solution_std_base')
     molar_relation = models.FloatField(verbose_name='Relación Molar', default=1)
 
