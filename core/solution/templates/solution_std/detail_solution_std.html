@@ -37,13 +37,28 @@
                 <div class="tile-body">
                     <div class="row">
                         <div class="col-md-2">
-                            <b>Cantidad {% if not object.solute_std.reagent.ready_to_use %}a Preparar{% endif %}</b><br>
+                            <b>Cantidad
+                                {% if not object.solute_std.reagent.ready_to_use %}
+                                    {% if object.preparation_confirmed %}
+                                        Preparada
+                                    {% else %}
+                                        a Preparar
+                                    {% endif %}
+                                {% endif %}
+                            </b>
+                            <br>
                             <p>{{ object.quantity_solution_std | intcomma:False }} mL</p>
                         </div>
                         <div class="col-md-2">
                             <b>Concentración</b><br>
                             <p>{{ object.concentration_std | unlocalize }} {{ object.concentration_unit }}</p>
                         </div>
+                        {% if object.preparation_confirmed %}
+                            <div class="col-md-2">
+                                <b>Cantidad Disponible</b><br>
+                                <p>{{ object.quantity_available_std | intcomma:False }} mL</p>
+                            </div>
+                        {% endif %}
                         <div class="col-md-5">
                             <b>Reactivo</b><br>
                             <p><b class="text-danger">
@@ -82,7 +97,7 @@
                         {% endif %}
                     </div>
                         <div class="row mt-1">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <b>Preparado por </b><br>
                                 <p>
                                     {% if object.preparated_std_by %}
@@ -94,7 +109,7 @@
                                     {% endif %}
                                 </p>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <b>Fecha de Preparación</b><br>
                                 <p>
                                     {% if object.preparation_std_date %}
@@ -106,7 +121,7 @@
                                     {% endif %}
                                 </p>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <b>Vencimiento</b><br>
                                 <p>
                                     {% if object.expire_std_date_solution %}
@@ -115,6 +130,10 @@
                                         <span class="text-danger">Pendiente Confirmación</span>
                                     {% endif %}
                                 </p>
+                            </div>
+                            <div class="col-md-5">
+                                <b>Laboratorio</b><br>
+                                <p>{{ object.laboratory }}</p>
                             </div>
                         </div>
 
@@ -131,6 +150,11 @@
                                     disponible {{ object.solute_std.quantity_stock | unlocalize }} {{ object.solute_std.reagent.umb }}</p>
                         {% endif %}
                     {% endif %}
+                    {% if not object.preparation_confirmed %}
+                        <a href="{% url 'solution:update_solution_std' object.id %}" type="button" class="btn btn-warning me-2">
+                            <i class="fa fa-fw fa-lg fa-pencil me-2"></i> Editar
+                        </a>
+                    {% endif %}
                     {% if object.preparation_confirmed %}
                         <a href="{{ label_url }}" type="button" class="btn btn-danger me-2" target="_blank">
                             <i class="fa fa-fw fa-lg fa-ticket me-2"></i> Etiqueta
@@ -145,9 +169,165 @@
             </div>
         </div>
     </div>
+    {% if object.solution_std_base.standardizable and object.preparation_confirmed %}
+        <div class="row">
+            <div class="col-md-11">
+                <div class="tile mb-3">
+                    <div class="tile-title">
+                        <h3 class="title">
+                            Estandarización de la Solución
+                        </h3>
+                    </div>
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <b>Concentración Real</b><br>
+                                {% if object.average_concentration %}
+                                    <p class="text-success"><b>{{ object.average_concentration | unlocalize }}
+                                        {{ object.concentration_unit }}</b></p>
+                                {% else %}
+                                    <p class="text-danger"><b>Pendiente</b></p>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <b>Coeficiente de Variación</b><br>
+                                {% if object.coefficient_variation %}
+                                    <p class="text-success"><b>{{ object.coefficient_variation | unlocalize }}%</b></p>
+                                {% else %}
+                                    <p class="text-danger"><b>Pendiente</b></p>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                {% if standard_count > 2 %}
+                                    {% if object.coefficient_variation > 2 %}
+                                        <div class="bs-component">
+                                            <div class="alert alert-dismissible alert-danger d-flex align-items-center pe-3 mb-2">
+                                                <i class="bi bi-x-octagon fa-2x me-2"></i>
+                                                <strong class="me-2">No Cumple.</strong> CV Mayor del 2%.
+                                            </div>
+                                            <b class="text-danger"> Realice una Estandarización Adicional</b>
+                                        </div>
+                                    {% else %}
+                                        {% if object.average_concentration %}
+                                            <div class="bs-component">
+                                                <div class="alert alert-dismissible alert-success d-flex align-items-center">
+                                                    <i class="fas fa-check-circle fa-2x me-2"></i>
+                                                    <strong>Cumple!</strong>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
+                                {% elif standard_count > 0 and standard_count < 3 %}
+                                    <div class="bs-component">
+                                        <div class="alert alert-dismissible alert-warning d-flex align-items-center pe-3 mb-2">
+                                            <i class="bi bi-x-octagon fa-2x me-2"></i>
+                                            <strong class="me-2">Mínimo 3 replicas</strong>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if object.standardized_by %}
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <b>Estandarizado por</b><br>
+                                    <p>{{ object.standardized_by }}</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <b>Fecha de Estandarización</b><br>
+                                    <p>{{ object.standarization_date | date:'Y-m-d' }}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% if not std_config %}
+                        <p class="text-danger semibold-text">Ir al listado de Soluciones STD Base y configurar Estandarización de la solución</p>
+                    {% elif standard_count < 6 %}
+                        <div class="tile-footer">
+                            <a onclick="open_modal('{{ add_standardization }}')" type="button"
+                               class="btn btn-primary me-2">
+                                <i class="fa fa-plus"></i> Registrar
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if standardizations %}
+        <!-- Historial de estandarizaciones de la misma solución -->
+        <div class="row">
+            <div class="col-md-11">
+                <div class="tile mb-3">
+                    <div class="tile-title">
+                        <h3 class="title">Estandarizaciones</h3>
+                    </div>
+                    <div class="tile-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered" id="data_0">
+                                <thead>
+                                <tr>
+                                    <th style="width:10%">Fecha</th>
+                                    <th style="width:35%">Solución STD</th>
+                                    <th style="width:10%">Alícuota STD</th>
+                                    <th style="width:10%">mL Sln Gastados</th>
+                                    <th style="width:10%">[Sln] {{ object.concentration_unit }}</th>
+                                    <th style="width:20%">Realizado por</th>
+                                    <th style="width:5%">Acciones</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for std in standardizations %}
+                                    <tr>
+                                        <td class="text-center">{{ std.standarization_date | date:'Y-m-d' }}</td>
+                                        <td class="text-center">
+                                            {% if std.standard_reagent %}
+                                                {{ std.standard_reagent.reagent.code_reagent }}
+                                                {{ std.standard_reagent.reagent.description_reagent }} Lote N°:
+                                                {{ std.standard_reagent.batch_number }}
+                                                {{ std.standard_reagent.purity }}
+                                                {{ std.standard_reagent.reagent.purity_unit }}
+                                            {% else %}
+                                                {{ std.standard_solution.code_solution_std }}
+                                                {{ std.standard_solution.solution_std_base }}
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {{ std.quantity_standard | unlocalize }}
+                                            {% if std.standard_reagent %}g{% else %}mL{% endif %}
+                                        </td>
+                                        <td class="text-center">{{ std.quantity_solution | unlocalize }}</td>
+                                        <td class="text-center">
+                                            <b>{{ std.concentration_sln | unlocalize }} {{ std.solution.concentration_unit }}</b>
+                                        </td>
+                                        <td>{{ std.standardized_by }}</td>
+                                        <td class="text-center">
+                                            <a onclick="open_modal('{% url 'solution:delete_standardization_solution' std.id %}')"
+                                               title="Eliminar">
+                                                <i class="bi bi-trash text-danger me-2"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center">
+                                            No hay otras estandarizaciones registradas.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
     {% if transactions %}
         <div class="row">
-            <div class="col-md-10">
+            <div class="col-md-11">
                 <div class="tile mb-3">
                     <div class="tile-title">
                         <h3 class="title">Detalle Consumo</h3>
@@ -168,12 +348,12 @@
                                 <tbody>
                                 {% for foo in transactions %}
                                     <tr>
-                                        <td>{{ foo.date_transaction | date:'Y-m-d' }}</td>
-                                        <td>{{ foo.type_transaction }}</td>
-                                        <td>{{ foo.quantity | intcomma:False }}</td>
-                                        <td>{{ foo.user_transaction }}</td>
-                                        <td>{{ foo.detail_transaction }}</td>
-                                        <td>
+                                        <td class="text-center align-middle">{{ foo.date_transaction | date:'Y-m-d' }}</td>
+                                        <td class="text-center align-middle">{{ foo.type_transaction }}</td>
+                                        <td class="text-center align-middle">{{ foo.quantity | intcomma:False }}</td>
+                                        <td class="text-center align-middle">{{ foo.user_transaction }}</td>
+                                        <td class="text-center align-middle">{{ foo.detail_transaction }}</td>
+                                        <td class="text-center align-middle">
                                             <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
                                                title="Editar">
                                                 <i class="bi bi-pencil-square text-warning me-2"></i>
@@ -193,7 +373,7 @@
                                 {% empty %}
                                     <tr>
                                         <td colspan="6" class="text-center">
-                                            No hay capacitaciones asociadas.
+                                            No hay transacciones asociadas.
                                         </td>
                                     </tr>
                                 {% endfor %}

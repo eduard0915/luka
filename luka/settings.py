@@ -1,3 +1,10 @@
+"""Configuración principal del proyecto Django Luka LIS.
+
+Define las aplicaciones instaladas, middleware, base de datos,
+archivos estáticos, medios, correo electrónico, sesiones,
+almacenamiento S3 y demás parámetros del entorno.
+"""
+
 import os
 from pathlib import Path
 
@@ -18,7 +25,7 @@ SECRET_KEY = config('SECRET_KEY')
 
 DEBUG = config('DEBUG')
 
-ALLOWED_HOSTS = ['127.0.0.1', '.herokuapp.com', 'localhost', '.run.app']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.run.app', '.padlims.cloud']
 
 # Application definition
 INSTALLED_APPS = [
@@ -43,6 +50,8 @@ INSTALLED_APPS = [
     'core.analytical_method',
     'core.sampling',
     'core.condition',
+    'core.observation',
+    'core.report',
     # Libs
     'widget_tweaks',
     'django_password_history',
@@ -78,6 +87,7 @@ TEMPLATES = [
             ],
             'builtins': [
                 'templatetags.path_helpers',
+                'templatetags.custom_filters',
             ],
         },
     },
@@ -87,18 +97,12 @@ WSGI_APPLICATION = 'luka.wsgi.application'
 
 # Database
 DATABASES = {
-    'dev': dj_database_url.config(
-        default=config('DATABASE_TEST')
-    ),
-    'production': dj_database_url.config(
-        default=config('DATABASE_URL')
+    'default': dj_database_url.config(
+        default=config('DATABASE_URL'),
+        conn_max_age=600,
+        conn_health_checks=True,
     )
 }
-
-DATABASES['default'] = DATABASES['dev' if DEBUG else 'production']
-
-db_from_env = dj_database_url.config()
-DATABASES['default'].update(db_from_env)
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -147,6 +151,18 @@ LOGOUT_REDIRECT_URL = '/login/'
 
 LOGIN_URL = '/login/'
 
+# Base URL (dominio) para construir enlaces absolutos en correos
+SITE_URL = config('SITE_URL', default='http://localhost:8000')
+
+# Email configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('MAIL_PASSWORD')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 MEDIA_URL = '/media/'
@@ -171,14 +187,13 @@ TIME_PASSWORD_EXPIRE = 90
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8000/',
     'http://localhost:8000/',
-    'https://*.padlims.com',
-    'https://*.herokuapp.com',
     'https://*.run.app',
+    'https://*.padlims.cloud',
 ]
 
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:8000',
-    'http://*.padlims.com',
+    'http://*.padlims.cloud',
 ]
 
 # Conexión AWS S3

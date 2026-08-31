@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 dataSrc: ""
             },
             columns: [
+                {"data": "site"},
                 {"data": "code_product"},
                 {"data": "description_product"},
                 {"data": "version"},
@@ -27,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
             ],
             columnDefs: [
                 {
-                    targets: [4],
+                    targets: [5],
                     class: 'td-actions text-center align-middle',
                     orderable: false,
                     render: function (data, type, row) {
@@ -37,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 {
-                    targets: [3],
+                    targets: [4],
                     class: 'td-actions text-center align-middle',
                     render: function (data, type, row) {
                         if (data) {
@@ -47,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 {
-                    targets: [0, 1, 2],
+                    targets: [0, 1, 2, 3],
                     class: 'td-actions text-center align-middle',
                 },
             ],

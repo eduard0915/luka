@@ -29,10 +29,12 @@
             pointContainer.style.display = 'none';
             batchContainer.style.display = 'none';
 
-            // Limpiar valores de campos ocultos
-            const pointField = document.querySelector('[name="point_sampling"]');
+            // Limpiar valores de campos ocultos y disparar evento change para Select2
+            const pointField = $('[name="point_sampling"]');
             const batchField = document.querySelector('[name="batch_number"]');
-            if (pointField) pointField.value = '';
+            if (pointField.length) {
+                pointField.val('').trigger('change');
+            }
             if (batchField) batchField.value = '';
 
         } else if (typeValue === 'Producto Terminado') {
@@ -41,9 +43,11 @@
             pointContainer.style.display = '';
             batchContainer.style.display = '';
 
-            // Limpiar valor de campo oculto
-            const groupField = document.querySelector('[name="group_sampling"]');
-            if (groupField) groupField.value = '';
+            // Limpiar valor de campo oculto y disparar evento change para Select2
+            const groupField = $('[name="group_sampling"]');
+            if (groupField.length) {
+                groupField.val('').trigger('change');
+            }
 
         } else {
             // Si no hay selección o valor desconocido, mostrar todos

@@ -1,0 +1,65 @@
+# Dependencias para DESARROLLO LOCAL. El servidor Django corre fuera de Docker, en el
+# host (ver docs/desarrollo-local.md). Aquí solo va lo que no quieres levantar a mano:
+# la base de datos y el cron de muestreos.
+#
+# Para desplegar NO se usa este archivo: producción es docker-compose.dokploy.yml, que
+# lleva el stack completo y no publica el puerto de la base.
+#
+#   docker-compose up -d          # levanta base y scheduler
+#   docker-compose logs -f scheduler-luka
+#   docker-compose down           # -v además borra los datos
+services:
+  db-luka:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    # Publica la base para que el Django del host la alcance en localhost:5432.
+    # Atado a 127.0.0.1 a propósito: sin ese prefijo Docker la abriría a toda la red
+    # local saltándose el firewall de macOS.
+    ports:
+      - "127.0.0.1:5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  scheduler-luka:
+    build:
+      context: .
+      args:
+        - SECRET_KEY=${SECRET_KEY}
+        - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-luka:5432/${POSTGRES_DB}
+        - MEDIA_URL=${MEDIA_URL}
+    # Ruta ABSOLUTA, no `supercronic` a secas: como PID 1 supercronic activa el reaper,
+    # que se re-ejecuta con ForkExec(os.Args[0]) sin resolver el PATH. Con el nombre
+    # pelado falla al arrancar con "Failed to fork exec: no such file or directory".
+    command: /usr/local/bin/supercronic /app/crontab
+    restart: unless-stopped
+    # Código del host, para que el cron ejecute lo que estás editando y no lo que había
+    # cuando se construyó la imagen.
+    volumes:
+      - .:/app
+    environment:
+      - TZ=America/Bogota
+      - SECRET_KEY=${SECRET_KEY}
+      # Dentro del contenedor la base es db-luka, no localhost. Esta variable manda
+      # sobre el luka/.env montado porque dj_database_url lee os.environ primero.
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-luka:5432/${POSTGRES_DB}
+      - DEBUG=${DEBUG}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - BUCKET=${BUCKET}
+      - REGION_NAME=${REGION_NAME}
+      - MEDIA_URL=${MEDIA_URL}
+    depends_on:
+      db-luka:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

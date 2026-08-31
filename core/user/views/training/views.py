@@ -1,3 +1,5 @@
+"""Vistas para la gestión de capacitaciones de usuarios."""
+
 from urllib.request import urlopen
 
 import boto3
@@ -19,6 +21,7 @@ from core.user.models import Training, User
 
 # Registro de capacitación
 class TrainingCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para registrar una nueva capacitación asociada a un usuario."""
     model = Training
     form_class = TrainingForm
     template_name = 'training/create_training.html'
@@ -26,9 +29,11 @@ class TrainingCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cr
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Deshabilita la protección CSRF para esta vista."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el envío del formulario para registrar una nueva capacitación."""
         data = {}
         try:
             action = request.POST['action']
@@ -46,12 +51,14 @@ class TrainingCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cr
         return JsonResponse(data)
 
     def get_form_kwargs(self):
+        """Inyecta el usuario al que se asociará la capacitación en los kwargs del formulario."""
         kwargs = super().get_form_kwargs()
         user = User.objects.get(slug=self.kwargs.get('pk'))
         kwargs.update({'user': user})
         return kwargs
 
     def get_context_data(self, **kwargs):
+        """Agrega el contexto necesario para la plantilla de creación de capacitación."""
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Registro de Capacitación'
@@ -60,6 +67,7 @@ class TrainingCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cr
 
 # Registro de actualización de capacitación
 class TrainingCreateUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para registrar una actualización de una capacitación existente."""
     model = Training
     form_class = TrainingCreateForm
     template_name = 'training/create_training.html'
@@ -67,9 +75,11 @@ class TrainingCreateUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMix
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Deshabilita la protección CSRF para esta vista."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el envío del formulario para registrar una actualización de capacitación."""
         data = {}
         try:
             action = request.POST['action']
@@ -87,12 +97,14 @@ class TrainingCreateUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMix
         return JsonResponse(data)
 
     def get_form_kwargs(self):
+        """Inyecta la capacitación original en los kwargs del formulario."""
         kwargs = super().get_form_kwargs()
         training = Training.objects.get(pk=self.kwargs.get('pk'))
         kwargs.update({'training': training})
         return kwargs
 
     def get_context_data(self, **kwargs):
+        """Agrega el contexto necesario para la plantilla de actualización de capacitación."""
         context = super().get_context_data(**kwargs)
         training = Training.objects.get(pk=self.kwargs.get('pk'))
         context['action'] = 'add'
@@ -103,6 +115,7 @@ class TrainingCreateUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMix
 
 # Edición de capacitación
 class TrainingUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para editar una capacitación existente."""
     model = Training
     form_class = TrainingUpdateForm
     template_name = 'training/create_training.html'
@@ -110,10 +123,12 @@ class TrainingUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Up
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Obtiene el objeto de capacitación antes de procesar la solicitud."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el envío del formulario para editar una capacitación existente."""
         data = {}
         try:
             action = request.POST['action']
@@ -131,6 +146,7 @@ class TrainingUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Up
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega el contexto necesario para la plantilla de edición de capacitación."""
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Edición de Capacitación'
         context['action'] = 'edit'
@@ -139,10 +155,12 @@ class TrainingUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Up
 
 # Descarga de soporte de capacitación
 class TrainingDownloadView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista para descargar el soporte de una capacitación desde S3 mediante una URL prefirmada."""
     permission_required = 'user.view_user'
 
     @staticmethod
     def get(request):
+        """Recupera un archivo de soporte desde S3 y lo retorna como respuesta HTTP para descarga o visualización."""
         s3 = boto3.client(
             's3',
             aws_access_key_id=config('AWS_ACCESS_KEY_ID'),
@@ -189,15 +207,18 @@ class TrainingDownloadView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
 
 # Eliminación de capacitación
 class TrainingDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DeleteView):
+    """Vista para eliminar un registro de capacitación."""
     model = Training
     template_name = 'training/delete_training.html'
     permission_required = 'user.view_user'
 
     def dispatch(self, request, *args, **kwargs):
+        """Obtiene el objeto de capacitación antes de procesar la solicitud de eliminación."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la eliminación de la capacitación y retorna una respuesta JSON."""
         data = {}
         try:
             self.object.delete()
@@ -207,6 +228,7 @@ class TrainingDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, De
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega el contexto necesario para la plantilla de confirmación de eliminación."""
         context = super().get_context_data(**kwargs)
         t = Training.objects.get(pk=self.kwargs.get('pk'))
         context['entity'] = 'Eliminar de Registro'

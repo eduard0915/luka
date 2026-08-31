@@ -1,36 +1,46 @@
+"""Vistas para la gestión de análisis de muestras."""
+
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_GET
-from django.views.generic import CreateView, DetailView
+from django.views.generic import CreateView, DetailView, DeleteView, ListView
 
-from core.analytical_method.models import AnalyticalMethodCalculateRelation, AnalyticalMethodCalculate
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.models import SpecificationProduct
-from core.sampling.forms import SamplingAnalysisProcessingForm, SamplingAnalysisProcessingRelationForm
-from core.sampling.models import SamplingAnalysis, SamplingAnalysisProcessing, SamplingAnalysisProcessingRelation
-from core.solution.models import SolutionStd
+from core.sampling.forms import *
+from core.sampling.models import *
+from core.analytical_method.models import AnalyticalMethodCalculateRelation
 
 
-# Detalle de Análisis de Muestra
 class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """Vista para el detalle del análisis de una muestra."""
     model = SamplingAnalysis
     template_name = 'analysis_sampling/detail_sampling_analysis.html'
     permission_required = 'reagent.add_reagent'
+    queryset = SamplingAnalysis.objects.select_related('analytical_method')
 
     def get_context_data(self, **kwargs):
+        """Agrega procesamientos, ecuaciones, especificaciones y URLs al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Procesamiento de Análisis de Muestra'
         context['entity'] = self.object
-        context['analysis_processing'] = self.object.samplinganalysisprocessing_set.filter(relational_calculation=False).order_by('-analyzed_date')
-        context['analysis_processing_relational'] = self.object.samplinganalysisprocessing_set.filter(relational_calculation=True).order_by('-analyzed_date')
+        context['analysis_processing'] = self.object.samplinganalysisprocessing_set.filter(relational_calculation=False).select_related(
+            'standard_solution__solute_std__reagent',
+            'analyzed_by'
+        ).order_by('-analyzed_date')
+        context['analysis_processing_relational'] = self.object.samplinganalysisprocessing_set.filter(relational_calculation=True).select_related(
+            'standard_solution__solute_std__reagent',
+            'analyzed_by'
+        ).order_by('-analyzed_date')
         context['analysis_processing_relational_new'] = self.object.samplinganalysisprocessingrelation_set.all().order_by('-date_creation')
         context['analysis_count'] = self.object.samplinganalysisprocessing_set.filter(relational_calculation=False).count()
+        context['millimole_reacted'] = self.object.millimolereacted_set.select_related(
+            'standard_solution_add__solute_std__reagent',
+            'standard_solution_spend__solute_std__reagent',
+        ).all().order_by('-date_creation')
 
         # Datos del método analítico
         method = self.object.analytical_method
@@ -40,41 +50,116 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['equipments'] = method.analyticalmethodequipment_set.all()
         context['materials'] = method.analyticalmethodmaterial_set.all()
         context['procedures'] = method.analyticalmethodprocedure_set.all()
-        # Agrupar relaciones de cálculo por descripción para evitar duplicados en el template
-        calculate_relations_all = method.analyticalmethodcalculaterelation_set.all()
+        # Agrupar relaciones de cálculo por descripción y generar LaTeX
+        calculate_relations_all = method.analyticalmethodcalculaterelation_set.select_related(
+            'analytical_method_calculate'
+        ).all().order_by('date_creation')
+
+        equations_data = {}
+        current_desc = None
+        for cr in calculate_relations_all:
+            if cr.calculate_description_relation:
+                current_desc = cr.calculate_description_relation
+                if current_desc not in equations_data:
+                    equations_data[current_desc] = {'num': [], 'den': [], 'gen': [], 'unit': cr.unit_measure_calculate}
+
+            if not current_desc:
+                continue
+
+            parts = []
+            if cr.analytical_method_calculate:
+                parts.append(rf"\text{{{cr.analytical_method_calculate.calculate_description}}}")
+            if cr.volumen_std:
+                parts.append(str(cr.volumen_std))
+            if cr.factor:
+                parts.append(str(cr.factor))
+            if cr.sample_quantity:
+                parts.append(str(cr.sample_quantity))
+            # if cr.variable:
+            #     parts.append(str(cr.variable))
+
+            term = r" \cdot ".join(parts)
+            if term:
+                if cr.position == 'Numerador':
+                    equations_data[current_desc]['num'].append(term)
+                elif cr.position == 'Denominador':
+                    equations_data[current_desc]['den'].append(term)
+                elif cr.position == 'General':
+                    equations_data[current_desc]['gen'].append(term)
+
+        final_equations = []
+        for desc, data in equations_data.items():
+            str_num = r" \cdot ".join(data['num']) if data['num'] else "1"
+            str_den = r" \cdot ".join(data['den']) if data['den'] else "1"
+            str_gen = rf" \cdot {r' \cdot '.join(data['gen'])}" if data['gen'] else ""
+
+            label = rf"\text{{{desc}}}"
+            if data['unit']:
+                label += rf" \text{{ ({data['unit']})}}"
+
+            final_equations.append(rf"{label} = \frac{{{str_num}}}{{{str_den}}}{str_gen}")
+
+        context['final_equations'] = final_equations
+
+        # Mantener calculate_relations original para compatibilidad con botones de 'Calcular' si es necesario
         unique_relations = []
         descriptions_seen = set()
         for rel in calculate_relations_all:
-            if rel.calculate_description_relation not in descriptions_seen:
+            if rel.calculate_description_relation and rel.calculate_description_relation not in descriptions_seen:
                 unique_relations.append(rel)
                 descriptions_seen.add(rel.calculate_description_relation)
         context['calculate_relations'] = unique_relations
 
         # Obtener la especificación del producto para este análisis
         sampling_process = self.object.sampling_process
-        product = None
-        if sampling_process.point_sampling:
-            product = sampling_process.point_sampling.product
-        elif sampling_process.group_sampling:
-            product = sampling_process.group_sampling.sampling_point.product
+        method = self.object.analytical_method
+        specification = None
+        sampling_point = None
 
-        if product:
-            specification = SpecificationProduct.objects.filter(
-                product=product,
+        if sampling_process.point_sampling:
+            sampling_point = sampling_process.point_sampling
+        elif sampling_process.group_sampling:
+            sampling_point = sampling_process.group_sampling.sampling_point
+
+        if sampling_point:
+            # Buscar la especificación en el punto de muestreo que coincida con el método
+            specification = sampling_point.specification.select_related('method_test__analytical_method').filter(
                 method_test__analytical_method=method
             ).first()
-            context['specification'] = specification
+
+        # Si no se encuentra en el punto de muestreo, intentar por el producto
+        if not specification:
+            product = None
+            if sampling_process.point_sampling:
+                product = sampling_process.point_sampling.product
+            elif sampling_process.group_sampling:
+                product = sampling_process.group_sampling.sampling_point.product
+
+            if product:
+                specification = SpecificationProduct.objects.select_related('method_test__analytical_method', 'product').filter(
+                    product=product,
+                    method_test__analytical_method=method
+                ).first()
+
+        context['specification'] = specification
 
         context['icon'] = 'bi bi-calculator'
         context['back'] = reverse_lazy('sampling:detail_sampling_process', kwargs={'pk': self.object.sampling_process.id})
+
         # URL para agregar procesamiento
-        context['create_processing_url'] = reverse_lazy(
-            'sampling:create_sampling_analysis_processing', kwargs={'pk': self.object.id})
+        if self.object.analytical_method.type_method == 'Volumetrico':
+            context['create_processing_url'] = reverse_lazy('sampling:sampling_analysis_volumetry', kwargs={'pk': self.object.id})
+        if self.object.analytical_method.type_method == 'Volumetrico por Retroceso':
+            context['create_processing_url'] = reverse_lazy('sampling:create_millimole_reacted', kwargs={'pk': self.object.id})
+        elif self.object.analytical_method.type_method == 'Gravimetrico':
+            context['create_processing_url'] = reverse_lazy('sampling:sampling_analysis_gravimetry', kwargs={'pk': self.object.id})
+        elif self.object.analytical_method.type_method == 'Lectura Directa':
+            context['create_processing_url'] = reverse_lazy('sampling:sampling_analysis_direct', kwargs={'pk': self.object.id})
         return context
 
 
-# Registro de Procesamiento de Análisis
 class SamplingAnalysisProcessingCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para el registro de procesamiento de análisis volumétrico."""
     model = SamplingAnalysisProcessing
     form_class = SamplingAnalysisProcessingForm
     template_name = 'analysis_sampling/create_sampling_analysis_processing.html'
@@ -82,9 +167,11 @@ class SamplingAnalysisProcessingCreateView(LoginRequiredMixin, ValidatePermissio
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de registro de procesamiento volumétrico."""
         data = {}
         try:
             action = request.POST['action']
@@ -102,30 +189,34 @@ class SamplingAnalysisProcessingCreateView(LoginRequiredMixin, ValidatePermissio
         return JsonResponse(data)
 
     def get_form_kwargs(self):
+        """Agrega el análisis a los kwargs del formulario."""
         kwargs = super().get_form_kwargs()
         analysis = SamplingAnalysis.objects.get(pk=self.kwargs.get('pk'))
         kwargs.update({'analysis': analysis})
         return kwargs
 
     def get_context_data(self, **kwargs):
+        """Agrega la entidad y acción al contexto."""
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Registro de Procesamiento de Análisis'
         return context
 
 
-# Registro de Procesamiento de Análisis Relacional
-class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
-    model = SamplingAnalysisProcessingRelation
-    form_class = SamplingAnalysisProcessingRelationForm
+class SamplingAnalysisProcessingGravimetryCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para el registro de procesamiento de análisis gravimétrico."""
+    model = SamplingAnalysisProcessing
+    form_class = SamplingAnalysisProcessingGravimetryForm
     template_name = 'analysis_sampling/create_sampling_analysis_processing.html'
     permission_required = 'reagent.add_reagent'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de registro de procesamiento gravimétrico."""
         data = {}
         try:
             action = request.POST['action']
@@ -133,7 +224,7 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
                 form = self.get_form()
                 if form.is_valid():
                     form.save()
-                    messages.success(request, '¡Procesamiento Relacional Registrado Satisfactoriamente!')
+                    messages.success(request, '¡Procesamiento Registrado Satisfactoriamente!')
                 else:
                     data['error'] = form.errors
             else:
@@ -143,147 +234,556 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
         return JsonResponse(data)
 
     def get_form_kwargs(self):
+        """Agrega el análisis a los kwargs del formulario."""
         kwargs = super().get_form_kwargs()
-        analysis = get_object_or_404(SamplingAnalysis, pk=self.kwargs.get('pk'))
-        relation = get_object_or_404(
-            AnalyticalMethodCalculateRelation,
-            pk=self.kwargs.get('pk_relation'),
-            analytical_method=analysis.analytical_method
-        )
+        analysis = SamplingAnalysis.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'analysis': analysis})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        """Agrega la entidad y acción al contexto."""
+        context = super().get_context_data(**kwargs)
+        context['action'] = 'add'
+        context['entity'] = 'Registro de Procesamiento de Análisis Gravimétrico'
+        return context
+
+
+class SamplingAnalysisProcessingDirectCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para el registro de análisis por lectura directa (pH, densidad, viscosidad)."""
+    model = SamplingAnalysisProcessing
+    form_class = SamplingAnalysisProcessingDirectForm
+    template_name = 'modal_one.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Procesa el formulario de registro de lectura directa."""
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'add':
+                form = self.get_form()
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, '¡Procesamiento Registrado Satisfactoriamente!')
+                else:
+                    data['error'] = form.errors
+            else:
+                data['error'] = 'No ha ingresado datos en los campos'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_form_kwargs(self):
+        """Agrega el análisis a los kwargs del formulario."""
+        kwargs = super().get_form_kwargs()
+        analysis = SamplingAnalysis.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'analysis': analysis})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        """Agrega la entidad con la descripción del método al contexto."""
+        context = super().get_context_data(**kwargs)
+        analysis = SamplingAnalysis.objects.get(pk=self.kwargs.get('pk'))
+        context['action'] = 'add'
+        context['entity'] = 'Registro de ' + str(analysis.analytical_method.description_analytical_method)
+        return context
+
+
+class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para el registro de procesamiento de análisis relacional."""
+    model = SamplingAnalysisProcessingRelation
+    form_class = SamplingAnalysisProcessingRelationForm
+    template_name = 'analysis_sampling/create_sampling_analysis_processing.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Procesa el formulario de registro de cálculo relacional."""
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'add':
+                form = self.get_form()
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, '¡Procesamiento de Calculo de Variables Realizado Satisfactoriamente!')
+                else:
+                    data['error'] = form.errors
+            else:
+                data['error'] = 'No ha ingresado datos en los campos'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_form_kwargs(self):
+        """Agrega el análisis, muestreo y relación de cálculo a los kwargs del formulario."""
+        kwargs = super().get_form_kwargs()
+
+        sampling = SamplingProcess.objects.get(pk=self.kwargs.get('pk'))
+
+        product = None
+
+        if sampling.point_sampling:
+            product = sampling.point_sampling.product
+        elif sampling.group_sampling:
+            product = sampling.group_sampling.sampling_point.product
+
+        relation = AnalyticalMethodCalculateRelation.objects.select_related(
+            'analytical_method_calculate', 'product'
+        ).filter(
+            product=product,
+            calculate_description_relation__isnull=False,
+            analytical_method_calculate__isnull=True
+        ).exclude(calculate_description_relation__in=[None, '']).first()
+
+        analysis = None
+        if relation:
+            analysis = SamplingAnalysis.objects.filter(
+                sampling_process=sampling,
+                analytical_method_relation=relation
+            ).first()
+            if not analysis:
+                analysis = SamplingAnalysis.objects.create(
+                    sampling_process=sampling,
+                    analytical_method_relation=relation
+                )
+        else:
+            analysis = SamplingAnalysis.objects.select_related('sampling_process').filter(sampling_process=self.kwargs.get('pk')).first()
 
         kwargs.update({
             'analysis': analysis,
+            'sampling': sampling,
             'relation': relation
         })
         return kwargs
 
-    # def get_form_kwargs(self):
-    #     kwargs = super().get_form_kwargs()
-    #     analysis = SamplingAnalysis.objects.get(pk=self.kwargs.get('pk'))
-    #     calcule = AnalyticalMethodCalculate.objects.get(pk=self.kwargs.get('pk_calcule'))
-    #     relation = AnalyticalMethodCalculateRelation.objects.filter(analytical_method_calculate_id=analysis.analytical_method.id).first()
-    #
-    #     kwargs.update({
-    #         'analysis': analysis,
-    #         'relation': relation
-    #     })
-    #     return kwargs
-
     def get_form(self, form_class=None):
+        """Precarga los valores de numerador y denominador según las relaciones de cálculo."""
         form = super().get_form(form_class)
-        analysis = get_object_or_404(SamplingAnalysis, pk=self.kwargs.get('pk'))
-        relation = get_object_or_404(
-            AnalyticalMethodCalculateRelation,
-            pk=self.kwargs.get('pk_relation'),
-            analytical_method=analysis.analytical_method
-        )
+        analysis_qs = SamplingAnalysis.objects.select_related('sampling_process').filter(sampling_process=self.kwargs.get('pk'))
+        sampling = SamplingProcess.objects.get(pk=self.kwargs.get('pk'))
 
-        all_relations = AnalyticalMethodCalculateRelation.objects.select_related('analytical_method').filter(
-            analytical_method_id=analysis.analytical_method.id,
-            calculate_description_relation=relation.calculate_description_relation
-        )
-        var_num = all_relations.filter(position__iexact='Numerador')
-        var_den = all_relations.filter(position__iexact='Denominador')
+        product = None
+        if sampling.point_sampling:
+            product = sampling.point_sampling.product
+        elif sampling.group_sampling:
+            product = sampling.group_sampling.sampling_point.product
 
-        base_processing = SamplingAnalysisProcessing.objects.filter(
-            sample_analysis_id=analysis.id,
-            relational_calculation=False
-        ).first()
+        # Validar que existe un producto
+        if not product:
+            return form
 
-        if not base_processing:
-            base_processing = SamplingAnalysisProcessing.objects.filter(
-                sample_analysis__sampling_process_id=analysis.sampling_process_id,
-                relational_calculation=False
-            ).order_by('-analyzed_date').first()
+        # Obtener relaciones de cálculo como QuerySet
+        relation_num_qs = AnalyticalMethodCalculateRelation.objects.select_related('product').filter(
+            product=product, position='Numerador')
 
-        if base_processing:
-            qty_std = float(base_processing.quantity_standard)
-            qty_sample = float(base_processing.quantity_sample)
+        relation_den_qs = AnalyticalMethodCalculateRelation.objects.select_related('product').filter(
+            product=product, position='Denominador')
 
-            def calculate_part(relations, target_pos=None):
-                factor = 1
-                sample = 1
-                std = 1
-                relation_val = 1
-                used_prev = False
-                for r in relations:
-                    if r.factor is not None:
-                        factor *= float(r.factor)
-                    if r.sample_quantity and r.sample_quantity.strip():
-                        sample = float(qty_sample)
-                    if r.volumen_std is not None:
-                        std = qty_std
-                    
-                    # 1. Prioridad: Cálculo específico definido en la relación
-                    if r.analytical_method_calculate is not None:
-                        prev_processing = SamplingAnalysisProcessing.objects.filter(
-                            sample_analysis__sampling_process_id=analysis.sampling_process_id,
-                            analytical_method_calculate=r.analytical_method_calculate,
-                            relational_calculation=False
-                        ).order_by('-analyzed_date').first()
-                        if prev_processing:
-                            relation_val *= prev_processing.concentration_sample
-                            used_prev = True
-                
-                # 2. Si no se encontró por cálculo específico, buscar por posición (ej. Denominador)
-                if not used_prev and target_pos:
-                    prev_processing_pos = SamplingAnalysisProcessing.objects.filter(
-                        sample_analysis__sampling_process_id=analysis.sampling_process_id,
-                        analytical_method_calculate__position__iexact=target_pos,
-                        relational_calculation=False
-                    ).order_by('-analyzed_date').first()
-                    if prev_processing_pos:
-                        relation_val = prev_processing_pos.concentration_sample
-                        used_prev = True
+        _relation = AnalyticalMethodCalculateRelation.objects.select_related('product').filter(
+            product=product).exclude(calculate_description_relation__in=[None, '']).first()
 
-                # 3. Fallback final al procesamiento base
-                if not used_prev:
-                    if base_processing:
-                        relation_val = base_processing.concentration_sample
-                
-                return std * factor * sample * relation_val
+        # Inicializar variables
+        numerator = 1.0
+        denominator = 1.0
+        has_num = False
+        has_den = False
 
-            if 'numerator' in form.fields:
-                val_num = calculate_part(var_num, 'Numerador')
-                form.initial['numerator'] = val_num
-                form.fields['numerator'].initial = val_num
-            if 'denominator' in form.fields:
-                val_den = calculate_part(var_den, 'Denominador')
-                form.initial['denominator'] = val_den
-                form.fields['denominator'].initial = val_den
+        # Procesar numerador
+        for relation_num in relation_num_qs:
+            if relation_num.analytical_method_calculate:
+                # Obtener el análisis correspondiente
+                target_analysis = analysis_qs.select_related('analytical_method').filter(
+                    analytical_method=relation_num.analytical_method_calculate.analytical_method
+                ).first()
+
+                if target_analysis and target_analysis.average_concentration:
+                    val_num = float(target_analysis.average_concentration)
+                    if relation_num.factor:
+                        val_num *= relation_num.factor
+                    numerator *= val_num
+                    has_num = True
+            else:
+                numerator *= relation_num.factor
+                has_num = True
+
+        # Procesar denominador
+        for relation_den in relation_den_qs:
+            if relation_den.analytical_method_calculate:
+                # Obtener el análisis correspondiente
+                target_analysis = analysis_qs.select_related('analytical_method').filter(
+                    analytical_method=relation_den.analytical_method_calculate.analytical_method
+                ).first()
+
+                if target_analysis and target_analysis.average_concentration:
+                    val_den = float(target_analysis.average_concentration)
+                    if relation_den.factor:
+                        val_den *= relation_den.factor
+                    denominator *= val_den
+                    has_den = True
+            else:
+                denominator *= relation_den.factor
+                has_den = True
+
+
+        # Establecer valores por defecto si no se encontraron
+        if not has_num:
+            numerator = 0.0
+        if not has_den:
+            denominator = 1.0
+
+        # Asignar valores al formulario
+        form.initial['numerator'] = round(numerator, 4)
+        form.initial['denominator'] = round(denominator, 4)
+
+        # Calcular el resultado
+        sign_figs = _relation.sig_figs if _relation.sig_figs else 4
+
+        if denominator != 0:
+            form.initial['calcule'] = round(numerator / denominator, sign_figs)
+        else:
+            form.initial['calcule'] = 0
 
         return form
 
     def get_context_data(self, **kwargs):
+        """Agrega la entidad con la descripción del cálculo al contexto."""
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
-        relation = get_object_or_404(AnalyticalMethodCalculateRelation, pk=self.kwargs.get('pk_relation'))
-        context['entity'] = f'Calcular {relation.calculate_description_relation}'
-        # context['confirm_msg'] = '¿Está Seguro de Ejecutar el Calculo?'
+
+        sampling = SamplingProcess.objects.get(pk=self.kwargs.get('pk'))
+
+        product = None
+        if sampling.point_sampling:
+            product = sampling.point_sampling.product
+        elif sampling.group_sampling:
+            product = sampling.group_sampling.sampling_point.product
+
+        relation = AnalyticalMethodCalculateRelation.objects.select_related('product').filter(
+            product=product).exclude(calculate_description_relation__in=[None, '']).first()
+
+        if relation:
+            context['entity'] = f'Calcular {relation.calculate_description_relation}'
+        else:
+            context['entity'] = 'Cálculo Relacional'
+
         context['detail_button'] = 'Si, Ejecutar'
-        context['relation'] = relation
+        context['calculo'] = 'True'
         return context
 
 
-# Vista para Obtener la unidad de medida del reactivo
-# @login_required
-# @require_GET
-# def get_solution_std_unit(request):
-#     """Obtiene la unidad de medida del reactivo de la solución estándar"""
-#     try:
-#         solution_id = request.GET.get('solution_id')
-#         if not solution_id:
-#             return JsonResponse({'unit': None})
-#
-#         solution = SolutionStd.objects.select_related(
-#             'solute_std__reagent'
-#         ).get(pk=solution_id)
-#
-#         # Obtener la unidad de medida del reactivo
-#         unit = solution.solute_std.reagent.umb if solution.solute_std and solution.solute_std.reagent else None
-#
-#         return JsonResponse({'unit': unit})
-#     except SolutionStd.DoesNotExist:
-#         return JsonResponse({'unit': None})
-#     except Exception as e:
-#         return JsonResponse({'error': str(e)}, status=400)
+class SamplingAnalysisProcessingRelationDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DeleteView):
+    """Vista para eliminar un cálculo de variables relacionadas."""
+    model = SamplingAnalysisProcessingRelation
+    template_name = 'analysis_sampling/delete_analysis.html'
+    permission_required = 'reagent.add_reagent'
+
+    def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud de eliminación."""
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Elimina el cálculo de variables relacionadas."""
+        data = {}
+        try:
+            detail = self.object.analytical_method_calculate_relation.calculate_description_relation
+            self.object.delete()
+            messages.success(request, f'Cálculo de {detail} eliminado satisfactoriamente!')
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        """Agrega la entidad y mensaje de confirmación al contexto."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Eliminar de Calculo'
+        context['delete'] = 'Está seguro de eliminar calculo de parametro?'
+        context['info_delete'] = f'{self.object.analytical_method_calculate_relation.calculate_description_relation}'
+        return context
+
+
+class MillimoleReactedCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para el registro de milimoles que reaccionaron en valoración por retroceso."""
+    model = MillimoleReacted
+    form_class = MillimoleReactedForm
+    template_name = 'analysis_sampling/create_sampling_analysis_processing.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Procesa el formulario de registro de soluciones estándar."""
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'add':
+                form = self.get_form()
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, '¡Soluciones Estándar Registrados Satisfactoriamente!')
+                else:
+                    data['error'] = form.errors
+            else:
+                data['error'] = 'No ha ingresado datos en los campos'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_form_kwargs(self):
+        """Agrega el análisis a los kwargs del formulario."""
+        kwargs = super().get_form_kwargs()
+        analysis = SamplingAnalysis.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'analysis': analysis})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        """Agrega la entidad y acción al contexto."""
+        context = super().get_context_data(**kwargs)
+        context['action'] = 'add'
+        context['entity'] = 'Registro de Soluciones Estándar Adicionada y Gastada'
+        return context
+
+
+class MillimoleReactedDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DeleteView):
+    """Vista para eliminar un registro de milimoles que reaccionaron."""
+    model = MillimoleReacted
+    template_name = 'analysis_sampling/delete_analysis.html'
+    permission_required = 'reagent.add_reagent'
+
+    def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud de eliminación."""
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Elimina el registro de milimoles."""
+        data = {}
+        try:
+            self.object.delete()
+            messages.success(request, f'Registro de milimoles eliminado satisfactoriamente!')
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        """Agrega la entidad y mensaje de confirmación al contexto."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Eliminar Registro de Milimoles'
+        context['delete'] = '¿Está seguro de eliminar este registro de milimoles?'
+        context['info_delete'] = f'{self.object.millimole}'
+        return context
+
+
+class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista para el listado de análisis de muestras."""
+    model = SamplingAnalysis
+    template_name = 'analysis_sampling/list_analysis.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Procesa solicitudes POST para búsqueda y eliminación de análisis."""
+        data = {}
+        try:
+            action = request.POST.get('action')
+            if action == 'searchdata':
+                data = []
+                for i in SamplingAnalysis.objects.all().select_related(
+                    'sampling_process',
+                    'sampling_process__group_sampling',
+                    'sampling_process__group_sampling__sampling_point',
+                    'sampling_process__point_sampling',
+                    'analytical_method'
+                ):
+                    data.append(i.toJSON())
+            elif action == 'delete':
+                pk = request.POST.get('id')
+                obj = SamplingAnalysis.objects.get(pk=pk)
+                obj.delete()
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        """Agrega el título y entidad del listado al contexto."""
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Listado de Análisis de Muestras'
+        context['create_url'] = reverse_lazy('sampling:create_sampling_analysis')
+        context['list_url'] = reverse_lazy('sampling:list_sampling_analysis')
+        context['entity'] = 'Análisis de Muestras'
+        return context
+
+
+class SamplingAnalysisCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para asociar un método analítico a una muestra."""
+    model = SamplingAnalysis
+    form_class = SamplingAnalysisForm
+    template_name = 'analysis_sampling/create_analysis.html'
+    success_url = reverse_lazy('sampling:list_sampling_analysis')
+    permission_required = 'reagent.add_reagent'
+
+    def post(self, request, *args, **kwargs):
+        """Procesa el formulario de asociación de método analítico."""
+        data = {}
+        try:
+            action = request.POST.get('action')
+            if action == 'add':
+                form = self.get_form()
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, f'Método de Analisis Asociado Satisfactoriamente!')
+                    data['success'] = True
+                else:
+                    for field, errors in form.errors.items():
+                        for error in errors:
+                            if field == '__all__':
+                                messages.error(request, error)
+                            else:
+                                messages.error(request, f"{field}: {error}")
+                    data['success'] = False
+                    data['errors'] = form.errors
+            else:
+                data['error'] = 'No ha ingresado a ninguna opción'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_form_kwargs(self):
+        """Agrega el proceso de muestreo a los kwargs del formulario."""
+        kwargs = super().get_form_kwargs()
+        sampling_process = SamplingProcess.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'sampling_process': sampling_process})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        """Agrega la entidad y acción al contexto."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Asociar Método de Analísis'
+        context['action'] = 'add'
+        return context
+
+
+class SamplingAnalysisDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DeleteView):
+    """Vista para eliminar un análisis de muestra."""
+    model = SamplingAnalysis
+    template_name = 'analysis_sampling/delete_analysis.html'
+    success_url = reverse_lazy('sampling:list_sampling_analysis')
+    permission_required = 'reagent.add_reagent'
+
+    def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud de eliminación."""
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Elimina el análisis de muestra."""
+        data = {}
+        try:
+            self.object.delete()
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        """Agrega la entidad y mensaje de confirmación al contexto."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Eliminación de Método de Análisis de Muestra'
+        context['info_delete'] = f'¿Está seguro de eliminar el método de análisis "{self.object.analytical_method}"?'
+        return context
+
+
+class SamplingAnalysisProcessingListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista para el listado de procesamiento de análisis."""
+    model = SamplingAnalysisProcessing
+    template_name = 'analysis_sampling/list_processing.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Procesa solicitudes POST para la búsqueda de procesamientos (server-side DataTables)."""
+        data = {}
+        try:
+            action = request.POST.get('action')
+            if action == 'searchdata':
+                draw = int(request.POST.get('draw', 1))
+                start = int(request.POST.get('start', 0))
+                length = int(request.POST.get('length', 10))
+
+                qs = SamplingAnalysisProcessing.objects.select_related(
+                    'sample_analysis',
+                    'sample_analysis__sampling_process',
+                    'sample_analysis__analytical_method',
+                    'analyzed_by',
+                    'analytical_method_calculate',
+                    'analytical_method_calculate_relation'
+                )
+                if request.user.laboratory:
+                    qs = qs.filter(
+                        Q(sample_analysis__sampling_process__group_sampling__sampling_point__product__site=request.user.laboratory.site) |
+                        Q(sample_analysis__sampling_process__point_sampling__product__site=request.user.laboratory.site)
+                    )
+                else:
+                    qs = qs.none()
+
+                records_total = qs.count()
+
+                order_column = request.POST.get('order[0][column]', '1')
+                order_dir = request.POST.get('order[0][dir]', 'desc')
+                order_map = {
+                    '0': 'analyzed_by__first_name',
+                    '1': 'analyzed_date',
+                    '2': 'sample_analysis__analytical_method__description_analytical_method',
+                    '3': 'concentration_sample',
+                    '4': 'sample_analysis__sampling_process__number_sample',
+                }
+                order_field = order_map.get(order_column, 'analyzed_date')
+                if order_dir == 'desc':
+                    order_field = '-' + order_field
+
+                qs = qs.order_by(order_field)[start:start + length]
+
+                page_data = [i.toJSON() for i in qs]
+
+                return JsonResponse({
+                    'draw': draw,
+                    'recordsTotal': records_total,
+                    'recordsFiltered': records_total,
+                    'data': page_data
+                })
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        """Agrega el título y entidad del listado al contexto."""
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Listado de Procesamiento de Análisis'
+        context['list_url'] = reverse_lazy('sampling:list_sampling_analysis_processing')
+        context['entity'] = 'Procesamiento de Análisis'
+        return context
+

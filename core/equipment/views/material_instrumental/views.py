@@ -1,3 +1,5 @@
+"""Vistas de material instrumental para la gestión de materiales y utensilios de laboratorio."""
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
@@ -11,8 +13,9 @@ from core.equipment.models import MaterialInstrumental
 from core.mixins import ValidatePermissionRequiredMixin
 
 
-# Creación de Material Instrumental
 class MaterialInstrumentalCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista de creación de material instrumental."""
+
     model = MaterialInstrumental
     form_class = MaterialInstrumentalForm
     template_name = 'material_instrumental/create_material.html'
@@ -20,10 +23,12 @@ class MaterialInstrumentalCreateView(LoginRequiredMixin, ValidatePermissionRequi
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP inicializando el objeto como nulo."""
         self.object = None
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la solicitud POST para registrar un nuevo material instrumental."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -55,30 +60,35 @@ class MaterialInstrumentalCreateView(LoginRequiredMixin, ValidatePermissionRequi
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de redirección después de crear un material instrumental."""
         return reverse('equipment:list_material_instrumental')
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de creación."""
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Registrar Material Instrumental'
+        context['title'] = 'Crear Material Instrumental'
         context['action'] = 'add'
-        context['entity'] = 'Materiales Instrumentales'
+        context['entity'] = 'Crear Material Instrumental'
         context['div'] = '10'
         context['icon'] = 'fa-solid fa-flask'
         context['list_url'] = reverse_lazy('equipment:list_material_instrumental')
         return context
 
 
-# Listado de Materiales Instrumentales
 class MaterialInstrumentalListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista de listado de materiales instrumentales."""
+
     model = MaterialInstrumental
     template_name = 'material_instrumental/list_material.html'
     permission_required = 'equipment.view_materialinstrumental'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP aplicando la exención de CSRF."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa las solicitudes POST para la búsqueda y listado de materiales instrumentales."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -96,13 +106,10 @@ class MaterialInstrumentalListView(LoginRequiredMixin, ValidatePermissionRequire
                     'enable_instrumental'
                 ).order_by('-code_instrumental'))
 
-                # Formatear el nombre completo del responsable
                 for material in materials:
                     first_name = material.get('responsible_user__first_name', '') or ''
                     last_name = material.get('responsible_user__last_name', '') or ''
                     material['responsible_user__full_name'] = f"{first_name} {last_name}".strip()
-
-                    # Formatear estado
                     material['enable_instrumental_display'] = 'Sí' if material['enable_instrumental'] else 'No'
 
                 return JsonResponse(materials, safe=False)
@@ -113,17 +120,19 @@ class MaterialInstrumentalListView(LoginRequiredMixin, ValidatePermissionRequire
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de listado."""
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Listado de Materiales Instrumentales'
+        context['title'] = 'Material Instrumental'
         context['create_url'] = reverse_lazy('equipment:create_material_instrumental')
-        context['entity'] = 'Materiales Instrumentales'
+        context['entity'] = 'Material Instrumental'
         context['div'] = '12'
         context['icon'] = 'fa-solid fa-flask'
         return context
 
 
-# Edición de Materiales Instrumentales
 class MaterialInstrumentalUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista de edición de materiales instrumentales."""
+
     model = MaterialInstrumental
     form_class = MaterialInstrumentalForm
     template_name = 'material_instrumental/update_material.html'
@@ -131,10 +140,12 @@ class MaterialInstrumentalUpdateView(LoginRequiredMixin, ValidatePermissionRequi
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP obteniendo el objeto a editar."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la solicitud POST para actualizar un material instrumental existente."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -166,9 +177,11 @@ class MaterialInstrumentalUpdateView(LoginRequiredMixin, ValidatePermissionRequi
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de redirección después de editar un material instrumental."""
         return reverse('equipment:list_material_instrumental')
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de edición."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Editar Material Instrumental'
         context['entity'] = 'Editar Material Instrumental'
@@ -179,16 +192,19 @@ class MaterialInstrumentalUpdateView(LoginRequiredMixin, ValidatePermissionRequi
         return context
 
 
-# Detalle de Material Instrumental
 class MaterialInstrumentalDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """Vista de detalle de material instrumental."""
+
     model = MaterialInstrumental
     template_name = 'material_instrumental/detail_material.html'
     permission_required = 'equipment.view_materialinstrumental'
 
     def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP."""
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de detalle."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Detalle de Material Instrumental'
         context['entity'] = 'Detalle de Material Instrumental'

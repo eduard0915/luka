@@ -1,3 +1,5 @@
+"""Formularios para la gestión de usuarios, capacitaciones y competencias."""
+
 from datetime import timedelta
 
 from django.forms import *
@@ -8,9 +10,11 @@ from core.user.models import *
 SELECT = [(True, 'Si'), (False, 'No')]
 
 
-# Creación de usuario
 class UserForm(ModelForm):
+    """Formulario para la creación de un nuevo usuario."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de creación de usuario configurando etiquetas y desactivando autocompletado."""
         super().__init__(*args, **kwargs)
         self.fields['groups'].label = 'Perfil'
         self.fields['email'].label = 'E-mail'
@@ -20,7 +24,8 @@ class UserForm(ModelForm):
     class Meta:
         model = User
         fields = [
-            'first_name', 'last_name', 'email', 'cargo', 'cellphone', 'cedula', 'username', 'password', 'groups', 'site', 'photo'
+            'first_name', 'last_name', 'email', 'cargo', 'cellphone', 'cedula', 'username', 'password', 'groups',
+            'laboratory', 'photo', 'notification_email_oss'
         ]
         widgets = {
             'password': PasswordInput(render_value=True, attrs={'class': 'form-control'}),
@@ -32,19 +37,20 @@ class UserForm(ModelForm):
             'cedula': TextInput(attrs={'class': 'form-control'}),
             'username': TextInput(attrs={'class': 'form-control'}),
             'groups': SelectMultiple(attrs={'class': 'form-control', 'required': True}),
-            'site': Select(attrs={'class': 'form-control', 'required': True}),
+            'laboratory': Select(attrs={'class': 'form-control', 'required': True}),
+            'notification_email_oss': Select(attrs={'class': 'form-control'}, choices=SELECT),
             'photo': FileInput(attrs={'class': 'form-control-file'})
         }
         exclude = ['user_permissions', 'last_login', 'date_joined', 'is_superuser', 'is_staff', 'is_active']
         help_texts = {
             'groups': 'Seleccione perfil del usuario',
-            'is_active': 'Indica si el usuario está habilitado',
             'username': 'Únicamente letras y/o números',
             'photo': 'Opcional, máximo 256Kb .jpg .png',
         }
 
 
     def save(self, commit=True):
+        """Guarda el usuario, encripta la contraseña si es nueva y asigna los grupos."""
         data = {}
         form = super()
         try:
@@ -70,7 +76,9 @@ class UserForm(ModelForm):
 
 # Edición de usuario por administrador
 class UserUpdateAdminForm(ModelForm):
+    """Formulario para la edición de un usuario por parte del administrador."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de edición administrativa configurando etiquetas y desactivando autocompletado."""
         super().__init__(*args, **kwargs)
         self.fields['groups'].label = 'Perfil'
         for form in self.visible_fields():
@@ -78,7 +86,10 @@ class UserUpdateAdminForm(ModelForm):
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'cargo', 'cellphone', 'cedula', 'username', 'site', 'groups', 'photo']
+        fields = [
+            'first_name', 'last_name', 'email', 'cargo', 'cellphone', 'cedula', 'username', 'laboratory', 'photo',
+            'notification_email_oss', 'is_active', 'groups',
+        ]
         widgets = {
             'first_name': TextInput(attrs={'class': 'form-control', 'required': True}),
             'last_name': TextInput(attrs={'class': 'form-control', 'required': True}),
@@ -88,7 +99,9 @@ class UserUpdateAdminForm(ModelForm):
             'cedula': TextInput(attrs={'class': 'form-control'}),
             'username': TextInput(attrs={'class': 'form-control', 'readonly': True}),
             'groups': SelectMultiple(attrs={'class': 'form-control', 'required': True}),
-            'site': Select(attrs={'class': 'form-control', 'required': True}),
+            'laboratory': Select(attrs={'class': 'form-control', 'required': True}),
+            'notification_email_oss': Select(attrs={'class': 'form-control'}, choices=SELECT),
+            'is_active': Select(attrs={'class': 'form-control'}, choices=SELECT),
             'photo': FileInput(attrs={'class': 'form-control-file'})
 
         }
@@ -97,9 +110,11 @@ class UserUpdateAdminForm(ModelForm):
         help_texts = {
             'groups': 'Seleccione perfil del usuario',
             'photo': 'Opcional, máximo 256Kb .jpg .png',
+            'is_active': 'Indica si el usuario está habilitado'
         }
 
     def save(self, commit=True):
+        """Guarda los cambios realizados al usuario por el administrador."""
         data = {}
         form = super()
         try:
@@ -114,7 +129,9 @@ class UserUpdateAdminForm(ModelForm):
 
 # Edición de usuario
 class UserUpdateForm(ModelForm):
+    """Formulario para que un usuario edite su propia información."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de edición de perfil propio desactivando el autocompletado."""
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -140,6 +157,7 @@ class UserUpdateForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda los cambios realizados por el usuario a su propia información."""
         data = {}
         form = super()
         try:
@@ -154,7 +172,9 @@ class UserUpdateForm(ModelForm):
 
 # Reseteo de contraseña de usuario por administrador
 class UserPasswordUpdateForm(ModelForm):
+    """Formulario para que un administrador restablezca la contraseña de un usuario."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de reseteo de contraseña desactivando el autocompletado."""
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -170,6 +190,7 @@ class UserPasswordUpdateForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la nueva contraseña del usuario encriptándola si ha cambiado."""
         data = {}
         form = super()
         try:
@@ -192,7 +213,9 @@ class UserPasswordUpdateForm(ModelForm):
 
 # Creación de capacitación
 class TrainingForm(ModelForm):
+    """Formulario para el registro de una capacitación asociada a un usuario."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario extrayendo el usuario destino y desactivando el autocompletado."""
         self.user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -210,6 +233,7 @@ class TrainingForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la capacitación asociándola al usuario y calculando la alerta de vencimiento."""
         data = {}
         form = super()
         company = Company.objects.first()
@@ -228,7 +252,9 @@ class TrainingForm(ModelForm):
 
 # Actualización de capacitación
 class TrainingCreateForm(ModelForm):
+    """Formulario para registrar una actualización de capacitación existente."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario extrayendo la capacitación original y desactivando el autocompletado."""
         self.training = kwargs.pop('training')
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -245,6 +271,7 @@ class TrainingCreateForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la actualización de capacitación heredando datos de la capacitación original."""
         data = {}
         form = super()
         company = Company.objects.first()
@@ -264,7 +291,9 @@ class TrainingCreateForm(ModelForm):
 
 # Edición de capacitación
 class TrainingUpdateForm(ModelForm):
+    """Formulario para la edición de una capacitación existente."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de edición de capacitación desactivando el autocompletado."""
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -282,6 +311,7 @@ class TrainingUpdateForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda los cambios de la capacitación y recalcula la alerta de vencimiento."""
         data = {}
         form = super()
         company = Company.objects.first()
@@ -299,7 +329,9 @@ class TrainingUpdateForm(ModelForm):
 
 # Creación de competencia
 class CompetenceForm(ModelForm):
+    """Formulario para el registro de una competencia asociada a un usuario."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario extrayendo el usuario destino y desactivando el autocompletado."""
         self.user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -317,6 +349,7 @@ class CompetenceForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la competencia asociándola al usuario correspondiente."""
         data = {}
         form = super()
         try:
@@ -333,7 +366,9 @@ class CompetenceForm(ModelForm):
 
 # Edición de competencia
 class CompetenceUpdateForm(ModelForm):
+    """Formulario para la edición de una competencia existente."""
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de edición de competencia desactivando el autocompletado."""
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -350,6 +385,7 @@ class CompetenceUpdateForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda los cambios realizados a la competencia."""
         data = {}
         form = super()
         try:

@@ -1,1 +1,43 @@
 {% extends 'modal_two.html' %}
+
+{% block scripts_detail %}
+    {{ block.super }}
+    <script type="application/javascript">
+        $(document).ready(function () {
+            const reagentStd = $('#id_reagent_std');
+            const solutionStdBase = $('#id_solution_std_base');
+
+            function toggleFields() {
+                const reagentVal = reagentStd.val();
+                const solutionVal = solutionStdBase.val();
+
+                if (reagentVal) {
+                    solutionStdBase.val('').prop('disabled', true).trigger('change.select2');
+                } else if (solutionVal) {
+                    reagentStd.val('').prop('disabled', true).trigger('change.select2');
+                } else {
+                    reagentStd.prop('disabled', false).trigger('change.select2');
+                    solutionStdBase.prop('disabled', false).trigger('change.select2');
+                }
+            }
+
+            reagentStd.on('change', function () {
+                if ($(this).val()) {
+                    solutionStdBase.val('').prop('disabled', true).trigger('change.select2');
+                } else {
+                    solutionStdBase.prop('disabled', false).trigger('change.select2');
+                }
+            });
+
+            solutionStdBase.on('change', function () {
+                if ($(this).val()) {
+                    reagentStd.val('').prop('disabled', true).trigger('change.select2');
+                } else {
+                    reagentStd.prop('disabled', false).trigger('change.select2');
+                }
+            });
+
+            toggleFields();
+        });
+    </script>
+{% endblock %}

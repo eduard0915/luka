@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 data: function (d) {
                     d.action = 'searchdata';
                     d.status_filter = typeof status_filter !== 'undefined' ? status_filter : '';
+                    d.out_specification = typeof out_specification !== 'undefined' ? out_specification : '';
                 },
                 dataSrc: ""
             },
@@ -52,19 +53,29 @@ document.addEventListener('DOMContentLoaded', function () {
                         } else if (status === 'Confirmada') {
                             badge_class = 'bg-info';
                         } else if (status === 'En Proceso') {
-                            badge_class = 'bg-primary';
-                        } else if (status === 'Procesada') {
-                            badge_class = 'bg-success';
-                        } else if (status === 'Cancelada') {
                             badge_class = 'bg-secondary';
+                        } else if (status === 'Aprobado') {
+                            badge_class = 'bg-primary';
+                        } else if (status === 'Cancelado') {
+                            badge_class = 'bg-dark';
                         }
 
                         return '<span class="badge ' + badge_class + ' ' + text_class + '">' + status + '</span>';
                     }
                 },
                 {
-                    targets: [1, 2, 3],
+                    targets: [1, 2],
                     class: 'td-actions text-center align-middle'
+                },
+                {
+                    targets: [3],
+                    class: 'td-actions text-center align-middle',
+                    render: function (data) {
+                        if (!data || data === 'None' || data === '') {
+                            return 'Automático';
+                        }
+                        return data;
+                    }
                 },
                 {
                     targets: [5],

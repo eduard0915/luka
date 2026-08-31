@@ -30,9 +30,11 @@
         {% url 'sampling:list_sampling_process' as list_sampling %}
         {% url 'sampling:list_sampling_process_scheduled' as list_sampling_sch %}
         {% url 'sampling:list_sampling_process_confirmed' as list_sampling_conf %}
+        {% url 'sampling:list_sampling_analysis_processing' as list_processing %}
+        {% url 'sampling:list_massive_sample_analysis' as list_massive %}
         {% url 'sampling:create_sampling_process' as create_sampling %}
 
-        {% is_expanded create_method list_method list_sampling create_sampling as analysis_expanded %}
+        {% is_expanded create_method list_method list_sampling create_sampling list_processing list_massive as analysis_expanded %}
 
         {% is_active_section create_method list_method as method_active %}
 
@@ -48,8 +50,43 @@
                         <i class="icon bi bi-circle-fill"></i>Métodos
                     </a>
                 </li>
-                <li><a class="treeview-item {% if list_sampling in request.path %}active{% endif %}" href="{% url 'sampling:list_sampling_process' %}"><i class="icon bi bi-circle-fill"></i>
-                    Muestreos</a>
+                <li><a class="treeview-item {% if list_sampling in request.path %}active{% endif %}" href="{% url 'sampling:list_sampling_process' %}"><i class="icon bi bi-circle-fill"></i>Muestreos</a></li>
+                <li><a class="treeview-item {% if list_processing in request.path %}active{% endif %}" href="{% url 'sampling:list_sampling_analysis_processing' %}"><i class="icon bi bi-circle-fill"></i>Procesamiento/Analista</a></li>
+                <li><a class="treeview-item {% if list_massive in request.path %}active{% endif %}" href="{% url 'sampling:list_massive_sample_analysis' %}"><i class="icon bi bi-circle-fill"></i>Metales Pesados</a></li>
+            </ul>
+        </li>
+
+        {% url 'report:sampling_analysis_list' as sampling_analysis_report %}
+        {% url 'report:sampling_analysis_list_point' as sampling_analysis_report_point %}
+        {% url 'report:sampling_analysis_chart' as sampling_analysis_chart %}
+        {% url 'report:sampling_analysis_processing_list' as sampling_analysis_processing_list %}
+
+        {% is_expanded sampling_analysis_report sampling_analysis_report_point sampling_analysis_chart sampling_analysis_processing_list as report_expanded %}
+
+        <li class="{{ report_expanded }}">
+            <a class="app-menu__item" href="#" data-toggle="treeview"><i
+                class="app-menu__icon bi bi-graph-up"></i><span class="app-menu__label">Reportes</span><i
+                class="treeview-indicator bi bi-chevron-right"></i></a>
+            <ul class="treeview-menu">
+                <li>
+                    <a class="treeview-item {% if sampling_analysis_report in request.path %}active{% endif %}" href="{% url 'report:sampling_analysis_list' %}">
+                        <i class="icon bi bi-circle-fill"></i>Análisis Diario - Método
+                    </a>
+                </li>
+                <li>
+                    <a class="treeview-item {% if sampling_analysis_report_point in request.path %}active{% endif %}" href="{% url 'report:sampling_analysis_list_point' %}">
+                        <i class="icon bi bi-circle-fill"></i>Análisis Diario - Punto
+                    </a>
+                </li>
+                <li>
+                    <a class="treeview-item {% if sampling_analysis_chart in request.path %}active{% endif %}" href="{% url 'report:sampling_analysis_chart' %}">
+                        <i class="icon bi bi-circle-fill"></i>Análisis Diario - Gráfico
+                    </a>
+                </li>
+                <li>
+                    <a class="treeview-item {% if sampling_analysis_processing_list in request.path %}active{% endif %}" href="{% url 'report:sampling_analysis_processing_list' %}">
+                        <i class="icon bi bi-circle-fill"></i>Análisis por Analista
+                    </a>
                 </li>
             </ul>
         </li>
@@ -123,12 +160,65 @@
             </ul>
         </li>
 
-        <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i
-                class="app-menu__icon bi bi-table"></i><span class="app-menu__label">Laboratorios</span><i
-                class="treeview-indicator bi bi-chevron-right"></i></a>
+{#        <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i#}
+{#                class="app-menu__icon bi bi-table"></i><span class="app-menu__label">Laboratorios</span><i#}
+{#                class="treeview-indicator bi bi-chevron-right"></i></a>#}
+{#            <ul class="treeview-menu">#}
+{#                <li><a class="treeview-item" href="#"><i class="icon bi bi-circle-fill"></i> Mantenimientos</a></li>#}
+{#                <li><a class="treeview-item" href="#"><i class="icon bi bi-circle-fill"></i> Calibraciones</a></li>#}
+{#            </ul>#}
+{#        </li>#}
+
+        {% url 'equipment:list_equipment_instrumental' as list_eq %}
+        {% url 'equipment:create_equipment_instrumental' as create_eq %}
+        {% url 'equipment:list_maintenance' as list_maint %}
+        {% url 'equipment:create_maintenance' as create_maint %}
+        {% url 'equipment:list_calibration' as list_calib %}
+        {% url 'equipment:create_calibration' as create_calib %}
+        {% url 'equipment:list_verification' as list_verif %}
+        {% url 'equipment:create_verification' as create_verif %}
+        {% url 'equipment:list_daily_verification' as list_daily_verif %}
+        {% url 'equipment:create_daily_verification' as create_daily_verif %}
+
+        {% is_expanded list_eq create_eq list_maint create_maint list_calib create_calib list_verif create_verif list_daily_verif create_daily_verif as equipment_expanded %}
+        {% is_active_section list_eq create_eq as equipment_active %}
+        {% is_active_section list_maint create_maint as maintenance_active %}
+        {% is_active_section list_calib create_calib as calibration_active %}
+        {% is_active_section list_verif create_verif as verification_active %}
+        {% is_active_section list_daily_verif create_daily_verif as daily_verification_active %}
+
+        <li class="{{ equipment_expanded }}">
+            <a class="app-menu__item" href="#" data-toggle="treeview">
+                <i class="app-menu__icon bi bi-tools"></i>
+                <span class="app-menu__label">Equipos</span><i
+                class="treeview-indicator bi bi-chevron-right"></i>
+            </a>
             <ul class="treeview-menu">
-                <li><a class="treeview-item" href="#"><i class="icon bi bi-circle-fill"></i> Mantenimientos</a></li>
-                <li><a class="treeview-item" href="#"><i class="icon bi bi-circle-fill"></i> Calibraciones</a></li>
+                <li>
+                    <a class="{{ equipment_active }}" href="{{ list_eq }}">
+                        <i class="icon bi bi-circle-fill"></i> Equipo Instrumental
+                    </a>
+                </li>
+                <li>
+                    <a class="{{ maintenance_active }}" href="{{ list_maint }}">
+                        <i class="icon bi bi-circle-fill"></i> Mantenimientos
+                    </a>
+                </li>
+                <li>
+                    <a class="{{ calibration_active }}" href="{{ list_calib }}">
+                        <i class="icon bi bi-circle-fill"></i> Calibraciones
+                    </a>
+                </li>
+                <li>
+                    <a class="{{ verification_active }}" href="{{ list_verif }}">
+                        <i class="icon bi bi-circle-fill"></i> Verificaciones Intermedias
+                    </a>
+                </li>
+                <li>
+                    <a class="{{ daily_verification_active }}" href="{{ list_daily_verif }}">
+                        <i class="icon bi bi-circle-fill"></i> Verificaciones Diarias
+                    </a>
+                </li>
             </ul>
         </li>
 
@@ -153,9 +243,6 @@
         {% url 'laboratory:list_laboratory' as list_lab %}
         {% url 'laboratory:create_laboratory' as create_lab %}
 
-        {% url 'equipment:list_equipment_instrumental' as list_eq %}
-        {% url 'equipment:create_equipment_instrumental' as create_eq %}
-
         {% url 'product:list_product' as list_prod %}
         {% url 'product:create_product' as create_prod %}
 
@@ -166,9 +253,8 @@
         {% url 'solution:list_solution_std_base' as list_std_base %}
 
         {% url 'sampling:list_sampling_group' as list_group %}
-        {% url 'sampling:create_sampling_group' as create_group %}
 
-        {% is_expanded list_lab create_lab list_eq create_eq list_sln_base add_sln_base list_std_base add_std_base list_prod create_prod list_group create_group as config_expanded %}
+        {% is_expanded list_lab create_lab list_sln_base add_sln_base list_std_base add_std_base list_prod create_prod list_group as config_expanded %}
 
         {% if perms.company.add_company %}
             <li class="{{ config_expanded }}">
@@ -178,23 +264,19 @@
                         class="treeview-indicator bi bi-chevron-right"></i></a>
                 <ul class="treeview-menu">
                     {% if company %}
-                        <li><a class="treeview-item" href="{% url 'company:company_detail' company.id %}">
+                        <li><a class="treeview-item" href="{% url 'company:company_detail' company.id %}"><i class="icon bi bi-circle-fill"></i> Empresa</a></li>
                     {% else %}
-                        <li><a class="treeview-item" href="{% url 'company:company_create' %}">
+                        <li><a class="treeview-item" href="{% url 'company:company_create' %}"><i class="icon bi bi-circle-fill"></i> Empresa</a></li>
                     {% endif %}
-                    <i class="icon bi bi-circle-fill"></i> Empresa</a></li>
                     <li><a class="treeview-item {% if list_lab in request.path or create_lab in request.path %}active{% endif %}" href="{% url 'laboratory:list_laboratory' %}">
                         <i class="icon bi bi-circle-fill"></i> Laboratorios</a></li>
                     <li><a class="treeview-item {% if list_sln_base in request.path or add_sln_base in request.path %}active{% endif %}" href="{% url 'solution:list_solution_base' %}">
                         <i class="icon bi bi-circle-fill"></i> Soluciones Base</a></li>
                     <li><a class="treeview-item {% if list_std_base in request.path or add_std_base in request.path %}active{% endif %}" href="{% url 'solution:list_solution_std_base' %}">
                         <i class="icon bi bi-circle-fill"></i> Soluciones STD Base</a></li>
-                    <li><a class="treeview-item {% if list_eq in request.path or create_eq in request.path %}active{% endif %}" href="{% url 'equipment:list_equipment_instrumental' %}">
-                        <i class="icon bi bi-circle-fill"></i> Equipo Instrumental</a></li>
                     <li><a class="treeview-item {% if list_prod in request.path or create_prod in request.path %}active{% endif %}" href="{% url 'product:list_product' %}">
                         <i class="icon bi bi-circle-fill"></i> Productos</a></li>
-                    <li><a class="treeview-item {% if list_group in request.path or create_group in request.path %}active{% endif %}" href="{% url 'sampling:list_sampling_group' %}">
-                        <i class="icon bi bi-circle-fill"></i> Grupos de Muestreo</a></li>
+                    <li><a class="treeview-item {% if list_group in request.path %}active{% endif %}" href="{% url 'sampling:list_sampling_group' %}"><i class="icon bi bi-circle-fill"></i> Grupos de Muestreo</a></li>
                 </ul>
             </li>
         {% endif %}

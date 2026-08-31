@@ -1,3 +1,9 @@
+"""Señales de Django para el módulo de soluciones.
+
+Maneja el descuento automático de inventarios, el registro de
+transacciones y el cálculo de estadísticas de estandarización.
+"""
+
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 
 from django.db import transaction
@@ -13,6 +19,7 @@ from core.solution.models import *
 # Descuento de inventario de reactivos soluto para soluciones
 @receiver(post_save, sender=Solution)
 def discount_inventory_reagent_solute(sender, instance, **kwargs):
+    """Descuenta del inventario las cantidades de soluto y solvente usadas al confirmar una solución."""
 
     if instance.preparation_confirmed and instance.solvent_reagent:
 
@@ -48,6 +55,7 @@ def discount_inventory_reagent_solute(sender, instance, **kwargs):
 # Descuento de inventario de reactivos en preparación de soluciones Estándares
 @receiver(post_save, sender=SolutionStd)
 def discount_reagent_transaction_std(sender, instance, **kwargs):
+    """Descuenta del inventario las cantidades de soluto y solvente usadas al confirmar una solución estándar."""
 
     if instance.preparation_confirmed and instance.solvent_reagent:
 
@@ -95,46 +103,54 @@ def discount_inventory_std_solution(sender, instance, created, **kwargs):
     # Usar transacción atómica para garantizar consistencia
     with transaction.atomic():
 
-        # Actualizar SolutionStd
-        std_solution = SolutionStd.objects.select_for_update().get(pk=instance.standard_solution_id)
-        std_solution.quantity_solution_std = round(
-            float(std_solution.quantity_solution_std) - float(instance.quantity_standard), 2
-        )
-        std_solution.save(update_fields=['quantity_solution_std'])
+        # Actualizar estándar (solución estándar o reactivo pesado)
+        if instance.standard_solution_id:
+            std_solution = SolutionStd.objects.select_for_update().get(pk=instance.standard_solution_id)
+            std_solution.quantity_available_std = round(
+                float(std_solution.quantity_available_std) - float(instance.quantity_solution), 2
+            )
+            std_solution.save(update_fields=['quantity_available_std'])
+        elif instance.standard_reagent_id:
+            standard_reagent = InventoryReagent.objects.select_for_update().get(pk=instance.standard_reagent_id)
+            InventoryReagent.objects.filter(pk=instance.standard_reagent_id).update(
+                quantity_stock=round(
+                    float(standard_reagent.quantity_stock) - float(instance.quantity_standard), 2
+                )
+            )
 
-        # Actualizar Solution
-        solution = Solution.objects.select_for_update().get(pk=instance.solution_id)
+        # Actualizar Solution STD
+        solution = SolutionStd.objects.select_for_update().get(pk=instance.solution_to_standardize_id)
         new_quantity = round(
-            float(solution.quantity_available_sln) - float(instance.quantity_solution), 2
+            float(solution.quantity_available_std) - float(instance.quantity_standard), 2
         )
-        # Usamos update() para evitar disparar signals (post_save)
-        Solution.objects.filter(pk=instance.solution_id).update(quantity_available_sln=new_quantity)
-        current_time = timezone.localdate()
-        detail_text = f'Estandarización de Solución {instance.solution.code_solution}'
+        SolutionStd.objects.filter(pk=instance.solution_to_standardize_id).update(quantity_available_std=new_quantity)
 
-        # Crear transacción de solución
-        TransactionSolution.objects.create(
-            solution_inventory_id=instance.solution_id,
-            type_transaction='Uso - Estandarización',
-            date_transaction=current_time,
-            detail_transaction=detail_text,
-            quantity=instance.quantity_solution,
-            user_transaction_id=instance.standardized_by_id,
-        )
+        current_time = timezone.now()
+        detail_text = f'Estandarización de Solución {instance.solution_to_standardize.code_solution_std}'
 
-        # Crear transacción de solución estándar
-        TransactionSolutionStd.objects.create(
-            solution_std_inventory_id=instance.standard_solution.id,
-            type_transaction='Uso - Estandarización',
-            date_transaction=current_time,
-            detail_transaction=detail_text,
-            quantity=instance.quantity_standard,
-            user_transaction_id=instance.user_creation.id,
-        )
+        # Crear transacción del estándar
+        if instance.standard_solution_id:
+            TransactionSolutionStd.objects.create(
+                solution_std_inventory_id=instance.standard_solution.id,
+                type_transaction='Estandarización',
+                date_transaction=current_time,
+                detail_transaction=detail_text,
+                quantity=instance.quantity_standard,
+                user_transaction_id=instance.user_creation.id,
+            )
+        elif instance.standard_reagent_id:
+            TransactionReagent.objects.create(
+                reagent_inventory_id=instance.standard_reagent.id,
+                type_transaction='Estandarización',
+                date_transaction=current_time,
+                detail_transaction=detail_text,
+                quantity=instance.quantity_standard,
+                user_transaction_id=instance.user_creation.id,
+            )
 
         # Calcular estadísticas de forma eficiente
         stats = StandardizationSolution.objects.filter(
-            solution_id=instance.solution_id
+            solution_to_standardize_id=instance.solution_to_standardize_id
         ).aggregate(
             average=Avg('concentration_sln'),
             deviation_std=StdDev('concentration_sln')
@@ -150,7 +166,7 @@ def discount_inventory_std_solution(sender, instance, created, **kwargs):
             rsd = _round_decimal((standard_deviation / media) * Decimal('100'))
 
         # Actualizar solución con estadísticas calculadas
-        Solution.objects.filter(pk=instance.solution_id).update(
+        SolutionStd.objects.filter(pk=instance.solution_to_standardize_id).update(
             average_concentration=media,
             deviation_std=standard_deviation,
             coefficient_variation=rsd
@@ -167,7 +183,7 @@ def recalculate_solution_stats_on_delete(sender, instance, **kwargs):
     with transaction.atomic():
         # Recalcular estadísticas con las estandarizaciones restantes
         stats = StandardizationSolution.objects.filter(
-            solution_id=instance.solution_id
+            solution_to_standardize_id=instance.solution_to_standardize_id
         ).aggregate(
             average=Avg('concentration_sln'),
             deviation_std=StdDev('concentration_sln')
@@ -184,7 +200,7 @@ def recalculate_solution_stats_on_delete(sender, instance, **kwargs):
 
         # Actualizar solución con nuevas estadísticas
         # Si no quedan estandarizaciones, los valores serán None
-        Solution.objects.filter(pk=instance.solution_id).update(
+        SolutionStd.objects.filter(pk=instance.solution_to_standardize_id).update(
             average_concentration=media,
             deviation_std=standard_deviation,
             coefficient_variation=rsd

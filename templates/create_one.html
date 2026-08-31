@@ -19,6 +19,10 @@
                     <form id="mainForm" enctype="multipart/form-data" method="post" action="" class="">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="{{ action }}">
+                        <div class="errormsg alert alert-danger" style="display: none;">
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <div class="errors"></div>
+                        </div>
                         {% for field in form.visible_fields %}
                             <div class="mb-3">
                                 <label for="id_{{ field.name }}" class="form-label">

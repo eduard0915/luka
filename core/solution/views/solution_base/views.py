@@ -1,3 +1,5 @@
+"""Vistas CRUD para la gestión de soluciones base (plantillas de preparación)."""
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
@@ -11,8 +13,8 @@ from core.solution.forms import SolutionBaseForm
 from core.solution.models import SolutionBase
 
 
-# Creación de solución base
 class SolutionBaseCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para la creación de una nueva solución base."""
     model = SolutionBase
     form_class = SolutionBaseForm
     template_name = 'solution/create_solution_base.html'
@@ -20,9 +22,11 @@ class SolutionBaseCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Maneja la petición de creación de solución base."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de creación vía AJAX."""
         data = {}
         try:
             action = request.POST['action']
@@ -51,6 +55,7 @@ class SolutionBaseCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega título, acción y URLs al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Crear Solución Base'
         context['action'] = 'add'
@@ -63,6 +68,7 @@ class SolutionBaseCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin
 
 # Editar soluciones base
 class SolutionBaseUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para editar una solución base existente."""
     model = SolutionBase
     form_class = SolutionBaseForm
     template_name = 'solution/create_solution_base.html'
@@ -70,10 +76,12 @@ class SolutionBaseUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Obtiene la solución base a editar."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de edición vía AJAX."""
         data = {}
         try:
             action = request.POST['action']
@@ -102,6 +110,7 @@ class SolutionBaseUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega título, acción y URLs al contexto de edición."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Editar Solución Base'
         context['action'] = 'edit'
@@ -114,13 +123,16 @@ class SolutionBaseUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin
 
 # Habilitar soluciones base
 class SolutionBaseEnableView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista para habilitar una solución base."""
     permission_required = 'reagent.change_reagent'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Maneja la petición de habilitación."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la habilitación de la solución base vía AJAX."""
         data = {}
         try:
             instance = SolutionBase.objects.get(pk=kwargs['pk'])
@@ -135,13 +147,16 @@ class SolutionBaseEnableView(LoginRequiredMixin, ValidatePermissionRequiredMixin
 
 # Deshabilitar soluciones base
 class SolutionBaseDisableView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista para deshabilitar una solución base."""
     permission_required = 'reagent.change_reagent'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Maneja la petición de deshabilitación."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la deshabilitación de la solución base vía AJAX."""
         data = {}
         try:
             instance = SolutionBase.objects.get(pk=kwargs['pk'])
@@ -156,27 +171,45 @@ class SolutionBaseDisableView(LoginRequiredMixin, ValidatePermissionRequiredMixi
 
 # Listado de Soluciones Base
 class SolutionBaseListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista para listar todas las soluciones base registradas."""
     model = SolutionBase
     template_name = 'solution/list_solution_base.html'
     permission_required = 'reagent.view_reagent'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Maneja la petición del listado de soluciones base."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la solicitud AJAX de búsqueda y retorna datos JSON."""
         data = {}
         try:
             action = request.POST['action']
             if action == 'searchdata':
-                reagents = list(SolutionBase.objects.values(
-                    'id',
-                    'solute_reagent_base__description_reagent',
-                    'concentration_base',
-                    'concentration_unit_base',
-                    'enable_solution'
-                ).order_by('-solute_reagent_base__description_reagent'))
-                return JsonResponse(reagents, safe=False)
+                slns = SolutionBase.objects.select_related(
+                    'solute_reagent_base'
+                ).prefetch_related(
+                    'standardization_set'
+                ).order_by('-solute_reagent_base__description_reagent')
+                rows = []
+                for sln in slns:
+                    std_list = sln.standardization_set.all()
+                    std = std_list[0] if std_list else None
+                    sln_data = {
+                        'id': sln.id,
+                        'solution_base': sln.solute_reagent_base.description_reagent,
+                        'concentration_base': sln.concentration_base,
+                        'concentration_unit_base': sln.concentration_unit_base,
+                        'enable_solution': sln.enable_solution,
+                        'standardizable': sln.standardizable,
+                        'stability_solution': sln.stability_solution,
+                        'standardization_id': std.id if std else None,
+                        'has_standardization': std is not None,
+                    }
+                    rows.append(sln_data)
+
+                return JsonResponse(rows, safe=False)
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
@@ -184,10 +217,11 @@ class SolutionBaseListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega título, URL de creación y entidad al contexto."""
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Maestro de Soluciones'
+        context['title'] = 'Soluciones Base'
         context['create_url'] = reverse_lazy('solution:create_solution_base')
-        context['entity'] = 'Maestro de Soluciones'
-        context['div'] = '7'
+        context['entity'] = 'Maestro de Soluciones Base'
+        context['div'] = '10'
         context['icon'] = 'fa-solid fa-flask-vial'
         return context

@@ -19,8 +19,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 dataSrc: ""
             },
             columns: [
-                {'data': 'solute_reagent_base__description_reagent'},
+                {'data': 'solution_base'},
                 {'data': 'concentration_base'},
+                {'data': 'stability_solution'},
+                {'data': 'standardizable'},
                 {'data': 'enable_solution'},
                 {'data': 'id'}
             ],
@@ -30,6 +32,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     class: 'td-actions text-left'
                 },
                 {
+                    targets: [2],
+                    class: 'td-actions text-center'
+                },
+                {
                     targets: [1],
                     class: 'td-actions text-center',
                     render: function (data, type, row) {
@@ -37,7 +43,19 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 {
-                    targets: [2],
+                    targets: [3],
+                    className: 'td-actions text-center',
+                    render: function (data, type, row) {
+                        switch (row['standardizable']) {
+                            case true:
+                                return '<span class="badge bg-primary rounded-pill">Si</span>';
+                            case false:
+                                return 'No';
+                        }
+                    }
+                },
+                {
+                    targets: [4],
                     className: 'td-actions text-center',
                     render: function (data, type, row) {
                         switch (row['enable_solution']) {
@@ -49,17 +67,34 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 {
-                    targets: [3],
+                    targets: [5],
                     class: 'td-actions text-center',
                     orderable: false,
                     render: function (data, type, row) {
                         let actions = '';
-                        actions += '<a href="/solution/update_base/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a> &nbsp;';
+                        actions += '<a href="/solution/update_base/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a> &nbsp';
                         
                         if (row['enable_solution']) {
-                            actions += '<a onclick="change_status(\'/solution/disable_base/' + row['id'] + '/\')" type="button" title="Deshabilitar"><i class="bi bi-toggle-on text-primary"></i></a>';
+                            actions += '<a onclick="change_status(\'/solution/disable_base/' + row['id'] + '/\')" type="button" title="Deshabilitar"><i class="bi bi-toggle-on text-primary"></i></a> &nbsp';
                         } else {
-                            actions += '<a onclick="change_status(\'/solution/enable_base/' + row['id'] + '/\')" type="button" title="Habilitar"><i class="bi bi-toggle-off text-danger"></i></a>';
+                            actions += '<a onclick="change_status(\'/solution/enable_base/' + row['id'] + '/\')" type="button" title="Habilitar"><i class="bi bi-toggle-off text-danger"></i></a> &nbsp';
+                        }
+
+                        // Validar si puede tener estandarización
+                        if (row['standardizable'] === true ) {
+
+                            // Si NO tiene estandarización: mostrar botón para CREAR
+                            if (row['has_standardization'] === false) {
+                                actions += '<a onclick="open_modal(\'/solution/add_standardization/' + row['id'] + '/\')" ';
+                                actions += 'type="button" title="Agregar Estandarización a la Solución">';
+                                actions += '<i class="bi bi-plus-circle text-primary"></i></a>';
+                            }
+                            // Si YA tiene estandarización: mostrar botón para EDITAR
+                            else {
+                                actions += '<a onclick="open_modal(\'/solution/update_standardization/' + row['standardization_id'] + '/\')" ';
+                                actions += 'type="button" title="Editar Estandarización">';
+                                actions += '<i class="bi bi-award-fill text-primary"></i></a>';
+                            }
                         }
                         
                         return actions;

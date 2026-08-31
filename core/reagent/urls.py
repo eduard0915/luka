@@ -1,3 +1,9 @@
+"""Configuración de rutas URL para la aplicación de reactivos.
+
+Define las rutas para CRUD de reactivos, inventario de reactivos,
+transacciones, descarga de documentos y consultas AJAX.
+"""
+
 from django.conf.urls.static import static
 from django.urls import path
 

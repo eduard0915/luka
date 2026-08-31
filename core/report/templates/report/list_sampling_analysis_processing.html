@@ -1,0 +1,59 @@
+{% extends 'list_one.html' %}
+{% load static %}
+
+{% block scripts_detail %}
+    {{ block.super }}
+    <script src="{% static 'list_sampling_analysis_processing.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="row mb-3">
+        <div class="col-md-2">
+            <label>Fecha Inicio</label>
+            <input type="date" class="form-control" name="date_from" id="id_date_from">
+        </div>
+        <div class="col-md-2">
+            <label>Fecha Final</label>
+            <input type="date" class="form-control" name="date_to" id="id_date_to">
+        </div>
+        <div class="col-md-2">
+            <label>Analista</label>
+            <select class="form-control" name="analyzed_by" id="id_analyzed_by">
+                <option value="">Todos</option>
+                {% for u in users %}
+                    <option value="{{ u.id }}">{{ u.get_full_name }}, {{ u.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label>Perfil</label>
+            <select class="form-control" name="profile" id="id_profile">
+                <option value="">Todos</option>
+                {% for p in profiles %}
+                    <option value="{{ p.id }}">{{ p.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label>&nbsp;</label><br>
+            <button type="button" class="btn btn-success btn-flat btnExcel">
+                <i class="fa-solid fa-file-excel"></i> Descargar Excel
+            </button>
+        </div>
+    </div>
+
+    {{ block.super }}
+{% endblock %}
+
+{% block columns %}
+    <th>Fecha</th>
+    <th>Muestra</th>
+    <th>Producto</th>
+    <th>Método de Análisis</th>
+    <th>Resultado</th>
+    <th>Analizado por</th>
+    <th>Perfil</th>
+{% endblock %}
+
+{% block rows %}
+{% endblock %}

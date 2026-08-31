@@ -1,7 +1,8 @@
-
+"""Módulo: Vistas CRUD para la gestión principal de métodos analíticos (listado, creación, edición y detalle)."""
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 from django.http import JsonResponse
 from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
@@ -10,27 +11,37 @@ from django.views.generic import CreateView, UpdateView, DetailView, ListView
 from django import forms
 
 from core.mixins import ValidatePermissionRequiredMixin
-from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation
+from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate, \
+    AnalyticalMethodCalculateRelation, SolutionStdBackValuation
 from core.analytical_method.forms import AnalyticalMethodForm
-
+from core.analytical_method.services import _build_relation_equation
 
 # Listado de Métodos Analíticos
 class AnalyticalMethodListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """)Vista para listar todos los métodos analíticos registrados."""
     model = AnalyticalMethod
     template_name = 'method/list_method.html'
     permission_required = 'analytical_method.view_analyticalmethod'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Maneja la petición HTTP y aplica decoradores CSRF."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la solicitud AJAX de búsqueda y retorna los datos en JSON."""
         data = {}
         try:
             action = request.POST['action']
             if action == 'searchdata':
+                if request.user.laboratory:
+                    methods_qs = AnalyticalMethod.objects.select_related('laboratory').filter(
+                        laboratory__site=request.user.laboratory.site
+                    )
+                else:
+                    methods_qs = AnalyticalMethod.objects.none()
                 methods = list(
-                    AnalyticalMethod.objects.select_related('laboratory').values(
+                    methods_qs.values(
                         'id',
                         'code_analytical_method',
                         'description_analytical_method',
@@ -53,6 +64,7 @@ class AnalyticalMethodListView(LoginRequiredMixin, ValidatePermissionRequiredMix
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Listado de Métodos Analíticos'
         context['create_url'] = reverse_lazy('analytical_method:create_method')
@@ -61,9 +73,9 @@ class AnalyticalMethodListView(LoginRequiredMixin, ValidatePermissionRequiredMix
         context['icon'] = 'fa-solid fa-vial'
         return context
 
-
 # Creación de Métodos Analíticos
 class AnalyticalMethodCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """)Vista para la creación de un nuevo método analítico."""
     model = AnalyticalMethod
     form_class = AnalyticalMethodForm
     template_name = 'method/create_method.html'
@@ -71,10 +83,12 @@ class AnalyticalMethodCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Maneja la petición HTTP y aplica decoradores CSRF."""
         self.object = None
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario enviado vía AJAX y retorna la respuesta JSON."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -105,9 +119,11 @@ class AnalyticalMethodCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
         return JsonResponse(data)
 
     def get_success_url(self):
-        return reverse('analytical_method:list_method')
+        """Retorna la URL de redirección después de una operación exitosa."""
+        return reverse('analytical_method:detail_method', kwargs={'pk': self.object.pk})
 
     def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Crear Método Analítico'
         context['action'] = 'add'
@@ -117,9 +133,9 @@ class AnalyticalMethodCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['list_url'] = reverse_lazy('analytical_method:list_method')
         return context
 
-
 # Editar Métodos Analíticos
 class AnalyticalMethodUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """)Vista para la edición de un método analítico existente."""
     model = AnalyticalMethod
     form_class = AnalyticalMethodForm
     template_name = 'method/update_method.html'
@@ -127,10 +143,12 @@ class AnalyticalMethodUpdateView(LoginRequiredMixin, ValidatePermissionRequiredM
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Maneja la petición HTTP y aplica decoradores CSRF."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario enviado vía AJAX y retorna la respuesta JSON."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -161,9 +179,11 @@ class AnalyticalMethodUpdateView(LoginRequiredMixin, ValidatePermissionRequiredM
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de redirección después de una operación exitosa."""
         return reverse('analytical_method:list_method')
 
     def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Editar Método Analítico'
         context['entity'] = 'Editar Método Analítico'
@@ -173,17 +193,19 @@ class AnalyticalMethodUpdateView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['list_url'] = reverse_lazy('analytical_method:list_method')
         return context
 
-
 # Detalle de Métodos Analíticos
 class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """)Vista de detalle de un método analítico con toda su configuración."""
     model = AnalyticalMethod
     template_name = 'method/detail_method.html'
     permission_required = 'analytical_method.view_analyticalmethod'
 
     def dispatch(self, request, *args, **kwargs):
+        """Maneja la petición HTTP y aplica decoradores CSRF."""
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Método Analítico: ' + str(self.object.code_analytical_method)
         context['entity'] = self.object
@@ -196,47 +218,107 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['equipments'] = self.object.analyticalmethodequipment_set.all()
         context['materials'] = self.object.analyticalmethodmaterial_set.all()
         context['procedures'] = self.object.analyticalmethodprocedure_set.all()
+        context['heavy_metals'] = self.object.heavymetal_set.all()
 
         calcules = AnalyticalMethodCalculate.objects.select_related('analytical_method').filter(analytical_method=self.object).order_by('-date_creation')
+        calcules_back = SolutionStdBackValuation.objects.select_related('analytical_method').filter(
+            analytical_method=self.object).filter(Q(volume_std_back__isnull=False) | Q(volume_std_back__gt=0)).order_by('-date_creation')
+        calcules_spent = SolutionStdBackValuation.objects.select_related('analytical_method').filter(
+            analytical_method=self.object).filter(Q(volume_std_back__isnull=True) | Q(volume_std_back=0)).order_by('-date_creation')
         context['calcules'] = calcules
+        context['calcules_back'] = calcules_back
+        context['calcules_spent'] = calcules_spent
 
         calcules_relation = AnalyticalMethodCalculateRelation.objects.select_related('analytical_method').filter(analytical_method=self.object).order_by('-date_creation')
         context['calcules_relation'] = calcules_relation
         context['has_relations'] = calcules_relation.exists()
+        context['relation_has_description'] = calcules_relation.exclude(
+            calculate_description_relation__isnull=True).exclude(calculate_description_relation='').exists()
+        context['relation_has_sample_gram'] = calcules_relation.exclude(
+            sample_quantity__isnull=True).exclude(sample_quantity='').exists()
+
+        if calcules_relation.exists():
+            context['final_equation_relation'] = _build_relation_equation(calcules_relation)
 
         inst_desc = calcules.exclude(calculate_description__isnull=True).exclude(calculate_description="").first()
         inst_unit = calcules.exclude(unit_measure_calculate__isnull=True).exclude(unit_measure_calculate="").first()
 
         context['inst_desc'] = inst_desc
 
+        volumen_std_calcule = calcules.exclude(volumen_std__isnull=True).exclude(volumen_std='').first()
+        context['subtract_blank'] = volumen_std_calcule.subtract_blank if volumen_std_calcule else False
+
         show_dependent_toggle = False
+
         for calc in calcules:
             if calc.volumen_std or calc.factor or calc.sample_quantity:
                 show_dependent_toggle = True
                 break
-        context['show_dependent_toggle'] = show_dependent_toggle or context['has_relations']
 
-        if inst_desc or calcules.exists():
+        for calc_back in calcules_back:
+            if calc_back.solution_std or calc_back.volume_std_back:
+                show_dependent_toggle = True
+                break
+
+        for calc_spent in calcules_spent:
+            if calc_spent.solution_std or calc_spent.volume_std_back:
+                show_dependent_toggle = True
+                break
+
+        context['show_dependent_toggle'] = show_dependent_toggle
+
+        if inst_desc or calcules.exists() or calcules_back.exists() or calcules_relation.exists():
+            # 1. Obtener descripción y unidad
             desc = inst_desc.calculate_description if inst_desc else "Cálculo"
             unit = inst_unit.unit_measure_calculate if inst_unit else ""
 
+            # 2. Recolectar valores válidos (fuera del loop, una sola vez)
+            def is_valid_value(value):
+                """Verifica si un valor no es vacío o None"""
+                return value and str(value).strip()
+
+            volumen_std_list = [calc.volumen_std for calc in calcules if is_valid_value(calc.volumen_std)]
+            volumen_std_back_list = [calc_back.volume_std_back for calc_back in calcules_back if is_valid_value(calc_back.volume_std_back)]
+            # volumen_std_spent_list = [calc_spent.volume_std_back for calc_spent in calcules_spent if is_valid_value(calc_spent.volume_std_back)]
+            volumen_std_spent_list = [calc_spent.solution_std for calc_spent in calcules_spent if calc_spent]
+            sample_quantity_list = [calc.sample_quantity for calc in calcules if is_valid_value(calc.sample_quantity)]
+
+            # Asignar al contexto (None si están vacíos)
+            context['volumen_std'] = volumen_std_list if volumen_std_list else None
+            context['volumen_std_back'] = volumen_std_back_list if volumen_std_back_list else None
+            context['volumen_std_spent'] = volumen_std_spent_list if volumen_std_spent_list else None
+            context['sample_quantity'] = sample_quantity_list if sample_quantity_list else None
+
+            # 3. Construir términos para la ecuación
             num_terms = []
             den_terms = []
             gen_terms = []
 
-            # 2. Iteramos TODAS las instancias para recolectar valores,
-            # sin importar si son la misma instancia que tiene la descripción
             for calc in calcules:
+                # Construir partes válidas
                 parts = []
-                if calc.volumen_std: parts.append(str(calc.volumen_std))
-                if calc.factor: parts.append(str(calc.factor))
-                if calc.sample_quantity: parts.append(str(calc.sample_quantity))
-                context['volumen_std'] = [calc.volumen_std for calc in calcules if calc.volumen_std is not None]
-                context['sample_quantity'] = [calc.sample_quantity for calc in calcules if calc.sample_quantity is not None]
+                if is_valid_value(calc.volumen_std):
+                    if calc.subtract_blank:
+                        vol_str = f"\\left({calc.volumen_std} - \\text{{Blanco}}\\right)"
+                    else:
+                        vol_str = str(calc.volumen_std)
+                    if calc.sln_std_base:
+                        vol_str += f" \\times \\text{{{calc.sln_std_base}}}"
+                    parts.append(vol_str)
+                if is_valid_value(calc.factor):
+                    parts.append(str(calc.factor))
+                if is_valid_value(calc.sample_quantity):
+                    parts.append(str(calc.sample_quantity))
+                if is_valid_value(calc.variable):
+                    parts.append(str(calc.variable))
+
+                # Si no hay partes válidas, continuar al siguiente
+                if not parts:
+                    continue
 
                 item_text = " \cdot ".join(parts)
-                if not item_text: continue
 
+                # Agregar según posición
                 if calc.position == 'Numerador':
                     num_terms.append(item_text)
                 elif calc.position == 'Denominador':
@@ -244,53 +326,17 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                 elif calc.position == 'General':
                     gen_terms.append(item_text)
 
-            # 3. Construcción de la estructura LaTeX
+            # 4. Construcción de la estructura LaTeX
             str_num = " \cdot ".join(num_terms) if num_terms else "1"
             str_den = " \cdot ".join(den_terms) if den_terms else "1"
             str_gen = f" \cdot {' \cdot '.join(gen_terms)}" if gen_terms else ""
 
-            # 4. Cálculos Relacionados
-            num_terms_rel = []
-            den_terms_rel = []
-            gen_terms_rel = []
-            rel_desc = ""
-            rel_unit = ""
+            if num_terms or den_terms or gen_terms:
+                # Construcción de la etiqueta con formato
+                label = f"\\text{{{desc}}}"
+                if unit:
+                    label += f" \\text{{ ({unit})}}"
 
-            for cr in calcules_relation:
-                parts_rel = []
-                if cr.calculate_description_relation:
-                    rel_desc = cr.calculate_description_relation
-                    rel_unit = cr.unit_measure_calculate
-                if cr.analytical_method_calculate: parts_rel.append(f"\\text{{{cr.analytical_method_calculate.calculate_description}}}")
-                if cr.volumen_std: parts_rel.append(str(cr.volumen_std))
-                if cr.factor: parts_rel.append(str(cr.factor))
-                if cr.sample_quantity: parts_rel.append(str(cr.sample_quantity))
-
-                item_text_rel = " \cdot ".join(parts_rel)
-                if not item_text_rel: continue
-
-                if cr.position == 'Numerador':
-                    num_terms_rel.append(item_text_rel)
-                elif cr.position == 'Denominador':
-                    den_terms_rel.append(item_text_rel)
-                elif cr.position == 'General':
-                    gen_terms_rel.append(item_text_rel)
-
-            str_num_rel = " \cdot ".join(num_terms_rel) if num_terms_rel else "1"
-            str_den_rel = " \cdot ".join(den_terms_rel) if den_terms_rel else "1"
-            str_gen_rel = f" \cdot {' \cdot '.join(gen_terms_rel)}" if gen_terms_rel else ""
-
-            if rel_desc:
-                label_rel = f"\\text{{{rel_desc}}}"
-                if rel_unit:
-                    label_rel += f" \\text{{ ({rel_unit})}}"
-                context['final_equation_relation'] = f"{label_rel} = \\frac{{{str_num_rel}}}{{{str_den_rel}}}{str_gen_rel}"
-
-            # Usamos \text{} para asegurar que espacios y tildes se vean bien
-            label = f"\\text{{{desc}}}"
-            if unit:
-                label += f" \\text{{ ({unit})}}"
-
-            context['final_equation'] = f"{label} = \\frac{{{str_num}}}{{{str_den}}}{str_gen}"
+                context['final_equation'] = f"{label} = \\frac{{{str_num}}}{{{str_den}}}{str_gen}"
 
         return context

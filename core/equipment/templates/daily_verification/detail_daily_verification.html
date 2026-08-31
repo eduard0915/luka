@@ -1,0 +1,117 @@
+{% extends 'body.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="{{ icon }}"></i> {{ title }}
+                    </h5>
+                    <div>
+                        <a href="{{ pdf_url }}" class="btn btn-danger btn-sm" target="_blank">
+                            <i class="fas fa-file-pdf"></i> Descargar PDF
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <!-- Información de la Verificación Diaria -->
+                            <div class="mb-4">
+                                <h5 class="section-title border-bottom pb-2 mb-3">
+                                    <i class="fas fa-info-circle"></i> Información de la Verificación Diaria
+                                </h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover">
+                                        <tbody>
+                                            <tr>
+                                                <td class="bg-light" style="width: 30%"><strong>Equipo Instrumental:</strong></td>
+                                                <td>{{ object.equipment_instrumental }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light"><strong>Fecha y Hora:</strong></td>
+                                                <td>{{ object.date_verification_daily|date:"d/m/Y H:i" }}</td>
+                                            </tr>
+{#                                            <tr>#}
+{#                                                <td class="bg-light"><strong>Verificado por:</strong></td>#}
+{#                                                <td>{{ object.verified_by }}</td>#}
+{#                                            </tr>#}
+                                            <tr>
+                                                <td class="bg-light"><strong>Parámetro:</strong></td>
+                                                <td>{{ object.parameter_verified }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light"><strong>Patrón de Referencia:</strong></td>
+                                                <td>{{ object.reference_pattern_daily }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light"><strong>Resultado:</strong></td>
+                                                <td>{{ object.verification_result_daily }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light"><strong>Error:</strong></td>
+                                                <td>{{ object.error }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light"><strong>Tolerancia:</strong></td>
+                                                <td>{{ object.equipment_instrumental.tolerance }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light"><strong>Cumple:</strong></td>
+                                                <td>
+                                                    {% if object.comply %}
+                                                        <span class="badge bg-success">Si</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger">No</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-light"><strong>Responsable:</strong></td>
+                                                <td>{{ object.verified_by.get_full_name }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Observaciones -->
+                            <div class="mb-4">
+                                <h5 class="section-title border-bottom pb-2 mb-3">
+                                    <i class="fas fa-align-left"></i> Observaciones de la Verificación
+                                </h5>
+                                <div class="p-3 border rounded bg-light">
+                                    {% if object.observation_verification %}
+                                        {{ object.observation_verification|linebreaks }}
+                                    {% else %}
+                                        <span class="text-muted">Sin observaciones</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer con botones de acción -->
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <a href="{{ list_url }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Volver al Listado
+                            </a>
+                        </div>
+                        <div>
+                            <a href="{{ update_url }}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Editar Verificación
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,78 +1,44 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const samplingPointSelect = document.querySelector('select[name="sampling_point"]');
-    const numberSamplingDayInput = document.querySelector('input[name="number_sampling_day"]');
+(function() {
+    var done = false;
 
-    if (!samplingPointSelect || !numberSamplingDayInput) {
-        console.error('No se encontraron los campos necesarios');
-        return;
-    }
-
-    // Hacer el campo de solo lectura para evitar edición manual
-    numberSamplingDayInput.setAttribute('readonly', 'readonly');
-
-    // Función para calcular y actualizar el número de muestras por día
-    function calculateSamplingDay() {
-        const samplingPointId = samplingPointSelect.value;
-
-        if (!samplingPointId) {
-            numberSamplingDayInput.value = '';
-            return;
-        }
-
-        // Obtener la frecuencia mediante AJAX desde la API
-        axios.get(`/sampling/api/sampling-point/${samplingPointId}/`)
-            .then(function(response) {
-                if (response.data && response.data.sample_frequency) {
-                    const sampleFrequency = parseInt(response.data.sample_frequency);
-
-                    if (sampleFrequency > 0) {
-                        const samplesPerDay = Math.floor(24 / sampleFrequency);
-                        numberSamplingDayInput.value = samplesPerDay;
-                    } else {
-                        numberSamplingDayInput.value = '';
-                    }
+    function calc($s, $i) {
+        var id = $s.val();
+        if (!id) { $i.val(''); return; }
+        axios.get('/sampling/api/sampling-point/' + id + '/')
+            .then(function(r) {
+                if (r.data && r.data.sample_frequency) {
+                    var f = parseInt(r.data.sample_frequency);
+                    $i.val(f > 0 ? Math.floor(24 / f) : '');
                 } else {
-                    numberSamplingDayInput.value = '';
+                    $i.val('');
                 }
             })
-            .catch(function(error) {
-                console.error('Error al obtener la frecuencia:', error);
-                numberSamplingDayInput.value = '';
-            });
+            .catch(function() { $i.val(''); });
     }
 
-    // Detectar si es Select2 y está inicializado
-    if ($(samplingPointSelect).hasClass('select2')) {
-        // Esperar a que Select2 se inicialice
-        setTimeout(function() {
-            if ($(samplingPointSelect).data('select2')) {
-                $(samplingPointSelect).on('select2:select', function(e) {
-                    calculateSamplingDay();
-                });
-            } else {
-                // Inicializar Select2 si no está inicializado
-                $(samplingPointSelect).select2({
-                    theme: 'bootstrap-5',
-                    width: '100%',
-                    placeholder: 'Seleccionar'
-                });
+    function init() {
+        if (done) return;
+        var $s = $('select[name="sampling_point"]');
+        var $i = $('input[name="number_sampling_day"]');
+        if (!$s.length || !$i.length) return;
+        done = true;
 
-                $(samplingPointSelect).on('select2:select', function(e) {
-                    calculateSamplingDay();
-                });
-            }
-        }, 100);
-    } else {
-        // Evento change normal para select sin Select2
-        samplingPointSelect.addEventListener('change', function() {
-            calculateSamplingDay();
+        $i.prop('readonly', true);
+
+        $s.on('select2:select', function() {
+            calc($s, $i);
         });
+
+        if ($s.val()) {
+            calc($s, $i);
+        }
     }
 
-    // Calcular al cargar si ya hay un valor seleccionado (para edición)
-    if (samplingPointSelect.value) {
-        setTimeout(function() {
-            calculateSamplingDay();
-        }, 500);
+    $(document).on('modal:loaded', init);
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
     }
-});
+})();

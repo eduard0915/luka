@@ -58,9 +58,21 @@
         </tr>
         <tr style="border-bottom: none; border-top:none; padding-bottom: 1px">
             <th style="border: none; padding: 2px 5px 0;"><strong>N° de Lote:</strong></th>
+            {% if sln.solution_std_base.standardizable %}
+                <th style="border: none; padding: 2px 5px 0;" colspan="2"><strong>Concentración STD:</strong></th>
+            {% endif %}
         </tr>
         <tr style="border-bottom: none; border-top:none; padding-bottom: 1px">
             <td style="border: none; padding: 0 5px 3px;">{{ sln.solute_std.batch_number }}</td>
+              {% if sln.solution_std_base.standardizable %}
+                <td style="border: none; padding: 0 5px 3px;" colspan="2">
+                    {% if sln.average_concentration %}
+                        <b style="color: red">{{ sln.average_concentration }} {{ sln.concentration_unit }}</b>
+                    {% else %}
+                        <p style="color: red">Pendiente</p>
+                    {% endif %}
+                </td>
+            {% endif %}
         </tr>
         <tr style="border-bottom: none; border-top:none; padding-bottom: 1px">
             <th style="border: none; padding: 2px 5px 0;" colspan="3"><strong>Preparado por:</strong></th>

@@ -1,1 +1,28 @@
 {% extends 'modal_one.html' %}
+
+{% block scripts_detail %}
+    {{ block.super }}
+    <script type="application/javascript">
+        $(document).ready(function () {
+            const standardSolution = $('#id_standard_solution');
+            const standardReagent = $('#id_standard_reagent');
+            const usesSolutionBase = {% if uses_solution_base %}true{% else %}false{% endif %};
+
+            function toggleFields() {
+                if (usesSolutionBase) {
+                    standardSolution.closest('p').show();
+                    standardReagent.closest('p').hide();
+                    standardReagent.prop('disabled', true).val('');
+                    standardSolution.prop('disabled', false);
+                } else {
+                    standardSolution.closest('p').hide();
+                    standardReagent.closest('p').show();
+                    standardSolution.prop('disabled', true).val('');
+                    standardReagent.prop('disabled', false);
+                }
+            }
+
+            toggleFields();
+        });
+    </script>
+{% endblock %}

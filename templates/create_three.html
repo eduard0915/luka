@@ -67,7 +67,7 @@
 
 {% block scripts_detail %}
 
-    {% if entity == 'Preparar Solución' or entity == 'Preparar Solución Estándar' %}
+    {% if entity == 'Preparar Solución' or entity == 'Preparar Solución Estándar' or entity == 'Editar Solución a Preparar' %}
 
         <script src="{% static 'solution_filter.js' %}"></script>
         <script type="application/javascript">

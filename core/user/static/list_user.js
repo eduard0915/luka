@@ -23,32 +23,32 @@ document.addEventListener('DOMContentLoaded', function () {
                 {'data': 'cargo'},
                 {'data': 'groups__name'},
                 {'data': 'email'},
-                {'data': 'site__site_name'},
+                {'data': 'laboratory'},
                 {'data': 'is_active'},
                 {'data': 'id'}
             ],
             columnDefs: [
                 {
                     targets: [1, 2, 4, 5],
-                    class: 'td-actions text-center'
+                    class: 'td-actions text-center align-middle'
                 },
                 {
                     targets: [0],
-                    className: 'td-actions text-center',
+                    className: 'td-actions text-center align-middle',
                     render: function (data, type, row) {
                         return row['first_name'] + ' ' + row['last_name'];
                     }
                 },
                 {
                     targets: [3],
-                    class: 'td-actions text-center',
+                    class: 'td-actions text-center align-middle',
                     render: function (data, type, row) {
                         return '<span class="text-primary">' + row['groups__name'] + '</span>'
                     }
                 },
                 {
                     targets: [6],
-                    className: 'td-actions text-center',
+                    className: 'td-actions text-center align-middle',
                     render: function (data, type, row) {
                         let estado = null;
                         switch (row['is_active']) {
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 {
                     targets: [7],
-                    class: 'td-actions text-center',
+                    class: 'td-actions text-center align-middle',
                     orderable: false,
                     render: function (data, type, row) {
                         let actions

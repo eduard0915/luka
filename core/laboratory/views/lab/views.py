@@ -1,3 +1,8 @@
+"""Vistas del módulo de laboratorios.
+
+Define las vistas CRUD para la gestión de laboratorios.
+"""  # noqa: E501
+
 import os
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -15,8 +20,9 @@ from core.laboratory.forms import LaboratoryForm
 from core.laboratory.models import Laboratory
 
 
-# Creación de Laboratorios
 class LaboratoryCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para crear un nuevo laboratorio."""
+
     model = Laboratory
     form_class = LaboratoryForm
     template_name = 'lab/create_laboratory.html'
@@ -24,10 +30,12 @@ class LaboratoryCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Inicializa el objeto como None y despacha la solicitud exenta de CSRF."""
         self.object = None
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de creación y retorna la respuesta JSON."""
         data = {}
         try:
             action = request.POST['action']
@@ -59,9 +67,11 @@ class LaboratoryCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de redirección tras crear un laboratorio."""
         return reverse('laboratory:list_laboratory')
 
     def get_context_data(self, **kwargs):
+        """Agrega títulos, URLs e íconos al contexto de la plantilla."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Crear Laboratorio'
         context['action'] = 'add'
@@ -72,17 +82,20 @@ class LaboratoryCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
         return context
 
 
-# Listado de Laboratorios
 class LaboratoryListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista que lista los laboratorios registrados."""
+
     model = Laboratory
     template_name = 'lab/list_laboratory.html'
     permission_required = 'laboratory.view_laboratory'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Exenta de CSRF y despacha la solicitud."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la acción 'searchdata' y retorna los laboratorios en JSON."""
         data = {}
         try:
             action = request.POST['action']
@@ -94,7 +107,6 @@ class LaboratoryListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Li
                     'enable_laboratory'
                 ).order_by('laboratory_name'))
 
-                # Formatear el estado habilitado
                 for lab in laboratories:
                     lab['enable_laboratory_display'] = 'Sí' if lab['enable_laboratory'] else 'No'
 
@@ -106,6 +118,7 @@ class LaboratoryListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Li
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega títulos y URLs al contexto de la plantilla."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Listado de Laboratorios'
         context['create_url'] = reverse_lazy('laboratory:create_laboratory')
@@ -115,8 +128,9 @@ class LaboratoryListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Li
         return context
 
 
-# Edición de Laboratorios
 class LaboratoryUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para editar un laboratorio existente."""
+
     model = Laboratory
     form_class = LaboratoryForm
     template_name = 'lab/update_laboratory.html'
@@ -124,10 +138,12 @@ class LaboratoryUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Obtiene el objeto y despacha la solicitud exenta de CSRF."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de edición y retorna la respuesta JSON."""
         data = {}
         try:
             action = request.POST['action']
@@ -159,9 +175,11 @@ class LaboratoryUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de redirección tras editar un laboratorio."""
         return reverse('laboratory:list_laboratory')
 
     def get_context_data(self, **kwargs):
+        """Agrega títulos, URLs e íconos al contexto de la plantilla."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Editar Laboratorio'
         context['entity'] = 'Editar Laboratorio'
@@ -172,16 +190,19 @@ class LaboratoryUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
         return context
 
 
-# Detalle de Laboratorio
 class LaboratoryDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """Vista de detalle de un laboratorio, incluyendo su equipamiento."""
+
     model = Laboratory
     template_name = 'lab/detail_laboratory.html'
     permission_required = 'laboratory.view_laboratory'
 
     def dispatch(self, request, *args, **kwargs):
+        """Despacha la solicitud."""
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
+        """Agrega títulos, equipamiento asociado y URLs al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Detalle de Laboratorio'
         context['entity'] = 'Detalle de Laboratorio'

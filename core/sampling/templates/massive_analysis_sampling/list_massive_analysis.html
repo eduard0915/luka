@@ -1,0 +1,72 @@
+{% extends 'list_one.html' %}
+{% load static %}
+
+{% block scripts_detail %}
+    {{ block.super }}
+    <script src="{% static 'massive_analysis_sampling/list_massive_analysis.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="row mb-3">
+        <div class="col-12 text-end">
+            <a href="{% url 'sampling:download_massive_sample_analysis_template' %}"
+               class="btn btn-outline-success">
+                <i class="bi bi-file-earmark-excel"></i> Plantilla
+            </a>
+            <button type="button" class="btn btn-primary"
+                    onclick="open_modal('{% url 'sampling:upload_massive_sample_analysis' %}')">
+                <i class="bi bi-upload"></i> Cargue Masivo
+            </button>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-2">
+            <label>Fecha Inicio</label>
+            <input type="date" class="form-control" name="start_date" id="id_start_date">
+        </div>
+        <div class="col-md-2">
+            <label>Fecha Final</label>
+            <input type="date" class="form-control" name="end_date" id="id_end_date">
+        </div>
+        <div class="col-md-3">
+            <label>Analizado por</label>
+            <select class="form-control select2" name="analized_by" id="id_analized_by">
+                <option value="">---------</option>
+                {% for u in analysts %}
+                    <option value="{{ u.id }}">{{ u.get_full_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label>Método de Análisis</label>
+            <select class="form-control select2" name="analytical_method" id="id_analytical_method">
+                <option value="">---------</option>
+                {% for m in analytical_methods %}
+                    <option value="{{ m.id }}">{{ m.description_analytical_method }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label>Muestra</label>
+            <input type="text" class="form-control" name="sample" id="id_sample"
+                   placeholder="N° de Muestra" autocomplete="off">
+        </div>
+    </div>
+
+    {{ block.super }}
+{% endblock %}
+
+{% block columns %}
+    <tr>
+        <th class="text-md-center" style="width: 17%">Muestra</th>
+        <th class="text-md-center" style="width: 17%">Producto</th>
+        <th class="text-md-center" style="width: 20%">Método de Análisis</th>
+        <th class="text-md-center" style="width: 10%">Metal</th>
+        <th class="text-md-center" style="width: 9%">Resultado</th>
+        <th class="text-md-center" style="width: 13%">Fecha de Análisis</th>
+        <th class="text-md-center" style="width: 14%">Analizado por</th>
+    </tr>
+{% endblock %}
+
+{% block rows %}
+{% endblock %}

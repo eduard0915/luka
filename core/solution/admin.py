@@ -1,3 +1,5 @@
+"""Configuración del panel de administración para el módulo de soluciones."""
+
 from django.contrib import admin
 
 from django.contrib import admin
@@ -6,6 +8,7 @@ from core.solution.models import Solution
 
 
 class SolutionAdmin(admin.ModelAdmin):
+    """Configuración de administración para el modelo Solution."""
     search_fields = (
         'id', 'solute_reagent', 'solvent_reagent', 'concentration', 'concentration_unit', 'preparation_date',
         'expire_date_solution', 'quantity_solution', 'quantity_reagent', 'quantity_solvent', 'preparated_by',
