@@ -20,6 +20,12 @@
                     </div>
                 {% endif %}
                 <div class="row justify-content-center">
+                    <div class="col-12">
+                        <div class="errormsg alert alert-danger" style="display: none;">
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <div class="errors"></div>
+                        </div>
+                    </div>
                     {% for field in form.visible_fields %}
                         <div class="
                                 {% if field.field.col_class %}{{ field.field.col_class }}{% else %}col-md-4{% endif %}">

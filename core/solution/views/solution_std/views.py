@@ -23,7 +23,7 @@ from core.laboratory.models import Laboratory
 from core.mixins import ValidatePermissionRequiredMixin
 from core.reagent.models import InventoryReagent
 from core.solution.forms import SolutionStandardForm, SolutionStdConfirmedForm, SolutionStdUpdateForm
-from core.solution.models import SolutionStd, TransactionSolutionStd
+from core.solution.models import SolutionStd, TransactionSolutionStd, StandardizationSolution, Standardization
 from core.user.models import User
 from luka import settings
 
@@ -289,7 +289,12 @@ class SolutionStdDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin,
         context['label_url'] = reverse_lazy('solution:solution_label_std_pdf', kwargs={'pk': self.object.pk})
         context['icon'] = 'fa-solid fa-flask-vial'
         context['list_url'] = reverse_lazy('solution:list_solution_std')
+        context['std_config'] = Standardization.objects.filter(solution_stb_base_to_standardize_id=self.object.solution_std_base.id).first()
+        context['standardizations'] = StandardizationSolution.objects.select_related('solution_to_standardize').filter(solution_to_standardize_id=self.object.id)
+        context['standard_count'] = StandardizationSolution.objects.select_related('solution_to_standardize').filter(solution_to_standardize_id=self.object.id).count()
         context['transactions'] = TransactionSolutionStd.objects.select_related('solution_std_inventory').filter(solution_std_inventory_id=self.object.pk)
+        context['add_standardization'] = reverse_lazy('solution:create_std_solution', kwargs={'pk': self.object.pk})
+        context['update_solution'] = reverse_lazy('solution:update_solution', kwargs={'pk': self.object.pk})
         context['std'] = reverse_lazy('solution:create_solution_std', kwargs={'pk': self.object.pk})
         return context
 

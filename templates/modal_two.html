@@ -11,6 +11,10 @@
                 {% csrf_token %}
                 <input type="hidden" name="action" value="{{ action }}">
                 <div class="row">
+                    <div class="errormsg alert alert-danger" style="display: none;">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <div class="errors"></div>
+                    </div>
                     <h5>{{ info_form }}</h5>
                     <div class="{{ class }}">
                         {% for field in form.visible_fields %}

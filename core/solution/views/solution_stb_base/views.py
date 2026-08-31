@@ -191,11 +191,11 @@ class SolutionStdBaseListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
                 ).select_related(
                     'solute_std_base'
                 ).prefetch_related(
-                    'standardization_set'
+                    'solution_stb_base_to_standardize'
                 ).order_by('-solute_std_base__description_reagent')
                 rows = []
                 for sln in slns:
-                    std_list = sln.standardization_set.all()
+                    std_list = sln.solution_stb_base_to_standardize.all()
                     std = std_list[0] if std_list else None
                     sln_data = {
                         'id': sln.id,

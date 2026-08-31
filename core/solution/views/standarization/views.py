@@ -47,9 +47,8 @@ class StandardizationCreateView(LoginRequiredMixin, ValidatePermissionRequiredMi
     def get_form_kwargs(self):
         """Agrega el reactivo a los kwargs del formulario."""
         kwargs = super().get_form_kwargs()
-        sln_std_base = SolutionStdBase.objects.filter(pk=self.kwargs.get('pk')).first()
-        sln_base = SolutionBase.objects.filter(pk=self.kwargs.get('pk')).first()
-        kwargs.update({'sln_std_base': sln_std_base, 'sln_base': sln_base})
+        sln_std_base = SolutionStdBase.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'sln_std_base': sln_std_base})
         return kwargs
 
     def get_context_data(self, **kwargs):

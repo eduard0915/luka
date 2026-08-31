@@ -190,11 +190,15 @@ class SolutionStd(BaseModel):
     preparation_std_date = models.DateField(verbose_name='Fecha de Preparación', null=True, blank=True)
     expire_std_date_solution = models.DateField(verbose_name='Fecha de Vencimiento', null=True, blank=True)
     quantity_solution_std = models.FloatField(verbose_name='Cant. a Preparar (mL)')
+    quantity_available_std = models.FloatField(verbose_name='Cantidad Disponible')
     quantity_std = models.FloatField(verbose_name='Cantidad de Estándar')
     quantity_solvent = models.FloatField(verbose_name='Solvente (mL)', null=True, blank=True)
     preparated_std_by = models.ForeignKey(User, verbose_name='Preparado por', on_delete=models.CASCADE, null=True, blank=True)
     preparation_confirmed = models.BooleanField(default=False)
     laboratory = models.ForeignKey(Laboratory, blank=True, null=True, on_delete=models.CASCADE, verbose_name='Laboratorio')
+    average_concentration = models.FloatField(verbose_name='Media', null=True, blank=True)
+    deviation_std = models.FloatField(verbose_name='Desviación Estándar', null=True, blank=True)
+    coefficient_variation = models.FloatField(verbose_name='Coeficiente de Variación', null=True, blank=True)
 
     def __str__(self):
         """Retorna la representación con el reactivo, concentración, código y cantidad."""
@@ -204,7 +208,7 @@ class SolutionStd(BaseModel):
         if not self.preparated_std_by:
             return solution_std_base + ' - ' + f'{self.quantity_solution_std}{self.solute_std.reagent.umb}'
         else:
-            return solution_std_base + ' - ' + f'{self.quantity_solution_std}mL'
+            return solution_std_base + ' - ' + f'{self.quantity_available_std}mL'
 
     class Meta:
         verbose_name = 'SolutionStd'
@@ -233,8 +237,9 @@ class Standardization(BaseModel):
     """Configuración de estandarización que relaciona una solución con un estándar y su relación molar."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     reagent_std = models.ForeignKey(Reagent, blank=True, null=True, on_delete=models.CASCADE, verbose_name='Estándar Primario')
-    solution_base = models.ForeignKey(SolutionBase, verbose_name='Solución Base', on_delete=models.CASCADE, blank=True, null=True)
-    solution_std_base = models.ForeignKey(SolutionStdBase, verbose_name='Solución Estándar Base (Primario)', on_delete=models.CASCADE, blank=True, null=True)
+    solution_base= models.ForeignKey(SolutionBase, verbose_name='Solución Base a Estándarizar', on_delete=models.CASCADE, blank=True, null=True)
+    solution_stb_base_to_standardize = models.ForeignKey(SolutionStdBase, verbose_name='Solución Estándar Base a Estándarizar', on_delete=models.CASCADE, related_name='solution_stb_base_to_standardize')
+    solution_std_base = models.ForeignKey(SolutionStdBase, verbose_name='Solución Estándar Base (Primario)', on_delete=models.CASCADE, blank=True, null=True, related_name='solution_std_base')
     molar_relation = models.FloatField(verbose_name='Relación Molar', default=1)
 
     def __str__(self):
@@ -261,8 +266,8 @@ class Standardization(BaseModel):
 class StandardizationSolution(BaseModel):
     """Registro individual de una estandarización con cantidades y concentración calculada."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    solution = models.ForeignKey(Solution, verbose_name='Solución', on_delete=models.CASCADE)
-    standard_solution = models.ForeignKey(SolutionStd, verbose_name='Solución Estándar', on_delete=models.CASCADE, blank=True, null=True)
+    solution_to_standardize = models.ForeignKey(SolutionStd, verbose_name='Solución a Estándarizar', on_delete=models.CASCADE, related_name='Solution_to_standardize', null=True, blank=True)
+    standard_solution = models.ForeignKey(SolutionStd, verbose_name='Solución Estándar', on_delete=models.CASCADE, blank=True, null=True, related_name='standard_solution')
     standard_reagent = models.ForeignKey(InventoryReagent, verbose_name='Estándar', on_delete=models.CASCADE, blank=True, null=True)
     quantity_standard = models.FloatField(verbose_name=' Cantidad de Estándar')
     quantity_solution = models.FloatField(verbose_name='mL de Solución Gastados')
