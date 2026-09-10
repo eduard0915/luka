@@ -253,6 +253,11 @@ class AnalyticalMethodGravimetryBasicsView(LoginRequiredMixin, ValidatePermissio
                 sample_quantity='Peso de Muestra',
                 position='Denominador'
             )
+            AnalyticalMethodCalculate.objects.create(
+                analytical_method=analytical_method,
+                factor=100,
+                position='Numerador'
+            )
 
             messages.success(request, 'Básicos de gravimetría creados con éxito!')
         except Exception as e:

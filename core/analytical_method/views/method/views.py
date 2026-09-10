@@ -358,11 +358,10 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                                if calc.factor and calc.position == 'Denominador']
 
                 numerator = f"\\left(\\text{{{gw}}}\\right) - \\text{{{wof}}}"
-                if factors_num:
-                    numerator = f"\\left({numerator}\\right) \\cdot {' \\cdot '.join(factors_num)}"
                 denominator = f"\\text{{{sq}}}"
                 if factors_den:
                     denominator += f" \\cdot {' \\cdot '.join(factors_den)}"
+                multiplier = f" \\times {' \\cdot '.join(factors_num)}" if factors_num else ""
 
                 desc = inst_desc.calculate_description
                 unit = inst_unit.unit_measure_calculate if inst_unit else ""
@@ -371,6 +370,6 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                 if unit:
                     label_g += f" \\text{{ ({unit})}}"
 
-                context['final_equation_gravimetry'] = f"{label_g} = \\frac{{{numerator}}}{{{denominator}}} \\times 100"
+                context['final_equation_gravimetry'] = f"{label_g} = \\frac{{{numerator}}}{{{denominator}}}{multiplier}"
 
         return context

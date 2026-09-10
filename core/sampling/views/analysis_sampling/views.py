@@ -13,6 +13,7 @@ from core.product.models import SpecificationProduct
 from core.sampling.forms import *
 from core.sampling.models import *
 from core.analytical_method.models import AnalyticalMethodCalculateRelation
+from core.utils import round_sig_figs
 
 
 class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
@@ -75,8 +76,8 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                 parts.append(str(cr.factor))
             if cr.sample_quantity:
                 parts.append(str(cr.sample_quantity))
-            # if cr.variable:
-            #     parts.append(str(cr.variable))
+            if cr.variable:
+                parts.append(str(cr.variable))
 
             term = r" \cdot ".join(parts)
             if term:
@@ -109,6 +110,68 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                 unique_relations.append(rel)
                 descriptions_seen.add(rel.calculate_description_relation)
         context['calculate_relations'] = unique_relations
+
+        # Ecuación del método (cálculos directos) que gobierna el procesamiento
+        method_equation = None
+        calcules = method.analyticalmethodcalculate_set.all().order_by('date_creation')
+
+        if method.type_method == 'Gravimetrico':
+            gross = calcules.exclude(gross_weight__isnull=True).exclude(gross_weight='').first()
+            wof = calcules.exclude(weight_of_filter__isnull=True).exclude(weight_of_filter='').first()
+            sq = calcules.exclude(sample_quantity__isnull=True).exclude(sample_quantity='').first()
+
+            if gross and wof and sq:
+                factors_num = [str(c.factor) for c in calcules if c.factor and c.position == 'Numerador']
+                factors_den = [str(c.factor) for c in calcules if c.factor and c.position == 'Denominador']
+
+                str_num = rf"\left(\text{{{gross.gross_weight}}}\right) - \text{{{wof.weight_of_filter}}}"
+                str_den = rf"\text{{{sq.sample_quantity}}}"
+                if factors_den:
+                    str_den += rf" \cdot {r' \cdot '.join(factors_den)}"
+                str_gen = rf" \times {r' \times '.join(factors_num)}" if factors_num else ""
+
+                method_equation = rf"\frac{{{str_num}}}{{{str_den}}}{str_gen}"
+        else:
+            num_terms, den_terms, gen_terms = [], [], []
+
+            for c in calcules:
+                parts = []
+                if c.volumen_std:
+                    parts.append(str(c.volumen_std))
+                if c.factor:
+                    parts.append(str(c.factor))
+                if c.sample_quantity:
+                    parts.append(str(c.sample_quantity))
+                if c.variable:
+                    parts.append(str(c.variable))
+
+                term = r" \cdot ".join(parts)
+                if not term:
+                    continue
+
+                if c.position == 'Numerador':
+                    num_terms.append(term)
+                elif c.position == 'Denominador':
+                    den_terms.append(term)
+                elif c.position == 'General':
+                    gen_terms.append(term)
+
+            if num_terms or den_terms or gen_terms:
+                str_num = r" \cdot ".join(num_terms) if num_terms else "1"
+                str_den = r" \cdot ".join(den_terms) if den_terms else "1"
+                str_gen = rf" \cdot {r' \cdot '.join(gen_terms)}" if gen_terms else ""
+                method_equation = rf"\frac{{{str_num}}}{{{str_den}}}{str_gen}"
+
+        if method_equation:
+            desc_calc = calcules.exclude(calculate_description__isnull=True).exclude(calculate_description='').first()
+            unit_calc = calcules.exclude(unit_measure_calculate__isnull=True).exclude(unit_measure_calculate='').first()
+            if desc_calc:
+                label = rf"\text{{{desc_calc.calculate_description}}}"
+                if unit_calc:
+                    label += rf" \text{{ ({unit_calc.unit_measure_calculate})}}"
+                method_equation = rf"{label} = {method_equation}"
+
+        context['method_equation'] = method_equation
 
         # Obtener la especificación del producto para este análisis
         sampling_process = self.object.sampling_process
@@ -449,7 +512,7 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
         sign_figs = _relation.sig_figs if _relation.sig_figs else 4
 
         if denominator != 0:
-            form.initial['calcule'] = round(numerator / denominator, sign_figs)
+            form.initial['calcule'] = round_sig_figs(numerator / denominator, sign_figs)
         else:
             form.initial['calcule'] = 0
 

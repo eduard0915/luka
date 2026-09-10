@@ -13,6 +13,7 @@ from core.product.models import SpecificationProduct
 from core.sampling.models import *
 from core.sampling.services import send_oss_notification_email
 from core.solution.models import SolutionStd, TransactionSolutionStd
+from core.utils import round_sig_figs
 
 
 @receiver(pre_save, sender=SamplingAnalysis)
@@ -289,7 +290,7 @@ def create_sampling_analysis_processing_from_millimole(sender, instance, created
             denominator = factor_den * sample_den * variable_den
             
             if denominator != 0:
-                concentration_sample = round((numerator / denominator), cifras_sign)
+                concentration_sample = round_sig_figs(numerator / denominator, cifras_sign)
 
         # Crear instancia de SamplingAnalysisProcessing
         SamplingAnalysisProcessing.objects.create(

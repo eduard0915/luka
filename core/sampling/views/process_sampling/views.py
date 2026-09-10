@@ -369,6 +369,8 @@ class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMi
                 parts.append(str(cr.factor))
             if cr.sample_quantity:
                 parts.append(str(cr.sample_quantity))
+            if cr.variable:
+                parts.append(str(cr.variable))
             
             term = r" \cdot ".join(parts)
             if term:
