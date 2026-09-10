@@ -13,10 +13,19 @@ from core.product.models import SamplePoint, AnalyticalMethodProduct
 from core.sampling.services import DAILY_PERIODICITY
 from core.solution.models import SolutionStd
 from core.analytical_method.models import AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation, AnalyticalMethod
+from core.utils import round_sig_figs
 
 TYPE_SAMPLING = [('En Proceso', 'En Proceso'), ('Producto Terminado', 'Producto Terminado')]
 
 SELECT = [(True, 'Si'), (False, 'No')]
+
+
+def _marks_net_weight(calc):
+    """Indica si una fila de cálculo marca el peso neto (variable, peso bruto o peso filtro)."""
+    return any(
+        (getattr(calc, field) or '').strip()
+        for field in ('variable', 'gross_weight', 'weight_of_filter')
+    )
 
 
 class SamplingAnalysisProcessingForm(ModelForm):
@@ -130,7 +139,7 @@ class SamplingAnalysisProcessingForm(ModelForm):
 
                 denominator = std_den * conc_std_den * factor_den * sample_den
 
-                instance.concentration_sample = round((numerator / denominator), cifras_sign)
+                instance.concentration_sample = round_sig_figs(numerator / denominator, cifras_sign)
             else:
                 instance.concentration_sample = 0
 
@@ -160,8 +169,9 @@ class SamplingAnalysisProcessingGravimetryForm(ModelForm):
             form.field.widget.attrs['autocomplete'] = 'off'
 
         col_classes = {
-            'standard_solution': 'col-md-2',
-            'quantity_standard': 'col-md-2',
+            'weight_obtained': 'col-md-4',
+            'weight_of_filter': 'col-md-4',
+            'quantity_sample': 'col-md-4'
         }
 
         for field_name, field in self.fields.items():
@@ -169,9 +179,10 @@ class SamplingAnalysisProcessingGravimetryForm(ModelForm):
 
     class Meta:
         model = SamplingAnalysisProcessing
-        fields = ['weight_obtained', 'quantity_sample']
+        fields = ['weight_obtained', 'weight_of_filter', 'quantity_sample']
         widgets = {
             'weight_obtained': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'weight_of_filter': TextInput(attrs={'class': 'form-control', 'required': True}),
             'quantity_sample': TextInput(attrs={'class': 'form-control', 'required': True}),
         }
 
@@ -193,50 +204,52 @@ class SamplingAnalysisProcessingGravimetryForm(ModelForm):
             if base_calc:
                 instance.analytical_method_calculate = base_calc
 
-            if instance.weight_obtained is None or instance.quantity_sample is None:
+            if instance.weight_obtained is None or instance.quantity_sample is None or instance.weight_of_filter is None:
                 raise ValidationError(
                     "Los campos Peso Obtenido y cantidad de muestra son obligatorios")
 
             qty_wt = float(instance.weight_obtained)
+            qty_filter = float(instance.weight_of_filter)
+            qty_net = qty_wt - qty_filter
             qty_sample = float(instance.quantity_sample)
             cifras_sign = instance.sample_analysis.analytical_method.sig_figs_result
 
             if qty_sample > 0:
 
                 factor_num = 1
-                variable_num = 1
                 sample_num = 1
+                # El peso neto (Peso Bruto - Peso Filtro) entra UNA sola vez por posición:
+                # las filas de peso bruto y peso filtro conforman el mismo término
+                net_weight_num = any(_marks_net_weight(num) for num in var_num)
 
                 for num in var_num:
                     if num.factor is not None:
                         factor_num *= float(num.factor)
 
-                    if num.variable is not None:
-                        variable_num *= float(qty_wt)
-
                     if num.sample_quantity and num.sample_quantity.strip():
                         sample_num = float(qty_sample)
+
+                variable_num = float(qty_net) if net_weight_num else 1
 
                 numerator = factor_num * sample_num * variable_num
 
                 factor_den = 1
-                variable_den = 1
                 sample_den = 1
+                net_weight_den = any(_marks_net_weight(den) for den in var_den)
 
                 for den in var_den:
 
                     if den.factor is not None:
                         factor_den *= float(den.factor)
 
-                    if den.variable is not None:
-                        variable_den *= float(qty_wt)
-
                     if den.sample_quantity and den.sample_quantity.strip():
                         sample_den = float(qty_sample)
 
+                variable_den = float(qty_net) if net_weight_den else 1
+
                 denominator = factor_den * sample_den * variable_den
 
-                instance.concentration_sample = round((numerator / denominator), cifras_sign)
+                instance.concentration_sample = round_sig_figs(numerator / denominator, cifras_sign)
             else:
                 instance.concentration_sample = 0
 
@@ -323,7 +336,7 @@ class SamplingAnalysisProcessingRelationForm(ModelForm):
             raise ValidationError('No se encontró una relación de cálculo asociada.')
         if not instance.denominator:
             raise ValidationError('El denominador no puede ser cero.')
-        instance.calcule = round(instance.numerator / instance.denominator, self.relation.sig_figs)
+        instance.calcule = round_sig_figs(instance.numerator / instance.denominator, self.relation.sig_figs)
         instance.sampling_analysis_id = self.analysis.id
         instance.sampling_process_id = self.sampling.id
         instance.analytical_method_calculate_relation_id = self.relation.id
