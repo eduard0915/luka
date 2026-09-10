@@ -316,7 +316,7 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                 if not parts:
                     continue
 
-                item_text = " \cdot ".join(parts)
+                item_text = " \\cdot ".join(parts)
 
                 # Agregar según posición
                 if calc.position == 'Numerador':
@@ -327,9 +327,9 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                     gen_terms.append(item_text)
 
             # 4. Construcción de la estructura LaTeX
-            str_num = " \cdot ".join(num_terms) if num_terms else "1"
-            str_den = " \cdot ".join(den_terms) if den_terms else "1"
-            str_gen = f" \cdot {' \cdot '.join(gen_terms)}" if gen_terms else ""
+            str_num = " \\cdot ".join(num_terms) if num_terms else "1"
+            str_den = " \\cdot ".join(den_terms) if den_terms else "1"
+            str_gen = f" \\cdot {' \\cdot '.join(gen_terms)}" if gen_terms else ""
 
             if num_terms or den_terms or gen_terms:
                 # Construcción de la etiqueta con formato
@@ -338,5 +338,39 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                     label += f" \\text{{ ({unit})}}"
 
                 context['final_equation'] = f"{label} = \\frac{{{str_num}}}{{{str_den}}}{str_gen}"
+
+        if self.object.type_method == 'Gravimetrico':
+            gross_weight_calc = calcules.exclude(gross_weight__isnull=True).exclude(gross_weight='').first()
+            weight_of_filter_calc = calcules.exclude(weight_of_filter__isnull=True).exclude(weight_of_filter='').first()
+            sample_quantity_calc = calcules.exclude(sample_quantity__isnull=True).exclude(sample_quantity='').first()
+            context['gravimetry_has_basics'] = bool(
+                gross_weight_calc and weight_of_filter_calc and sample_quantity_calc
+            )
+
+            if inst_desc and gross_weight_calc and weight_of_filter_calc and sample_quantity_calc:
+                gw = gross_weight_calc.gross_weight
+                wof = weight_of_filter_calc.weight_of_filter
+                sq = sample_quantity_calc.sample_quantity
+
+                factors_num = [str(calc.factor) for calc in calcules
+                               if calc.factor and calc.position == 'Numerador']
+                factors_den = [str(calc.factor) for calc in calcules
+                               if calc.factor and calc.position == 'Denominador']
+
+                numerator = f"\\left(\\text{{{gw}}}\\right) - \\text{{{wof}}}"
+                if factors_num:
+                    numerator = f"\\left({numerator}\\right) \\cdot {' \\cdot '.join(factors_num)}"
+                denominator = f"\\text{{{sq}}}"
+                if factors_den:
+                    denominator += f" \\cdot {' \\cdot '.join(factors_den)}"
+
+                desc = inst_desc.calculate_description
+                unit = inst_unit.unit_measure_calculate if inst_unit else ""
+
+                label_g = f"\\text{{{desc}}}"
+                if unit:
+                    label_g += f" \\text{{ ({unit})}}"
+
+                context['final_equation_gravimetry'] = f"{label_g} = \\frac{{{numerator}}}{{{denominator}}} \\times 100"
 
         return context

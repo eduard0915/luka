@@ -809,28 +809,21 @@
                                                             <small>Constante</small>
                                                         </button>
 
-                                                        <button type="button"
-                                                                class="btn btn-outline-primary btn-sm"
-                                                                onclick="open_modal('{% url 'analytical_method:add_calc_operation' object.id %}')">
-                                                            <i class="bi bi-link me-1"></i>
-                                                            <small>Cálculo con Operación</small>
-                                                        </button>
+{#                                                        <button type="button"#}
+{#                                                                class="btn btn-outline-primary btn-sm"#}
+{#                                                                onclick="open_modal('{% url 'analytical_method:add_calc_operation' object.id %}')">#}
+{#                                                            <i class="bi bi-link me-1"></i>#}
+{#                                                            <small>Cálculo con Operación</small>#}
+{#                                                        </button>#}
 
-                                                        {% if sample_quantity|length == 0 %}
+                                                        {% if not gravimetry_has_basics %}
                                                             <button type="button"
                                                                     class="btn btn-outline-primary btn-sm"
-                                                                    onclick="open_modal('{% url 'analytical_method:add_sample_gram' object.id %}')">
-                                                                <i class="bi bi-droplet me-1"></i>
-                                                                <small>Cantidad de Muestra</small>
+                                                                    onclick="open_modal('{% url 'analytical_method:add_gravimetry_basics' object.id %}')">
+                                                                <i class="bi bi-calculator me-1"></i>
+                                                                <small>Básicos Gravimetría</small>
                                                             </button>
                                                         {% endif %}
-
-                                                        <button type="button"
-                                                                class="btn btn-outline-primary btn-sm"
-                                                                onclick="open_modal('{% url 'analytical_method:add_variable' object.id %}')">
-                                                            <i class="bi bi-alphabet me-1"></i>
-                                                            <small>Variable</small>
-                                                        </button>
                                                     </div>
                                                 </div>
 
@@ -863,6 +856,10 @@
                                                                              {% if calc.sln_std_base %} × {{ calc.sln_std_base }}{% endif %}
                                                                         {% elif calc.factor %}
                                                                             Constante: {{ calc.factor }}
+                                                                        {% elif calc.weight_of_filter %}
+                                                                            Peso Filtro: {{ calc.weight_of_filter }}
+                                                                        {% elif calc.gross_weight %}
+                                                                            Peso Bruto: {{ calc.gross_weight }}
                                                                         {% elif calc.sample_quantity %}
                                                                             Cant. Muestra: {{ calc.sample_quantity }}
                                                                         {% elif calc.variable %}
@@ -1010,12 +1007,27 @@
                                         </div>
                                         <div class="col-md-12">
                                             {% if object.type_method == 'Volumetrico' or object.type_method == 'Gravimetrico' or object.type_method == 'Volumetrico - Mezcla' %}
-                                                {% if object.type_method == 'Volumetrico' or object.type_method == 'Gravimetrico' %}
+                                                {% if object.type_method == 'Volumetrico' %}
                                                     <div class="p-3 bg-light rounded text-center"
                                                          id="equation-container">
                                                         {% if final_equation %}
                                                             <div style="font-size: 0.8rem; overflow-x: auto; font-family: 'Times New Roman', serif;">
                                                                 $${{ final_equation }}$$
+                                                            </div>
+                                                        {% else %}
+                                                            <div class="py-3 text-center text-muted">
+                                                                <i class="bi bi-inbox"></i> No hay parámetros definidos
+                                                                para generar la ecuación.
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                {% endif %}
+                                                {% if object.type_method == 'Gravimetrico' %}
+                                                    <div class="p-3 bg-light rounded text-center"
+                                                         id="equation-container">
+                                                        {% if final_equation_gravimetry %}
+                                                            <div style="font-size: 0.8rem; overflow-x: auto; font-family: 'Times New Roman', serif;">
+                                                                $${{ final_equation_gravimetry }}$$
                                                             </div>
                                                         {% else %}
                                                             <div class="py-3 text-center text-muted">

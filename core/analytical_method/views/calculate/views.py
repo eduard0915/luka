@@ -210,3 +210,65 @@ class AnalyticalMethodCalculateDeleteView(LoginRequiredMixin, ValidatePermission
         context['entity'] = 'Eliminar Variable de Ecuación'
         context['delete'] = 'Está seguro de eliminar la variable de la ecuación?'
         return context
+
+
+class AnalyticalMethodGravimetryBasicsView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista para crear los registros básicos de gravimetría."""
+    permission_required = 'analytical_method.view_analyticalmethod'
+    template_name = 'method/modal_gravimetry_basics.html'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name, self.get_context_data())
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            analytical_method = AnalyticalMethod.objects.get(pk=self.kwargs.get('pk'))
+            inst_desc = AnalyticalMethodCalculate.objects.filter(
+                analytical_method=analytical_method
+            ).exclude(
+                calculate_description__isnull=True
+            ).exclude(calculate_description='').first()
+
+            if not inst_desc:
+                data['error'] = 'Registra primero "Descripción Cálculo" de la ecuación'
+                return JsonResponse(data)
+
+            AnalyticalMethodCalculate.objects.create(
+                analytical_method=analytical_method,
+                weight_of_filter='Peso Filtro',
+                position='Numerador'
+            )
+            AnalyticalMethodCalculate.objects.create(
+                analytical_method=analytical_method,
+                gross_weight='Peso Filtro + Residuo',
+                position='Numerador'
+            )
+            AnalyticalMethodCalculate.objects.create(
+                analytical_method=analytical_method,
+                sample_quantity='Peso de Muestra',
+                position='Denominador'
+            )
+
+            messages.success(request, 'Básicos de gravimetría creados con éxito!')
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        context = {}
+        context['class'] = 'col-lg-12'
+        pk = self.kwargs.get('pk')
+        context['pk'] = pk
+        analytical_method = AnalyticalMethod.objects.get(pk=pk)
+        inst_desc = AnalyticalMethodCalculate.objects.filter(
+            analytical_method=analytical_method
+        ).exclude(
+            calculate_description__isnull=True
+        ).exclude(calculate_description='').first()
+        context['inst_desc'] = inst_desc
+        return context
