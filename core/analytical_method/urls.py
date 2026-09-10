@@ -54,6 +54,7 @@ urlpatterns = [
     path('detail/calculate/add_variable/<uuid:pk>/', AnalyticalMethodVariableCreateView.as_view(), name='add_variable'),
     path('detail/calculate/edit_sample_gram/<uuid:pk>/', AnalyticalMethodSampleGramUpdateView.as_view(), name='edit_sample_gram'),
     path('detail/calculate/delete/<uuid:pk>/', AnalyticalMethodCalculateDeleteView.as_view(), name='delete_analytical_method_calcule'),
+    path('detail/calculate/gravimetry_basics/<uuid:pk>/', AnalyticalMethodGravimetryBasicsView.as_view(), name='add_gravimetry_basics'),
 
     # Cálculos Relacionados
     path('detail/calculate_relation/add_description/<uuid:pk>/', AnalyticalMethodCalculeRelationDescriptionCreateView.as_view(), name='add_calc_relation_description'),

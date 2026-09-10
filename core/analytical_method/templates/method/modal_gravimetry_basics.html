@@ -1,0 +1,91 @@
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Básicos Gravimetría</h5>
+            <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true"></span>
+            </button>
+        </div>
+        {% if inst_desc %}
+            <form method="post" action="{% url 'analytical_method:add_gravimetry_basics' pk %}" class="form-horizontal" id="modal_form">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add">
+                    <div class="errormsg alert alert-danger" style="display: none;">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <div class="errors"></div>
+                    </div>
+                    <p>Crear Ecuación Básica para Gravimetría</p>
+                    <p class="text-muted small mb-0">Se crearán las siguientes variables:</p>
+                    <ul class="text-muted small">
+                        <li>Peso Filtro</li>
+                        <li>Peso Filtro + Residuo</li>
+                        <li>Peso de Muestra</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" id="btnSubmit">Guardar</button>
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </form>
+        {% else %}
+            <div class="modal-body">
+                <div class="alert alert-warning mb-0">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    Registra primero "Descripción Cálculo" de la ecuación
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        {% endif %}
+    </div>
+
+    {% block scripts_gravimetry %}
+        <script type="application/javascript">
+            (function () {
+                var form = document.getElementById('modal_form');
+                if (!form) return;
+
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    var parameters = new FormData(this);
+                    var btnSubmit = document.getElementById('btnSubmit');
+                    if (btnSubmit) {
+                        btnSubmit.disabled = true;
+                        btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
+                    }
+                    $.ajax({
+                        url: form.getAttribute('action'),
+                        type: 'POST',
+                        data: parameters,
+                        dataType: 'json',
+                        processData: false,
+                        contentType: false,
+                    }).done(function (data) {
+                        if (!data.hasOwnProperty('error')) {
+                            location.href = window.location.pathname;
+                            return false;
+                        }
+                        var errDiv = form.querySelector('.errormsg');
+                        var errDivInner = form.querySelector('.errors');
+                        if (errDiv && errDivInner) {
+                            errDiv.style.display = 'block';
+                            errDivInner.innerHTML = typeof data.error === 'string' ? data.error : JSON.stringify(data.error);
+                        }
+                        if (btnSubmit) {
+                            btnSubmit.disabled = false;
+                            btnSubmit.innerHTML = 'Guardar';
+                        }
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        alert(textStatus + ': ' + errorThrown);
+                        if (btnSubmit) {
+                            btnSubmit.disabled = false;
+                            btnSubmit.innerHTML = 'Guardar';
+                        }
+                    });
+                });
+            })();
+        </script>
+    {% endblock %}
+</div>
