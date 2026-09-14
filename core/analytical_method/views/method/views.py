@@ -337,7 +337,10 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                 if unit:
                     label += f" \\text{{ ({unit})}}"
 
-                context['final_equation'] = f"{label} = \\frac{{{str_num}}}{{{str_den}}}{str_gen}"
+                if self.object.type_method == 'Volumetrico':
+                    context['final_equation_volumetry'] = f"{label} = \\frac{{{str_num}}}{{{str_den}}}{str_gen}"
+                else:
+                    context['final_equation'] = f"{label} = \\frac{{{str_num}}}{{{str_den}}}{str_gen}"
 
         if self.object.type_method == 'Gravimetrico':
             gross_weight_calc = calcules.exclude(gross_weight__isnull=True).exclude(gross_weight='').first()

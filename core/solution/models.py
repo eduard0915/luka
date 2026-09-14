@@ -203,7 +203,10 @@ class SolutionStd(BaseModel):
     def __str__(self):
         """Retorna la representación con el reactivo, concentración, código y cantidad."""
 
-        solution_std_base = f'{self.code_solution_std} - {self.solution_std_base}'
+        if self.average_concentration:
+            solution_std_base = f'{self.code_solution_std} - {self.solution_std_base.solute_std_base.description_reagent} - {self.average_concentration}{self.concentration_unit}'
+        else:
+            solution_std_base = f'{self.code_solution_std} - {self.solution_std_base}'
 
         if not self.preparated_std_by:
             return solution_std_base + ' - ' + f'{self.quantity_solution_std}{self.solute_std.reagent.umb}'

@@ -337,12 +337,12 @@
                             <table class="table table-hover table-bordered" id="data_0">
                                 <thead>
                                 <tr>
-                                    <th style="width:10%">Fecha</th>
-                                    <th style="width:15%">Tipo</th>
-                                    <th style="width:10%">Cant. ({{ object.solute_std.reagent.umb }})</th>
+                                    <th style="width:15%">Fecha</th>
+                                    <th style="width:20%">Tipo</th>
+                                    <th style="width:10%">Cant. mL</th>
                                     <th style="width:25%">Realizada por</th>
                                     <th style="width:30%">Detalle</th>
-                                    <th style="width:10%">Acciones</th>
+{#                                    <th style="width:10%">Acciones</th>#}
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -353,22 +353,22 @@
                                         <td class="text-center align-middle">{{ foo.quantity | intcomma:False }}</td>
                                         <td class="text-center align-middle">{{ foo.user_transaction }}</td>
                                         <td class="text-center align-middle">{{ foo.detail_transaction }}</td>
-                                        <td class="text-center align-middle">
-                                            <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
-                                               title="Editar">
-                                                <i class="bi bi-pencil-square text-warning me-2"></i>
-                                            </a>
-                                            <a onclick="open_modal('{% url 'user:delete_training' foo.id %}')"
-                                               title="Eliminar">
-                                                <i class="bi bi-trash text-danger me-2"></i>
-                                            </a>
-                                            {% if foo.training_status == 'Vencido' %}
-                                                <a onclick="open_modal('{% url 'user:create_update_training' foo.id %}')"
-                                                   title="Actualizar">
-                                                    <i class="bi bi-arrow-clockwise text-info me-2"></i>
-                                                </a>
-                                            {% endif %}
-                                        </td>
+{#                                        <td class="text-center align-middle">#}
+{#                                            <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"#}
+{#                                               title="Editar">#}
+{#                                                <i class="bi bi-pencil-square text-warning me-2"></i>#}
+{#                                            </a>#}
+{#                                            <a onclick="open_modal('{% url 'user:delete_training' foo.id %}')"#}
+{#                                               title="Eliminar">#}
+{#                                                <i class="bi bi-trash text-danger me-2"></i>#}
+{#                                            </a>#}
+{#                                            {% if foo.training_status == 'Vencido' %}#}
+{#                                                <a onclick="open_modal('{% url 'user:create_update_training' foo.id %}')"#}
+{#                                                   title="Actualizar">#}
+{#                                                    <i class="bi bi-arrow-clockwise text-info me-2"></i>#}
+{#                                                </a>#}
+{#                                            {% endif %}#}
+{#                                        </td>#}
                                     </tr>
                                 {% empty %}
                                     <tr>
