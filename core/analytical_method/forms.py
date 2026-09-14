@@ -385,7 +385,7 @@ class AnalyticalMethodVolumenStdForm(ModelForm):
                 instance = super().save(commit=False)
                 if self.analytical_method:
                     instance.analytical_method = self.analytical_method
-                self.volumen_std = 'mL Gastados'
+                instance.volumen_std = 'mL Gastados'
                 instance.save()
                 data = instance
             else:

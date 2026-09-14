@@ -128,14 +128,14 @@ def discount_inventory_std_solution(sender, instance, created, **kwargs):
         current_time = timezone.now()
         detail_text = f'Estandarización de Solución {instance.solution_to_standardize.code_solution_std}'
 
-        # Crear transacción del estándar
+        # Crear transacción del estándar utilizado
         if instance.standard_solution_id:
             TransactionSolutionStd.objects.create(
                 solution_std_inventory_id=instance.standard_solution.id,
                 type_transaction='Estandarización',
                 date_transaction=current_time,
                 detail_transaction=detail_text,
-                quantity=instance.quantity_standard,
+                quantity=instance.quantity_solution,
                 user_transaction_id=instance.user_creation.id,
             )
         elif instance.standard_reagent_id:
@@ -144,6 +144,16 @@ def discount_inventory_std_solution(sender, instance, created, **kwargs):
                 type_transaction='Estandarización',
                 date_transaction=current_time,
                 detail_transaction=detail_text,
+                quantity=instance.quantity_solution,
+                user_transaction_id=instance.user_creation.id,
+            )
+
+        if instance.solution_to_standardize_id:
+            TransactionSolutionStd.objects.create(
+                solution_std_inventory_id=instance.solution_to_standardize.id,
+                type_transaction='Estandarización',
+                date_transaction=current_time,
+                detail_transaction='Gasto en Estandarización',
                 quantity=instance.quantity_standard,
                 user_transaction_id=instance.user_creation.id,
             )

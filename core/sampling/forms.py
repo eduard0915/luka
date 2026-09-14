@@ -93,7 +93,10 @@ class SamplingAnalysisProcessingForm(ModelForm):
 
             qty_std = float(instance.quantity_standard)
             qty_sample = float(instance.quantity_sample)
-            conc_std = float(instance.standard_solution.concentration_std)
+            if instance.standard_solution.average_concentration:
+                conc_std = float(instance.standard_solution.average_concentration)
+            else:
+                conc_std = float(instance.standard_solution.concentration_std)
             cifras_sign = instance.sample_analysis.analytical_method.sig_figs_result
 
             if qty_sample > 0:
