@@ -131,7 +131,7 @@
                                                                     mL Estándar
                                                                 </th>
                                                                 <th class="text-center align-middle" style="width: 10%">
-                                                                    mL Muestra
+                                                                    {{ sample_quantity|default:"mL Muestra" }}
                                                                 </th>
                                                                 <th class="text-center align-middle" style="width: 10%">
                                                                     [{{ specification.unit_measure|default:"" }}]

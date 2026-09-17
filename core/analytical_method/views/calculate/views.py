@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, UpdateView, DeleteView, View
 
 from core.analytical_method.forms import *
-from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate
+from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate, OPERATION
 from core.mixins import ValidatePermissionRequiredMixin
 
 class BaseAnalyticalMethodDetailView(ValidatePermissionRequiredMixin):
@@ -169,6 +169,32 @@ class AnalyticalMethodVariableCreateView(LoginRequiredMixin, BaseAnalyticalMetho
         context['action'] = 'add'
         return context
 
+# Creación Alícuota
+class AnalyticalMethodAliquotCreateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, CreateView):
+    """)Vista para agregar la alícuota a un cálculo."""
+    model = AnalyticalMethodCalculate
+    form_class = AnalyticalMethodAliquotForm
+
+    def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Agregar Alícuota en la Ecuación'
+        context['action'] = 'add'
+        return context
+
+# Edición Alícuota
+class AnalyticalMethodAliquotUpdateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, UpdateView):
+    """)Vista para editar la alícuota de un cálculo."""
+    model = AnalyticalMethodCalculate
+    form_class = AnalyticalMethodAliquotForm
+
+    def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Editar Alícuota en la Ecuación'
+        context['action'] = 'edit'
+        return context
+
 # Editar Cantidad de Muestra
 class AnalyticalMethodSampleGramUpdateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, UpdateView):
     """)Vista para editar la variable de muestra de un cálculo."""
@@ -238,20 +264,36 @@ class AnalyticalMethodGravimetryBasicsView(LoginRequiredMixin, ValidatePermissio
                 data['error'] = 'Registra primero "Descripción Cálculo" de la ecuación'
                 return JsonResponse(data)
 
+            operation = request.POST.get('operation') or None
+            consecutive = request.POST.get('consecutive') or None
+            try:
+                consecutive = int(consecutive) if consecutive else None
+            except (TypeError, ValueError):
+                consecutive = None
+
             AnalyticalMethodCalculate.objects.create(
                 analytical_method=analytical_method,
                 weight_of_filter='Peso Filtro',
-                position='Numerador'
+                position='Numerador',
+                term_type='basic',
+                operation=operation,
+                consecutive=consecutive,
             )
             AnalyticalMethodCalculate.objects.create(
                 analytical_method=analytical_method,
                 gross_weight='Peso Filtro + Residuo',
-                position='Numerador'
+                position='Numerador',
+                term_type='basic',
+                operation=operation,
+                consecutive=consecutive,
             )
             AnalyticalMethodCalculate.objects.create(
                 analytical_method=analytical_method,
                 sample_quantity='Peso de Muestra',
-                position='Denominador'
+                position='Denominador',
+                term_type='basic',
+                operation=operation,
+                consecutive=consecutive,
             )
             AnalyticalMethodCalculate.objects.create(
                 analytical_method=analytical_method,
@@ -276,4 +318,5 @@ class AnalyticalMethodGravimetryBasicsView(LoginRequiredMixin, ValidatePermissio
             calculate_description__isnull=True
         ).exclude(calculate_description='').first()
         context['inst_desc'] = inst_desc
+        context['operations'] = OPERATION
         return context

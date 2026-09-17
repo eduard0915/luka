@@ -328,3 +328,78 @@ class HeavyMetalDeleteView(AnalyticalMethodDetailDeleteView):
     model = HeavyMetal
     template_name = 'method/delete_method_calcule.html'
     permission_required = 'analytical_method.view_analyticalmethod'
+
+# Términos de la Ecuación Gravimétrica
+class GravimetryTermCreateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, CreateView):
+    """)Vista para agregar un término a la ecuación de un método gravimétrico."""
+    model = GravimetryTerm
+    form_class = GravimetryTermForm
+
+    def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Agregar Término de la Ecuación'
+        context['action'] = 'add'
+        return context
+
+class GravimetryTermUpdateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, UpdateView):
+    """)Vista para editar un término de la ecuación gravimétrica."""
+    model = GravimetryTerm
+    form_class = GravimetryTermForm
+
+    def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Editar Término de la Ecuación'
+        context['action'] = 'edit'
+        return context
+
+class GravimetryTermDeleteView(AnalyticalMethodDetailDeleteView):
+    """)Vista para eliminar un término de la ecuación gravimétrica."""
+    model = GravimetryTerm
+    template_name = 'method/delete_method_calcule.html'
+    permission_required = 'analytical_method.view_analyticalmethod'
+
+    def post(self, request, *args, **kwargs):
+        """Procesa la eliminación del término vía AJAX."""
+        data = {}
+        try:
+            self.get_object().delete()
+            messages.success(request, 'Término de ecuación eliminado satisfactoriamente!')
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Eliminar Término de la Ecuación'
+        context['delete'] = 'Está seguro de eliminar el término de la ecuación?'
+        return context
+
+# Términos gravimétricos almacenados en AnalyticalMethodCalculate
+class GravimetryCalcTermCreateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, CreateView):
+    """)Vista para agregar un término (básicos o constante) a la ecuación desde AnalyticalMethodCalculate."""
+    model = AnalyticalMethodCalculate
+    form_class = GravimetryCalcTermForm
+    template_name = 'method/modal_gravimetry_calc_term.html'
+
+    def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Agregar Término de la Ecuación'
+        context['action'] = 'add'
+        return context
+
+class GravimetryCalcTermUpdateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, UpdateView):
+    """)Vista para editar un término (básicos o constante) de la ecuación en AnalyticalMethodCalculate."""
+    model = AnalyticalMethodCalculate
+    form_class = GravimetryCalcTermForm
+    template_name = 'method/modal_gravimetry_calc_term.html'
+
+    def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Editar Término de la Ecuación'
+        context['action'] = 'edit'
+        return context

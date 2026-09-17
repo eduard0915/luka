@@ -1,7 +1,7 @@
 """Formularios para la aplicación de muestreo del laboratorio."""
 
 from django.db.models import Q
-from django.forms import ModelForm, Form, TextInput, Select, TimeInput, DateTimeInput, FloatField, FileField, FileInput
+from django.forms import ModelForm, Form, TextInput, Select, TimeInput, DateTimeInput, FloatField, FileField, FileInput, HiddenInput
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from crum import get_current_user
@@ -13,6 +13,7 @@ from core.product.models import SamplePoint, AnalyticalMethodProduct
 from core.sampling.services import DAILY_PERIODICITY
 from core.solution.models import SolutionStd
 from core.analytical_method.models import AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation, AnalyticalMethod
+from core.analytical_method.services import build_gravimetry_data, evaluate_gravimetry_terms
 from core.utils import round_sig_figs
 
 TYPE_SAMPLING = [('En Proceso', 'En Proceso'), ('Producto Terminado', 'Producto Terminado')]
@@ -48,12 +49,21 @@ class SamplingAnalysisProcessingForm(ModelForm):
         if calc_con_label and calc_con_label.sample_quantity:
             self.fields['quantity_sample'].label = str(calc_con_label.sample_quantity)
 
+        # La alícuota solo se solicita cuando la ecuación del método la incluye.
+        if calcs.filter(aliquot=True).exists():
+            self.fields['aliquot'].required = True
+            self.fields['aliquot'].label = 'Alícuota'
+        else:
+            self.fields['aliquot'].required = False
+            self.fields['aliquot'].widget = HiddenInput()
+
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
         col_classes = {
-            'standard_solution': 'col-md-7',
+            'standard_solution': 'col-md-5',
             'quantity_standard': 'col-md-2',
+            'aliquot': 'col-md-2',
         }
 
         for field_name, field in self.fields.items():
@@ -61,11 +71,12 @@ class SamplingAnalysisProcessingForm(ModelForm):
 
     class Meta:
         model = SamplingAnalysisProcessing
-        fields = ['standard_solution', 'quantity_standard', 'quantity_sample']
+        fields = ['standard_solution', 'quantity_standard', 'quantity_sample', 'aliquot']
         widgets = {
             'standard_solution': Select(attrs={'class': 'form-control select2', 'required': True, 'style': 'width: 100%'}),
             'quantity_standard': TextInput(attrs={'class': 'form-control', 'required': True}),
             'quantity_sample': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'aliquot': TextInput(attrs={'class': 'form-control'}),
         }
 
     def save(self, commit=True):
@@ -105,6 +116,7 @@ class SamplingAnalysisProcessingForm(ModelForm):
                 sample_num = 1
                 std_num = 1
                 conc_std_num = 1
+                aliquot_num = 1
 
                 for num in var_num:
                     if num.factor is not None:
@@ -119,12 +131,18 @@ class SamplingAnalysisProcessingForm(ModelForm):
                     if num.sln_std_base is not None:
                         conc_std_num = conc_std
 
-                numerator = std_num * conc_std_num * factor_num * sample_num
+                    if num.aliquot:
+                        if instance.aliquot in (None, ''):
+                            raise ValidationError('El campo alícuota es obligatorio')
+                        aliquot_num = float(instance.aliquot)
+
+                numerator = std_num * conc_std_num * factor_num * sample_num * aliquot_num
 
                 factor_den = 1
                 sample_den = 1
                 std_den = 1
                 conc_std_den = 1
+                aliquot_den = 1
 
                 for den in var_den:
 
@@ -140,7 +158,12 @@ class SamplingAnalysisProcessingForm(ModelForm):
                     if den.sln_std_base is not None:
                         conc_std_den = conc_std
 
-                denominator = std_den * conc_std_den * factor_den * sample_den
+                    if den.aliquot:
+                        if instance.aliquot in (None, ''):
+                            raise ValidationError('El campo alícuota es obligatorio')
+                        aliquot_den = float(instance.aliquot)
+
+                denominator = std_den * conc_std_den * factor_den * sample_den * aliquot_den
 
                 instance.concentration_sample = round_sig_figs(numerator / denominator, cifras_sign)
             else:
@@ -252,7 +275,24 @@ class SamplingAnalysisProcessingGravimetryForm(ModelForm):
 
                 denominator = factor_den * sample_den * variable_den
 
-                instance.concentration_sample = round_sig_figs(numerator / denominator, cifras_sign)
+                raw_value = numerator / denominator if denominator else 0
+
+                # La ecuación del método puede combinar el cálculo básico con
+                # términos constantes (por ejemplo 100 - cálculo básico).
+                calcules = AnalyticalMethodCalculate.objects.filter(
+                    analytical_method_id=analytical_method_id)
+                _, calc_terms = build_gravimetry_data(calcules)
+                calc_constants = [term for term in calc_terms if term.term_type == 'constant']
+                if calc_constants:
+                    term_units = calc_terms
+                else:
+                    term_units = list(self.analysis.analytical_method.gravimetryterm_set.all())
+                if term_units:
+                    evaluated = evaluate_gravimetry_terms(raw_value, term_units)
+                    if evaluated is not None:
+                        raw_value = evaluated
+
+                instance.concentration_sample = round_sig_figs(raw_value, cifras_sign)
             else:
                 instance.concentration_sample = 0
 

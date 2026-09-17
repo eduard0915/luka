@@ -390,6 +390,15 @@
                                                                 <small>Cantidad de Muestra</small>
                                                             </button>
                                                         {% endif %}
+
+                                                        {% if not aliquot %}
+                                                            <button type="button"
+                                                                    class="btn btn-outline-primary btn-sm"
+                                                                    onclick="open_modal('{% url 'analytical_method:add_aliquot' object.id %}')">
+                                                                <i class="bi bi-droplet me-1"></i>
+                                                                <small>Alícuota</small>
+                                                            </button>
+                                                        {% endif %}
                                                     </div>
                                                 </div>
 
@@ -426,6 +435,8 @@
                                                                             Constante: {{ calc.factor }}
                                                                         {% elif calc.sample_quantity %}
                                                                             Muestra: {{ calc.sample_quantity }}
+                                                                        {% elif calc.aliquot %}
+                                                                            Alícuota
                                                                         {% endif %}
                                                                     </td>
                                                                     <td class="text-center">{{ calc.position|default:"No aplica" }}</td>
@@ -439,6 +450,12 @@
                                                                         {% elif calc.volumen_std %}
                                                                             <a href="javascript:void(0);"
                                                                                onclick="open_modal('{% url 'analytical_method:edit_volume_std' calc.id %}')"
+                                                                               class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                                <i class="bi bi-pencil text-warning"></i>
+                                                                            </a>
+                                                                        {% elif calc.aliquot %}
+                                                                            <a href="javascript:void(0);"
+                                                                               onclick="open_modal('{% url 'analytical_method:edit_aliquot' calc.id %}')"
                                                                                class="btn btn-link btn-sm p-0 text-primary me-2">
                                                                                 <i class="bi bi-pencil text-warning"></i>
                                                                             </a>
@@ -819,8 +836,69 @@
                                                                 <small>Básicos Gravimetría</small>
                                                             </button>
                                                         {% endif %}
+
+                                                        <button type="button"
+                                                                class="btn btn-outline-primary btn-sm"
+                                                                onclick="open_modal('{% url 'analytical_method:add_gravimetry_calc_term' object.id %}')">
+                                                            <i class="bi bi-plus-slash-minus me-1"></i>
+                                                            <small>Término Ecuación</small>
+                                                        </button>
                                                     </div>
                                                 </div>
+
+                                                {% if gravimetry_terms %}
+                                                    <div class="col-12 mt-3">
+                                                        <table class="table table-sm table-bordered">
+                                                            <thead>
+                                                            <tr>
+                                                                <th class="text-center" style="width: 8%;">#</th>
+                                                                <th class="text-center" style="width: 55%;">Término</th>
+                                                                <th class="text-center" style="width: 20%;">Operación</th>
+                                                                <th class="text-center" style="width: 17%;">Acciones</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            {% for term in gravimetry_terms %}
+                                                                <tr>
+                                                                    <td class="text-center align-middle">{{ term.consecutive }}</td>
+                                                                    <td class="text-left align-middle">
+                                                                        {% if term.term_type == 'basic' %}
+                                                                            Cálculo Básico de Gravimetría
+                                                                        {% else %}
+                                                                            Constante: {{ term.constant_value }}
+                                                                        {% endif %}
+                                                                    </td>
+                                                                    <td class="text-center align-middle">
+                                                                        {% if term.operation == 'add' %}
+                                                                            <span class="badge bg-secondary">+</span>
+                                                                        {% elif term.operation == 'subtract' %}
+                                                                            <span class="badge bg-secondary">−</span>
+                                                                        {% elif term.operation == 'multiply' %}
+                                                                            <span class="badge bg-secondary">×</span>
+                                                                        {% elif term.operation == 'divide' %}
+                                                                            <span class="badge bg-secondary">÷</span>
+                                                                        {% else %}
+                                                                            —
+                                                                        {% endif %}
+                                                                    </td>
+                                                                    <td class="text-center align-middle">
+                                                                        <a href="javascript:void(0);"
+                                                                           onclick="open_modal('{% url 'analytical_method:update_gravimetry_term' term.id %}')"
+                                                                           class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                            <i class="bi bi-pencil text-warning"></i>
+                                                                        </a>
+                                                                        <a href="javascript:void(0);"
+                                                                           onclick="open_modal('{% url 'analytical_method:delete_gravimetry_term' term.id %}')"
+                                                                           class="btn btn-link btn-sm p-0 text-primary">
+                                                                            <i class="bi bi-trash-fill text-danger"></i>
+                                                                        </a>
+                                                                    </td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                {% endif %}
 
                                                 <!-- Tabla debajo de los botones -->
                                                 {% if calcules %}
@@ -842,9 +920,12 @@
                                                             {% for calc in calcules %}
                                                                 <tr>
                                                                     <td class="text-left align-middle">
+                                                                        {% if calc.operation == 'add' %}<span class="badge bg-secondary me-1">+</span>{% elif calc.operation == 'subtract' %}<span class="badge bg-secondary me-1">−</span>{% elif calc.operation == 'multiply' %}<span class="badge bg-secondary me-1">×</span>{% elif calc.operation == 'divide' %}<span class="badge bg-secondary me-1">÷</span>{% endif %}
                                                                         {% if calc.calculate_description %}
                                                                             Descripción:
                                                                             {{ calc.calculate_description }}
+                                                                        {% elif calc.term_type == 'constant' %}
+                                                                            Término: {{ calc.factor }}
                                                                         {% elif calc.volumen_std %}
                                                                             Volumen STD: {{ calc.volumen_std }}
                                                                              {% if calc.subtract_blank %} - Blanco{% endif %}
@@ -866,6 +947,18 @@
                                                                         {% if calc.calculate_description %}
                                                                             <a href="javascript:void(0);"
                                                                                onclick="open_modal('{% url 'analytical_method:edit_calc_description' calc.id %}')"
+                                                                               class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                                <i class="bi bi-pencil text-warning"></i>
+                                                                            </a>
+                                                                        {% elif calc.term_type == 'constant' %}
+                                                                            <a href="javascript:void(0);"
+                                                                               onclick="open_modal('{% url 'analytical_method:update_gravimetry_calc_term' calc.id %}')"
+                                                                               class="btn btn-link btn-sm p-0 text-primary me-2">
+                                                                                <i class="bi bi-pencil text-warning"></i>
+                                                                            </a>
+                                                                        {% elif calc.term_type == 'basic' %}
+                                                                            <a href="javascript:void(0);"
+                                                                               onclick="open_modal('{% url 'analytical_method:update_gravimetry_calc_term' calc.id %}')"
                                                                                class="btn btn-link btn-sm p-0 text-primary me-2">
                                                                                 <i class="bi bi-pencil text-warning"></i>
                                                                             </a>

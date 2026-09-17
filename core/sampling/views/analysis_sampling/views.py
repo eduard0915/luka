@@ -13,6 +13,7 @@ from core.product.models import SpecificationProduct
 from core.sampling.forms import *
 from core.sampling.models import *
 from core.analytical_method.models import AnalyticalMethodCalculateRelation
+from core.analytical_method.services import _build_gravimetry_equation, build_gravimetry_data
 from core.utils import round_sig_figs
 
 
@@ -115,35 +116,47 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         method_equation = None
         calcules = method.analyticalmethodcalculate_set.all().order_by('date_creation')
 
+        sample_quantity_calc = calcules.exclude(sample_quantity__isnull=True).exclude(sample_quantity='').first()
+        context['sample_quantity'] = sample_quantity_calc.sample_quantity if sample_quantity_calc else None
+
         if method.type_method == 'Gravimetrico':
-            gross = calcules.exclude(gross_weight__isnull=True).exclude(gross_weight='').first()
-            wof = calcules.exclude(weight_of_filter__isnull=True).exclude(weight_of_filter='').first()
-            sq = calcules.exclude(sample_quantity__isnull=True).exclude(sample_quantity='').first()
+            basic_latex, calc_terms = build_gravimetry_data(calcules)
+            calc_constants = [term for term in calc_terms if term.term_type == 'constant']
+            gravimetry_terms = method.gravimetryterm_set.all()
+            if calc_constants:
+                term_units = calc_terms
+            elif gravimetry_terms.exists():
+                term_units = list(gravimetry_terms)
+            else:
+                term_units = []
 
-            if gross and wof and sq:
-                factors_num = [str(c.factor) for c in calcules if c.factor and c.position == 'Numerador']
-                factors_den = [str(c.factor) for c in calcules if c.factor and c.position == 'Denominador']
-
-                str_num = rf"\left(\text{{{gross.gross_weight}}}\right) - \text{{{wof.weight_of_filter}}}"
-                str_den = rf"\text{{{sq.sample_quantity}}}"
-                if factors_den:
-                    str_den += rf" \cdot {r' \cdot '.join(factors_den)}"
-                str_gen = rf" \times {r' \times '.join(factors_num)}" if factors_num else ""
-
-                method_equation = rf"\frac{{{str_num}}}{{{str_den}}}{str_gen}"
+            if basic_latex:
+                method_equation = basic_latex
+            if term_units:
+                term_equation = _build_gravimetry_equation(basic_latex or '', term_units)
+                if term_equation:
+                    method_equation = term_equation
         else:
             num_terms, den_terms, gen_terms = [], [], []
 
             for c in calcules:
                 parts = []
                 if c.volumen_std:
-                    parts.append(str(c.volumen_std))
+                    if c.subtract_blank:
+                        vol_str = rf"\left({c.volumen_std} - \text{{Blanco}}\right)"
+                    else:
+                        vol_str = str(c.volumen_std)
+                    if c.sln_std_base:
+                        vol_str += rf" \times \text{{{c.sln_std_base}}}"
+                    parts.append(vol_str)
                 if c.factor:
                     parts.append(str(c.factor))
                 if c.sample_quantity:
                     parts.append(str(c.sample_quantity))
                 if c.variable:
                     parts.append(str(c.variable))
+                if c.aliquot:
+                    parts.append(r"\text{Alícuota}")
 
                 term = r" \cdot ".join(parts)
                 if not term:

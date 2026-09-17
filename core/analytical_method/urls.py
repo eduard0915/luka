@@ -52,6 +52,8 @@ urlpatterns = [
     path('detail/calculate/edit_factor_den/<uuid:pk>/', AnalyticalMethodFactorUpdateView.as_view(), name='edit_factor'),
     path('detail/calculate/add_sample_gram/<uuid:pk>/', AnalyticalMethodSampleGramCreateView.as_view(), name='add_sample_gram'),
     path('detail/calculate/add_variable/<uuid:pk>/', AnalyticalMethodVariableCreateView.as_view(), name='add_variable'),
+    path('detail/calculate/add_aliquot/<uuid:pk>/', AnalyticalMethodAliquotCreateView.as_view(), name='add_aliquot'),
+    path('detail/calculate/edit_aliquot/<uuid:pk>/', AnalyticalMethodAliquotUpdateView.as_view(), name='edit_aliquot'),
     path('detail/calculate/edit_sample_gram/<uuid:pk>/', AnalyticalMethodSampleGramUpdateView.as_view(), name='edit_sample_gram'),
     path('detail/calculate/delete/<uuid:pk>/', AnalyticalMethodCalculateDeleteView.as_view(), name='delete_analytical_method_calcule'),
     path('detail/calculate/gravimetry_basics/<uuid:pk>/', AnalyticalMethodGravimetryBasicsView.as_view(), name='add_gravimetry_basics'),
@@ -78,6 +80,13 @@ urlpatterns = [
     path('detail/solution_std_back/add/<uuid:pk>/', SolutionStdBackValuationCreateView.as_view(), name='add_solution_std_back'),
     path('detail/solution_std_spent/add/<uuid:pk>/', SolutionStdBackValuationSpentCreateView.as_view(), name='add_solution_std_spent'),
     path('detail/solution_std_back/delete/<uuid:pk>/', SolutionStdBackValuationDeleteView.as_view(), name='delete_solution_std_back'),
+
+    # Términos de la Ecuación Gravimétrica
+    path('detail/gravimetry_term/add/<uuid:pk>/', GravimetryTermCreateView.as_view(), name='add_gravimetry_term'),
+    path('detail/gravimetry_term/update/<uuid:pk>/', GravimetryTermUpdateView.as_view(), name='update_gravimetry_term'),
+    path('detail/gravimetry_term/delete/<uuid:pk>/', GravimetryTermDeleteView.as_view(), name='delete_gravimetry_term'),
+    path('detail/gravimetry_calc_term/add/<uuid:pk>/', GravimetryCalcTermCreateView.as_view(), name='add_gravimetry_calc_term'),
+    path('detail/gravimetry_calc_term/update/<uuid:pk>/', GravimetryCalcTermUpdateView.as_view(), name='update_gravimetry_calc_term'),
 
     # Componentes de Corridas (Metales Pesados)
     path('detail/heavy_metal/add/<uuid:pk>/', HeavyMetalCreateView.as_view(), name='add_heavy_metal'),
