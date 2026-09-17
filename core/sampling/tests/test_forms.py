@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.utils import timezone
 from crum import impersonate
 
-from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate
+from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate, GravimetryTerm
 from core.laboratory.models import Laboratory
 from core.sampling.forms import (
     SamplingAnalysisProcessingGravimetryForm, SamplingGroupForm, SamplingProcessForm,
@@ -248,6 +248,69 @@ class SamplingAnalysisProcessingGravimetryFormTests(TestCase):
         instance = self._save(1.115, 1.112, 0.0)
         self.assertEqual(instance.concentration_sample, 0)
 
+    def test_ecuacion_con_terminos_resta_el_calculo_basico(self):
+        """La ecuación con términos evalúa '100 - cálculo básico' para la concentración."""
+        method = AnalyticalMethod.objects.create(
+            description_analytical_method='Insolubles con Términos',
+            code_analytical_method='GRA-04',
+            sample_size=100.0,
+            type_method='Gravimetrico',
+            laboratory=self.method.laboratory,
+            sig_figs_result=4,
+        )
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, calculate_description='Residuo')
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, position='Numerador', gross_weight='Peso Filtro + Residuo')
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, position='Numerador', weight_of_filter='Peso Filtro')
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, position='Denominador', sample_quantity='Peso de Muestra')
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, position='Numerador', factor=100.0)
+        GravimetryTerm.objects.create(
+            analytical_method=method, term_type='constant', constant_value=100, consecutive=1)
+        GravimetryTerm.objects.create(
+            analytical_method=method, term_type='basic', operation='subtract', consecutive=2)
+        analysis = SamplingAnalysis.objects.create(
+            sampling_process=self.analysis.sampling_process, analytical_method=method)
+
+        # Cálculo básico = (2.0 - 1.0) * 100 / 100 = 1.0 -> 100 - 1.0 = 99.0
+        instance = self._save(2.0, 1.0, 100.0, analysis=analysis)
+        self.assertAlmostEqual(instance.concentration_sample, 99.0, places=6)
+
+    def test_ecuacion_con_terminos_en_analytical_method_calculate(self):
+        """Los términos guardados en AnalyticalMethodCalculate también evalúan la ecuación."""
+        method = AnalyticalMethod.objects.create(
+            description_analytical_method='Insolubles con Términos',
+            code_analytical_method='GRA-06',
+            sample_size=100.0,
+            type_method='Gravimetrico',
+            laboratory=self.method.laboratory,
+            sig_figs_result=4,
+        )
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, calculate_description='Residuo')
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, position='Numerador', gross_weight='Peso Filtro + Residuo',
+            term_type='basic', operation='subtract', consecutive=2)
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, position='Numerador', weight_of_filter='Peso Filtro',
+            term_type='basic', operation='subtract', consecutive=2)
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, position='Denominador', sample_quantity='Peso de Muestra',
+            term_type='basic', operation='subtract', consecutive=2)
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, position='Numerador', factor=100.0)
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, factor=100.0, term_type='constant', consecutive=1)
+        analysis = SamplingAnalysis.objects.create(
+            sampling_process=self.analysis.sampling_process, analytical_method=method)
+
+        # Cálculo básico = (2.0 - 1.0) * 100 / 100 = 1.0 -> 100 - 1.0 = 99.0
+        instance = self._save(2.0, 1.0, 100.0, analysis=analysis)
+        self.assertAlmostEqual(instance.concentration_sample, 99.0, places=6)
+
 
 class SamplingAnalysisDetailEquationTests(TestCase):
     """Pruebas de la ecuación del método mostrada en el detalle del análisis."""
@@ -266,6 +329,42 @@ class SamplingAnalysisDetailEquationTests(TestCase):
         self.assertContains(response, 'Peso Filtro')
         self.assertContains(response, 'Peso de Muestra')
         self.assertContains(response, '100.0')
+
+    def test_detalle_muestra_ecuacion_gravimetrica_con_terminos(self):
+        """El detalle muestra la ecuación gravimétrica combinada con sus términos."""
+        method = AnalyticalMethod.objects.create(
+            description_analytical_method='Insolubles con Términos',
+            code_analytical_method='GRA-05',
+            sample_size=100.0,
+            type_method='Gravimetrico',
+            laboratory=self.method.laboratory,
+            sig_figs_result=4,
+        )
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, calculate_description='Residuo')
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, position='Numerador', gross_weight='Peso Filtro + Residuo')
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, position='Numerador', weight_of_filter='Peso Filtro')
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, position='Denominador', sample_quantity='Peso de Muestra')
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, position='Numerador', factor=100.0)
+        GravimetryTerm.objects.create(
+            analytical_method=method, term_type='constant', constant_value=100, consecutive=1)
+        GravimetryTerm.objects.create(
+            analytical_method=method, term_type='basic', operation='subtract', consecutive=2)
+        analysis = SamplingAnalysis.objects.create(
+            sampling_process=self.analysis.sampling_process, analytical_method=method)
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse('sampling:detail_sampling_analysis', args=[analysis.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        equation = response.context['method_equation']
+        self.assertIn(r'100 - \left(\frac', equation)
+        self.assertIn(r'\text{Residuo}', equation)
 
     def test_detalle_muestra_ecuacion_volumetrica(self):
         """Los métodos no gravimétricos muestran sus términos en numerador y denominador."""

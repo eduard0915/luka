@@ -1,0 +1,26 @@
+{% extends 'modal_one.html' %}
+
+{% block scripts_detail %}
+    {{ block.super }}
+    <script type="application/javascript">
+        (function () {
+            var termType = document.getElementById('id_term_type');
+            var factorField = document.getElementById('id_factor');
+            if (!termType || !factorField) return;
+
+            function toggleConstante() {
+                var isConstant = termType.value === 'constant';
+                factorField.disabled = !isConstant;
+                if (isConstant) {
+                    factorField.setAttribute('required', 'required');
+                } else {
+                    factorField.removeAttribute('required');
+                    factorField.value = '';
+                }
+            }
+
+            termType.addEventListener('change', toggleConstante);
+            toggleConstante();
+        })();
+    </script>
+{% endblock %}

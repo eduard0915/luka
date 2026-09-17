@@ -195,6 +195,7 @@ class SamplingAnalysisProcessing(BaseModel):
     sample_analysis = models.ForeignKey(SamplingAnalysis, verbose_name='Análisis de la Muestra', on_delete=models.CASCADE)
     standard_solution = models.ForeignKey(SolutionStd, verbose_name='Solución Estándar', on_delete=models.CASCADE, null=True, blank=True)
     quantity_standard = models.FloatField(verbose_name='mL Estándar', null=True, blank=True)
+    aliquot = models.FloatField(verbose_name='Blanco', null=True, blank=True)
     blank = models.FloatField(verbose_name='Blanco', null=True, blank=True)
     weight_obtained = models.FloatField(verbose_name='Peso Obtenido', null=True, blank=True)
     weight_of_filter = models.FloatField(verbose_name='Peso Filtro', null=True, blank=True)

@@ -22,6 +22,23 @@
                         <li>Peso Filtro + Residuo</li>
                         <li>Peso de Muestra</li>
                     </ul>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <label class="control-label">Operación con el Término Anterior</label>
+                            <select name="operation" class="form-control">
+                                <option value="">Sin operación</option>
+                                {% for value, label in operations %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">Déjala en blanco si es el primer término.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="control-label">Orden</label>
+                            <input type="number" name="consecutive" class="form-control" min="1" placeholder="Ej: 2">
+                            <small class="form-text text-muted">Posición del término en la ecuación.</small>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary" id="btnSubmit">Guardar</button>

@@ -17,6 +17,18 @@ from core.reagent.models import Reagent
 from core.solution.models import SolutionBase, SolutionStdBase
 from core.user.models import User
 
+OPERATION = [
+    ('multiply', 'Multiplicar (×)'),
+    ('add', 'Sumar (+)'),
+    ('subtract', 'Restar (−)'),
+    ('divide', 'Dividir (÷)'),
+]
+
+GRAVIMETRY_TERM_TYPE = [
+    ('constant', 'Valor Constante'),
+    ('basic', 'Cálculo Básico'),
+]
+
 
 class AnalyticalMethod(BaseModel):
     """Modelo que representa un método analítico con sus parámetros y configuración."""
@@ -221,6 +233,14 @@ class AnalyticalMethodCalculate(BaseModel):
     sample_quantity = models.CharField(max_length=50, verbose_name='Variable Muestra', null=True, blank=True)
     position = models.CharField(max_length=15, verbose_name='Posición en Ecuación', null=True, blank=True)
     subtract_blank = models.BooleanField(default=False, verbose_name='Restar Blanco?')
+    aliquot = models.BooleanField(default=False, verbose_name='Alicuota')
+    term_type = models.CharField(
+        max_length=10, choices=GRAVIMETRY_TERM_TYPE, verbose_name='Tipo de Término de Ecuación',
+        null=True, blank=True)
+    operation = models.CharField(
+        max_length=10, choices=OPERATION, verbose_name='Operación con el Término Anterior',
+        null=True, blank=True)
+    consecutive = models.PositiveSmallIntegerField(verbose_name='Orden del Término', null=True, blank=True)
     sln_std_base = models.ForeignKey(SolutionStdBase, verbose_name='Solución Estándar', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
@@ -268,14 +288,6 @@ class DependentCalculation(BaseModel):
             else:
                 self.user_updated = user
         return super(DependentCalculation, self).save(*args, **kwargs)
-
-
-OPERATION = [
-    ('multiply', 'Multiplicar (×)'),
-    ('add', 'Sumar (+)'),
-    ('subtract', 'Restar (−)'),
-    ('divide', 'Dividir (÷)'),
-]
 
 
 class AnalyticalMethodCalculateRelation(BaseModel):
@@ -326,6 +338,43 @@ class AnalyticalMethodCalculateRelation(BaseModel):
             else:
                 self.user_updated = user
         return super(AnalyticalMethodCalculateRelation, self).save(*args, **kwargs)
+
+
+class GravimetryTerm(BaseModel):
+    """Término que compone la ecuación de un método analítico gravimétrico.
+
+    Permite combinar valores constantes (por ejemplo 100) con el cálculo básico
+    de gravimetría mediante operaciones de suma, resta, multiplicación o división.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analítico', on_delete=models.CASCADE)
+    term_type = models.CharField(max_length=10, choices=GRAVIMETRY_TERM_TYPE, verbose_name='Tipo de Término')
+    constant_value = models.FloatField(verbose_name='Valor Constante', null=True, blank=True)
+    operation = models.CharField(
+        max_length=10, choices=OPERATION, verbose_name='Operación con el Término Anterior', null=True, blank=True)
+    consecutive = models.PositiveSmallIntegerField(default=1, verbose_name='Orden')
+
+    def __str__(self):
+        """Retorna la representación del término: valor constante o cálculo básico."""
+        if self.term_type == 'constant':
+            return str(self.constant_value)
+        return 'Cálculo Básico'
+
+    class Meta:
+        verbose_name = 'GravimetryTerm'
+        verbose_name_plural = 'GravimetryTerms'
+        db_table = 'GravimetryTerm'
+        ordering = ['consecutive', 'date_creation']
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda el término de la ecuación asignando el usuario correspondiente."""
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(GravimetryTerm, self).save(*args, **kwargs)
 
 
 class SolutionStdBackValuation(BaseModel):

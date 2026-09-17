@@ -5,6 +5,7 @@ incluyendo soluciones, reactivos, equipos, materiales, procedimientos y cálculo
 """
 
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.forms import ModelForm, ModelChoiceField, TextInput, Select, Textarea, CheckboxInput, widgets
 
 from core.analytical_method.models import *
@@ -494,6 +495,42 @@ class AnalyticalMethodSampleGramForm(ModelForm):
                 instance = super().save(commit=False)
                 if self.analytical_method:
                     instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+class AnalyticalMethodAliquotForm(ModelForm):
+    """Formulario para la alícuota en el cálculo."""
+    def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de alícuota."""
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        self.fields['position'].required = True
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodCalculate
+        fields = ['position']
+        widgets = {
+            'position': Select(attrs={'class': 'form-control'}, choices=POSITION)
+        }
+
+    def save(self, commit=True):
+        """Guarda la alícuota del cálculo."""
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.aliquot = True
                 instance.save()
                 data = instance
             else:
@@ -1042,6 +1079,198 @@ class DependentCalculationForm(ModelForm):
                     instance.consecutive = last.consecutive + 1 if last else 1
                 instance.save()
                 data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Términos de la Ecuación Gravimétrica
+class GravimetryTermForm(ModelForm):
+    """Formulario para crear y editar los términos de la ecuación gravimétrica.
+
+    El término puede ser un valor constante o el cálculo básico de gravimetría;
+    cada término define la operación con la que se combina con el anterior.
+    """
+    def __init__(self, *args, **kwargs):
+        """Inicializa el formulario validando la existencia de un cálculo básico previo."""
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+
+        basic_qs = GravimetryTerm.objects.filter(term_type='basic')
+        if self.analytical_method:
+            basic_qs = basic_qs.filter(analytical_method=self.analytical_method)
+        else:
+            basic_qs = basic_qs.none()
+        if self.instance and self.instance.pk:
+            basic_qs = basic_qs.exclude(pk=self.instance.pk)
+        self._basic_exists = basic_qs.exists()
+
+        self.fields['constant_value'].label = 'Valor Constante'
+        self.fields['term_type'].label = 'Tipo de Término'
+        self.fields['operation'].label = 'Operación con el Término Anterior'
+        self.fields['consecutive'].label = 'Orden'
+        self.fields['consecutive'].required = False
+        if not self.instance.pk and self.analytical_method:
+            last = GravimetryTerm.objects.filter(
+                analytical_method=self.analytical_method).order_by('consecutive').last()
+            self.fields['consecutive'].initial = last.consecutive + 1 if last else 1
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = GravimetryTerm
+        fields = ['term_type', 'constant_value', 'operation', 'consecutive']
+        widgets = {
+            'term_type': Select(attrs={'class': 'form-control', 'required': True}, choices=GRAVIMETRY_TERM_TYPE),
+            'constant_value': TextInput(attrs={'class': 'form-control', 'step': 'any', 'placeholder': 'Ej: 100'}),
+            'operation': Select(attrs={'class': 'form-control'},
+                                choices=[('', '----')] + OPERATION),
+            'consecutive': TextInput(attrs={'class': 'form-control', 'type': 'number', 'min': 1}),
+        }
+
+    def clean(self):
+        """Valida el valor de las constantes y la unicidad del cálculo básico."""
+        cleaned_data = super().clean()
+        term_type = cleaned_data.get('term_type')
+        constant_value = cleaned_data.get('constant_value')
+        if term_type == 'constant' and constant_value is None:
+            raise ValidationError({'constant_value': 'Ingrese el valor de la constante.'})
+        if term_type == 'basic' and self._basic_exists:
+            raise ValidationError({'term_type': 'Ya existe un término de cálculo básico para este método.'})
+        return cleaned_data
+
+    def save(self, commit=True):
+        """Guarda el término asignando el método analítico y su orden consecutivo."""
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                if instance.term_type == 'basic':
+                    instance.constant_value = None
+                if not instance.consecutive:
+                    last = GravimetryTerm.objects.filter(
+                        analytical_method=instance.analytical_method).order_by('consecutive').last()
+                    instance.consecutive = last.consecutive + 1 if last else 1
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
+# Términos gravimétricos guardados en AnalyticalMethodCalculate
+GRAVIMETRY_TERM_ORDER = [(i, str(i)) for i in range(1, 6)]
+
+
+class GravimetryCalcTermForm(ModelForm):
+    """Formulario para los términos gravimétricos almacenados en AnalyticalMethodCalculate.
+
+    El término puede ser los Básicos de Gravimetría (se crean/marcan sus filas) o
+    una Constante (valor en ``factor``, habilitado solo para ese tipo). El orden
+    (posición 1 a 5) y la operación con el término anterior son seleccionables;
+    la operación puede ir en blanco cuando no se requiere.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Inicializa el formulario y precarga el orden del siguiente término."""
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        self.fields['term_type'].label = 'Tipo de Término'
+        self.fields['term_type'].required = True
+        self.fields['term_type'].choices = [
+            ('basic', 'Básicos Gravimetría'), ('constant', 'Constante')]
+        self.fields['factor'].label = 'Constante'
+        self.fields['factor'].required = False
+        self.fields['operation'].label = 'Operación con el Término Anterior'
+        self.fields['consecutive'].label = 'Orden (posición en la ecuación)'
+        self.fields['consecutive'].required = True
+        if not self.instance.pk and self.analytical_method:
+            last = AnalyticalMethodCalculate.objects.filter(
+                analytical_method=self.analytical_method, term_type__in=['basic', 'constant']
+            ).order_by('consecutive').last()
+            next_order = (last.consecutive + 1) if last and last.consecutive else 1
+            self.fields['consecutive'].initial = min(next_order, 5)
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodCalculate
+        fields = ['term_type', 'factor', 'operation', 'consecutive']
+        widgets = {
+            'term_type': Select(attrs={'class': 'form-control', 'required': True},
+                                choices=[('basic', 'Básicos Gravimetría'), ('constant', 'Constante')]),
+            'factor': TextInput(attrs={'class': 'form-control', 'step': 'any', 'placeholder': 'Ej: 100'}),
+            'operation': Select(attrs={'class': 'form-control'},
+                                choices=[('', 'Sin operación')] + OPERATION),
+            'consecutive': Select(attrs={'class': 'form-control', 'required': True},
+                                  choices=GRAVIMETRY_TERM_ORDER),
+        }
+
+    def clean_consecutive(self):
+        """Valida que el orden sea una posición entre 1 y 5."""
+        value = self.cleaned_data.get('consecutive')
+        if value is None or value not in dict(GRAVIMETRY_TERM_ORDER):
+            raise ValidationError('Seleccione la posición del término (1 a 5).')
+        return value
+
+    def clean(self):
+        """La constante solo es obligatoria cuando el término es de tipo Constante."""
+        cleaned_data = super().clean()
+        term_type = cleaned_data.get('term_type')
+        factor = cleaned_data.get('factor')
+        if term_type == 'constant' and factor is None:
+            raise ValidationError({'factor': 'Ingrese el valor de la constante.'})
+        return cleaned_data
+
+    def save(self, commit=True):
+        """Guarda el término: crea/marca los básicos o guarda la constante."""
+        data = {}
+        try:
+            if self.is_valid():
+                term_type = self.cleaned_data.get('term_type')
+                operation = self.cleaned_data.get('operation') or None
+                consecutive = self.cleaned_data.get('consecutive')
+                analytical_method = self.analytical_method or self.instance.analytical_method
+
+                if term_type == 'basic':
+                    basic_rows = AnalyticalMethodCalculate.objects.filter(
+                        analytical_method=analytical_method
+                    ).filter(
+                        Q(gross_weight__isnull=False) | Q(weight_of_filter__isnull=False) |
+                        Q(sample_quantity__isnull=False))
+                    if basic_rows.exists():
+                        basic_rows.update(term_type='basic', operation=operation, consecutive=consecutive)
+                        data = basic_rows.first()
+                    else:
+                        data = AnalyticalMethodCalculate.objects.create(
+                            analytical_method=analytical_method,
+                            weight_of_filter='Peso Filtro', position='Numerador',
+                            term_type='basic', operation=operation, consecutive=consecutive)
+                        AnalyticalMethodCalculate.objects.create(
+                            analytical_method=analytical_method,
+                            gross_weight='Peso Filtro + Residuo', position='Numerador',
+                            term_type='basic', operation=operation, consecutive=consecutive)
+                        AnalyticalMethodCalculate.objects.create(
+                            analytical_method=analytical_method,
+                            sample_quantity='Peso de Muestra', position='Denominador',
+                            term_type='basic', operation=operation, consecutive=consecutive)
+                        AnalyticalMethodCalculate.objects.create(
+                            analytical_method=analytical_method,
+                            factor=100, position='Numerador')
+                else:
+                    instance = super().save(commit=False)
+                    instance.term_type = 'constant'
+                    instance.analytical_method = analytical_method
+                    instance.save()
+                    data = instance
             else:
                 data['error'] = self.errors
         except Exception as e:

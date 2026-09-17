@@ -14,7 +14,9 @@ from core.mixins import ValidatePermissionRequiredMixin
 from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate, \
     AnalyticalMethodCalculateRelation, SolutionStdBackValuation
 from core.analytical_method.forms import AnalyticalMethodForm
-from core.analytical_method.services import _build_relation_equation
+from core.analytical_method.services import (
+    _build_gravimetry_equation, _build_relation_equation, build_gravimetry_data,
+)
 
 # Listado de Métodos Analíticos
 class AnalyticalMethodListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
@@ -247,6 +249,7 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
 
         volumen_std_calcule = calcules.exclude(volumen_std__isnull=True).exclude(volumen_std='').first()
         context['subtract_blank'] = volumen_std_calcule.subtract_blank if volumen_std_calcule else False
+        context['aliquot'] = calcules.filter(aliquot=True).first()
 
         show_dependent_toggle = False
 
@@ -311,6 +314,8 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                     parts.append(str(calc.sample_quantity))
                 if is_valid_value(calc.variable):
                     parts.append(str(calc.variable))
+                if calc.aliquot:
+                    parts.append("\\text{Alícuota}")
 
                 # Si no hay partes válidas, continuar al siguiente
                 if not parts:
@@ -343,36 +348,36 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                     context['final_equation'] = f"{label} = \\frac{{{str_num}}}{{{str_den}}}{str_gen}"
 
         if self.object.type_method == 'Gravimetrico':
-            gross_weight_calc = calcules.exclude(gross_weight__isnull=True).exclude(gross_weight='').first()
-            weight_of_filter_calc = calcules.exclude(weight_of_filter__isnull=True).exclude(weight_of_filter='').first()
-            sample_quantity_calc = calcules.exclude(sample_quantity__isnull=True).exclude(sample_quantity='').first()
-            context['gravimetry_has_basics'] = bool(
-                gross_weight_calc and weight_of_filter_calc and sample_quantity_calc
-            )
+            gravimetry_terms = self.object.gravimetryterm_set.all()
+            context['gravimetry_terms'] = gravimetry_terms
 
-            if inst_desc and gross_weight_calc and weight_of_filter_calc and sample_quantity_calc:
-                gw = gross_weight_calc.gross_weight
-                wof = weight_of_filter_calc.weight_of_filter
-                sq = sample_quantity_calc.sample_quantity
+            basic_latex, calc_terms = build_gravimetry_data(calcules)
+            calc_constants = [term for term in calc_terms if term.term_type == 'constant']
+            if calc_constants:
+                # Términos nuevos guardados en AnalyticalMethodCalculate.
+                term_units = calc_terms
+            elif gravimetry_terms.exists():
+                # Términos heredados de GravimetryTerm (compatibilidad).
+                term_units = list(gravimetry_terms)
+            else:
+                term_units = []
 
-                factors_num = [str(calc.factor) for calc in calcules
-                               if calc.factor and calc.position == 'Numerador']
-                factors_den = [str(calc.factor) for calc in calcules
-                               if calc.factor and calc.position == 'Denominador']
+            context['gravimetry_has_basics'] = bool(basic_latex)
 
-                numerator = f"\\left(\\text{{{gw}}}\\right) - \\text{{{wof}}}"
-                denominator = f"\\text{{{sq}}}"
-                if factors_den:
-                    denominator += f" \\cdot {' \\cdot '.join(factors_den)}"
-                multiplier = f" \\times {' \\cdot '.join(factors_num)}" if factors_num else ""
-
-                desc = inst_desc.calculate_description
+            if basic_latex or term_units:
+                desc = inst_desc.calculate_description if inst_desc else "Cálculo"
                 unit = inst_unit.unit_measure_calculate if inst_unit else ""
 
                 label_g = f"\\text{{{desc}}}"
                 if unit:
                     label_g += f" \\text{{ ({unit})}}"
 
-                context['final_equation_gravimetry'] = f"{label_g} = \\frac{{{numerator}}}{{{denominator}}}{multiplier}"
+                if term_units:
+                    equation_body = _build_gravimetry_equation(basic_latex, term_units)
+                else:
+                    equation_body = basic_latex
+
+                if equation_body:
+                    context['final_equation_gravimetry'] = f"{label_g} = {equation_body}"
 
         return context
