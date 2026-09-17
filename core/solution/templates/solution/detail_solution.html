@@ -73,7 +73,7 @@
                                     <p class="text-danger">Pendiente Confirmación</p>
                                 {% endif %}
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <b>Fecha de Preparación</b><br>
                                 {% if object.preparation_date %}
                                     <p>{{ object.preparation_date | date:'Y-m-d' }}</p>
@@ -81,7 +81,7 @@
                                     <p class="text-danger">Pendiente Confirmación</p>
                                 {% endif %}
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <b>Vencimiento</b><br>
                                 {% if object.expire_date_solution %}
                                     <p>{{ object.expire_date_solution | date:'Y-m-d' }}</p>
@@ -89,13 +89,17 @@
                                     <p class="text-danger">Pendiente Confirmación</p>
                                 {% endif %}
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <b>Cantidad Disponible</b><br>
                                 {% if object.quantity_available_sln %}
                                     <p>{{ object.quantity_available_sln | intcomma:False }} mL</p>
                                 {% else %}
                                     <p class="text-danger">Pendiente Confirmación</p>
                                 {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <b>Laboratorio</b><br>
+                                <p>{{ object.laboratory }}</p>
                             </div>
                         </div>
                     {% endif %}
@@ -118,11 +122,12 @@
                         <a href="{{ update_solution }}" type="button" class="btn btn-warning me-2">
                             <i class="fa fa-fw fa-lg fa-pencil me-2"></i> Editar
                         </a>
-                    {% endif %}
-                    {% if object.coefficient_variation < 2 %}
-                        <a href="{{ label_url }}" type="button" class="btn btn-danger me-2" target="_blank">
-                            <i class="fa fa-fw fa-lg fa-ticket me-2"></i> Etiqueta
-                        </a>
+                    {% else %}
+                        {% if object.coefficient_variation < 2 or not object.standardizable %}
+                            <a href="{{ label_url }}" type="button" class="btn btn-danger me-2" target="_blank">
+                                <i class="fa fa-fw fa-lg fa-ticket me-2"></i> Etiqueta
+                            </a>
+                        {% endif %}
                     {% endif %}
                     {% if list_url %}
                         <a href="{{ list_url }}" class="btn btn-secondary me-2">
@@ -234,9 +239,9 @@
                                 <tr>
                                     <th style="width:10%">Fecha</th>
                                     <th style="width:35%">Solución STD</th>
-                                    <th style="width:10%">mL Alícuota STD</th>
-                                    <th style="width:10%">mL Solución </th>
-                                    <th style="width:10%">[ ]</th>
+                                    <th style="width:10%">Cant. STD</th>
+                                    <th style="width:10%">mL Sln Gastados</th>
+                                    <th style="width:10%">[Sln]</th>
                                     <th style="width:20%">Realizado por</th>
                                     <th style="width:5%">Acciones</th>
                                 </tr>
@@ -245,8 +250,22 @@
                                 {% for std in standardizations %}
                                     <tr>
                                         <td class="text-center">{{ std.standarization_date | date:'Y-m-d' }}</td>
-                                        <td class="text-center">{{ std.standard_solution }}</td>
-                                        <td class="text-center">{{ std.quantity_standard | unlocalize}}</td>
+                                        <td class="text-center">
+                                            {% if std.standard_reagent %}
+                                                {{ std.standard_reagent.reagent.code_reagent }}
+                                                {{ std.standard_reagent.reagent.description_reagent }} Lote N°:
+                                                {{ std.standard_reagent.batch_number }}
+                                                {{ std.standard_reagent.purity }}
+                                                {{ std.standard_reagent.reagent.purity_unit }}
+                                            {% else %}
+                                                {{ std.standard_solution.code_solution_std }}
+                                                {{ std.standard_solution.solution_std_base }}
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {{ std.quantity_standard | unlocalize}}
+                                            {% if std.standard_reagent %}g{% else %}mL{% endif %}
+                                        </td>
                                         <td class="text-center">{{ std.quantity_solution | unlocalize }}</td>
                                         <td class="text-center">
                                             <b>{{ std.concentration_sln | unlocalize }} {{ std.solution.concentration_unit }}</b>
@@ -298,12 +317,12 @@
                                 <tbody>
                                 {% for foo in transactions %}
                                     <tr>
-                                        <td>{{ foo.date_transaction | date:'Y-m-d' }}</td>
-                                        <td>{{ foo.type_transaction }}</td>
-                                        <td>{{ foo.quantity | intcomma:False }}</td>
-                                        <td>{{ foo.user_transaction }}</td>
-                                        <td>{{ foo.detail_transaction }}</td>
-                                        <td>
+                                        <td class="text-center align-middle">{{ foo.date_transaction | date:'Y-m-d' }}</td>
+                                        <td class="text-center align-middle">{{ foo.type_transaction }}</td>
+                                        <td class="text-center align-middle">{{ foo.quantity | intcomma:False }}</td>
+                                        <td class="text-center align-middle">{{ foo.user_transaction }}</td>
+                                        <td class="text-center align-middle">{{ foo.detail_transaction }}</td>
+                                        <td class="text-center align-middle">
                                             <a onclick="open_modal('{% url 'user:update_training' foo.id %}')"
                                                title="Editar">
                                                 <i class="bi bi-pencil-square text-warning me-2"></i>
@@ -313,7 +332,7 @@
                                 {% empty %}
                                     <tr>
                                         <td colspan="6" class="text-center">
-                                            No hay capacitaciones asociadas.
+                                            No hay transacciones asociadas.
                                         </td>
                                     </tr>
                                 {% endfor %}
@@ -348,7 +367,7 @@
                         autoWidth: false,
                         searching: false,
                         info: false,
-                        order: [[3, 'desc']],
+                        order: [[0, 'desc']],
                         language: {
                             url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
                         },

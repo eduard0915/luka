@@ -41,7 +41,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     render: function (data, type, row) {
                         let actions = '';
                         actions += '<a href="/sampling/group/detail/' + row['id'] + '/" type="button" title="Detalle"><i class="bi bi-info-square text-info"></i></a> &nbsp;';
-                        actions += '<a href="/sampling/group/update/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a>';
+                        actions += '<a href="/sampling/group/update_list/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a> &nbsp;';
+                        actions += '<a href="#" onclick="open_modal(\'/sampling/group/delete/' + row['id'] + '/\')" title="Eliminar"><i class="bi bi-trash text-danger"></i></a>';
                         return actions;
                     }
                 },

@@ -1,59 +1,82 @@
+"""Vistas para el CRUD de productos y su detalle con información relacionada.
+
+Incluye la creación, edición, listado y detalle de productos, así como
+la construcción de ecuaciones para los cálculos dependientes.
+"""
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import CreateView, UpdateView, ListView, DetailView
+from django.views.generic import CreateView, UpdateView, ListView, DetailView, DeleteView
 
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.forms import ProductForm
 from core.product.models import Product, SamplePoint, AnalyticalMethodProduct, SpecificationProduct
+from core.analytical_method.models import AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation, DependentCalculation
+from core.analytical_method.services import _build_relation_equation
+from core.sampling.models import SamplingGroup
+from core.utils import format_form_errors
 
 
 # Creación de Productos
 class ProductCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para la creación de un nuevo producto."""
+
     model = Product
     form_class = ProductForm
     template_name = 'product/create_product.html'
-    success_url = reverse_lazy('product:list_product')
     permission_required = 'reagent.add_reagent'
-    url_redirect = success_url
+    url_redirect = reverse_lazy('product:list_product')
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Inicializa el objeto en None y procesa la petición sin CSRF."""
         self.object = None
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la creación del producto vía AJAX."""
         data = {}
         try:
             action = request.POST['action']
             if action == 'add':
                 form = self.get_form()
                 if form.is_valid():
-                    form.save()
-                    messages.success(request, f'Punto de Muestreo creado satisfactoriamente!')
+                    self.object = form.save()
+                    data['success'] = True
+                    data['redirect_url'] = self.get_success_url()
+                    messages.success(request, f'Producto creado satisfactoriamente!')
                 else:
-                    messages.error(request, 'Por favor corrija los errores: {}'.format(form.errors.as_json()))
+                    data['error'] = format_form_errors(form)
+                    messages.error(request, f'Por favor corrija los errores: {data["error"]}')
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
             data['error'] = str(e)
         return JsonResponse(data)
 
+    def get_success_url(self):
+        """Retorna la URL de redirección al detalle del producto creado."""
+        return reverse('product:detail_product', kwargs={'pk': self.object.pk})
+
     def get_context_data(self, **kwargs):
+        """Agrega los datos de contexto específicos para la creación de producto."""
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Creación de Producto'
         context['title'] = 'Creación de Producto'
-        context['div'] = '10'
-        context['list_url'] = self.success_url
+        context['div'] = '8'
+        context['list_url'] = self.url_redirect
         return context
 
 
 # Edición de Productos
 class ProductUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para la edición de un producto existente."""
+
     model = Product
     form_class = ProductForm
     template_name = 'product/create_product.html'
@@ -63,10 +86,12 @@ class ProductUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Obtiene el objeto actual y procesa la petición sin CSRF."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la edición del producto vía AJAX."""
         data = {}
         try:
             action = request.POST['action']
@@ -74,9 +99,12 @@ class ProductUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
                 form = self.get_form()
                 if form.is_valid():
                     form.save()
-                    messages.success(request, f'Punto de Muestreo editado satisfactoriamente!')
+                    data['success'] = True
+                    data['redirect_url'] = str(self.success_url)
+                    messages.success(request, f'Producto editado satisfactoriamente!')
                 else:
-                    messages.error(request, 'Por favor corrija los errores: {}'.format(form.errors.as_json()))
+                    data['error'] = format_form_errors(form)
+                    messages.error(request, f'Por favor corrija los errores: {data["error"]}')
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -84,26 +112,31 @@ class ProductUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega los datos de contexto específicos para la edición de producto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Edición de Punto de Muestreo'
         context['entity'] = 'Edición de Punto de Muestreo'
         context['action'] = 'edit'
-        context['div'] = '10'
+        context['div'] = '8'
         context['list_url'] = self.success_url
         return context
 
 
 # Listado de Productos
 class ProductListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista para el listado de productos con búsqueda vía AJAX."""
+
     model = Product
     template_name = 'product/list_product.html'
     permission_required = 'reagent.view_inventoryreagent'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la petición HTTP con protección CSRF desactivada."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Retorna los datos de productos en formato JSON para la tabla del listado."""
         data = {}
         try:
             action = request.POST['action']
@@ -116,6 +149,7 @@ class ProductListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
                         'description_product': i.description_product,
                         'enable_product': i.enable_product,
                         'version': i.version,
+                        'site': i.site.site_name
                     })
                 return JsonResponse(data, safe=False)
             else:
@@ -125,25 +159,30 @@ class ProductListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega los datos de contexto para la plantilla del listado."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Productos'
         context['create_url'] = reverse_lazy('product:create_product')
         context['entity'] = 'Productos'
-        context['div'] = '8'
+        context['div'] = '9'
         context['icon'] = 'fa-solid fa-vial-virus'
         return context
 
 
 # Detalle de Producto
 class ProductDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """Vista de detalle de producto con puntos de muestreo, métodos, especificaciones y ecuaciones."""
+
     model = Product
     template_name = 'product/detail_product.html'
     permission_required = 'equipment.add_equipmentinstrumental'
 
     def dispatch(self, request, *args, **kwargs):
+        """Procesa la petición HTTP para mostrar el detalle del producto."""
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
+        """Construye el contexto con las relaciones del producto y la ecuación de cálculo."""
         context = super().get_context_data(**kwargs)
         context['title'] = self.object.code_product
         context['entity'] = self.object
@@ -152,8 +191,56 @@ class ProductDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Det
         context['create_sample_point'] = reverse_lazy('product:create_sample_point', kwargs={'pk': self.object.pk})
         context['sample_point'] = SamplePoint.objects.select_related('product').filter(
             enable_point=True, product_id=self.object.id).order_by('sequence')
+        context['sampling_groups'] = SamplingGroup.objects.select_related(
+            'sampling_point__product'
+        ).filter(
+            sampling_point__product_id=self.object.id
+        ).order_by('sampling_point__sequence')
+        context['create_sampling_group'] = reverse_lazy('sampling:create_sampling_group_product', kwargs={'pk': self.object.pk})
         context['create_method_product'] = reverse_lazy('product:create_method_product', kwargs={'pk': self.object.pk})
         context['analytical_methods'] = AnalyticalMethodProduct.objects.select_related('product').filter(product_id=self.object.id)
+        context['has_mezcla_method'] = AnalyticalMethodProduct.objects.filter(
+            product_id=self.object.id, analytical_method__type_method='Volumetrico - Mezcla').exists()
         context['create_specification_product'] = reverse_lazy('product:create_specification_product', kwargs={'pk': self.object.pk})
-        context['specifications'] = SpecificationProduct.objects.filter(product_id=self.object.id)
+        context['create_specification_product_calcule'] = reverse_lazy('product:create_specification_product_calcule', kwargs={'pk': self.object.pk})
+        context['specifications'] = SpecificationProduct.objects.select_related(
+            'method_test__analytical_method',
+            'method_test_relacional'
+        ).filter(product_id=self.object.id)
+        context['specification_rel'] = SpecificationProduct.objects.select_related('method_test__analytical_method').filter(product_id=self.object.id).first()
+        calcules_relation = AnalyticalMethodCalculateRelation.objects.select_related('product').filter(product_id=self.object.id).order_by('-date_creation')
+        context['calcules_relation'] = calcules_relation
+        context['has_relations'] = calcules_relation.exists()
+        dependent_calculations = DependentCalculation.objects.filter(product_id=self.object.id).order_by('consecutive')
+        context['dependent_calculations'] = dependent_calculations
+        context['create_dependent_calculation'] = reverse_lazy('product:add_dependent_calculation', kwargs={'pk': self.object.pk})
+        first_dep = dependent_calculations.first()
+        context['first_dependent_calculation'] = first_dep
+        deps_with_description = set(AnalyticalMethodCalculateRelation.objects.filter(
+            consecutive_calcule__in=dependent_calculations,
+            calculate_description_relation__isnull=False
+        ).values_list('consecutive_calcule_id', flat=True))
+        context['deps_with_description'] = deps_with_description
+        deps_with_sample_gram = set(AnalyticalMethodCalculateRelation.objects.filter(
+            consecutive_calcule__in=dependent_calculations,
+            sample_quantity__isnull=False
+        ).values_list('consecutive_calcule_id', flat=True))
+        context['deps_with_sample_gram'] = deps_with_sample_gram
+        calcules_by_dep = {}
+        for dep in dependent_calculations:
+            dep_calcules = [cr for cr in calcules_relation if cr.consecutive_calcule_id == dep.id]
+            if dep_calcules:
+                calcules_by_dep[dep.id] = dep_calcules
+        context['calcules_by_dep'] = calcules_by_dep
+
+        if calcules_relation.exists():
+            context['final_equation_relation'] = _build_relation_equation(calcules_relation)
+
+        equations_by_dep = {}
+        for dep_id, dep_calcules in calcules_by_dep.items():
+            equation = _build_relation_equation(dep_calcules)
+            if equation:
+                equations_by_dep[dep_id] = equation
+        context['equations_by_dep'] = equations_by_dep
+
         return context

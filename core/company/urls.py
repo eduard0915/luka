@@ -1,3 +1,9 @@
+"""Definición de las rutas URL para la aplicación company.
+
+Configura las rutas de creación, edición y detalle de empresas, plantas
+y procesos, así como la servidumbre de archivos multimedia en modo desarrollo.
+"""
+
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static

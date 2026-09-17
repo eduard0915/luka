@@ -1,3 +1,10 @@
+"""Enrutador principal del proyecto Luka LIS.
+
+Define los patrones de URL globales que incluyen el panel de
+administración, la página de inicio y las rutas de cada módulo
+de la aplicación core.
+"""
+
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.http import HttpResponse
@@ -21,7 +28,9 @@ urlpatterns = [
     path('analytical_method/', include('core.analytical_method.urls')),
     path('product/', include('core.product.urls')),
     path('sampling/', include('core.sampling.urls')),
+    path('observation/', include('core.observation.urls')),
     path('condition/', include('core.condition.urls')),
+    path('report/', include('core.report.urls')),
     # path("__debug__/", include("debug_toolbar.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

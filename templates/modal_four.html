@@ -19,7 +19,13 @@
                         {{ confirm_msg }}
                     </div>
                 {% endif %}
-                <div class="row">
+                <div class="row justify-content-center">
+                    <div class="col-12">
+                        <div class="errormsg alert alert-danger" style="display: none;">
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <div class="errors"></div>
+                        </div>
+                    </div>
                     {% for field in form.visible_fields %}
                         <div class="
                                 {% if field.field.col_class %}{{ field.field.col_class }}{% else %}col-md-4{% endif %}">
@@ -103,6 +109,14 @@
             });
 
         </script>
+
+        {% if entity == 'Registro de Soluciones Estándar Adicionada y Gastada' %}
+            <script src="{% static 'analysis_sampling/millimole_reacted_validation.js' %}"></script>
+        {% endif %}
+
+        {% if calculo == 'True' %}
+            <script src="{% static 'analysis_sampling/zero_value_validation.js' %}"></script>
+        {% endif %}
 
     {% endblock %}
 </div>

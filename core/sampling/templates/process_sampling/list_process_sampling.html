@@ -4,6 +4,7 @@
 {% block head_list %}
     <script>
         const status_filter = "{{ status_filter }}";
+        const out_specification = "{{ out_specification }}";
     </script>
     <script src="{% static 'list_process_sampling.js' %}"></script>
 {% endblock %}
@@ -19,7 +20,7 @@
         <th class="text-md-center" style="width: 23%">Punto de Muestreo</th>
         <th style="width: 15%">N° de Muestra</th>
         <th style="width: 13%">Programada</th>
-        <th style="width: 22%">Realizada</th>
+        <th style="width: 22%">Generada por</th>
         <th style="width: 10%">Estado</th>
         <th style="width: 7%">Acciones</th>
     </tr>

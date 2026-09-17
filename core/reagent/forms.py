@@ -1,3 +1,9 @@
+"""Formularios de la aplicación de reactivos para el sistema PadLims.
+
+Define los formularios basados en modelos para la creación, edición y
+transferencia de reactivos, inventario de reactivos y transacciones.
+"""
+
 from crum import get_current_user
 from django import forms
 from django.forms import ModelForm, TextInput, FileInput, Select, DateInput, NumberInput, CheckboxInput
@@ -12,20 +18,27 @@ UNIT_PURITY = [('', '-----'), ('%', '%'), ('mg/L', 'mg/L'), ('g/L', 'g/L'), ('M'
 REGISTRY_TYPE = [('', '-----'), ('Uso', 'Uso'), ('Ajuste de Salida', 'Ajuste de Salida'), ('Ajuste de Entrada', 'Ajuste de Entrada')]
 
 
-# Creación Reactivo
 class ReagentForm(ModelForm):
+    """Formulario para la creación y edición de reactivos."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario configurando atributos de campos y clases CSS."""
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
         col_classes = {
-            'code_reagent': 'col-md-2',
+            'site': 'col-md-2',
             'description_reagent': 'col-md-5',
             'umb': 'col-md-2',
             'purity_unit': 'col-md-2',
             'molecular_weight': 'col-md-2',
             'gram_equivalent': 'col-md-2',
+            'volumetric': 'col-md-2',
+            'solvent': 'col-md-2',
+            'density_enable': 'col-md-2',
+            'standard': 'col-md-2',
+            'ready_to_use': 'col-md-2',
         }
 
         for field_name, field in self.fields.items():
@@ -34,16 +47,14 @@ class ReagentForm(ModelForm):
     class Meta:
         model = Reagent
         fields = [
-            'code_reagent', 'description_reagent', 'umb', 'manufacturer', 'site', 'technical_sheet', 'purity_unit',
-            'molecular_weight', 'gram_equivalent', 'stability_solution', 'volumetric', 'solvent', 'density_enable',
+            'description_reagent', 'umb', 'manufacturer', 'site', 'technical_sheet', 'purity_unit',
+            'molecular_weight', 'gram_equivalent', 'volumetric', 'solvent', 'density_enable',
             'standard', 'ready_to_use']
         widgets = {
             'description_reagent': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'code_reagent': TextInput(attrs={'class': 'form-control', 'required': True}),
             'manufacturer': TextInput(attrs={'class': 'form-control', 'required': True}),
             'molecular_weight': TextInput(attrs={'class': 'form-control', 'required': True}),
             'gram_equivalent': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'stability_solution': TextInput(attrs={'class': 'form-control', 'required': True}),
             'technical_sheet': FileInput(attrs={'class': 'form-control', 'type': 'file'}),
             'site': Select(attrs={'class': 'form-control', 'required': True}),
             'umb': Select(attrs={'class': 'form-control', 'required': True}, choices=UMB),
@@ -56,6 +67,7 @@ class ReagentForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el formulario y retorna un diccionario con el resultado."""
         data = {}
         form = super()
         try:
@@ -68,13 +80,15 @@ class ReagentForm(ModelForm):
         return data
 
 
-# Registro de Entrada Inventario de Reactivo
 class InventoryReagentForm(ModelForm):
+    """Formulario para el registro de entrada de reactivos al inventario."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario ajustando el queryset y etiquetas según el usuario y el reactivo."""
         super().__init__(*args, **kwargs)
         user = get_current_user()
-        if user and user.site:
-            self.fields['reagent'].queryset = Reagent.objects.filter(enable_reagent=True, site_id=user.site.id)
+
+        self.fields['reagent'].queryset = Reagent.objects.filter(enable_reagent=True, site_id=user.laboratory.site.id)
 
         if self.instance.pk:
             try:
@@ -105,13 +119,14 @@ class InventoryReagentForm(ModelForm):
             'quantity_stock': TextInput(attrs={'class': 'form-control', 'required': True}),
             'purity': TextInput(attrs={'class': 'form-control', 'required': True}),
             'certificate_quality': FileInput(attrs={'class': 'form-control', 'required': True}),
-            'reagent': Select(attrs={'class': 'form-control', 'required': True}),
+            'reagent': Select(attrs={'class': 'form-control select2', 'required': True, 'placeholder': 'Seleccione un reactivo'}),
             'batch_number': TextInput(attrs={'class': 'form-control', 'required': True}),
             'density': TextInput(attrs={'class': 'form-control', 'required': True}),
             'date_expire': DateInput(attrs={'class': 'form-control', 'required': True, 'type': 'text', 'data-datepicker': '1', 'placeholder': 'yyyy-mm-dd'}),
         }
 
     def save(self, commit=True):
+        """Guarda el formulario y retorna un diccionario con el resultado."""
         data = {}
         form = super()
         try:
@@ -124,9 +139,11 @@ class InventoryReagentForm(ModelForm):
         return data
 
 
-# Traslado de InventoryReagent a SolutionStd
 class InventoryReagentTransferForm(ModelForm):
+    """Formulario de solo lectura para el traslado de inventario de reactivo a solución estándar."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario configurando campos como solo lectura y ajustando etiquetas."""
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.reagent:
             self.fields['quantity_stock'].label = f"Cantidad ({self.instance.reagent.umb})"
@@ -160,39 +177,11 @@ class InventoryReagentTransferForm(ModelForm):
         }
 
 
-# Edición de Registro de Entrada Inventario de Reactivo
-# class InventoryReagentUpdateForm(ModelForm):
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         for form in self.visible_fields():
-#             form.field.widget.attrs['autocomplete'] = 'off'
-#
-#     class Meta:
-#         model = InventoryReagent
-#         fields = ['reagent', 'quantity_stock','batch_number', 'date_expire']
-#         widgets = {
-#             'reagent': Select(attrs={'class': 'form-control', 'required': True}),
-#             'quantity_stock': TextInput(attrs={'class': 'form-control', 'required': True}),
-#             'batch_number': TextInput(attrs={'class': 'form-control', 'required': True}),
-#             'date_expire': DateInput(attrs={'class': 'form-control', 'required': True, 'type': 'text', 'data-datepicker': '1', 'placeholder': 'yyyy-mm-dd'}),
-#         }
-#
-#     def save(self, commit=True):
-#         data = {}
-#         form = super()
-#         try:
-#             if form.is_valid():
-#                 data = form.save()
-#             else:
-#                 data['error'] = form.errors
-#         except Exception as e:
-#             data['error'] = str(e)
-#         return data
-
-
-# Creación Transacción de Reactivo
 class TransactionReagentForm(ModelForm):
+    """Formulario para la creación de transacciones de reactivo (uso, ajustes)."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario extrayendo el inventario desde los kwargs."""
         self.invent = kwargs.pop('invent')
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -210,6 +199,7 @@ class TransactionReagentForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda la transacción asociada al inventario de reactivo y retorna un diccionario."""
         data = {}
         form = super()
         try:
@@ -224,9 +214,11 @@ class TransactionReagentForm(ModelForm):
         return data
 
 
-# Actualización Transacción de Reactivo
 class TransactionReagentUpdateForm(ModelForm):
+    """Formulario para la actualización de transacciones de reactivo."""
+
     def __init__(self, *args, **kwargs):
+        """Inicializa el formulario configurando el autocompletado de los campos."""
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
@@ -240,6 +232,7 @@ class TransactionReagentUpdateForm(ModelForm):
         }
 
     def save(self, commit=True):
+        """Guarda el formulario y retorna un diccionario con el resultado."""
         data = {}
         form = super()
         try:

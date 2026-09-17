@@ -4,6 +4,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h5 class="modal-title">{{ entity }}</h5>
+            <p>{{ subtitle }}</p>
             <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"><span
                     aria-hidden="true"></span></button>
         </div>
@@ -57,16 +58,39 @@
             <script src="{% static 'type_test_toggle.js' %}"></script>
         {% endif %}
 
-        {% if entity == 'Creación de Punto de Muestreo' or entity == 'Edición de Punto de Muestreo' %}
-            <script src="{% static 'periodicity_toggle.js' %}"></script>
+        {% if entity == 'Creación de Grupo de Muestreo' or entity == 'Edición de Grupo de Muestreo' %}
+            <script src="{% static 'form_sampling_group.js' %}"></script>
         {% endif %}
 
         <script type="application/javascript">
 
-            $('form').on('submit', function (e) {
+            // Convierte los errores del formulario (dict de Django o string) en HTML para Swal
+            function format_errors(error) {
+                if (typeof error === 'object' && error !== null) {
+                    var html = '<ul style="text-align: left;">';
+                    $.each(error, function (key, value) {
+                        html += '<li>' + key + ': ' + value + '</li>';
+                    });
+                    return html + '</ul>';
+                }
+                return '<p>' + error + '</p>';
+            }
+
+            $(document).on('submit', '#modal_form', function (e) {
                 e.preventDefault();
                 var parameters = new FormData(this);
                 const form_action = $(this).attr('action');
+                const $btn = $(this).find('#btnSubmit');
+                const original_btn = $btn.html();
+
+                function reset_btn() {
+                    $btn.prop('disabled', false).html(original_btn);
+                }
+
+                $btn.prop('disabled', true).html(
+                    `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...`
+                );
+
                 $.ajax({
                     url: form_action,
                     type: 'POST',
@@ -75,28 +99,146 @@
                     processData: false,
                     contentType: false,
                 }).done(function (data) {
-                    console.log(data);
-                    if (!data.hasOwnProperty('error')) {
+                    if (data.hasOwnProperty('error')) {
+                        Swal.fire({icon: 'error', title: 'Error de Validación', html: format_errors(data.error)});
+                        reset_btn();
+                        return;
+                    }
+                    Swal.fire({
+                        icon: 'success', title: '¡Éxito!', text: 'Operación realizada satisfactoriamente',
+                        timer: 2000, showConfirmButton: false
+                    }).then(function () {
                         if (data.hasOwnProperty('redirect_url')) {
                             window.location.href = data.redirect_url;
                         } else {
                             location.href = window.location.pathname;
                         }
-                        return false;
-                    }
-                    message_error(data.error);
+                    });
                 }).fail(function (jqXHR, textStatus, errorThrown) {
-                    alert(textStatus + ': ' + errorThrown);
+                    Swal.fire({icon: 'error', title: 'Error del Sistema', text: textStatus + ': ' + errorThrown});
+                    reset_btn();
                 });
             });
 
-            $("#btnSubmit").click(function () {
-                $(this).prop("disabled", true); //deshabilitamos el botón
-                $(this).submit()
-                $(this).html(
-                    `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...` //añadimos el spinner
-                );
-            });
+            {#$('#modal_form').on('submit', function (e) {#}
+            {#    e.preventDefault();#}
+            {#    var parameters = new FormData(this);#}
+            {#    const form_action = $(this).attr('action');#}
+            {#    const $btn = $('#btnSubmit');#}
+            {#    const original_btn = $btn.html();#}
+            {##}
+            {#    function reset_btn() {#}
+            {#        $btn.prop('disabled', false).html(original_btn);#}
+            {#    }#}
+            {##}
+            {#    $btn.prop('disabled', true).html(#}
+            {#        `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...`#}
+            {#    );#}
+            {##}
+            {#    $.ajax({#}
+            {#        url: form_action,#}
+            {#        type: 'POST',#}
+            {#        data: parameters,#}
+            {#        dataType: 'json',#}
+            {#        processData: false,#}
+            {#        contentType: false,#}
+            {#    }).done(function (data) {#}
+            {#        console.log(data);#}
+            {#        if (data.hasOwnProperty('error')) {#}
+            {#            Swal.fire({#}
+            {#                icon: 'error',#}
+            {#                title: 'Error de Validación',#}
+            {#                html: format_errors(data.error),#}
+            {#            });#}
+            {#            reset_btn();#}
+            {#            return;#}
+            {#        }#}
+            {#        Swal.fire({#}
+            {#            icon: 'success',#}
+            {#            title: '¡Éxito!',#}
+            {#            text: 'Operación realizada satisfactoriamente',#}
+            {#            timer: 2000,#}
+            {#            showConfirmButton: false#}
+            {#        }).then(function () {#}
+            {#            if (data.hasOwnProperty('redirect_url')) {#}
+            {#                window.location.href = data.redirect_url;#}
+            {#            } else {#}
+            {#                location.href = window.location.pathname;#}
+            {#            }#}
+            {#        });#}
+            {#    }).fail(function (jqXHR, textStatus, errorThrown) {#}
+            {#        Swal.fire({#}
+            {#            icon: 'error',#}
+            {#            title: 'Error del Sistema',#}
+            {#            text: textStatus + ': ' + errorThrown,#}
+            {#        });#}
+            {#        reset_btn();#}
+            {#    });#}
+            {# });#}
+
+            // Initialize Datepicker for any datepicker-enabled input found in the modal (Bootstrap 5 enhanced)
+            const dateInputs = document.querySelectorAll('[data-datepicker="1"], .js-datepicker');
+            if (dateInputs.length) {
+                dateInputs.forEach(function (input) {
+                    if (!input || input.dataset.datepickerInitialized) return;
+
+                    // Ensure BS5 form-control styling
+                    input.classList.add('form-control');
+
+                    // Wrap in input-group with calendar button (only once)
+                    if (!input.dataset.datepickerEnhanced) {
+                        const group = document.createElement('div');
+                        group.className = 'input-group';
+                        const parent = input.parentNode;
+                        parent.insertBefore(group, input);
+                        group.appendChild(input);
+
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'btn btn-outline-secondary';
+                        btn.setAttribute('aria-label', 'Abrir calendario');
+                        btn.innerHTML = '<i class="bi bi-calendar-date"></i>';
+                        const span = document.createElement('span');
+                        span.className = 'input-group-text p-0';
+                        group.appendChild(btn);
+                        input.dataset.datepickerEnhanced = '1';
+
+                        // Initialize Datepicker with BS5-friendly options
+                        const dp = new Datepicker(input, {
+                            autohide: true,
+                            language: 'es',
+                            format: 'yyyy-mm-dd',
+                            todayHighlight: true,
+                            clearBtn: true,
+                            // ensure the picker attaches within the modal to handle z-index correctly
+                            container: input.closest('.modal') || document.body,
+                            // Use Bootstrap icons for navigation arrows
+                            prevArrow: '<i class="bi bi-chevron-left"></i>',
+                            nextArrow: '<i class="bi bi-chevron-right"></i>',
+                            buttonClass: 'btn btn-outline-secondary'
+                        });
+
+                        // Toggle/show the datepicker on button click
+                        btn.addEventListener('click', function () {
+                            dp.show();
+                        });
+                    } else {
+                        // If already enhanced, just init the picker
+                        new Datepicker(input, {
+                            autohide: true,
+                            language: 'es',
+                            format: 'yyyy-mm-dd',
+                            todayHighlight: true,
+                            clearBtn: true,
+                            container: input.closest('.modal') || document.body,
+                            prevArrow: '<i class="bi bi-chevron-left"></i>',
+                            nextArrow: '<i class="bi bi-chevron-right"></i>',
+                            buttonClass: 'btn btn-outline-secondary'
+                        });
+                    }
+                    input.dataset.datepickerInitialized = '1';
+                });
+            }
 
         </script>
     {% endblock %}

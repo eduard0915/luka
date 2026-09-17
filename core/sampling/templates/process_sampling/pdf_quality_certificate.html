@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <style>
+        @page {
+            size: letter portrait;
+            margin: 1cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 9pt;
+            line-height: 1.4;
+            color: #333;
+        }
+        .header {
+            margin-bottom: 15px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        .header table {
+            width: 100%;
+            border: none;
+            margin-bottom: 0;
+        }
+        .header td {
+            border: none;
+            padding: 0;
+            vertical-align: middle;
+        }
+        .header .logo-cell {
+            width: 200px;
+            text-align: left;
+        }
+        .header .logo-cell img {
+            width: 179px;
+            height: auto;
+        }
+        .header .company-info {
+            text-align: center;
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 12pt;
+            letter-spacing: 2px;
+            color: #555;
+        }
+        .clear {
+            clear: both;
+        }
+        .section {
+            margin-bottom: 15px;
+        }
+        .section-title {
+            font-size: 10pt;
+            font-weight: bold;
+            background-color: #f0f0f0;
+            padding: 4px 6px;
+            border-left: 4px solid #333;
+            margin-bottom: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 5px;
+            text-align: left;
+        }
+        table th {
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+        .info-table th {
+            width: 25%;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .text-justify {
+            text-align: justify;
+        }
+        .concept {
+            font-weight: bold;
+        }
+        .concept-no-cumple {
+            color: #cc0000;
+        }
+        .signatures {
+            margin-top: 30px;
+        }
+        .signature {
+            display: inline-block;
+            width: 32%;
+            text-align: center;
+            vertical-align: top;
+        }
+        .signature .line {
+            border-top: 1px solid #333;
+            margin-top: 45px;
+            padding-top: 5px;
+            font-weight: bold;
+        }
+        .signature .role {
+            font-size: 8pt;
+            color: #666;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 7pt;
+            color: #999;
+            border-top: 1px solid #ddd;
+            padding-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <table>
+            <tr>
+                <td class="logo-cell">
+                    {% if company_logo_path %}
+                        <img src="{{ company_logo_path }}" alt="Logo">
+                    {% endif %}
+                </td>
+                <td class="company-info">
+                    <h2>CERTIFICADO DE CALIDAD</h2>
+                </td>
+            </tr>
+        </table>
+        <div class="clear"></div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">DATOS DE LA MUESTRA</div>
+        <table class="info-table">
+            <tr>
+                <th>N° de Muestra</th>
+                <td>{{ object.number_sample }}</td>
+                <th>N° de Lote</th>
+                <td>{{ object.batch_number|default_if_none:"No Aplica" }}</td>
+            </tr>
+            <tr>
+                <th>Producto</th>
+                <td>
+                    {% if sampling_point %}
+                        {{ sampling_point.product.code_product }} - {{ sampling_point.product.description_product }}
+                    {% else %}
+                        No Aplica
+                    {% endif %}
+                </td>
+                <th>Estado</th>
+                <td>{{ object.status_sampling }}</td>
+            </tr>
+            <tr>
+                <th>Punto de Muestreo</th>
+                <td>
+                    {% if sampling_point %}
+                        {{ sampling_point.sample_point_code }} - {{ sampling_point.sample_point_name }}
+                    {% else %}
+                        No Aplica
+                    {% endif %}
+                </td>
+                <th>Fecha de Muestreo</th>
+                <td>{{ object.date_sampling|date:"d/m/Y H:i"|default:"Pendiente" }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">RESULTADOS DE ANÁLISIS DE CONTROL DE CALIDAD</div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:45%">Ensayo</th>
+                    <th style="width:20%">Especificación</th>
+                    <th style="width:20%">Resultado</th>
+                    <th style="width:15%">Concepto</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sa in sampling_analysis %}
+                    <tr>
+                        <td>
+                            {% if sa.analytical_method %}
+                                {{ sa.analytical_method.description_analytical_method }}
+                            {% else %}
+                                {{ sa.analytical_method_relation.calculate_description_relation }}
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if sa.average_concentration and sa.spec_prod %}
+                                {{ sa.spec_prod.lower_limit_prod|default_if_none:"Menor que" }}
+                                {% if sa.spec_prod.lower_limit_prod %} - {% endif %}{{ sa.spec_prod.upper_limit_prod }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {{ sa.average_concentration|default_if_none:'Pendiente' }}
+                            {% if sa.average_concentration %}{{ sa.unit_measure_prod|default_if_none:"" }}{% endif %}
+                        </td>
+                        <td class="text-center concept {% if sa.comply == 'No Cumple' %}concept-no-cumple{% endif %}">
+                            {{ sa.comply|default_if_none:"Pendiente" }}
+                        </td>
+                    </tr>
+                {% endfor %}
+                {% for cr in result_calcule_relation %}
+                    <tr>
+                        <td>{{ cr.analytical_method_calculate_relation.calculate_description_relation }}</td>
+                        <td class="text-center">
+                            {% if cr.spec_prod %}
+                                {{ cr.spec_prod.lower_limit_prod|default_if_none:"Menor que" }}
+                                {% if cr.spec_prod.lower_limit_prod %} - {% endif %}{{ cr.spec_prod.upper_limit_prod }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {{ cr.calcule }} {{ cr.analytical_method_calculate_relation.unit_measure_calculate|default_if_none:"" }}
+                        </td>
+                        <td class="text-center">-</td>
+                    </tr>
+                {% endfor %}
+                {% if not sampling_analysis and not result_calcule_relation %}
+                    <tr>
+                        <td colspan="4" class="text-center">No hay análisis asociados a esta Muestra.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if observations %}
+        <div class="section">
+            <div class="section-title">OBSERVACIONES</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:18%">Fecha</th>
+                        <th style="width:82%">Observación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for obs in observations %}
+                        <tr>
+                            <td>{{ obs.comment_date|date:"d/m/Y H:i" }}</td>
+                            <td>{{ obs.comment }}. {{ obs.comment_by.get_full_name|default:obs.comment_by.username }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+
+    <div class="section">
+        <div class="section-title">RESPONSABLES</div>
+        <div class="signatures">
+            <div class="signature">
+                <div>Realizado por</div>
+                <div class="line">{{ object.sampling_created_by.get_full_name|default:"N/A" }}</div>
+                <div class="role">Toma de Muestra</div>
+            </div>
+            <div class="signature">
+                <div>Confirmado por</div>
+                <div class="line">{{ object.sampling_confirmed_by.get_full_name|default:"N/A" }}</div>
+                <div class="role">Recepción de Muestra</div>
+            </div>
+            <div class="signature">
+                <div>Autorizado por</div>
+                <div class="line">{{ object.approved_by.get_full_name|default:"N/A" }}</div>
+                <div class="role">Control de Calidad</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Generado el {{ today|date:"d/m/Y H:i" }} | Página <pdf:pagenumber/> de <pdf:pagecount/>
+    </div>
+</body>
+</html>

@@ -1,18 +1,82 @@
+"""Vistas de la aplicación de inicio de sesión.
+
+Define las vistas para el inicio de sesión, recuperación de contraseñas
+y la pantalla de servicio no disponible.
+"""  # noqa: E501
+
 from datetime import timedelta
 
 from django.contrib import messages
-from django.contrib.auth.views import *
+from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView, LoginView
 from django.shortcuts import redirect
 from django.utils import timezone
+from django.views.generic import TemplateView
 
+from core.company.models import Company
+from core.login.forms import LoginAuthenticationForm
 from core.user.models import PasswordHistoryUser
+from luka import settings
 
 
-# Login para iniciar sesión
+class FormResetPasswordView(PasswordResetView):
+    """Vista que muestra el formulario para solicitar el restablecimiento de contraseña."""
+
+    template_name = 'resetpwd_form.html'
+
+    def get_context_data(self, **kwargs):
+        """Agrega el título 'Restablecer Contraseña' al contexto de la plantilla."""
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Restablecer Contraseña'
+        return context
+
+
+class ResetPasswordDoneView(PasswordResetDoneView):
+    """Vista que informa que el correo de restablecimiento ha sido enviado."""
+
+    template_name = 'resetpwd_done.html'
+
+    def get_context_data(self, **kwargs):
+        """Agrega el título 'Correo Enviado' al contexto de la plantilla."""
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Correo Enviado'
+        return context
+
+
+class ResetConfirmPasswordView(PasswordResetConfirmView):
+    """Vista que permite al usuario ingresar y confirmar su nueva contraseña."""
+
+    template_name = 'resetpwd_confirm.html'
+
+    def get_context_data(self, **kwargs):
+        """Agrega el título 'Nueva Contraseña' al contexto de la plantilla."""
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Nueva Contraseña'
+        return context
+
+
+class ResetCompletePasswordView(PasswordResetCompleteView):
+    """Vista que confirma que la contraseña ha sido restablecida exitosamente."""
+
+    template_name = 'resetpwd_complete.html'
+
+    def get_context_data(self, **kwargs):
+        """Agrega el título 'Contraseña Restablecida' al contexto de la plantilla."""
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Contraseña Restablecida'
+        return context
+
+
 class LoginFormView(LoginView):
+    """Vista de inicio de sesión que valida la expiración de la contraseña del usuario autenticado."""
+
     template_name = 'login.html'
+    form_class = LoginAuthenticationForm
 
     def dispatch(self, request, *args, **kwargs):
+        """Verifica el estado del servicio y la expiración de la contraseña antes de procesar la solicitud."""
+        company = Company.objects.first()
+        if company and not company.service_software:
+            return redirect('service_not_available')
         if self.request.user.is_authenticated:
             username = self.request.user.id
             password = self.request.user.password
@@ -30,6 +94,24 @@ class LoginFormView(LoginView):
         return super(LoginFormView, self).dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
+        """Agrega el título 'Iniciar sesión' al contexto de la plantilla."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Iniciar sesión'
+        return context
+
+
+class ServiceNotAvailableView(TemplateView):
+    """Vista que muestra un mensaje de servicio no disponible.
+
+    Cuando el campo service_software de la compañía está deshabilitado,
+    redirige a esta vista para informar al usuario que el servicio no
+    está disponible y proporciona el contacto de soporte técnico.
+    """
+
+    template_name = 'service_not_available.html'
+
+    def get_context_data(self, **kwargs):
+        """Agrega el título 'Servicio No Disponible' al contexto de la plantilla."""
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Servicio No Disponible'
         return context

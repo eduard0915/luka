@@ -1,3 +1,9 @@
+"""Vistas de la funcionalidad de inventario de reactivos.
+
+Define las vistas para el registro, listado, detalle, edición, eliminación,
+transferencia de inventario de reactivos y descarga de certificados de calidad.
+"""
+
 from urllib.request import urlopen
 
 import boto3
@@ -24,8 +30,9 @@ from core.solution.models import SolutionStd, code_solution_std_generator, Trans
 from core.solution.services import transfer_inventory_reagent_to_std
 
 
-# Registro de Entrada Inventario de Reactivo
 class InventoryReagentCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para registrar una entrada de reactivo al inventario."""
+
     model = InventoryReagent
     form_class = InventoryReagentForm
     template_name = 'inventory_reagent/create_inventory_reagent.html'
@@ -35,10 +42,12 @@ class InventoryReagentCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Despacha la petición inicializando el objeto como None."""
         self.object = None
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de registro de inventario de reactivo vía AJAX."""
         data = {}
         try:
             action = request.POST['action']
@@ -61,6 +70,7 @@ class InventoryReagentCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Retorna el contexto de la plantilla con los datos de la vista."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Registro de Entrada de Reactivos'
         context['list_url'] = self.success_url
@@ -71,37 +81,43 @@ class InventoryReagentCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
         return context
 
 
-# Inventario de reactivos
 class InventoryReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista para listar el inventario de reactivos."""
+
     model = InventoryReagent
     template_name = 'inventory_reagent/list_inventory_reagent.html'
     permission_required = 'reagent.view_inventoryreagent'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Despacha la petición sin inicializar el objeto."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Retorna los datos del inventario de reactivos en formato JSON para DataTables."""
         data = {}
         try:
             action = request.POST['action']
             if action == 'searchdata':
                 data = []
-                inventory_reagents = list(InventoryReagent.objects.values(
-                    'id',
-                    'reagent__description_reagent',
-                    'reagent__code_reagent',
-                    'reagent__purity_unit',
-                    'reagent__density_enable',
-                    'reagent__umb',
-                    'batch_number',
-                    'date_expire',
-                    'quantity_stock',
-                    'date_creation',
-                    'purity',
-                    'certificate_quality',
-                    'density'
-                ).order_by('-date_creation'))
+                if request.user.laboratory:
+                    inventory_reagents = list(InventoryReagent.objects.values(
+                        'id',
+                        'reagent__description_reagent',
+                        'reagent__code_reagent',
+                        'reagent__purity_unit',
+                        'reagent__density_enable',
+                        'reagent__umb',
+                        'batch_number',
+                        'date_expire',
+                        'quantity_stock',
+                        'date_creation',
+                        'purity',
+                        'certificate_quality',
+                        'density'
+                    ).filter(reagent__site=request.user.laboratory.site).order_by('-date_creation'))
+                else:
+                    inventory_reagents = []
                 return JsonResponse(inventory_reagents, safe=False)
             else:
                 data['error'] = 'Ha ocurrido un error'
@@ -110,6 +126,7 @@ class InventoryReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMix
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Retorna el contexto de la plantilla con los datos de la vista."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Inventario de Reactivos'
         context['create_url'] = reverse_lazy('reagent:register_inventory_reagent')
@@ -120,30 +137,33 @@ class InventoryReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMix
         return context
 
 
-# Detalle de Reactivos
 class InventoryReagentDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """Vista para mostrar el detalle de un registro de inventario de reactivo."""
+
     model = InventoryReagent
     template_name = 'inventory_reagent/detail_inventory_reagent.html'
     permission_required = 'reagent.view_reagent'
+    queryset = InventoryReagent.objects.select_related('reagent')
 
     def dispatch(self, request, *args, **kwargs):
+        """Despacha la petición."""
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
+        """Retorna el contexto incluyendo las transacciones asociadas al inventario."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Detalle Movimiento de Reactivo'
         context['entity'] = 'Detalle Movimiento de Reactivo'
         context['label_url'] = reverse_lazy('solution:solution_label_pdf', kwargs={'pk': self.object.pk})
-        # if self.request.user.has_perm('user.add_user'):
-        #     context['back'] = reverse_lazy('user:user_list')
         context['icon'] = 'fa-solid fa-flask-vial'
         context['back'] = reverse_lazy('reagent:list_inventory_reagent')
-        context['transactions'] = TransactionReagent.objects.filter(reagent_inventory_id=self.object.pk)
+        context['transactions'] = TransactionReagent.objects.select_related('user_transaction').filter(reagent_inventory_id=self.object.pk)
         return context
 
 
-# Edición de Registro de Entrada Inventario de Reactivo
 class InventoryReagentUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para editar un registro de entrada de inventario de reactivo."""
+
     model = InventoryReagent
     form_class = InventoryReagentForm
     template_name = 'inventory_reagent/create_inventory_reagent.html'
@@ -153,10 +173,12 @@ class InventoryReagentUpdateView(LoginRequiredMixin, ValidatePermissionRequiredM
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Despacha la petición obteniendo el objeto a editar."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de edición de inventario de reactivo."""
         data = {}
         try:
             action = request.POST['action']
@@ -176,6 +198,7 @@ class InventoryReagentUpdateView(LoginRequiredMixin, ValidatePermissionRequiredM
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Retorna el contexto de la plantilla con los datos de edición."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Edición de Inventario de Reactivos'
         context['list_url'] = self.success_url
@@ -186,17 +209,20 @@ class InventoryReagentUpdateView(LoginRequiredMixin, ValidatePermissionRequiredM
         return context
 
 
-# Eliminación de inventario de reactivo
 class InventoryReagentDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DeleteView):
+    """Vista para eliminar un registro de inventario de reactivo."""
+
     model = InventoryReagent
     template_name = 'inventory_reagent/delete_inventory_reagent.html'
     permission_required = 'reagent.delete_inventoryreagent'
 
     def dispatch(self, request, *args, **kwargs):
+        """Despacha la petición obteniendo el objeto a eliminar."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Elimina el registro de inventario de reactivo y retorna una respuesta JSON."""
         data = {}
         try:
             self.object.delete()
@@ -206,16 +232,18 @@ class InventoryReagentDeleteView(LoginRequiredMixin, ValidatePermissionRequiredM
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Retorna el contexto de la plantilla de confirmación de eliminación."""
         context = super().get_context_data(**kwargs)
-        ir = InventoryReagent.objects.get(pk=self.kwargs.get('pk'))
+        ir = InventoryReagent.objects.select_related('reagent').get(pk=self.kwargs.get('pk'))
         context['entity'] = 'Eliminar Inventario de Reactivo'
         context['delete'] = 'Está seguro de eliminar la entrada de inventario de reactivo?'
         context['info_delete'] = f'Lote: {ir.batch_number} - {ir.reagent.code_reagent} {ir.reagent.description_reagent}?'
         return context
 
 
-# Traslado de InventoryReagent a SolutionStd
 class InventoryReagentTransferView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para transferir un reactivo del inventario a una solución estándar."""
+
     model = InventoryReagent
     form_class = InventoryReagentTransferForm
     template_name = 'inventory_reagent/transfer_inventory_reagent.html'
@@ -223,6 +251,7 @@ class InventoryReagentTransferView(LoginRequiredMixin, ValidatePermissionRequire
     permission_required = 'reagent.change_inventoryreagent'
 
     def dispatch(self, request, *args, **kwargs):
+        """Verifica que el reactivo esté marcado como listo para usar antes de continuar."""
         self.object = self.get_object()
         if not self.object.reagent.ready_to_use:
             messages.error(request, 'Este reactivo no está marcado como listo para usar.')
@@ -230,6 +259,7 @@ class InventoryReagentTransferView(LoginRequiredMixin, ValidatePermissionRequire
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el traslado a solución estándar buscando la SolutionStdBase correspondiente."""
         data = {}
         try:
             action = request.POST['action']
@@ -237,7 +267,6 @@ class InventoryReagentTransferView(LoginRequiredMixin, ValidatePermissionRequire
                 self.object = self.get_object()
                 form = self.get_form()
                 if form.is_valid():
-                    # Buscar SolutionStdBase automáticamente
                     solution_std_base = SolutionStdBase.objects.filter(
                         solute_std_base=self.object.reagent,
                         enable_solution_std=True
@@ -261,6 +290,7 @@ class InventoryReagentTransferView(LoginRequiredMixin, ValidatePermissionRequire
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Retorna el contexto de la plantilla de traslado."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Traslado a Solución Estándar'
         context['list_url'] = self.success_url
@@ -271,12 +301,14 @@ class InventoryReagentTransferView(LoginRequiredMixin, ValidatePermissionRequire
         return context
 
 
-# Descarga de certificado de calidad de reactivo
 class CertificateQualityDownloadView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista para descargar el certificado de calidad de un reactivo desde S3."""
+
     permission_required = 'reagent.view_reagent'
 
     @staticmethod
     def get(request):
+        """Descarga el certificado de calidad desde Amazon S3 usando una URL prefirmada."""
         s3 = boto3.client(
             's3',
             aws_access_key_id=config('AWS_ACCESS_KEY_ID'),
@@ -301,7 +333,7 @@ class CertificateQualityDownloadView(LoginRequiredMixin, ValidatePermissionRequi
                             Params={'Bucket': config('BUCKET'), 'Key': object_name},
                             ExpiresIn=8000
                         )
-                        ext = object_name.split(".")[-1]  # Use -1 to get the last element in case of multiple dots
+                        ext = object_name.split(".")[-1]
                         url = urlopen(link)
                         doc = url.read()
                         disposition = 'attachment'
@@ -323,6 +355,7 @@ class CertificateQualityDownloadView(LoginRequiredMixin, ValidatePermissionRequi
 
 @require_http_methods(["GET"])
 def get_reagent_info(request, reagent_id):
+    """Retorna información de un reactivo en formato JSON para consumo AJAX."""
     try:
         reagent = Reagent.objects.get(id=reagent_id)
         return JsonResponse({

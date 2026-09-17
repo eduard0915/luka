@@ -1,3 +1,9 @@
+"""Modelos de la aplicación de condiciones ambientales.
+
+Define las entidades Condition (configuración de variables ambientales)
+y ConditionRegister (registro de lecturas periódicas).
+"""  # noqa: E501
+
 import uuid
 from django.db import models
 from core.user.models import User
@@ -7,6 +13,8 @@ from crum import get_current_user
 
 
 class Condition(BaseModel):
+    """Configuración de una condición ambiental (área, variable y sus límites)."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     laboratory = models.ForeignKey(Laboratory, on_delete=models.CASCADE, verbose_name='Laboratorio', null=True, blank=True)
     area = models.CharField(max_length=150, verbose_name='Área')
@@ -16,6 +24,7 @@ class Condition(BaseModel):
     enabled = models.BooleanField(default=True, verbose_name='Habilitado')
 
     def __str__(self):
+        """Devuelve una representación legible con el área y la variable."""
         return f"{self.area} - {self.variable}"
 
     class Meta:
@@ -24,6 +33,7 @@ class Condition(BaseModel):
         db_table = 'Condition'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Asigna el usuario de creación o actualización antes de guardar."""
         user = get_current_user()
         if user:
             if not self.user_creation:
@@ -34,6 +44,8 @@ class Condition(BaseModel):
 
 
 class ConditionRegister(BaseModel):
+    """Registro de una lectura de condición ambiental."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     registration_date = models.DateTimeField(verbose_name='Fecha de Registro')
     registered_by = models.ForeignKey(User, verbose_name='Registrado por', on_delete=models.CASCADE,
@@ -45,6 +57,7 @@ class ConditionRegister(BaseModel):
                                               related_name='actions_registered_by_conditions', null=True, blank=True)
 
     def __str__(self):
+        """Devuelve una representación legible con la condición y la fecha de registro."""
         return f"{self.condition} - {self.registration_date}"
 
     class Meta:
@@ -53,6 +66,7 @@ class ConditionRegister(BaseModel):
         db_table = 'ConditionRegister'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Asigna el usuario de creación o actualización antes de guardar."""
         user = get_current_user()
         if user:
             if not self.user_creation:

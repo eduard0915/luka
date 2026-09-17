@@ -1,23 +1,37 @@
+"""Vistas de la aplicación de condiciones ambientales.
+
+Define las vistas CRUD para condiciones ambientales y sus registros
+de lectura, incluyendo exportación a Excel y consultas API.
+"""  # noqa: E501
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, CreateView, UpdateView, View, DetailView
 
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+from datetime import datetime, timedelta
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from core.condition.forms import ConditionForm, ConditionRegisterForm, ConditionRegisterActionsForm
 from core.condition.models import Condition, ConditionRegister
 from core.mixins import ValidatePermissionRequiredMixin
 
 
 class ConditionVariableAPI(LoginRequiredMixin, View):
+    """API que retorna los datos de una condición (variable, límites) vía POST."""
+
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Exenta de CSRF y despacha la solicitud."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la acción 'get_variable' y retorna los datos de la condición en JSON."""
         data = {}
         try:
             action = request.POST.get('action')
@@ -26,6 +40,8 @@ class ConditionVariableAPI(LoginRequiredMixin, View):
                 if condition_id:
                     condition = Condition.objects.get(pk=condition_id)
                     data['variable'] = condition.variable
+                    data['upper_limit'] = condition.upper_limit
+                    data['lower_limit'] = condition.lower_limit
                 else:
                     data['error'] = 'No se ha proporcionado el ID de la condición'
             else:
@@ -36,21 +52,25 @@ class ConditionVariableAPI(LoginRequiredMixin, View):
 
 
 class ConditionListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista que lista las condiciones ambientales y provee datos para gráficos."""
+
     model = Condition
     template_name = 'condition/list_condition.html'
     permission_required = 'condition.view_condition'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Exenta de CSRF y despacha la solicitud."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa las acciones 'searchdata' (listado) y 'search_graph' (datos para gráfico)."""
         data = {}
         try:
             action = request.POST['action']
             if action == 'searchdata':
                 data = []
-                for i in Condition.objects.all():
+                for i in Condition.objects.select_related('laboratory').all():
                     data.append({
                         'id': i.id,
                         'laboratory': i.laboratory.laboratory_name if i.laboratory else 'N/A',
@@ -79,6 +99,7 @@ class ConditionListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Lis
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega títulos y URLs al contexto de la plantilla."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Áreas y Condiciones'
         context['create_url'] = reverse_lazy('condition:create_condition')
@@ -89,6 +110,8 @@ class ConditionListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Lis
 
 
 class ConditionCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para crear una nueva condición ambiental."""
+
     model = Condition
     form_class = ConditionForm
     template_name = 'condition/create_condition.html'
@@ -96,9 +119,11 @@ class ConditionCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, C
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Exenta de CSRF y despacha la solicitud."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de creación y retorna la respuesta JSON."""
         data = {}
         try:
             action = request.POST['action']
@@ -110,7 +135,14 @@ class ConditionCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, C
                     data['success'] = True
                     data['redirect_url'] = self.get_success_url()
                 else:
-                    data['error'] = form.errors
+                    error_list = []
+                    for field, errors in form.errors.items():
+                        for error in errors:
+                            if field == '__all__':
+                                error_list.append(f"{error}")
+                            else:
+                                error_list.append(f"<b>{form.fields[field].label}</b>: {error}")
+                    data['error'] = "<br>".join(error_list)
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -118,9 +150,11 @@ class ConditionCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, C
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de redirección tras crear una condición."""
         return reverse('condition:list_condition')
 
     def get_context_data(self, **kwargs):
+        """Agrega títulos y URLs al contexto de la plantilla."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Creación de Área y Condiciones Ambientales'
         context['entity'] = 'Creación de Área y Condiciones Ambientales'
@@ -130,6 +164,8 @@ class ConditionCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, C
 
 
 class ConditionUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para editar una condición ambiental existente."""
+
     model = Condition
     form_class = ConditionForm
     template_name = 'condition/create_condition.html'
@@ -137,10 +173,12 @@ class ConditionUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, U
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Obtiene el objeto y despacha la solicitud exenta de CSRF."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de edición y retorna la respuesta JSON."""
         data = {}
         try:
             action = request.POST['action']
@@ -152,7 +190,14 @@ class ConditionUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, U
                     data['success'] = True
                     data['redirect_url'] = self.get_success_url()
                 else:
-                    data['error'] = form.errors
+                    error_list = []
+                    for field, errors in form.errors.items():
+                        for error in errors:
+                            if field == '__all__':
+                                error_list.append(f"{error}")
+                            else:
+                                error_list.append(f"<b>{form.fields[field].label}</b>: {error}")
+                    data['error'] = "<br>".join(error_list)
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -160,9 +205,11 @@ class ConditionUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, U
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de redirección tras actualizar una condición."""
         return reverse('condition:list_condition')
 
     def get_context_data(self, **kwargs):
+        """Agrega títulos y URLs al contexto de la plantilla."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Edición de Área y Condición Ambiental'
         context['entity'] = 'Edición de Área y Condición Ambiental'
@@ -172,33 +219,50 @@ class ConditionUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, U
 
 
 class ConditionRegisterListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista que lista los registros de condiciones ambientales."""
+
     model = ConditionRegister
     template_name = 'condition/list_condition_register.html'
     permission_required = 'condition.view_conditionregister'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Exenta de CSRF y despacha la solicitud."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa la acción 'searchdata' y retorna los registros formateados en JSON."""
         data = {}
         try:
-            action = request.POST['action']
+            action = request.POST.get('action')
             if action == 'searchdata':
-                data = []
-                for i in ConditionRegister.objects.all():
-                    data.append({
-                        'id': i.id,
-                        'registration_date': timezone.localtime(i.registration_date).strftime('%Y-%m-%d %H:%M:%S'),
-                        'registered_by': str(i.registered_by),
-                        'registered_data': f"{i.registered_data}" '%' if i.condition.variable == 'Humedad Relativa' else f"{i.registered_data}" '°C',
-                        'condition__area': f"{i.condition.area}",
-                        'condition__variable': f"{i.condition.variable}",
-                        'condition__upper_limit': i.condition.upper_limit,
-                        'condition__lower_limit': i.condition.lower_limit,
-                        'actions_registered_by': i.actions_registered_by.id if i.actions_registered_by else None,
-                        'value': i.registered_data,
-                    })
+                registers = list(ConditionRegister.objects.select_related(
+                    'condition',
+                    'registered_by',
+                    'actions_registered_by'
+                ).values(
+                    'id',
+                    'registration_date',
+                    'registered_by__first_name',
+                    'registered_by__last_name',
+                    'registered_data',
+                    'condition__area',
+                    'condition__variable',
+                    'condition__upper_limit',
+                    'condition__lower_limit',
+                    'actions_registered_by__id'
+                ).order_by('-registration_date'))
+
+                for r in registers:
+                    r['registration_date'] = timezone.localtime(r['registration_date']).strftime('%Y-%m-%d %H:%M:%S')
+                    first_name = r.pop('registered_by__first_name') or ''
+                    last_name = r.pop('registered_by__last_name') or ''
+                    r['registered_by'] = f"{first_name} {last_name}".strip()
+                    unit = '%' if r['condition__variable'] == 'Humedad Relativa' else '°C'
+                    r['registered_data_formatted'] = f"{r['registered_data']}{unit}"
+                    r['actions_registered_by'] = r.pop('actions_registered_by__id')
+
+                return JsonResponse(registers, safe=False)
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
@@ -206,16 +270,94 @@ class ConditionRegisterListView(LoginRequiredMixin, ValidatePermissionRequiredMi
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Agrega títulos, URLs y la URL de exportación al contexto."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Registros de Condiciones Ambientales'
         context['create_url'] = reverse_lazy('condition:create_condition_register')
         context['list_url'] = reverse_lazy('condition:list_condition_register')
+        context['export_url'] = reverse_lazy('condition:export_condition_register_excel')
         context['entity'] = 'Registros de Condiciones Ambientales'
         context['div'] = '12'
         return context
 
 
+class ConditionRegisterExportExcelView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista que exporta los registros de condiciones ambientales a un archivo Excel."""
+
+    permission_required = 'condition.view_conditionregister'
+
+    def get(self, request, *args, **kwargs):
+        """Genera el archivo Excel con los registros de los últimos 3 años y lo descarga."""
+        try:
+            three_years_ago = timezone.localtime() - timedelta(days=3 * 365)
+            registers = ConditionRegister.objects.filter(
+                registration_date__gte=three_years_ago
+            ).select_related('condition', 'registered_by', 'actions_registered_by').order_by('-registration_date')
+
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Registros Condiciones"
+
+            header_font = Font(bold=True, color="FFFFFF")
+            header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+            alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            border = Border(
+                left=Side(style='thin'),
+                right=Side(style='thin'),
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
+
+            headers = [
+                'Fecha de Registro', 'Registrado por', 'Área', 'Variable',
+                'Dato Registrado', 'Límite Inferior', 'Límite Superior',
+                'Acciones', 'Acciones Registradas por'
+            ]
+
+            for col_num, header in enumerate(headers, 1):
+                cell = ws.cell(row=1, column=col_num)
+                cell.value = header
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.alignment = alignment
+                cell.border = border
+                ws.column_dimensions[cell.column_letter].width = 20
+
+            for row_num, r in enumerate(registers, 2):
+                data = [
+                    timezone.localtime(r.registration_date).strftime('%Y-%m-%d %H:%M:%S'),
+                    r.registered_by.get_full_name(),
+                    r.condition.area,
+                    r.condition.variable,
+                    r.registered_data,
+                    r.condition.lower_limit,
+                    r.condition.upper_limit,
+                    r.actions or '',
+                    r.actions_registered_by.get_full_name() if r.actions_registered_by else ''
+                ]
+
+                for col_num, value in enumerate(data, 1):
+                    cell = ws.cell(row=row_num, column=col_num)
+                    cell.value = value
+                    cell.alignment = alignment
+                    cell.border = border
+
+            response = HttpResponse(
+                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            )
+            response['Content-Disposition'] = f'attachment; filename="Registros_Condiciones_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
+            
+            wb.save(response)
+            return response
+
+        except Exception as e:
+            messages.error(request, f'Error al generar el Excel: {str(e)}')
+            return HttpResponseRedirect(reverse_lazy('condition:list_condition_register'))
+
+
 class ConditionRegisterCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para crear uno o dos registros de condiciones ambientales."""
+
     model = ConditionRegister
     form_class = ConditionRegisterForm
     template_name = 'condition/create_condition_register.html'
@@ -223,21 +365,30 @@ class ConditionRegisterCreateView(LoginRequiredMixin, ValidatePermissionRequired
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Exenta de CSRF y despacha la solicitud."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de creación de registros y retorna la respuesta JSON."""
         data = {}
         try:
             action = request.POST['action']
             if action == 'add':
-                form = self.get_form()
+                form = ConditionRegisterForm(request.POST)
                 if form.is_valid():
                     form.save()
-                    messages.success(request, '¡Registro de condición guardado satisfactoriamente!')
+                    messages.success(request, 'Condiciones ambientales registradas satisfactoriamente!')
                     data['success'] = True
                     data['redirect_url'] = self.get_success_url()
                 else:
-                    data['error'] = form.errors
+                    error_list = []
+                    for field, errors in form.errors.items():
+                        for error in errors:
+                            if field == '__all__':
+                                error_list.append(f"{error}")
+                            else:
+                                error_list.append(f"<b>{form.fields[field].label}</b>: {error}")
+                    data['error'] = "<br>".join(error_list)
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -245,9 +396,11 @@ class ConditionRegisterCreateView(LoginRequiredMixin, ValidatePermissionRequired
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de redirección tras crear un registro."""
         return reverse('condition:list_condition_register')
 
     def get_context_data(self, **kwargs):
+        """Agrega títulos y URLs al contexto de la plantilla."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Registro de Condiciones Ambientales'
         context['entity'] = 'Registro de Condiciones Ambientales'
@@ -257,6 +410,8 @@ class ConditionRegisterCreateView(LoginRequiredMixin, ValidatePermissionRequired
 
 
 class ConditionRegisterUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para editar un registro de condición ambiental."""
+
     model = ConditionRegister
     form_class = ConditionRegisterForm
     template_name = 'condition/create_condition_register.html'
@@ -264,10 +419,12 @@ class ConditionRegisterUpdateView(LoginRequiredMixin, ValidatePermissionRequired
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Obtiene el objeto y despacha la solicitud exenta de CSRF."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de edición y retorna la respuesta JSON."""
         data = {}
         try:
             action = request.POST['action']
@@ -279,7 +436,14 @@ class ConditionRegisterUpdateView(LoginRequiredMixin, ValidatePermissionRequired
                     data['success'] = True
                     data['redirect_url'] = self.get_success_url()
                 else:
-                    data['error'] = form.errors
+                    error_list = []
+                    for field, errors in form.errors.items():
+                        for error in errors:
+                            if field == '__all__':
+                                error_list.append(f"{error}")
+                            else:
+                                error_list.append(f"<b>{form.fields[field].label}</b>: {error}")
+                    data['error'] = "<br>".join(error_list)
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -287,9 +451,11 @@ class ConditionRegisterUpdateView(LoginRequiredMixin, ValidatePermissionRequired
         return JsonResponse(data)
 
     def get_success_url(self):
+        """Retorna la URL de redirección tras actualizar un registro."""
         return reverse('condition:list_condition_register')
 
     def get_context_data(self, **kwargs):
+        """Agrega títulos y URLs al contexto de la plantilla."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Edición de Registro de Condiciones Ambientales'
         context['entity'] = 'Edición de Registro de Condiciones Ambientales   '
@@ -299,17 +465,22 @@ class ConditionRegisterUpdateView(LoginRequiredMixin, ValidatePermissionRequired
 
 
 class ConditionRegisterActionsUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para registrar acciones o correcciones sobre un registro fuera de rango."""
+
     model = ConditionRegister
     form_class = ConditionRegisterActionsForm
     template_name = 'modal_two.html'
     permission_required = 'condition.change_conditionregister'
+    queryset = ConditionRegister.objects.select_related('condition')
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Obtiene el objeto y despacha la solicitud exenta de CSRF."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de acciones y retorna la respuesta JSON."""
         data = {}
         try:
             action = request.POST['action']
@@ -320,7 +491,14 @@ class ConditionRegisterActionsUpdateView(LoginRequiredMixin, ValidatePermissionR
                     messages.success(request, '¡Acciones registradas satisfactoriamente!')
                     data['success'] = True
                 else:
-                    data['error'] = form.errors
+                    error_list = []
+                    for field, errors in form.errors.items():
+                        for error in errors:
+                            if field == '__all__':
+                                error_list.append(f"{error}")
+                            else:
+                                error_list.append(f"<b>{form.fields[field].label}</b>: {error}")
+                    data['error'] = "<br>".join(error_list)
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
@@ -328,20 +506,33 @@ class ConditionRegisterActionsUpdateView(LoginRequiredMixin, ValidatePermissionR
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Agrega información de la condición y resalta si el dato está fuera de rango."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Registro de Acciones o Correcciones'
         context['entity'] = 'Registro de Acciones o Correcciones'
-        context['info_form'] = f"Condición: {self.object.condition} | Dato: {self.object.registered_data}"
+        
+        registered_data = self.object.registered_data
+        upper_limit = self.object.condition.upper_limit
+        lower_limit = self.object.condition.lower_limit
+        
+        info_text = f"Condición: {self.object.condition} | Dato: {registered_data}"
+        if registered_data > upper_limit or registered_data < lower_limit:
+            info_text = mark_safe(f"Condición: {self.object.condition} | <span style='color: red;'>Dato: {registered_data} (Fuera de rango)</span>")
+            
+        context['info_form'] = info_text
         context['action'] = 'edit'
         return context
 
 
 class ConditionRegisterDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """Vista de detalle de un registro de condición, mostrando las acciones registradas."""
+
     model = ConditionRegister
     template_name = 'condition/detail_condition_register.html'
     permission_required = 'condition.view_conditionregister'
 
     def get_context_data(self, **kwargs):
+        """Agrega títulos al contexto de la plantilla de detalle."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Detalle de Acciones Registradas'
         context['entity'] = 'Detalle de Acciones Registradas'

@@ -1,3 +1,5 @@
+"""Modelos de datos para la gestión de usuarios, competencias y capacitaciones."""
+
 import os
 import uuid
 
@@ -7,12 +9,13 @@ from django.db import models
 from django.utils.text import slugify
 from django.utils.timezone import localtime
 
-from core.company.models import Site
 from core.validators import validator_file_image_user
+from core.laboratory.models import Laboratory
 from luka.settings import MEDIA_URL, STATIC_URL
 
 
 def validator_file_image(value):
+    """Valida que el archivo subido sea una imagen con extensión .jpg, .png o .svg y no supere los 256Kb."""
     limit = 256 * 1024     # de bits
     ext = os.path.splitext(value.name)[1]
     valid_extensions = ['.jpeg', '.jpg', '.png', '.svg']
@@ -24,6 +27,7 @@ def validator_file_image(value):
 
 # Usuarios
 class User(AbstractUser):
+    """Modelo que representa un usuario del sistema, extendiendo AbstractUser con campos adicionales."""
     cedula = models.CharField(max_length=15, null=True, blank=True, unique=False, verbose_name='Cédula')
     cargo = models.CharField(max_length=50, null=True, blank=True, verbose_name='Cargo')
     email_person = models.EmailField(null=True, blank=True, verbose_name='Email Personal')
@@ -33,21 +37,26 @@ class User(AbstractUser):
     photo = models.ImageField(
         upload_to='user/%Y%m%d', null=True, blank=True, verbose_name='Foto', validators=[validator_file_image_user])
     slug = models.SlugField(unique=True, null=False, blank=False)
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, verbose_name='Planta', null=True, blank=True)
+    laboratory = models.ForeignKey(Laboratory, on_delete=models.CASCADE, verbose_name='Laboratorio', null=True, blank=True)
+    notification_email_oss = models.BooleanField(default=False, verbose_name='Notificación Resultados OOS')
 
     def __init__(self, *args, **kwargs):
+        """Inicializa el usuario guardando la contraseña original para detectar cambios."""
         super(User, self).__init__(*args, **kwargs)
         self.original_password = self.password
 
     def __str__(self):
+        """Retorna el nombre completo y el cargo del usuario."""
         return str(self.get_full_name()) + ', ' + str(self.cargo)
 
     def get_image(self):
+        """Retorna la URL de la foto del usuario o una imagen por defecto si no tiene."""
         if self.photo:
             return '{}{}'.format(MEDIA_URL, self.photo)
         return '{}{}'.format(STATIC_URL, 'img/default-avatar.png')
 
     def save(self, *args, **kwargs):
+        """Guarda el usuario generando un slug único y registrando el cambio de contraseña en el historial."""
         if not self.slug:
             self.slug = slugify(str(uuid.uuid4()))
         if self.username is not int:
@@ -58,23 +67,27 @@ class User(AbstractUser):
         super().save(*args, **kwargs)
 
     def _password_has_been_changed(self):
+        """Verifica si la contraseña del usuario ha sido modificada."""
         return self.original_password != self.password
 
 
 # Histórico de Contraseñas utilizadas
 class PasswordHistoryUser(models.Model):
+    """Modelo que almacena el historial de contraseñas utilizadas por cada usuario."""
     username = models.ForeignKey(User, on_delete=models.CASCADE)
     old_pass = models.CharField(max_length=128)
     pass_date = models.DateTimeField()
 
     @classmethod
     def remember_password(cls, user):
+        """Registra la contraseña actual del usuario en el historial."""
         if user:
             cls(username=user, old_pass=user.password, pass_date=localtime()).save()
 
 
 # Competencias
 class Competence(models.Model):
+    """Modelo que representa una competencia o certificación obtenida por un usuario."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     description_competence = models.CharField(max_length=200, verbose_name='Descripción')
     institution = models.CharField(max_length=200, verbose_name='Institución')
@@ -83,6 +96,7 @@ class Competence(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='')
 
     def __str__(self):
+        """Retorna la descripción de la competencia."""
         return str(self.description_competence)
 
     class Meta:
@@ -93,6 +107,7 @@ class Competence(models.Model):
 
 # Capacitaciones
 class Training(models.Model):
+    """Modelo que representa una capacitación recibida por un usuario."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     description_training = models.CharField(max_length=120, verbose_name='Capacitación')
     training_by = models.CharField(max_length=200, verbose_name='Realizado por')
@@ -104,6 +119,7 @@ class Training(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='')
 
     def __str__(self):
+        """Retorna la descripción de la capacitación."""
         return str(self.description_training)
 
     class Meta:

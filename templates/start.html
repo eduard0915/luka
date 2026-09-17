@@ -1,1 +1,131 @@
 {% extends 'body.html' %}
+{% load custom_filters %}
+
+{% block content %}
+
+    <div class="row">
+
+        {% if request.user.laboratory %}
+            <!-- Muestras por Recolectar Card -->
+            <div class="col-md-6 col-lg-3">
+                <div class="info-card">
+                    <div class="info-card-content">
+                        <div class="info-card-title">Muestras por Recolectar</div>
+                        <div class="info-card-value">{{ count_scheduled_sampling }}</div>
+                        <div class="info-card-change positive">
+                            {{ percent_sampling_scheduled }}% <span style="color: #6c757d; font-weight: 400;">por Confirmar</span>
+                        </div>
+                    </div>
+                    <div class="info-card-icon">
+                        <a href="{% url 'sampling:list_sampling_process_scheduled' %}" title="Ver Listado">
+                            <i class="bi bi-basket text-white"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Muestras Confirmadas Card -->
+            <div class="col-md-6 col-lg-3">
+                <div class="info-card">
+                    <div class="info-card-content">
+                        <div class="info-card-title">Muestras Confirmadas</div>
+                        <div class="info-card-value">{{ count_confirmed_sampling }}</div>
+                        <div class="info-card-change positive">
+                            {{ percent_sampling_confirmed }}% <span style="color: #6c757d; font-weight: 400;">por Procesar</span>
+                        </div>
+                    </div>
+                    <div class="info-card-icon">
+                        <a href="{% url 'sampling:list_sampling_process_confirmed' %}" title="Ver Listado">
+                            <i class="bi bi-bag-check text-white"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ads Views Card -->
+            <div class="col-md-6 col-lg-3">
+                <div class="info-card">
+                    <div class="info-card-content">
+                        <div class="info-card-title">Muestras en Proceso</div>
+                        <div class="info-card-value">{{ count_in_process_sampling }}</div>
+{#                        <div class="info-card-change negative">#}
+                        <div class="info-card-change positive">
+                            {{ percent_sampling_end }}% <span
+                                style="color: #6c757d; font-weight: 400;">Finalizadas</span>
+                        </div>
+                    </div>
+                    <div class="info-card-icon">
+                        <a href="{% url 'sampling:list_sampling_process_in_process' %}" title="Ver Listado">
+                            <i class="bi bi-measuring-cup text-white"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Muestras con resultados fuera de especificación Card -->
+            <div class="col-md-6 col-lg-3">
+                <div class="info-card">
+                    <div class="info-card-content">
+                        <div class="info-card-title">Resultados con (OOS)</div>
+                        <div class="info-card-value">{{ count_oos_result }}</div>
+                        <div class="info-card-change negative">
+                            {{ percent_oos_result }}% <span style="color: #6c757d; font-weight: 400; width: 100%">de Muestras en Proceso</span>
+                        </div>
+                    </div>
+                    <div class="danger-card-icon">
+                        <a href="{% url 'sampling:list_sampling_process_out_specification' %}" title="Ver Listado">
+                            <i class="bi bi-exclamation-octagon text-white"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if request.user|has_group:"Administrador" %}
+
+            <!-- Mantenimientos Vencidos -->
+            {% if count_mtto_expire > 0 %}
+                <div class="col-md-6 col-lg-3">
+                    <div class="info-card">
+                        <div class="info-card-content">
+                            <div class="info-card-title">Mttos Vencidos</div>
+                            <div class="info-card-value">{{ count_mtto_expire }}</div>
+                            {% if percent_expire_mtto > 0 %}
+                                <div class="info-card-change negative">
+                                    {{ percent_expire_mtto }}% <span
+                                        style="color: #6c757d; font-weight: 400;"> del Total</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="info-card-icon">
+                            <i class="fa-solid fa-tools"></i>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Calibraciones Vencidas -->
+            {% if count_calibration_expire > 0 %}
+                <div class="col-md-6 col-lg-3">
+                    <div class="info-card">
+                        <div class="info-card-content">
+                            <div class="info-card-title">Calibraciones Vencidas</div>
+                            <div class="info-card-value">{{ count_calibration_expire }}</div>
+                            {% if percent_expire_calibration > 0 %}
+                                <div class="info-card-change negative">
+                                    {{ percent_expire_calibration }}% <span
+                                        style="color: #6c757d; font-weight: 400;"> del Total</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="info-card-icon">
+                            <i class="fa-solid fa-gauge-high"></i>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+        {% endif %}
+    </div>
+
+{% endblock %}

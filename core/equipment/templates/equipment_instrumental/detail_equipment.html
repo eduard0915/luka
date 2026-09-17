@@ -6,22 +6,22 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <div class="row">
-                        <!-- Columna izquierda: Información del equipo -->
-                        <div class="col-lg-8">
-                            <!-- Información General -->
-                            <div class="mb-4">
-                                <h5 class="section-title">
-                                    <i class="fas fa-info-circle"></i> Información General
-                                </h5>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-hover">
-                                        <tbody>
+    <div class="container-fluid equipment-detail-view">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Columna izquierda: Información del equipo -->
+                            <div class="col-lg-8">
+                                <!-- Información General -->
+                                <div class="mb-4">
+                                    <h5 class="section-title">
+                                        <i class="fas fa-info-circle"></i> Información General
+                                    </h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-hover">
+                                            <tbody>
                                             <tr>
                                                 <td class="info-label" style="width: 30%">Código:</td>
                                                 <td class="info-value">
@@ -36,19 +36,19 @@
                                                 <td class="info-label">Proveedor:</td>
                                                 <td class="info-value">{{ object.supplier_equipment }}</td>
                                             </tr>
-                                        </tbody>
-                                    </table>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Especificaciones Técnicas -->
-                            <div class="mb-4">
-                                <h5 class="section-title">
-                                    <i class="fas fa-cogs"></i> Especificaciones Técnicas
-                                </h5>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-hover">
-                                        <tbody>
+                                <!-- Especificaciones Técnicas -->
+                                <div class="mb-4">
+                                    <h5 class="section-title">
+                                        <i class="fas fa-cogs"></i> Especificaciones Técnicas
+                                    </h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-hover">
+                                            <tbody>
                                             <tr>
                                                 <td class="info-label" style="width: 30%">Marca:</td>
                                                 <td class="info-value">{{ object.brand_equipment }}</td>
@@ -63,19 +63,31 @@
                                                     <span class="badge bg-info">{{ object.serie_equipment }}</span>
                                                 </td>
                                             </tr>
-                                        </tbody>
-                                    </table>
+                                            <tr>
+                                                <td class="info-label">Patrón de Referencia:</td>
+                                                <td class="info-value">
+                                                    {{ object.verification_pattern }}{{ object.unit_tolerance }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="info-label">Error Máximo Permitido:</td>
+                                                <td class="info-value">
+                                                    {{ object.tolerance }}{{ object.unit_tolerance }}
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Ubicación y Responsabilidad -->
-                            <div class="mb-4">
-                                <h5 class="section-title">
-                                    <i class="fas fa-map-marker-alt"></i> Ubicación y Responsabilidad
-                                </h5>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-hover">
-                                        <tbody>
+                                <!-- Ubicación y Responsabilidad -->
+                                <div class="mb-4">
+                                    <h5 class="section-title">
+                                        <i class="fas fa-map-marker-alt"></i> Ubicación y Responsabilidad
+                                    </h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-hover">
+                                            <tbody>
                                             <tr>
                                                 <td class="info-label" style="width: 30%">Laboratorio:</td>
                                                 <td class="info-value">
@@ -100,19 +112,19 @@
                                                     {% endif %}
                                                 </td>
                                             </tr>
-                                        </tbody>
-                                    </table>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Fechas y Uso -->
-                            <div class="mb-4">
-                                <h5 class="section-title">
-                                    <i class="fas fa-calendar-alt"></i> Fechas y Uso
-                                </h5>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-hover">
-                                        <tbody>
+                                <!-- Fechas y Uso -->
+                                <div class="mb-4">
+                                    <h5 class="section-title">
+                                        <i class="fas fa-calendar-alt"></i> Fechas y Uso
+                                    </h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-hover">
+                                            <tbody>
                                             <tr>
                                                 <td class="info-label" style="width: 30%">Fecha Inicio de Uso:</td>
                                                 <td class="info-value">
@@ -144,7 +156,7 @@
                                                 <td class="info-value">
                                                     {% if object.time_use %}
                                                         <i class="fas fa-clock text-info"></i>
-                                                        <strong>{{ object.time_use }}</strong> horas
+                                                        <strong>{{ object.time_use }}</strong> Años
                                                     {% else %}
                                                         <span class="badge bg-warning text-dark">
                                                             <i class="fas fa-exclamation-triangle"></i> Pendiente
@@ -152,156 +164,474 @@
                                                     {% endif %}
                                                 </td>
                                             </tr>
-                                        </tbody>
-                                    </table>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Estado y Documentación -->
-                            <div class="mb-4">
-                                <h5 class="section-title">
-                                    <i class="fas fa-file-alt"></i> Documentación
-                                </h5>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-hover">
-                                        <tbody>
-                                            <tr>
-                                                <td class="info-label">Manual de Operación:</td>
-                                                <td class="info-value">
-                                                    {% if object.manual_equipment %}
-                                                        <a href="{{ object.manual_equipment.url }}"
-                                                           target="_blank"
-                                                           download
-                                                           class="btn btn-sm btn-info download-btn">
-                                                            <i class="fas fa-file-download"></i> Descargar Manual (PDF)
-                                                        </a>
-                                                    {% else %}
-                                                        <span class="badge bg-warning text-dark">
-                                                            <i class="fas fa-exclamation-triangle"></i> Manual no disponible
-                                                        </span>
-                                                    {% endif %}
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Columna derecha: Foto del equipo -->
-                        <div class="col-lg-4">
-                            <div class="mb-4">
-                                <h5 class="section-title"><br></h5>
-                                <div class="photo-container">
-                                    {% if object.photo_equipment %}
-                                        <img src="{{ object.photo_equipment.url }}"
-                                             alt="Foto de {{ object.description_equipment }}"
-                                             class="equipment-photo">
+                                <!-- Historial de Verificaciones Intermedias -->
+                                <div class="mb-4">
+                                    <h5 class="section-title">
+                                        <i class="fas fa-check-double"></i> Verificaciones Intermedias
+                                    </h5>
+                                    {% if verifications %}
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover" id="tblVerifications">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th class="text-center">Fecha</th>
+                                                        <th class="text-center">Cumple</th>
+                                                        <th class="text-center">Realizado por</th>
+                                                        <th class="text-center">Parámetro</th>
+                                                        <th class="text-center">Responsable</th>
+                                                        <th class="text-center">Reporte</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for ver in verifications %}
+                                                        <tr>
+                                                            <td>{{ ver.date_verification|date:"d/m/Y" }}</td>
+                                                            <td class="text-center">
+                                                                {% if ver.comply %}
+                                                                    <span class="badge bg-success">Sí</span>
+                                                                {% else %}
+                                                                    <span class="badge bg-danger">No</span>
+                                                                {% endif %}
+                                                            </td>
+                                                            <td class="text-center">{{ ver.verified_by }}</td>
+                                                            <td class="text-center">{{ ver.parameter_verified|default:"-" }}</td>
+                                                            <td class="text-center">{{ ver.responsible_user.get_full_name }}</td>
+                                                            <td class="text-center">
+                                                                {% if ver.report_verification %}
+                                                                    <a href="{{ ver.report_verification.url }}"
+                                                                       target="_blank"
+                                                                       download
+                                                                       class="btn btn-sm btn-outline-primary"
+                                                                       title="Descargar Reporte">
+                                                                        <i class="fas fa-file-download"></i>
+                                                                    </a>
+                                                                {% else %}
+                                                                    <span class="text-muted">-</span>
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     {% else %}
-                                        <div class="text-center">
-                                            <i class="fas fa-camera-retro no-photo-icon"></i>
-                                            <p class="text-muted mt-3">
-                                                <strong>Sin Imagen</strong>
-                                            </p>
-                                            <span class="badge bg-warning text-dark">
-                                                <i class="fas fa-exclamation-triangle"></i>
-                                                Foto pendiente
-                                            </span>
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle"></i> No se registran verificaciones intermedias para este equipo.
                                         </div>
                                     {% endif %}
                                 </div>
+
+                                <!-- Historial de Calibraciones -->
+                                <div class="mb-4">
+                                    <h5 class="section-title">
+                                        <i class="fas fa-balance-scale"></i> Calibraciones Realizadas
+                                    </h5>
+                                    {% if calibrations %}
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover" id="tblCalibrations">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th class="text-center">Fecha</th>
+                                                        <th class="text-center">Cumple</th>
+                                                        <th class="text-center">Realizado por</th>
+                                                        <th class="text-center">Parámetro</th>
+                                                        <th class="text-center">Responsable</th>
+                                                        <th class="text-center">CoA</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for cal in calibrations %}
+                                                        <tr>
+                                                            <td class="text-center">{{ cal.date_calibration|date:"d/m/Y" }}</td>
+                                                            <td class="text-center">
+                                                                {% if cal.comply %}
+                                                                    <span class="badge bg-success">Sí</span>
+                                                                {% else %}
+                                                                    <span class="badge bg-danger">No</span>
+                                                                {% endif %}
+                                                            </td>
+                                                            <td class="text-center">{{ cal.calibrated_by }}</td>
+                                                            <td class="text-center">{{ cal.parameter|default:"-" }}</td>
+                                                            <td class="text-center">{{ cal.responsible_user.get_full_name }}</td>
+                                                            <td class="text-center">
+                                                                {% if cal.certificate_calibration %}
+                                                                    <a href="{{ cal.certificate_calibration.url }}"
+                                                                       target="_blank"
+                                                                       download
+                                                                       class="btn btn-sm btn-outline-primary"
+                                                                       title="Descargar Certificado">
+                                                                        <i class="fas fa-file-download"></i>
+                                                                    </a>
+                                                                {% else %}
+                                                                    <span class="text-muted">-</span>
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle"></i> No se registran calibraciones para este equipo.
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Patrones de Referencia -->
+                                <div class="mb-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h5 class="section-title mb-0">
+                                            <i class="fas fa-layer-group"></i> Patrones de Referencia
+                                        </h5>
+                                        <button onclick="open_modal('{% url 'equipment:create_reference_pattern' object.id %}')"
+                                                type="button" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-plus me-1"></i> Agregar
+                                        </button>
+                                    </div>
+                                    {% if reference_patterns %}
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover" id="tblReferencePatterns">
+                                                <thead class="table-light">
+                                                <tr>
+                                                    <th class="text-center">Descripción</th>
+                                                    <th class="text-center">Magnitud</th>
+                                                    <th class="text-center">Unidad</th>
+                                                    <th class="text-center">Expira</th>
+                                                    <th class="text-center">Certificado</th>
+                                                    <th class="text-center">Acciones</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for pattern in reference_patterns %}
+                                                    <tr>
+                                                        <td class="text-center">{{ pattern.description_pattern }}</td>
+                                                        <td class="text-center">{{ pattern.magnitude_pattern|default:"-" }}</td>
+                                                        <td class="text-center">{{ pattern.unit_pattern|default:"-" }}</td>
+                                                        <td class="text-center">
+                                                            {% if pattern.date_expire_calibration %}
+                                                                {{ pattern.date_expire_calibration|date:"d/m/Y" }}
+                                                            {% else %}
+                                                                -
+                                                            {% endif %}
+                                                        </td>
+                                                        <td class="text-center">
+                                                            {% if pattern.certificate_calibration %}
+                                                                <a href="{{ pattern.certificate_calibration.url }}"
+                                                                   target="_blank"
+                                                                   class="btn btn-sm btn-outline-primary"
+                                                                   title="Descargar Certificado">
+                                                                    <i class="fas fa-file-download"></i>
+                                                                </a>
+                                                            {% else %}
+                                                                <span class="text-muted">-</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <a onclick="open_modal('{% url 'equipment:update_reference_pattern' pattern.id %}')">
+                                                                <i class="fas fa-edit text-warning me-2"></i>
+                                                            </a>
+                                                            <a onclick="open_modal('{% url 'equipment:delete_reference_pattern' pattern.id %}')">
+                                                                <i class="fas fa-trash text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle"></i> No se han registrado patrones de referencia para este equipo.
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Historial de Mantenimientos -->
+                                <div class="mb-4">
+                                    <h5 class="section-title">
+                                        <i class="fas fa-tools"></i> Mantenimientos Realizados
+                                    </h5>
+                                    {% if maintenances %}
+                                        <div class="row">
+                                            {% for maintenance in maintenances %}
+                                                <div class="col-md-12 mb-3">
+                                                    <div class="card border-left-primary shadow-sm h-100 py-2 mb-0 pb-0">
+                                                        <div class="card-body">
+                                                            <div class="row no-gutters align-items-center">
+                                                                <div class="col mr-2">
+                                                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                                        {{ maintenance.type_maintenance }} - {{ maintenance.date_maintenance|date:"d/m/Y" }}
+                                                                    </div>
+                                                                    <div class="h6 mb-0 font-weight-bold text-gray-800">
+                                                                        Realizado por: {{ maintenance.maintenance_by }}
+                                                                    </div>
+                                                                    <div class="mt-2">
+                                                                        <strong>Descripción:</strong>
+                                                                        <p class="mb-1 text-muted">{{ maintenance.description_maintenance }}</p>
+                                                                    </div>
+                                                                    <div class="mt-2">
+                                                                        <strong>Repuestos/Cambios:</strong>
+                                                                        <p class="mb-1 text-muted">{{ maintenance.parts_change_maintenance|default:"Ninguno" }}</p>
+                                                                    </div>
+                                                                    {% if maintenance.file_maintenance %}
+                                                                        <div class="mt-3">
+                                                                            <a href="{{ maintenance.file_maintenance.url }}"
+                                                                               target="_blank"
+                                                                               download
+                                                                               class="btn btn-sm btn-outline-primary">
+                                                                                <i class="fas fa-file-download"></i> Descargar Registro
+                                                                            </a>
+                                                                        </div>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle"></i> No se registran mantenimientos para este equipo.
+                                        </div>
+                                    {% endif %}
+                                </div>
+
                             </div>
 
-                            <!-- Información rápida en tarjetas -->
-                            <div class="row">
-                                <div class="col-12 mb-3">
-                                    <div class="card bg-light mb-2">
-                                        <div class="card-body text-center">
-                                            <h6 class="card-title text-muted mb-2">
-                                                <i class="fas fa-hashtag"></i> Código
-                                            </h6>
-                                            <h4 class="mb-0 text-primary">{{ object.code_equipment }}</h4>
-                                        </div>
+                            <!-- Columna derecha: Foto del equipo -->
+                            <div class="col-lg-4">
+                                <div class="mb-4">
+                                    <h5 class="section-title"><br></h5>
+                                    <div class="photo-container">
+                                        {% if object.photo_equipment %}
+                                            <img src="{{ object.photo_equipment.url }}"
+                                                 alt="Foto de {{ object.description_equipment }}"
+                                                 class="equipment-photo">
+                                        {% else %}
+                                            <div class="text-center">
+                                                <i class="fas fa-camera-retro no-photo-icon"></i>
+                                                <p class="text-muted mt-3">
+                                                    <strong>Sin Imagen</strong>
+                                                </p>
+                                                <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                Foto pendiente
+                                            </span>
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </div>
-                                <div class="col-12 mb-3">
-                                    <div class="card bg-light">
-                                        <div class="card-body text-center">
-                                            <h6 class="card-title text-muted mb-2">
-                                                <i class="fas fa-toggle-on"></i> Estado
-                                            </h6>
-                                            <h5 class="mb-0">
-                                                {% if object.enable_equipment %}
-                                                    <span class="badge bg-success">Habilitado</span>
-                                                {% else %}
-                                                    <span class="badge bg-danger">No Habilitado</span>
-                                                {% endif %}
-                                            </h5>
+
+                                <!-- Información rápida en tarjetas -->
+                                <div class="row">
+                                    <div class="col-12 mb-3">
+                                        <div class="card bg-light mb-2">
+                                            <div class="card-body text-center">
+                                                <h6 class="card-title text-muted mb-2">
+                                                    <i class="fas fa-hashtag"></i> Código
+                                                </h6>
+                                                <h4 class="mb-0 text-primary">{{ object.code_equipment }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <div class="card bg-light">
+                                            <div class="card-body text-center">
+                                                <h6 class="card-title text-muted mb-2">
+                                                    <i class="fas fa-toggle-on"></i> Estado
+                                                </h6>
+                                                <h5 class="mb-0">
+                                                    {% if object.enable_equipment %}
+                                                        <span class="badge bg-success">Habilitado</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger">No Habilitado</span>
+                                                    {% endif %}
+                                                </h5>
+                                                <div class="mt-3 row justify-content-center">
+                                                    <div class="col-md-7 text-center">
+                                                        {% if object.manual_equipment %}
+                                                            <a href="{{ object.manual_equipment.url }}"
+                                                               target="_blank"
+                                                               download
+                                                               class="btn btn-sm btn-info download-btn text-center">
+                                                                <i class="fas fa-file-download"></i> Manual de Operación
+                                                            </a>
+                                                        {% else %}
+                                                            <span class="badge bg-warning text-dark text-center">
+                                                                <i class="fas fa-exclamation-triangle"></i> Manual no disponible
+                                                            </span>
+                                                        {% endif %}
+                                                        <a href="{{ pdf_url }}"
+                                                           target="_blank"
+                                                           class="btn btn-sm btn-primary mt-2 text-center">
+                                                            <i class="fas fa-file-pdf"></i> Hoja de Vida
+                                                        </a>
+                                                        <button type="button" class="btn btn-sm btn-success mt-2 text-center btnGraph">
+                                                            <i class="fas fa-chart-line"></i> Ver Gráfica
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                     </div>
-                </div>
 
-                <!-- Footer con botones de acción -->
-                <div class="card-footer bg-light">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <a href="{{ list_url }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Volver al Listado
-                            </a>
-                        </div>
-                        <div>
-                            <a href="{{ update_url }}" class="btn btn-warning">
-                                <i class="fas fa-edit"></i> Editar Equipo
-                            </a>
+                    <!-- Footer con botones de acción -->
+                    <div class="card-footer bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <a href="{{ list_url }}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Volver al Listado
+                                </a>
+                            </div>
+                            <div>
+                                <a href="{{ update_url }}" class="btn btn-warning">
+                                    <i class="fas fa-edit"></i> Editar Equipo
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- Modal para el gráfico -->
+    <div class="modal fade" id="modalGraph" tabindex="-1" aria-labelledby="modalGraphLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalGraphLabel">Gráfica de Verificaciones Diarias</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <canvas id="myLineChart" style="width: 100%; height: 400px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block javascript %}
-<script>
-    // Agregar efecto de zoom a la imagen al hacer clic
-    document.addEventListener('DOMContentLoaded', function() {
-        const equipmentPhoto = document.querySelector('.equipment-photo');
-        if (equipmentPhoto) {
-            equipmentPhoto.style.cursor = 'pointer';
-            equipmentPhoto.addEventListener('click', function() {
-                // Crear modal para ver imagen en grande
-                const modal = document.createElement('div');
-                modal.style.cssText = `
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: rgba(0,0,0,0.9);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 9999;
-                    cursor: pointer;
-                `;
+    <!-- Data table plugin-->
+    <script src="{% static 'lib/vali-admin/js/plugins/jquery.dataTables.min.js' %}"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-1.13.4/datatables.min.css">
+    <script src="{% static 'lib/vali-admin/js/plugins/chart.js' %}"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('.btnGraph').on('click', function () {
+                $.ajax({
+                    url: '{% url "equipment:list_daily_verification" %}',
+                    type: 'POST',
+                    data: {
+                        'action': 'get_graph_data',
+                        'equipment_id': '{{ object.id }}'
+                    },
+                    dataType: 'json',
+                }).done(function (data) {
+                    if (!data.hasOwnProperty('error')) {
+                        $('#modalGraph').modal('show');
+                        const ctx = document.getElementById('myLineChart').getContext('2d');
+                        
+                        // Destruir gráfico anterior si existe
+                        let chartStatus = Chart.getChart("myLineChart");
+                        if (chartStatus != undefined) {
+                            chartStatus.destroy();
+                        }
 
-                const img = document.createElement('img');
-                img.src = this.src;
-                img.style.cssText = 'max-width: 90%; max-height: 90%; border-radius: 8px;';
-
-                modal.appendChild(img);
-                document.body.appendChild(modal);
-
-                modal.addEventListener('click', function() {
-                    document.body.removeChild(modal);
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: data.categories,
+                                datasets: [
+                                    {
+                                        label: 'Error (' + data.unit_tolerance + ')',
+                                        data: data.series[0].data,
+                                        borderColor: 'rgb(75, 192, 192)',
+                                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                        pointRadius: 5,
+                                        pointHoverRadius: 7,
+                                        tension: 0.1,
+                                        fill: false
+                                    },
+                                    {
+                                        label: 'Tolerancia (' + data.unit_tolerance + ')',
+                                        data: data.series[1].data,
+                                        borderColor: 'rgb(255, 99, 132)',
+                                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                        borderDash: [5, 5],
+                                        pointRadius: 0,
+                                        tension: 0.1,
+                                        fill: false
+                                    },
+                                    {
+                                        label: 'Tolerancia (-' + data.unit_tolerance + ')',
+                                        data: data.series[2].data,
+                                        borderColor: 'rgb(255, 99, 132)',
+                                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                        borderDash: [5, 5],
+                                        pointRadius: 0,
+                                        tension: 0.1,
+                                        fill: false
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: {
+                                        beginAtZero: false,
+                                        min: data.min_y,
+                                        max: data.max_y,
+                                        title: {
+                                            display: true,
+                                            text: 'Valor (' + data.unit_tolerance + ')'
+                                        }
+                                    },
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Fecha y Hora'
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function (context) {
+                                                let label = context.dataset.label || '';
+                                                if (label) {
+                                                    label = label.split(' (')[0] + ': ';
+                                                }
+                                                if (context.parsed.y !== null) {
+                                                    label += context.parsed.y + ' ' + data.unit_tolerance;
+                                                }
+                                                return label;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        return false;
+                    }
+                    alert(data.error);
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    alert(textStatus + ': ' + errorThrown);
                 });
             });
-        }
-    });
-</script>
+        });
+    </script>
 {% endblock %}

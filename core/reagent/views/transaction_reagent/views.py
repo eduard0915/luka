@@ -1,3 +1,9 @@
+"""Vistas de la funcionalidad de transacciones de reactivos.
+
+Define las vistas para crear, listar, editar y eliminar transacciones
+de reactivos (usos, ajustes de entrada/salida del inventario).
+"""
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
@@ -12,8 +18,9 @@ from core.reagent.forms import TransactionReagentForm, TransactionReagentUpdateF
 from core.reagent.models import TransactionReagent, InventoryReagent
 
 
-# Registrar de transacción de uso de reactivo
 class TransactionReagentCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para registrar una transacción de uso o ajuste de reactivo."""
+
     model = TransactionReagent
     form_class = TransactionReagentForm
     template_name = 'transaction_reagent/create_transaction_reagent.html'
@@ -23,10 +30,12 @@ class TransactionReagentCreateView(LoginRequiredMixin, ValidatePermissionRequire
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Despacha la petición inicializando el objeto como None."""
         self.object = None
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de creación de transacción de reactivo."""
         data = {}
         try:
             action = request.POST['action']
@@ -46,12 +55,14 @@ class TransactionReagentCreateView(LoginRequiredMixin, ValidatePermissionRequire
         return JsonResponse(data)
 
     def get_form_kwargs(self):
+        """Inyecta el objeto InventoryReagent en los kwargs del formulario."""
         kwargs = super().get_form_kwargs()
         invent = InventoryReagent.objects.get(pk=self.kwargs.get('pk'))
         kwargs.update({'invent': invent})
         return kwargs
 
     def get_context_data(self, **kwargs):
+        """Retorna el contexto de la plantilla con los datos de creación."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Registro de Transacción de Reactivos'
         context['list_url'] = self.success_url
@@ -62,17 +73,20 @@ class TransactionReagentCreateView(LoginRequiredMixin, ValidatePermissionRequire
         return context
 
 
-# Listado de transacciones de reactivos
 class TransactionReagentListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista para listar las transacciones de reactivos."""
+
     model = TransactionReagent
     template_name = 'transaction_reagent/list_transaction_reagent.html'
     permission_required = 'reagent.view_transactionreagent'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Despacha la petición."""
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Retorna los datos de las transacciones en formato JSON para DataTables."""
         data = {}
         try:
             action = request.POST['action']
@@ -99,6 +113,7 @@ class TransactionReagentListView(LoginRequiredMixin, ValidatePermissionRequiredM
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
+        """Retorna el contexto de la plantilla con los datos de la vista."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Transacciones de Reactivos'
         context['create_url'] = reverse_lazy('transaction_reagent:transaction_reagent_create')
@@ -107,8 +122,9 @@ class TransactionReagentListView(LoginRequiredMixin, ValidatePermissionRequiredM
         return context
 
 
-# Edición de transacción de reactivo
 class TransactionReagentUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """Vista para editar una transacción de reactivo."""
+
     model = TransactionReagent
     form_class = TransactionReagentUpdateForm
     template_name = 'transaction_reagent/create_transaction_reagent.html'
@@ -118,10 +134,12 @@ class TransactionReagentUpdateView(LoginRequiredMixin, ValidatePermissionRequire
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
+        """Despacha la petición obteniendo el objeto a editar."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Procesa el formulario de edición de transacción de reactivo."""
         data = {}
         try:
             action = request.POST['action']
@@ -141,6 +159,7 @@ class TransactionReagentUpdateView(LoginRequiredMixin, ValidatePermissionRequire
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Retorna el contexto de la plantilla con los datos de edición."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Edición de Transacción de Reactivos'
         context['list_url'] = self.success_url
@@ -151,18 +170,21 @@ class TransactionReagentUpdateView(LoginRequiredMixin, ValidatePermissionRequire
         return context
 
 
-# Eliminación de transacción de reactivo
 class TransactionReagentDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DeleteView):
+    """Vista para eliminar una transacción de reactivo."""
+
     model = TransactionReagent
     template_name = 'transaction_reagent/delete_transaction_reagent.html'
     success_url = reverse_lazy('transaction_reagent:transaction_reagent_list')
     permission_required = 'reagent.delete_transactionreagent'
 
     def dispatch(self, request, *args, **kwargs):
+        """Despacha la petición obteniendo el objeto a eliminar."""
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        """Elimina la transacción de reactivo y retorna una respuesta JSON."""
         data = {}
         try:
             self.object.delete()
@@ -172,8 +194,9 @@ class TransactionReagentDeleteView(LoginRequiredMixin, ValidatePermissionRequire
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
+        """Retorna el contexto de la plantilla de confirmación de eliminación."""
         context = super().get_context_data(**kwargs)
-        tr = TransactionReagent.objects.get(pk=self.kwargs.get('pk'))
+        tr = TransactionReagent.objects.select_related('reagent_inventory__reagent').get(pk=self.kwargs.get('pk'))
         context['title'] = 'Eliminar Transacción de Reactivo'
         context['entity'] = 'Eliminar Transacción de Reactivo'
         context['delete'] = 'Está seguro de eliminar la transacción de reactivo?'

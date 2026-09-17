@@ -1,0 +1,27 @@
+# CRÍTICO: los .env locales NO deben entrar en la imagen.
+# El Dockerfile hace `COPY . .`, y decouple da prioridad al archivo .env sobre las
+# variables de entorno (decouple.py: `self.data.get(option) or os.environ[option]`),
+# así que un .env de desarrollo horneado en la imagen sobrescribiría en silencio el
+# SECRET_KEY, el DEBUG y las credenciales que inyecta el despliegue.
+.env
+luka/.env
+.env.*
+!.env.example
+
+# Entornos y cachés de Python
+.venv
+venv
+__pycache__
+*.py[cod]
+
+# Control de versiones y herramientas
+.git
+.gitignore
+.idea
+
+# Artefactos locales
+staticfiles
+media
+db.sqlite3
+db.sqlite3-journal
+django_errors.log

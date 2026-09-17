@@ -1,0 +1,3 @@
+# Generación automática de muestreos: cada hora al minuto 10.
+# La primera corrida del día crea el lote completo; las demás son no-ops (idempotente).
+10 * * * * python manage.py generate_samplings

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        .header img {
+            max-height: 80px;
+            float: left;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 16pt;
+        }
+        .header p {
+            margin: 5px 0 0;
+            font-size: 10pt;
+            color: #666;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 12pt;
+            font-weight: bold;
+            background-color: #f0f0f0;
+            padding: 5px;
+            border-left: 5px solid #333;
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        table th {
+            background-color: #f9f9f9;
+            width: 30%;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 8pt;
+            color: #999;
+            border-top: 1px solid #ddd;
+            padding-top: 5px;
+        }
+        .text-justify {
+            text-align: justify;
+        }
+        .clear {
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        {% if company.image_company %}
+            <img src="{{ company.image_company.path }}" alt="Logo">
+        {% endif %}
+        <h1>{{ company.name_company|default:"Reporte de Mantenimiento" }}</h1>
+        <p>{{ company.address_company }} | RUC: {{ company.ruc_company }}</p>
+        <div class="clear"></div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">DETALLES DEL REGISTRO</div>
+        <table>
+            <tr>
+                <th>Equipo Instrumental:</th>
+                <td>{{ maintenance.equipment_instrumental }}</td>
+            </tr>
+            <tr>
+                <th>Código del Equipo:</th>
+                <td>{{ maintenance.equipment_instrumental.code_equipment }}</td>
+            </tr>
+            <tr>
+                <th>Fecha:</th>
+                <td>{{ maintenance.date_maintenance|date:"d/m/Y" }}</td>
+            </tr>
+            <tr>
+                <th>Tipo de Mantenimiento:</th>
+                <td>{{ maintenance.type_maintenance }}</td>
+            </tr>
+            <tr>
+                <th>Realizado por:</th>
+                <td>{{ maintenance.maintenance_by }}</td>
+            </tr>
+            <tr>
+                <th>Responsable:</th>
+                <td>{{ maintenance.responsible_user.get_full_name }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">DESCRIPCIÓN DEL MANTENIMIENTO</div>
+        <div class="text-justify">
+            {{ maintenance.description_maintenance|linebreaks }}
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">PARTES O PIEZAS REEMPLAZADAS</div>
+        <div class="text-justify">
+            {{ maintenance.parts_change_maintenance|linebreaks }}
+        </div>
+    </div>
+
+    <div class="footer">
+        Generado el {{ today|date:"d/m/Y H:i" }} | Página <pdf:pagenumber/> de <pdf:pagecount/>
+    </div>
+</body>
+</html>

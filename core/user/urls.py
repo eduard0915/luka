@@ -1,3 +1,5 @@
+"""Definición de rutas URL para la aplicación de usuarios."""
+
 from django.conf.urls.static import static
 from django.urls import path
 

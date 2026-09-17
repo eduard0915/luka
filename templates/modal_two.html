@@ -11,9 +11,23 @@
                 {% csrf_token %}
                 <input type="hidden" name="action" value="{{ action }}">
                 <div class="row">
+                    <div class="errormsg alert alert-danger" style="display: none;">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <div class="errors"></div>
+                    </div>
                     <h5>{{ info_form }}</h5>
                     <div class="{{ class }}">
-                        {{ form.as_p }}
+                        {% for field in form.visible_fields %}
+                            <div class="mb-3">
+                                <label for="id_{{ field.name }}" class="form-label">
+                                    {{ field.label }}{% if field.field.required %}*{% endif %}
+                                </label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>

@@ -1,0 +1,43 @@
+{% extends 'base_login.html' %}
+
+{% block styles %}
+.logo {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.logo img {
+    max-width: 35%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.success-icon {
+    font-size: 3rem;
+    color: #00695C;
+}
+
+.login-box a {
+    color: #00695C;
+}
+
+.login-box a:hover {
+    color: #004d40;
+}
+{% endblock %}
+
+{% block content %}
+<div class="login-form">
+    <h3 class="login-head"><i class="bi bi-envelope me-2"></i>Correo Enviado</h3>
+    <div class="text-center mb-3">
+        <i class="bi bi-check-circle success-icon"></i>
+    </div>
+    <p class="text-muted">
+        Le hemos enviado un enlace de restablecimiento de contraseña a su correo electrónico. Si no recibe el correo en unos minutos, verifique su carpeta de spam o correo no deseado.
+    </p>
+    <div class="text-center mt-3">
+        <a href="{% url 'login' %}"><i class="bi bi-arrow-left"></i> Volver al inicio de sesión</a>
+    </div>
+</div>
+{% endblock %}

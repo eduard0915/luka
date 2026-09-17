@@ -1,3 +1,5 @@
+"""Definición de rutas URL para la aplicación de inicio (start)."""  # noqa: E501
+
 from django.urls import path
 from core.start.views import *
 

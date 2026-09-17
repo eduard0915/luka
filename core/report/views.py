@@ -1,0 +1,923 @@
+"""Vistas para la generación de reportes del módulo de muestreo y análisis."""
+
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import Group
+from django.db.models import Q, Avg
+from django.http import JsonResponse, HttpResponse
+from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import ListView, TemplateView, View
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+from datetime import datetime
+from django.utils import timezone
+
+from core.mixins import ValidatePermissionRequiredMixin
+from core.product.models import Product, SamplePoint, AnalyticalMethodProduct, SpecificationProduct
+from core.sampling.models import SamplingAnalysis, SamplingAnalysisProcessing
+from core.user.models import User
+
+
+class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista para el reporte de análisis agrupados por método analítico."""
+    model = SamplingAnalysis
+    template_name = 'report/list_sampling_analysis.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Procesa solicitudes POST para búsqueda de datos y filtros."""
+        data = {}
+        try:
+            action = request.POST.get('action')
+            if action == 'searchdata':
+                product_id = request.POST.get('product')
+                method_id = request.POST.get('analytical_method')
+
+                if not method_id:
+                    data = {
+                        'columns': [],
+                        'data': []
+                    }
+                else:
+                    filters = Q(analytical_method_id=method_id)
+                    if product_id:
+                        filters &= (
+                            Q(sampling_process__point_sampling__product_id=product_id) |
+                            Q(sampling_process__group_sampling__sampling_point__product_id=product_id)
+                        )
+
+                    # Filtro por fecha de análisis
+                    start_date = request.POST.get('start_date')
+                    end_date = request.POST.get('end_date')
+
+                    if start_date and end_date:
+                        filters &= Q(date_analysis__range=[start_date, end_date + ' 23:59:59'])
+                    else:
+                        # Por defecto, año actual
+                        current_year = datetime.now().year
+                        filters &= Q(date_analysis__year=current_year)
+
+                    analyses = SamplingAnalysis.objects.filter(filters).select_related(
+                        'sampling_process',
+                        'sampling_process__point_sampling',
+                        'sampling_process__group_sampling__sampling_point'
+                    ).order_by('date_analysis')
+
+                    # Obtener todos los puntos de muestreo asociados al producto
+                    sample_points_query = SamplePoint.objects.filter(product_id=product_id).order_by('sequence')
+                    sample_points = [p.sample_point_name for p in sample_points_query]
+
+                    # Si no hay puntos de muestreo explícitos para el producto, al menos mostrar los que tienen datos
+                    if not sample_points:
+                        # Extraer nombres de puntos de muestreo de los análisis
+                        # Consideramos tanto point_sampling como group_sampling.sampling_point
+                        found_points = set()
+                        for a in analyses:
+                            if a.sampling_process.point_sampling:
+                                found_points.add(a.sampling_process.point_sampling.sample_point_name)
+                            elif a.sampling_process.group_sampling and a.sampling_process.group_sampling.sampling_point:
+                                found_points.add(a.sampling_process.group_sampling.sampling_point.sample_point_name)
+                        sample_points = sorted(list(found_points))
+
+                    # Agrupar datos por fecha y hora
+                    rows = {}
+                    for a in analyses:
+                        dt_str = a.date_analysis.strftime('%Y-%m-%d %H:%M:%S') if a.date_analysis else 'N/A'
+                        if dt_str not in rows:
+                            rows[dt_str] = {'date_analysis': dt_str}
+                            # Inicializar todos los puntos conocidos con vacío o N/A para esta fila
+                            for sp in sample_points:
+                                rows[dt_str][sp] = '-'
+                        
+                        # Determinar el nombre del punto de muestreo del análisis actual
+                        point_name = None
+                        if a.sampling_process.point_sampling:
+                            point_name = a.sampling_process.point_sampling.sample_point_name
+                        elif a.sampling_process.group_sampling and a.sampling_process.group_sampling.sampling_point:
+                            point_name = a.sampling_process.group_sampling.sampling_point.sample_point_name
+                        
+                        if point_name:
+                            # Si el punto no estaba en la lista inicial (ej. producto mal configurado), lo agregamos
+                            if point_name not in sample_points:
+                                sample_points.append(point_name)
+                                # Actualizar filas previas con este nuevo punto
+                                for r_key in rows:
+                                    if point_name not in rows[r_key]:
+                                        rows[r_key][point_name] = '-'
+                            
+                            rows[dt_str][point_name] = a.average_concentration
+
+                    data = {
+                        'columns': sample_points,
+                        'data': list(rows.values())
+                    }
+            elif action == 'search_analytical_method':
+                data = []
+                product_id = request.POST.get('id')
+                if product_id:
+                    from core.product.models import AnalyticalMethodProduct
+                    methods = AnalyticalMethodProduct.objects.filter(product_id=product_id).select_related('analytical_method')
+                    for m in methods:
+                        data.append({
+                            'id': m.analytical_method.id,
+                            'text': f"{m.analytical_method.description_analytical_method}"
+                        })
+            elif action == 'search_sample_point':
+                data = []
+                product_id = request.POST.get('id')
+                if product_id:
+                    points = SamplePoint.objects.filter(product_id=product_id).order_by('sequence')
+                    for p in points:
+                        data.append({
+                            'id': p.id,
+                            'text': p.sample_point_name
+                        })
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        """Agrega el título, entidad y productos disponibles al contexto."""
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Reporte de Análisis por Método'
+        context['entity'] = 'Reporte de Análisis por Método Analítico'
+        context['div'] = '12'
+        context['products'] = Product.objects.filter(enable_product=True)
+        return context
+
+
+class SamplingAnalysisExcelView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista para exportar el reporte de análisis por método analítico a Excel."""
+    permission_required = 'reagent.add_reagent'
+
+    def get(self, request, *args, **kwargs):
+        """Genera y descarga el archivo Excel con el reporte de análisis."""
+        try:
+            product_id = request.GET.get('product')
+            method_id = request.GET.get('analytical_method')
+            start_date = request.GET.get('start_date')
+            end_date = request.GET.get('end_date')
+
+            if not method_id:
+                return HttpResponse("Método analítico no seleccionado", status=400)
+
+            filters = Q(analytical_method_id=method_id)
+            if product_id:
+                filters &= (
+                    Q(sampling_process__point_sampling__product_id=product_id) |
+                    Q(sampling_process__group_sampling__sampling_point__product_id=product_id)
+                )
+
+            if start_date and end_date:
+                filters &= Q(date_analysis__range=[start_date, end_date + ' 23:59:59'])
+            else:
+                current_year = datetime.now().year
+                filters &= Q(date_analysis__year=current_year)
+
+            analyses = SamplingAnalysis.objects.filter(filters).select_related(
+                'sampling_process',
+                'sampling_process__point_sampling',
+                'sampling_process__group_sampling__sampling_point',
+                'analytical_method'
+            ).order_by('date_analysis')
+
+            sample_points_query = SamplePoint.objects.filter(product_id=product_id).order_by('sequence')
+            sample_points = [p.sample_point_name for p in sample_points_query]
+
+            if not sample_points:
+                found_points = set()
+                for a in analyses:
+                    if a.sampling_process.point_sampling:
+                        found_points.add(a.sampling_process.point_sampling.sample_point_name)
+                    elif a.sampling_process.group_sampling and a.sampling_process.group_sampling.sampling_point:
+                        found_points.add(a.sampling_process.group_sampling.sampling_point.sample_point_name)
+                sample_points = sorted(list(found_points))
+
+            rows = {}
+            for a in analyses:
+                dt_str = a.date_analysis.strftime('%Y-%m-%d %H:%M:%S') if a.date_analysis else 'N/A'
+                if dt_str not in rows:
+                    rows[dt_str] = {'date_analysis': dt_str}
+                    for sp in sample_points:
+                        rows[dt_str][sp] = '-'
+
+                point_name = None
+                if a.sampling_process.point_sampling:
+                    point_name = a.sampling_process.point_sampling.sample_point_name
+                elif a.sampling_process.group_sampling and a.sampling_process.group_sampling.sampling_point:
+                    point_name = a.sampling_process.group_sampling.sampling_point.sample_point_name
+
+                if point_name:
+                    if point_name not in sample_points:
+                        sample_points.append(point_name)
+                        for r_key in rows:
+                            if point_name not in rows[r_key]:
+                                rows[r_key][point_name] = '-'
+                    rows[dt_str][point_name] = a.average_concentration
+
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Reporte de Análisis"
+
+            # Estilos
+            header_font = Font(bold=True, color="FFFFFF")
+            header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+            alignment = Alignment(horizontal="center", vertical="center")
+            border = Border(
+                left=Side(style='thin'),
+                right=Side(style='thin'),
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
+
+            # Encabezados
+            headers = ['Fecha y Hora'] + sample_points
+            for col_num, header in enumerate(headers, 1):
+                cell = ws.cell(row=1, column=col_num, value=header)
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.alignment = alignment
+                cell.border = border
+                ws.column_dimensions[ws.cell(row=1, column=col_num).column_letter].width = 20
+
+            # Datos
+            for row_num, (dt, row_data) in enumerate(rows.items(), 2):
+                ws.cell(row=row_num, column=1, value=dt).border = border
+                for col_num, point in enumerate(sample_points, 2):
+                    value = row_data.get(point, '-')
+                    cell = ws.cell(row=row_num, column=col_num, value=value)
+                    cell.border = border
+                    cell.alignment = alignment
+
+            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = f'attachment; filename="reporte_analisis_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
+            wb.save(response)
+            return response
+
+        except Exception as e:
+            return HttpResponse(f"Error generando Excel: {str(e)}", status=500)
+
+
+class SamplingAnalysisChartView(LoginRequiredMixin, ValidatePermissionRequiredMixin, TemplateView):
+    """Vista para mostrar el gráfico de control de análisis diario."""
+
+    template_name = 'report/chart_sampling_analysis.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Procesa solicitudes POST para obtener datos del gráfico y filtros."""
+        data = {}
+        try:
+            action = request.POST.get('action')
+            if action == 'get_graph_data':
+                product_id = request.POST.get('product')
+                method_id = request.POST.get('analytical_method')
+                sample_point_id = request.POST.get('sample_point')
+                date_from = request.POST.get('date_from')
+                date_to = request.POST.get('date_to')
+
+                if not product_id or not method_id:
+                    data = {'categories': [], 'series': [], 'specifications': []}
+                else:
+                    filters = Q(analytical_method_id=method_id)
+                    filters &= (
+                        Q(sampling_process__point_sampling__product_id=product_id) |
+                        Q(sampling_process__group_sampling__sampling_point__product_id=product_id)
+                    )
+
+                    if sample_point_id and sample_point_id != 'all':
+                        filters &= (
+                            Q(sampling_process__point_sampling_id=sample_point_id) |
+                            Q(sampling_process__group_sampling__sampling_point_id=sample_point_id)
+                        )
+
+                    if date_from:
+                        date_from_dt = timezone.make_aware(datetime.strptime(date_from, '%Y-%m-%d'))
+                        filters &= Q(sampling_process__date_sampling__gte=date_from_dt)
+                    if date_to:
+                        date_to_dt = timezone.make_aware(datetime.strptime(f"{date_to} 23:59:59", '%Y-%m-%d %H:%M:%S'))
+                        filters &= Q(sampling_process__date_sampling__lte=date_to_dt)
+
+                    analyses = SamplingAnalysis.objects.filter(filters).select_related(
+                        'sampling_process'
+                    ).order_by('sampling_process__date_sampling')
+
+                    # Especificaciones asociadas
+                    specifications = []
+                    if sample_point_id and sample_point_id != 'all':
+                        sp = SamplePoint.objects.filter(id=sample_point_id).first()
+                        if sp:
+                            specs = sp.specification.filter(method_test__analytical_method_id=method_id)
+                            for s in specs:
+                                specifications.append({
+                                    'name': s.test_prod,
+                                    'lower_limit': s.lower_limit_prod,
+                                    'upper_limit': s.upper_limit_prod,
+                                    'sample_point': sp.sample_point_name,
+                                    'unit_measure': s.unit_measure
+                                })
+                    else:
+                        # Para 'all', obtener especificaciones de todos los puntos de muestreo del producto para ese método
+                        points = SamplePoint.objects.filter(
+                            product_id=product_id,
+                            specification__method_test__analytical_method_id=method_id
+                        ).prefetch_related('specification')
+
+                        seen_specs = set()
+                        for p in points:
+                            p_specs = p.specification.filter(method_test__analytical_method_id=method_id)
+                            for s in p_specs:
+                                spec_key = (s.test_prod, s.lower_limit_prod, s.upper_limit_prod)
+                                if spec_key not in seen_specs:
+                                    specifications.append({
+                                        'name': s.test_prod,
+                                        'lower_limit': s.lower_limit_prod,
+                                        'upper_limit': s.upper_limit_prod,
+                                        'sample_point': p.sample_point_name,
+                                        'unit_measure': s.unit_measure
+                                    })
+                                    seen_specs.add(spec_key)
+
+                    data['specifications'] = specifications
+
+                    # Agrupar por fecha y punto si es 'all', o solo por fecha si es uno específico
+                    categories = []
+
+                    if sample_point_id == 'all':
+                        # Mostrar múltiples series, una por cada punto de muestreo
+                        series_dict = {}
+                        # Obtener todos los puntos de muestreo del producto para inicializar las series
+                        points = SamplePoint.objects.filter(
+                            product_id=product_id,
+                            specification__method_test__analytical_method_id=method_id
+                        ).distinct().order_by('sequence')
+                        for p in points:
+                            # Obtener unit_measure de la primera especificación del punto
+                            unit_measure = ''
+                            spec = p.specification.filter(method_test__analytical_method_id=method_id).first()
+                            if spec and spec.unit_measure:
+                                unit_measure = spec.unit_measure
+
+                            series_dict[str(p.id)] = {
+                                'name': p.sample_point_name,
+                                'data': [],
+                                'unit_measure': unit_measure  # ← AGREGADO
+                            }
+
+                        # Fechas únicas ordenadas
+                        dates_raw = sorted(list(set(
+                            a.sampling_process.date_sampling for a in analyses if a.sampling_process.date_sampling
+                        )))
+                        dates = [d.strftime('%Y-%m-%d %H:%M') for d in dates_raw]
+
+                        data['categories'] = dates
+
+                        for d_raw in dates_raw:
+                            d_str = d_raw.strftime('%Y-%m-%d %H:%M')
+                            # Filtrar análisis de este momento específico
+                            moment_analyses = [a for a in analyses if a.sampling_process.date_sampling.strftime('%Y-%m-%d %H:%M') == d_str]
+
+                            for p_id in series_dict:
+                                # Buscar el valor para este día y punto
+                                val = None
+                                for a in moment_analyses:
+                                    a_point_id = None
+                                    if a.sampling_process.point_sampling_id:
+                                        a_point_id = str(a.sampling_process.point_sampling_id)
+                                    elif a.sampling_process.group_sampling and a.sampling_process.group_sampling.sampling_point_id:
+                                        a_point_id = str(a.sampling_process.group_sampling.sampling_point_id)
+
+                                    if a_point_id == p_id:
+                                        val = a.average_concentration
+                                        break
+                                series_dict[p_id]['data'].append(val)
+
+                        data['series'] = list(series_dict.values())
+                    else:
+                        # Una sola serie
+                        point_name = 'Resultado'
+                        unit_measure = ''
+                        if sample_point_id:
+                            sp = SamplePoint.objects.filter(id=sample_point_id).first()
+                            if sp:
+                                point_name = sp.sample_point_name
+                                # Obtener unit_measure de las especificaciones del punto
+                                spec = sp.specification.filter(method_test__analytical_method_id=method_id).first()
+                                if spec and spec.unit_measure:
+                                    unit_measure = spec.unit_measure
+
+                        series_data = []
+                        for a in analyses:
+                            if a.sampling_process.date_sampling:
+                                categories.append(a.sampling_process.date_sampling.strftime('%Y-%m-%d %H:%M'))
+                                series_data.append(a.average_concentration)
+
+                        data['categories'] = categories
+                        data['series'] = [{
+                            'name': point_name,
+                            'data': series_data,
+                            'unit_measure': unit_measure
+                        }]
+
+            elif action == 'search_analytical_method':
+                data = []
+                product_id = request.POST.get('id')
+
+                if product_id:
+                    methods = AnalyticalMethodProduct.objects.filter(product_id=product_id).select_related('analytical_method')
+
+                    for m in methods:
+                        data.append({
+                            'id': str(m.analytical_method.id),
+                            'text': f"{m.analytical_method.description_analytical_method}"
+                        })
+            elif action == 'search_sample_point':
+                data = [{'id': 'all', 'text': 'Todos'}]
+                product_id = request.POST.get('id')
+
+                if product_id:
+                    points = SamplePoint.objects.filter(product_id=product_id).order_by('sequence')
+
+                    for p in points:
+                        data.append({
+                            'id': str(p.id),
+                            'text': p.sample_point_name
+                        })
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        """Agrega productos ordenados y configuración del gráfico al contexto."""
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Análisis Diario - Gráfico'
+        context['entity'] = 'Gráfico de Análisis de Diario'
+        context['products'] = Product.objects.filter(enable_product=True).order_by('description_product')
+        context['icon'] = 'fa-solid fa-chart-line'
+        context['list_url'] = reverse_lazy('report:sampling_analysis_chart')
+        return context
+
+
+class SamplingAnalysisByPointListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista para el reporte de análisis agrupados por punto de muestreo."""
+    model = SamplingAnalysis
+    template_name = 'report/list_sampling_analysis_by_point.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Procesa solicitudes POST para búsqueda de datos por punto de muestreo."""
+        data = {}
+        try:
+            action = request.POST.get('action')
+            if action == 'searchdata':
+                product_id = request.POST.get('product')
+                sample_point_id = request.POST.get('sample_point')
+                start_date = request.POST.get('start_date')
+                end_date = request.POST.get('end_date')
+
+                if not sample_point_id:
+                    data = {
+                        'columns': [],
+                        'data': []
+                    }
+                else:
+                    filters = Q()
+                    filters &= (
+                        Q(sampling_process__point_sampling_id=sample_point_id) |
+                        Q(sampling_process__group_sampling__sampling_point_id=sample_point_id)
+                    )
+
+                    if start_date:
+                        filters &= Q(sampling_process__date_sampling__date__gte=start_date)
+                    if end_date:
+                        filters &= Q(sampling_process__date_sampling__date__lte=end_date)
+                    
+                    analyses = SamplingAnalysis.objects.filter(filters).select_related(
+                        'sampling_process',
+                        'analytical_method'
+                    ).order_by('sampling_process__date_sampling')
+
+                    # Obtener métodos analíticos asociados al producto
+                    from core.product.models import AnalyticalMethodProduct
+                    methods_query = AnalyticalMethodProduct.objects.filter(product_id=product_id).select_related('analytical_method')
+                    methods = [m.analytical_method.description_analytical_method for m in methods_query]
+
+                    # Si no hay métodos explícitos, usar los encontrados en los análisis
+                    if not methods:
+                        found_methods = set()
+                        for a in analyses:
+                            found_methods.add(a.analytical_method.description_analytical_method)
+                        methods = sorted(list(found_methods))
+
+                    # Agrupar datos por fecha y hora
+                    rows = {}
+                    for a in analyses:
+                        dt_str = a.sampling_process.date_sampling.strftime('%Y-%m-%d %H:%M:%S') if a.sampling_process.date_sampling else 'N/A'
+                        if dt_str not in rows:
+                            rows[dt_str] = {'date_analysis': dt_str}
+                            for m in methods:
+                                rows[dt_str][m] = '-'
+                        
+                        method_name = a.analytical_method.description_analytical_method
+                        if method_name not in methods:
+                            methods.append(method_name)
+                            for r_key in rows:
+                                if method_name not in rows[r_key]:
+                                    rows[r_key][method_name] = '-'
+                        
+                        rows[dt_str][method_name] = a.average_concentration
+
+                    data = {
+                        'columns': methods,
+                        'data': list(rows.values())
+                    }
+            elif action == 'search_sample_point':
+                data = []
+                product_id = request.POST.get('id')
+                if product_id:
+                    points = SamplePoint.objects.filter(product_id=product_id).order_by('sequence')
+                    for p in points:
+                        data.append({
+                            'id': p.id,
+                            'text': p.sample_point_name
+                        })
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        """Agrega el título, entidad y productos disponibles al contexto."""
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Reporte de Análisis por Punto de Muestreo'
+        context['entity'] = 'Reporte de Análisis por Punto de Muestreo'
+        context['div'] = '12'
+        context['products'] = Product.objects.filter(enable_product=True)
+        return context
+
+
+class SamplingAnalysisByPointExcelView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista para exportar el reporte de análisis por punto de muestreo a Excel."""
+    permission_required = 'reagent.add_reagent'
+
+    def get(self, request, *args, **kwargs):
+        """Genera y descarga el archivo Excel con el reporte por punto de muestreo."""
+        try:
+            product_id = request.GET.get('product')
+            sample_point_id = request.GET.get('sample_point')
+            start_date = request.GET.get('start_date')
+            end_date = request.GET.get('end_date')
+
+            if not sample_point_id:
+                return HttpResponse("Debe seleccionar un punto de muestreo", status=400)
+
+            filters = Q()
+            filters &= (
+                Q(sampling_process__point_sampling_id=sample_point_id) |
+                Q(sampling_process__group_sampling__sampling_point_id=sample_point_id)
+            )
+
+            if start_date:
+                filters &= Q(sampling_process__date_sampling__date__gte=start_date)
+            if end_date:
+                filters &= Q(sampling_process__date_sampling__date__lte=end_date)
+
+            analyses = SamplingAnalysis.objects.filter(filters).select_related(
+                'sampling_process',
+                'analytical_method'
+            ).order_by('sampling_process__date_sampling')
+
+            # Obtener métodos analíticos asociados al producto
+            methods_query = AnalyticalMethodProduct.objects.filter(product_id=product_id).select_related(
+                'analytical_method')
+            methods = [m.analytical_method.description_analytical_method for m in methods_query]
+
+            # Si no hay métodos explícitos, usar los encontrados en los análisis
+            if not methods:
+                found_methods = set()
+                for a in analyses:
+                    found_methods.add(a.analytical_method.description_analytical_method)
+                methods = sorted(list(found_methods))
+
+            # Agrupar datos por fecha y hora
+            rows = {}
+            for a in analyses:
+                dt_str = a.sampling_process.date_sampling.strftime(
+                    '%Y-%m-%d %H:%M:%S') if a.sampling_process.date_sampling else 'N/A'
+                if dt_str not in rows:
+                    rows[dt_str] = {'date_analysis': dt_str}
+                    for m in methods:
+                        rows[dt_str][m] = '-'
+
+                method_name = a.analytical_method.description_analytical_method
+                if method_name not in methods:
+                    methods.append(method_name)
+                    for r_key in rows:
+                        if method_name not in rows[r_key]:
+                            rows[r_key][method_name] = '-'
+
+                rows[dt_str][method_name] = a.average_concentration
+
+            # Crear el Excel
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Reporte de Análisis"
+
+            # Información de cabecera en el Excel
+            product = Product.objects.get(pk=product_id)
+            sample_point = SamplePoint.objects.get(pk=sample_point_id)
+            
+            ws.merge_cells('A1:C1')
+            ws['A1'] = f"Producto: {product.description_product}"
+            ws.merge_cells('A2:C2')
+            ws['A2'] = f"Punto de Muestreo: {sample_point.sample_point_name}"
+            ws['A1'].font = Font(bold=True, size=12)
+            ws['A2'].font = Font(bold=True, size=12)
+
+            # Estilos
+            header_font = Font(bold=True, color="FFFFFF")
+            header_fill = PatternFill(start_color="2A383E", end_color="2A383E", fill_type="solid")
+            alignment = Alignment(horizontal="center")
+            border = Border(
+                left=Side(style='thin'),
+                right=Side(style='thin'),
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
+
+            # Cabeceras
+            headers = ['Fecha y Hora'] + methods
+            header_row = 4
+            for col_num, header in enumerate(headers, 1):
+                cell = ws.cell(row=header_row, column=col_num, value=header)
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.alignment = alignment
+                cell.border = border
+
+            # Datos
+            for row_num, (dt_str, row_data) in enumerate(rows.items(), header_row + 1):
+                ws.cell(row=row_num, column=1, value=dt_str).border = border
+                for col_num, method in enumerate(methods, 2):
+                    ws.cell(row=row_num, column=col_num, value=row_data.get(method, '-')).border = border
+
+            # Ajustar ancho de columnas
+            for col in ws.columns:
+                max_length = 0
+                column = col[0].column_letter
+                for cell in col:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                adjusted_width = (max_length + 2)
+                ws.column_dimensions[column].width = adjusted_width
+
+            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = f'attachment; filename="reporte_analisis_{datetime.now().strftime("%Y%m%d%H%M%S")}.xlsx"'
+            wb.save(response)
+            return response
+
+        except Exception as e:
+            return HttpResponse(f"Error al generar el excel: {str(e)}", status=500)
+
+
+# Procesamiento de Muestras por Analista
+class SamplingAnalysisProcessingListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista para el reporte de procesamiento de muestras por analista."""
+    model = SamplingAnalysisProcessing
+    template_name = 'report/list_sampling_analysis_processing.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Procesa solicitudes POST para búsqueda de procesamiento por filtros."""
+        data = {}
+        try:
+            action = request.POST.get('action')
+            if action == 'searchdata':
+                items = []
+                date_from = request.POST.get('date_from')
+                date_to = request.POST.get('date_to')
+                analyzed_by = request.POST.get('analyzed_by')
+                profile = request.POST.get('profile')
+
+                filters = Q()
+                if date_from:
+                    date_from_dt = timezone.make_aware(datetime.strptime(date_from, '%Y-%m-%d'))
+                    filters &= Q(analyzed_date__gte=date_from_dt)
+                if date_to:
+                    date_to_dt = timezone.make_aware(datetime.strptime(f"{date_to} 23:59:59", '%Y-%m-%d %H:%M:%S'))
+                    filters &= Q(analyzed_date__lte=date_to_dt)
+                if analyzed_by:
+                    filters &= Q(analyzed_by_id=analyzed_by)
+                if profile:
+                    filters &= Q(analyzed_by__groups__id=profile)
+
+                queryset = SamplingAnalysisProcessing.objects.filter(filters).select_related(
+                    'sample_analysis',
+                    'sample_analysis__analytical_method',
+                    'sample_analysis__sampling_process',
+                    'sample_analysis__sampling_process__point_sampling',
+                    'sample_analysis__sampling_process__point_sampling__product',
+                    'sample_analysis__sampling_process__group_sampling__sampling_point',
+                    'sample_analysis__sampling_process__group_sampling__sampling_point__product',
+                    'analyzed_by'
+                ).order_by('-analyzed_date')
+
+                for i in queryset:
+                    product = 'No aplica'
+                    unit = 'No aplica'
+
+                    if i.sample_analysis and i.sample_analysis.sampling_process:
+                        sampling_process = i.sample_analysis.sampling_process
+                        point = None
+                        
+                        if sampling_process.point_sampling:
+                            point = sampling_process.point_sampling
+                        elif sampling_process.group_sampling and sampling_process.group_sampling.sampling_point:
+                            point = sampling_process.group_sampling.sampling_point
+                        
+                        if point:
+                            product = str(point.product)
+                            first_spec = point.specification.first()
+                            if first_spec:
+                                unit = str(first_spec.unit_measure)
+
+                    groups_str = ', '.join([g.name for g in i.analyzed_by.groups.all()]) if i.analyzed_by else ''
+
+                    item = {
+                        'analyzed_date': i.analyzed_date.strftime('%Y-%m-%d %H:%M'),
+                        'sample_analysis': str(i.sample_analysis.sampling_process.number_sample) if i.sample_analysis and i.sample_analysis.sampling_process else 'No aplica',
+                        'product': product,
+                        'method': str(i.sample_analysis.analytical_method),
+                        'unit': unit,
+                        'analyzed_by': str(i.analyzed_by.get_full_name()) + ', ' + str(i.analyzed_by.username),
+                        'profile': groups_str,
+                        'concentration_sample': f"{i.concentration_sample} {unit}",
+                    }
+                    items.append(item)
+
+                data = {'data': items}
+
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        """Agrega usuarios, perfiles y configuración de la vista al contexto."""
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Procesamiento de Muestras'
+        context['entity'] = 'Procesamiento de Muestras por Analista'
+        context['div'] = '12'
+        context['users'] = User.objects.filter(is_superuser=False).order_by('first_name')
+        context['profiles'] = Group.objects.all().order_by('name')
+        return context
+
+
+class SamplingAnalysisProcessingExcelView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista para exportar el reporte de procesamiento de muestras por analista a Excel."""
+    permission_required = 'reagent.add_reagent'
+
+    def get(self, request, *args, **kwargs):
+        """Genera y descarga el archivo Excel con el procesamiento de muestras."""
+        try:
+            date_from = request.GET.get('date_from')
+            date_to = request.GET.get('date_to')
+            analyzed_by = request.GET.get('analyzed_by')
+            profile = request.GET.get('profile')
+
+            filters = Q()
+            if date_from:
+                date_from_dt = timezone.make_aware(datetime.strptime(date_from, '%Y-%m-%d'))
+                filters &= Q(analyzed_date__gte=date_from_dt)
+            if date_to:
+                date_to_dt = timezone.make_aware(datetime.strptime(f"{date_to} 23:59:59", '%Y-%m-%d %H:%M:%S'))
+                filters &= Q(analyzed_date__lte=date_to_dt)
+            if analyzed_by:
+                filters &= Q(analyzed_by_id=analyzed_by)
+            if profile:
+                filters &= Q(analyzed_by__groups__id=profile)
+
+            queryset = SamplingAnalysisProcessing.objects.filter(filters).select_related(
+                'sample_analysis',
+                'sample_analysis__analytical_method',
+                'sample_analysis__sampling_process',
+                'sample_analysis__sampling_process__point_sampling',
+                'sample_analysis__sampling_process__point_sampling__product',
+                'sample_analysis__sampling_process__group_sampling__sampling_point',
+                'sample_analysis__sampling_process__group_sampling__sampling_point__product',
+                'analyzed_by'
+            ).order_by('-analyzed_date')
+
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Procesamiento de Muestras"
+
+            # Cabeceras
+            headers = [
+                'Fecha', 'Muestra', 'Producto', 'Método de Análisis',
+                'Resultado', 'Analizado por', 'Perfil'
+            ]
+            
+            # Estilos
+            header_font = Font(bold=True, color="FFFFFF")
+            header_fill = PatternFill(start_color="2A383E", end_color="2A383E", fill_type="solid")
+            alignment = Alignment(horizontal="center")
+            border = Border(
+                left=Side(style='thin'),
+                right=Side(style='thin'),
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
+
+            for col_num, header in enumerate(headers, 1):
+                cell = ws.cell(row=1, column=col_num, value=header)
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.alignment = alignment
+                cell.border = border
+
+            # Datos
+            for row_num, i in enumerate(queryset, 2):
+                product = 'No aplica'
+                unit = 'No aplica'
+
+                if i.sample_analysis and i.sample_analysis.sampling_process:
+                    sampling_process = i.sample_analysis.sampling_process
+                    point = None
+                    if sampling_process.point_sampling:
+                        point = sampling_process.point_sampling
+                    elif sampling_process.group_sampling and sampling_process.group_sampling.sampling_point:
+                        point = sampling_process.group_sampling.sampling_point
+                    
+                    if point:
+                        product = str(point.product)
+                        first_spec = point.specification.first()
+                        if first_spec:
+                            unit = str(first_spec.unit_measure)
+
+                groups_str = ', '.join([g.name for g in i.analyzed_by.groups.all()]) if i.analyzed_by else ''
+
+                row_data = [
+                    i.analyzed_date.strftime('%Y-%m-%d %H:%M'),
+                    str(i.sample_analysis.sampling_process.number_sample) if i.sample_analysis and i.sample_analysis.sampling_process else 'No aplica',
+                    product,
+                    str(i.sample_analysis.analytical_method),
+                    f"{i.concentration_sample} {unit}",
+                    str(i.analyzed_by.get_full_name()) + ', ' + str(i.analyzed_by.username),
+                    groups_str
+                ]
+
+                for col_num, value in enumerate(row_data, 1):
+                    cell = ws.cell(row=row_num, column=col_num, value=value)
+                    cell.border = border
+
+            # Ajustar ancho de columnas
+            for col in ws.columns:
+                max_length = 0
+                column = col[0].column_letter
+                for cell in col:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                adjusted_width = (max_length + 2)
+                ws.column_dimensions[column].width = adjusted_width
+
+            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = f'attachment; filename="procesamiento_muestras_{datetime.now().strftime("%Y%m%d%H%M%S")}.xlsx"'
+            wb.save(response)
+            return response
+
+        except Exception as e:
+            return HttpResponse(f"Error al generar el excel: {str(e)}", status=500)
