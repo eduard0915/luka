@@ -57,12 +57,20 @@ class SamplingAnalysisProcessingForm(ModelForm):
             self.fields['aliquot'].required = False
             self.fields['aliquot'].widget = HiddenInput()
 
+        # El segundo volumen estándar solo se solicita cuando el método tiene dos volúmenes estándar.
+        if calcs.exclude(volumen_std__isnull=True).exclude(volumen_std='').count() >= 2:
+            self.fields['quantity_standard_two'].required = True
+        else:
+            self.fields['quantity_standard_two'].required = False
+            self.fields['quantity_standard_two'].widget = HiddenInput()
+
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 
         col_classes = {
             'standard_solution': 'col-md-5',
             'quantity_standard': 'col-md-2',
+            'quantity_standard_two': 'col-md-2',
             'aliquot': 'col-md-2',
         }
 
@@ -71,10 +79,11 @@ class SamplingAnalysisProcessingForm(ModelForm):
 
     class Meta:
         model = SamplingAnalysisProcessing
-        fields = ['standard_solution', 'quantity_standard', 'quantity_sample', 'aliquot']
+        fields = ['standard_solution', 'quantity_standard', 'quantity_standard_two', 'quantity_sample', 'aliquot']
         widgets = {
             'standard_solution': Select(attrs={'class': 'form-control select2', 'required': True, 'style': 'width: 100%'}),
             'quantity_standard': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'quantity_standard_two': TextInput(attrs={'class': 'form-control'}),
             'quantity_sample': TextInput(attrs={'class': 'form-control', 'required': True}),
             'aliquot': TextInput(attrs={'class': 'form-control'}),
         }

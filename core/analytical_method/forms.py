@@ -378,6 +378,18 @@ class AnalyticalMethodVolumenStdForm(ModelForm):
             'subtract_blank': Select(attrs={'class': 'form-control'}, choices=BOOLEAN)
         }
 
+    def clean(self):
+        """Valida que un método tenga como máximo dos volúmenes estándar."""
+        cleaned_data = super().clean()
+        if self.instance._state.adding and self.analytical_method:
+            existing = AnalyticalMethodCalculate.objects.filter(
+                analytical_method=self.analytical_method
+            ).exclude(volumen_std__isnull=True).exclude(volumen_std='').count()
+            if existing >= 2:
+                raise ValidationError(
+                    {'sln_std_base': 'Solo se permiten dos Volúmenes Estándar por método.'})
+        return cleaned_data
+
     def save(self, commit=True):
         """Guarda el volumen estándar del cálculo."""
         data = {}
