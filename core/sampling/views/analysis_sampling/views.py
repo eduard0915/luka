@@ -139,16 +139,26 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         else:
             num_terms, den_terms, gen_terms = [], [], []
 
+            # Volúmenes estándar en orden de creación (primero = V_Total, segundo = V_2)
+            volume_calcs = [c for c in calcules if c.volumen_std]
+            second_volume_pks = {c.pk for c in volume_calcs[1:]} if len(volume_calcs) > 1 else set()
+
             for c in calcules:
                 parts = []
                 if c.volumen_std:
-                    if c.subtract_blank:
-                        vol_str = rf"\left({c.volumen_std} - \text{{Blanco}}\right)"
+                    if c.pk in second_volume_pks:
+                        # Volumen Estándar 2: incluido en el término combinado (V_Total - V_2)
+                        pass
+                    elif second_volume_pks:
+                        parts.append(r"\left(V_{\text{Total}} - V_{2}\right)")
                     else:
-                        vol_str = str(c.volumen_std)
-                    if c.sln_std_base:
-                        vol_str += rf" \times \text{{{c.sln_std_base}}}"
-                    parts.append(vol_str)
+                        if c.subtract_blank:
+                            vol_str = rf"\left({c.volumen_std} - \text{{Blanco}}\right)"
+                        else:
+                            vol_str = str(c.volumen_std)
+                        if c.sln_std_base:
+                            vol_str += rf" \times \text{{{c.sln_std_base}}}"
+                        parts.append(vol_str)
                 if c.factor:
                     parts.append(str(c.factor))
                 if c.sample_quantity:
