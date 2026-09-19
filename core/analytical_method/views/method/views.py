@@ -297,17 +297,30 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
             den_terms = []
             gen_terms = []
 
+            # Volúmenes estándar en orden de creación (primero = V_Total, segundo = V_2)
+            volume_calcs = sorted(
+                [c for c in calcules if is_valid_value(c.volumen_std)],
+                key=lambda c: c.date_creation
+            )
+            second_volume_pks = {c.pk for c in volume_calcs[1:]} if len(volume_calcs) > 1 else set()
+
             for calc in calcules:
                 # Construir partes válidas
                 parts = []
                 if is_valid_value(calc.volumen_std):
-                    if calc.subtract_blank:
-                        vol_str = f"\\left({calc.volumen_std} - \\text{{Blanco}}\\right)"
+                    if calc.pk in second_volume_pks:
+                        # Volumen Estándar 2: incluido en el término combinado (V_Total - V_2)
+                        pass
+                    elif second_volume_pks:
+                        parts.append("\\left(V_{\\text{Total}} - V_{2}\\right)")
                     else:
-                        vol_str = str(calc.volumen_std)
-                    if calc.sln_std_base:
-                        vol_str += f" \\times \\text{{{calc.sln_std_base}}}"
-                    parts.append(vol_str)
+                        if calc.subtract_blank:
+                            vol_str = f"\\left({calc.volumen_std} - \\text{{Blanco}}\\right)"
+                        else:
+                            vol_str = str(calc.volumen_std)
+                        if calc.sln_std_base:
+                            vol_str += f" \\times \\text{{{calc.sln_std_base}}}"
+                        parts.append(vol_str)
                 if is_valid_value(calc.factor):
                     parts.append(str(calc.factor))
                 if is_valid_value(calc.sample_quantity):
