@@ -92,8 +92,10 @@ class SamplingAnalysisProcessingForm(ModelForm):
         """Guarda el procesamiento volumétrico calculando la concentración de la muestra."""
         user = get_current_user()
         analytical_method_id = self.analysis.analytical_method.id
-        var_num = AnalyticalMethodCalculate.objects.filter(analytical_method_id=analytical_method_id, position='Numerador')
-        var_den = AnalyticalMethodCalculate.objects.filter(analytical_method_id=analytical_method_id, position='Denominador')
+        var_num = AnalyticalMethodCalculate.objects.filter(
+            analytical_method_id=analytical_method_id, position='Numerador').order_by('date_creation')
+        var_den = AnalyticalMethodCalculate.objects.filter(
+            analytical_method_id=analytical_method_id, position='Denominador').order_by('date_creation')
 
         try:
             instance = super().save(commit=False)
@@ -120,61 +122,68 @@ class SamplingAnalysisProcessingForm(ModelForm):
             cifras_sign = instance.sample_analysis.analytical_method.sig_figs_result
 
             if qty_sample > 0:
+                # Volúmenes estándar en orden de creación (primero = V_Total, segundo = V_2)
+                volume_rows = sorted(
+                    [c for c in list(var_num) + list(var_den)
+                     if c.volumen_std and str(c.volumen_std).strip()],
+                    key=lambda c: c.date_creation
+                )
+                second_volume_pks = {c.pk for c in volume_rows[1:]} if len(volume_rows) > 1 else set()
 
-                factor_num = 1
-                sample_num = 1
-                std_num = 1
-                conc_std_num = 1
-                aliquot_num = 1
-
-                for num in var_num:
-                    if num.factor is not None:
-                        factor_num *= float(num.factor)
-
-                    if num.sample_quantity and num.sample_quantity.strip():
-                        sample_num = float(qty_sample)
-
-                    if num.volumen_std is not None:
-                        std_num = qty_std
-
-                    if num.sln_std_base is not None:
-                        conc_std_num = conc_std
-
-                    if num.aliquot:
+                def row_value(row):
+                    """Valor de una fila de cálculo: producto de sus términos no vacíos."""
+                    value = 1.0
+                    has_part = False
+                    if row.factor is not None:
+                        value *= float(row.factor)
+                        has_part = True
+                    if row.sample_quantity and str(row.sample_quantity).strip():
+                        value *= qty_sample
+                        has_part = True
+                    if row.volumen_std and str(row.volumen_std).strip():
+                        if row.pk in second_volume_pks:
+                            if instance.quantity_standard_two in (None, ''):
+                                raise ValidationError('El campo mL Estándar 2 es obligatorio')
+                            value *= float(instance.quantity_standard_two)
+                        else:
+                            value *= qty_std
+                        has_part = True
+                    if row.sln_std_base is not None:
+                        value *= conc_std
+                        has_part = True
+                    if row.aliquot:
                         if instance.aliquot in (None, ''):
                             raise ValidationError('El campo alícuota es obligatorio')
-                        aliquot_num = float(instance.aliquot)
+                        value *= float(instance.aliquot)
+                        has_part = True
+                    return value if has_part else None
 
-                numerator = std_num * conc_std_num * factor_num * sample_num * aliquot_num
+                def combine(rows):
+                    """Combina los valores de las filas según su operación con el término anterior."""
+                    result = None
+                    for row in rows:
+                        value = row_value(row)
+                        if value is None:
+                            continue
+                        if result is None:
+                            result = value
+                            continue
+                        operation = row.operation or 'multiply'
+                        if operation == 'add':
+                            result += value
+                        elif operation == 'subtract':
+                            result -= value
+                        elif operation == 'divide':
+                            result = result / value if value else 0
+                        else:
+                            result *= value
+                    return 1.0 if result is None else result
 
-                factor_den = 1
-                sample_den = 1
-                std_den = 1
-                conc_std_den = 1
-                aliquot_den = 1
-
-                for den in var_den:
-
-                    if den.factor is not None:
-                        factor_den *= float(den.factor)
-
-                    if den.sample_quantity and den.sample_quantity.strip():
-                        sample_den = float(qty_sample)
-
-                    if den.volumen_std is not None:
-                        std_den = qty_std
-
-                    if den.sln_std_base is not None:
-                        conc_std_den = conc_std
-
-                    if den.aliquot:
-                        if instance.aliquot in (None, ''):
-                            raise ValidationError('El campo alícuota es obligatorio')
-                        aliquot_den = float(instance.aliquot)
-
-                denominator = std_den * conc_std_den * factor_den * sample_den * aliquot_den
-
-                instance.concentration_sample = round_sig_figs(numerator / denominator, cifras_sign)
+                numerator = combine(var_num)
+                denominator = combine(var_den)
+                instance.concentration_sample = (
+                    round_sig_figs(numerator / denominator, cifras_sign) if denominator else 0
+                )
             else:
                 instance.concentration_sample = 0
 
