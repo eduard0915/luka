@@ -159,7 +159,12 @@ class SamplingAnalysisProcessingForm(ModelForm):
                     return value if has_part else None
 
                 def combine(rows):
-                    """Combina los valores de las filas según su operación con el término anterior."""
+                    """Combina los valores de las filas según su operación con el término anterior.
+
+                    El segundo volumen estándar resta del primero por defecto (V_Total - V_2),
+                    igual que la ecuación mostrada en el detalle del método; una operación
+                    explícita en la fila tiene prioridad.
+                    """
                     result = None
                     for row in rows:
                         value = row_value(row)
@@ -168,7 +173,12 @@ class SamplingAnalysisProcessingForm(ModelForm):
                         if result is None:
                             result = value
                             continue
-                        operation = row.operation or 'multiply'
+                        if row.operation:
+                            operation = row.operation
+                        elif row.pk in second_volume_pks:
+                            operation = 'subtract'
+                        else:
+                            operation = 'multiply'
                         if operation == 'add':
                             result += value
                         elif operation == 'subtract':

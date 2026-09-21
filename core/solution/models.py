@@ -206,7 +206,7 @@ class SolutionStd(BaseModel):
         if self.average_concentration:
             solution_std_base = f'{self.code_solution_std} - {self.solution_std_base.solute_std_base.description_reagent} - {self.average_concentration}{self.concentration_unit}'
         else:
-            solution_std_base = f'{self.code_solution_std} - {self.solution_std_base}'
+            solution_std_base = f'{self.code_solution_std} - {self.solution_std_base.solute_std_base.description_reagent} - {self.concentration_std}{self.concentration_unit}'
 
         if not self.preparated_std_by:
             return solution_std_base + ' - ' + f'{self.quantity_solution_std}{self.solute_std.reagent.umb}'
