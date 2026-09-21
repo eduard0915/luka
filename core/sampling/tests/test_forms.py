@@ -6,13 +6,18 @@ from django.urls import reverse
 from django.utils import timezone
 from crum import impersonate
 
-from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalculate, GravimetryTerm
+from core.analytical_method.models import (
+    AnalyticalMethod, AnalyticalMethodCalculate, AnalyticalMethodSolutionStd, GravimetryTerm,
+)
 from core.laboratory.models import Laboratory
+from core.reagent.models import InventoryReagent, Reagent
 from core.sampling.forms import (
-    SamplingAnalysisProcessingGravimetryForm, SamplingGroupForm, SamplingProcessForm,
+    SamplingAnalysisProcessingForm, SamplingAnalysisProcessingGravimetryForm, SamplingGroupForm,
+    SamplingProcessForm,
 )
 from core.sampling.models import SamplingAnalysis, SamplingProcess
 from core.sampling.tests.factories import build_sample_point, build_sampling_group
+from core.solution.models import SolutionStd, SolutionStdBase
 from core.user.models import User
 from core.utils import round_sig_figs
 
@@ -53,6 +58,58 @@ def build_gravimetry_setup(sig_figs_result=4, code='GRA-01'):
     )
     analysis = SamplingAnalysis.objects.create(sampling_process=sampling, analytical_method=method)
     return user, method, analysis
+
+
+def build_volumetry_setup(sig_figs_result=4, code='VOL-09'):
+    """Crea analista, solución estándar, método volumétrico y análisis para pruebas de V_Total y V_2."""
+    point = build_sample_point(code='VOLP')
+    laboratory = Laboratory.objects.create(laboratory_name='Lab Volumetría', site=point.product.site)
+    user = User.objects.create_user(
+        username='analista-vol', password='test1234', laboratory=laboratory,
+    )
+    user.user_permissions.add(Permission.objects.get(codename='add_reagent'))
+
+    with impersonate(user):
+        reagent = Reagent.objects.create(
+            description_reagent='HCl Estándar', code_reagent='R-HCL-STD', umb='mL',
+            purity_unit='%', molecular_weight=36.46, gram_equivalent=36.46,
+            site=point.product.site,
+        )
+        inventory = InventoryReagent.objects.create(
+            reagent=reagent, batch_number='L-HCL-01', quantity_stock=1000.0, purity=0.1,
+        )
+        std_base = SolutionStdBase.objects.create(
+            solute_std_base=reagent, concentration_std_base=0.1, concentration_unit_base='N',
+        )
+        method = AnalyticalMethod.objects.create(
+            description_analytical_method='Acidez Total',
+            code_analytical_method=code,
+            sample_size=20.0,
+            type_method='Volumetrico',
+            laboratory=laboratory,
+            sig_figs_result=sig_figs_result,
+        )
+        AnalyticalMethodSolutionStd.objects.create(analytical_method=method, solution_std=std_base)
+        solution_std = SolutionStd.objects.create(
+            solute_std=inventory,
+            solution_std_base=std_base,
+            concentration_std=0.1,
+            concentration_unit='N',
+            quantity_solution_std=1000.0,
+            quantity_available_std=1000.0,
+            quantity_std=0.0,
+            preparation_confirmed=True,
+            laboratory=laboratory,
+        )
+
+    sampling = SamplingProcess.objects.create(
+        point_sampling=point,
+        type_sampling='Producto Terminado',
+        date_sampling_scheduled=timezone.now(),
+        number_sample='VOLP-20260101-1',
+    )
+    analysis = SamplingAnalysis.objects.create(sampling_process=sampling, analytical_method=method)
+    return user, method, analysis, solution_std
 
 
 class SamplingProcessFormTests(TestCase):
@@ -310,6 +367,65 @@ class SamplingAnalysisProcessingGravimetryFormTests(TestCase):
         # Cálculo básico = (2.0 - 1.0) * 100 / 100 = 1.0 -> 100 - 1.0 = 99.0
         instance = self._save(2.0, 1.0, 100.0, analysis=analysis)
         self.assertAlmostEqual(instance.concentration_sample, 99.0, places=6)
+
+
+class SamplingAnalysisProcessingVolumetryFormTests(TestCase):
+    """Pruebas del cálculo de concentración en el formulario volumétrico con V_Total y V_2."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user, cls.method, cls.analysis, cls.solution_std = build_volumetry_setup(sig_figs_result=5)
+        # Ecuación: ((V_Total - V_2) × Factor) / (Alícuota × mL Muestra)
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=cls.method, calculate_description='Acidez', unit_measure_calculate='%')
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=cls.method, position='Numerador', volumen_std='V_Total')
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=cls.method, position='Numerador', volumen_std='V_2', operation='subtract')
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=cls.method, position='Numerador', factor=6.08)
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=cls.method, position='Denominador', aliquot=True)
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=cls.method, position='Denominador', sample_quantity='mL Muestra')
+
+    def test_vtotal_menos_v2_con_factor_alicuota_y_muestra(self):
+        """Registra V_Total y V_2 como quantity_standard/quantity_standard_two y calcula la concentración.
+
+        Datos: quantity_standard=19 (V_Total), quantity_standard_two=17 (V_2),
+        factor=6.08, alícuota=5, muestra=1.5.
+        Numerador: (19 - 17) × 6.08 = 12.16; Denominador: 5 × 1.5 = 7.5 → 1.6213
+        """
+        with impersonate(self.user):
+            form = SamplingAnalysisProcessingForm(data={
+                'standard_solution': self.solution_std.pk,
+                'quantity_standard': 19,
+                'quantity_standard_two': 17,
+                'quantity_sample': 1.5,
+                'aliquot': 5,
+            }, analysis=self.analysis)
+            self.assertTrue(form.is_valid(), form.errors)
+            instance = form.save()
+
+        self.assertEqual(instance.quantity_standard, 19)
+        self.assertEqual(instance.quantity_standard_two, 17)
+        self.assertEqual(instance.aliquot, 5)
+        self.assertAlmostEqual(float(instance.concentration_sample), 1.6213, places=4)
+
+        self.analysis.refresh_from_db()
+        self.assertAlmostEqual(float(self.analysis.average_concentration), 1.6213, places=4)
+
+    def test_alicuota_y_v2_son_obligatorios_cuando_la_ecuacion_los_incluye(self):
+        """El formulario exige alícuota y mL Estándar 2 cuando la ecuación los contiene."""
+        with impersonate(self.user):
+            form = SamplingAnalysisProcessingForm(data={
+                'standard_solution': self.solution_std.pk,
+                'quantity_standard': 19,
+                'quantity_sample': 1.5,
+            }, analysis=self.analysis)
+        self.assertFalse(form.is_valid())
+        self.assertIn('aliquot', form.errors)
+        self.assertIn('quantity_standard_two', form.errors)
 
 
 class SamplingAnalysisDetailEquationTests(TestCase):
