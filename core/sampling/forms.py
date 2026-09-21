@@ -57,9 +57,13 @@ class SamplingAnalysisProcessingForm(ModelForm):
             self.fields['aliquot'].required = False
             self.fields['aliquot'].widget = HiddenInput()
 
+        self.fields['quantity_standard'].required = True
+
         # El segundo volumen estándar solo se solicita cuando el método tiene dos volúmenes estándar.
         if calcs.exclude(volumen_std__isnull=True).exclude(volumen_std='').count() >= 2:
             self.fields['quantity_standard_two'].required = True
+            self.fields['quantity_standard'].label = 'mL STD Totales'
+            self.fields['quantity_standard_two'].label = 'mL STD 2'
         else:
             self.fields['quantity_standard_two'].required = False
             self.fields['quantity_standard_two'].widget = HiddenInput()
@@ -68,10 +72,10 @@ class SamplingAnalysisProcessingForm(ModelForm):
             form.field.widget.attrs['autocomplete'] = 'off'
 
         col_classes = {
-            'standard_solution': 'col-md-5',
-            'quantity_standard': 'col-md-2',
-            'quantity_standard_two': 'col-md-2',
-            'aliquot': 'col-md-2',
+            'standard_solution': 'col-md-6',
+            'quantity_standard': 'col-md-3',
+            'quantity_standard_two': 'col-md-3',
+            'aliquot': 'col-md-3',
         }
 
         for field_name, field in self.fields.items():
