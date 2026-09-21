@@ -312,7 +312,10 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                         # Volumen Estándar 2: incluido en el término combinado (V_Total - V_2)
                         pass
                     elif second_volume_pks:
-                        parts.append("\\left(V_{\\text{Total}} - V_{2}\\right)")
+                        vol_str = "\\left(V_{\\text{Total}} - V_{2}\\right)"
+                        if calc.sln_std_base:
+                            vol_str += f" \\times \\text{{{calc.sln_std_base}}}"
+                        parts.append(vol_str)
                     else:
                         if calc.subtract_blank:
                             vol_str = f"\\left({calc.volumen_std} - \\text{{Blanco}}\\right)"

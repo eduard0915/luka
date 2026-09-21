@@ -60,26 +60,28 @@ def build_gravimetry_setup(sig_figs_result=4, code='GRA-01'):
     return user, method, analysis
 
 
-def build_volumetry_setup(sig_figs_result=4, code='VOL-09'):
+def build_volumetry_setup(sig_figs_result=4, code='VOL-09', concentration_std=0.1, suffix='1'):
     """Crea analista, solución estándar, método volumétrico y análisis para pruebas de V_Total y V_2."""
-    point = build_sample_point(code='VOLP')
-    laboratory = Laboratory.objects.create(laboratory_name='Lab Volumetría', site=point.product.site)
+    point = build_sample_point(code=f'VOLP{suffix}')
+    laboratory = Laboratory.objects.create(
+        laboratory_name=f'Lab Volumetría {suffix}', site=point.product.site)
     user = User.objects.create_user(
-        username='analista-vol', password='test1234', laboratory=laboratory,
+        username=f'analista-vol{suffix}', password='test1234', laboratory=laboratory,
     )
     user.user_permissions.add(Permission.objects.get(codename='add_reagent'))
 
     with impersonate(user):
         reagent = Reagent.objects.create(
-            description_reagent='HCl Estándar', code_reagent='R-HCL-STD', umb='mL',
+            description_reagent='HCl Estándar', code_reagent=f'R-HCL-STD{suffix}', umb='mL',
             purity_unit='%', molecular_weight=36.46, gram_equivalent=36.46,
             site=point.product.site,
         )
         inventory = InventoryReagent.objects.create(
-            reagent=reagent, batch_number='L-HCL-01', quantity_stock=1000.0, purity=0.1,
+            reagent=reagent, batch_number=f'L-HCL-{suffix}', quantity_stock=1000.0, purity=0.1,
         )
         std_base = SolutionStdBase.objects.create(
-            solute_std_base=reagent, concentration_std_base=0.1, concentration_unit_base='N',
+            solute_std_base=reagent, concentration_std_base=concentration_std,
+            concentration_unit_base='N',
         )
         method = AnalyticalMethod.objects.create(
             description_analytical_method='Acidez Total',
@@ -93,7 +95,7 @@ def build_volumetry_setup(sig_figs_result=4, code='VOL-09'):
         solution_std = SolutionStd.objects.create(
             solute_std=inventory,
             solution_std_base=std_base,
-            concentration_std=0.1,
+            concentration_std=concentration_std,
             concentration_unit='N',
             quantity_solution_std=1000.0,
             quantity_available_std=1000.0,
@@ -106,7 +108,7 @@ def build_volumetry_setup(sig_figs_result=4, code='VOL-09'):
         point_sampling=point,
         type_sampling='Producto Terminado',
         date_sampling_scheduled=timezone.now(),
-        number_sample='VOLP-20260101-1',
+        number_sample=f'VOLP{suffix}-20260101-1',
     )
     analysis = SamplingAnalysis.objects.create(sampling_process=sampling, analytical_method=method)
     return user, method, analysis, solution_std
@@ -414,6 +416,45 @@ class SamplingAnalysisProcessingVolumetryFormTests(TestCase):
 
         self.analysis.refresh_from_db()
         self.assertAlmostEqual(float(self.analysis.average_concentration), 1.6213, places=4)
+
+    def test_volumetrico_dos_volumenes_con_concentracion_resta_por_defecto(self):
+        """Caso real 'Determinación de Magnesio': dos volúmenes con solución estándar y sin operación.
+
+        El segundo volumen resta del primero por defecto (V_Total - V_2), igual que la
+        ecuación mostrada en el detalle, y la concentración del estándar aplica una vez:
+        (19 - 17) × 0.0538 × 6.08 / (1.5 × 5) = 0.0872
+        """
+        user, method, analysis, solution_std = build_volumetry_setup(
+            sig_figs_result=3, code='VOL-10', concentration_std=0.0538, suffix='2')
+        std_base = solution_std.solution_std_base
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, calculate_description='Determinacion de Mg')
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, position='Denominador', sample_quantity='Gramos de Muestra')
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, position='Numerador', volumen_std='mL Gastados',
+            sln_std_base=std_base)
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, position='Numerador', volumen_std='mL Gastados',
+            sln_std_base=std_base)
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, position='Numerador', factor=6.08)
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, position='Denominador', aliquot=True)
+
+        with impersonate(user):
+            form = SamplingAnalysisProcessingForm(data={
+                'standard_solution': solution_std.pk,
+                'quantity_standard': 19,
+                'quantity_standard_two': 17,
+                'quantity_sample': 1.5,
+                'aliquot': 5,
+            }, analysis=analysis)
+            self.assertTrue(form.is_valid(), form.errors)
+            instance = form.save()
+
+        # Numerador: (19×0.0538 - 17×0.0538) × 6.08 = 0.6542; Denominador: 1.5 × 5 = 7.5
+        self.assertAlmostEqual(float(instance.concentration_sample), 0.0872, places=4)
 
     def test_alicuota_y_v2_son_obligatorios_cuando_la_ecuacion_los_incluye(self):
         """El formulario exige alícuota y mL Estándar 2 cuando la ecuación los contiene."""
