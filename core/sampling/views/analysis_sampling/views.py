@@ -118,6 +118,12 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
 
         sample_quantity_calc = calcules.exclude(sample_quantity__isnull=True).exclude(sample_quantity='').first()
         context['sample_quantity'] = sample_quantity_calc.sample_quantity if sample_quantity_calc else None
+        context['has_aliquot'] = calcules.filter(aliquot=True).exists()
+        context['has_standard_two'] = context['analysis_processing'].filter(
+            quantity_standard_two__isnull=False
+        ).exists()
+        context['volumetric_colspan'] = 6 + int(context['has_aliquot']) + int(context['has_standard_two'])
+        context['standard_solution_width'] = 35 - 5 * int(context['has_aliquot']) - 5 * int(context['has_standard_two'])
 
         if method.type_method == 'Gravimetrico':
             basic_latex, calc_terms = build_gravimetry_data(calcules)

@@ -81,7 +81,6 @@ class ProductForm(ModelForm):
         """Guarda el producto validando el formulario y retornando los datos o errores."""
         data = {}
         form = super()
-        user = get_current_user()
         try:
             if form.is_valid():
                 data = form.save()
