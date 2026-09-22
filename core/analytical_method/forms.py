@@ -516,6 +516,44 @@ class AnalyticalMethodSampleGramForm(ModelForm):
         return data
 
 
+# Agregar Absorbancia (Espectrofotometría)
+class AnalyticalMethodAbsorbanceForm(ModelForm):
+    """Formulario para la variable de absorbancia en el cálculo espectrofotométrico."""
+    def __init__(self, *args, **kwargs):
+        """Inicializa el formulario de absorbancia."""
+        self.analytical_method = kwargs.pop('analytical_method', None)
+        super().__init__(*args, **kwargs)
+        self.fields['absorbance'].required = True
+        self.fields['absorbance'].initial = 'Absorbancia'
+        for form in self.visible_fields():
+            form.field.widget.attrs['class'] = 'form-control'
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+    class Meta:
+        model = AnalyticalMethodCalculate
+        fields = ['absorbance', 'position']
+        widgets = {
+            'absorbance': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'position': Select(attrs={'class': 'form-control'}, choices=POSITION)
+        }
+
+    def save(self, commit=True):
+        """Guarda la variable de absorbancia del cálculo."""
+        data = {}
+        try:
+            if self.is_valid():
+                instance = super().save(commit=False)
+                if self.analytical_method:
+                    instance.analytical_method = self.analytical_method
+                instance.save()
+                data = instance
+            else:
+                data['error'] = self.errors
+        except Exception as e:
+            data['error'] = str(e)
+        return data
+
+
 class AnalyticalMethodAliquotForm(ModelForm):
     """Formulario para la alícuota en el cálculo."""
     def __init__(self, *args, **kwargs):
@@ -1196,8 +1234,12 @@ class GravimetryCalcTermForm(ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['term_type'].label = 'Tipo de Término'
         self.fields['term_type'].required = True
-        self.fields['term_type'].choices = [
-            ('basic', 'Básicos Gravimetría'), ('constant', 'Constante')]
+        if self.analytical_method and self.analytical_method.type_method == 'Espectrofotometrico':
+            self.fields['term_type'].choices = [
+                ('absorbance', 'Absorbancia'), ('constant', 'Constante')]
+        else:
+            self.fields['term_type'].choices = [
+                ('basic', 'Básicos Gravimetría'), ('constant', 'Constante')]
         self.fields['factor'].label = 'Constante'
         self.fields['factor'].required = False
         self.fields['operation'].label = 'Operación con el Término Anterior'
@@ -1205,7 +1247,8 @@ class GravimetryCalcTermForm(ModelForm):
         self.fields['consecutive'].required = True
         if not self.instance.pk and self.analytical_method:
             last = AnalyticalMethodCalculate.objects.filter(
-                analytical_method=self.analytical_method, term_type__in=['basic', 'constant']
+                analytical_method=self.analytical_method,
+                term_type__in=['basic', 'constant', 'absorbance']
             ).order_by('consecutive').last()
             next_order = (last.consecutive + 1) if last and last.consecutive else 1
             self.fields['consecutive'].initial = min(next_order, 5)
@@ -1234,16 +1277,25 @@ class GravimetryCalcTermForm(ModelForm):
         return value
 
     def clean(self):
-        """La constante solo es obligatoria cuando el término es de tipo Constante."""
+        """Valida la constante y que la absorbancia del método esté registrada."""
         cleaned_data = super().clean()
         term_type = cleaned_data.get('term_type')
         factor = cleaned_data.get('factor')
         if term_type == 'constant' and factor is None:
             raise ValidationError({'factor': 'Ingrese el valor de la constante.'})
+        if term_type == 'absorbance':
+            analytical_method = self.analytical_method or getattr(
+                self.instance, 'analytical_method', None)
+            exists = AnalyticalMethodCalculate.objects.filter(
+                analytical_method=analytical_method
+            ).exclude(absorbance__isnull=True).exclude(absorbance='').exists()
+            if not exists:
+                raise ValidationError(
+                    {'term_type': 'Registra primero la Absorbancia del método.'})
         return cleaned_data
 
     def save(self, commit=True):
-        """Guarda el término: crea/marca los básicos o guarda la constante."""
+        """Guarda el término: crea/marca los básicos, la absorbancia o la constante."""
         data = {}
         try:
             if self.is_valid():
@@ -1277,6 +1329,15 @@ class GravimetryCalcTermForm(ModelForm):
                         AnalyticalMethodCalculate.objects.create(
                             analytical_method=analytical_method,
                             factor=100, position='Numerador')
+                elif term_type == 'absorbance':
+                    absorbance_row = AnalyticalMethodCalculate.objects.filter(
+                        analytical_method=analytical_method
+                    ).exclude(absorbance__isnull=True).exclude(absorbance='').first()
+                    absorbance_row.term_type = 'absorbance'
+                    absorbance_row.operation = operation
+                    absorbance_row.consecutive = consecutive
+                    absorbance_row.save()
+                    data = absorbance_row
                 else:
                     instance = super().save(commit=False)
                     instance.term_type = 'constant'

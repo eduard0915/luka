@@ -16,6 +16,7 @@ from core.analytical_method.models import AnalyticalMethod, AnalyticalMethodCalc
 from core.analytical_method.forms import AnalyticalMethodForm
 from core.analytical_method.services import (
     _build_gravimetry_equation, _build_relation_equation, build_gravimetry_data,
+    build_spectrophotometry_data,
 )
 
 # Listado de Métodos Analíticos
@@ -395,5 +396,26 @@ class AnalyticalMethodDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
 
                 if equation_body:
                     context['final_equation_gravimetry'] = f"{label_g} = {equation_body}"
+
+        if self.object.type_method == 'Espectrofotometrico':
+            context['absorbance'] = calcules.exclude(
+                absorbance__isnull=True).exclude(absorbance='').first()
+
+            basic_latex, spectro_terms = build_spectrophotometry_data(calcules)
+            if basic_latex or spectro_terms:
+                desc = inst_desc.calculate_description if inst_desc else "Cálculo"
+                unit = inst_unit.unit_measure_calculate if inst_unit else ""
+
+                label_s = f"\\text{{{desc}}}"
+                if unit:
+                    label_s += f" \\text{{ ({unit})}}"
+
+                if spectro_terms:
+                    equation_body = _build_gravimetry_equation(basic_latex, spectro_terms)
+                else:
+                    equation_body = basic_latex
+
+                if equation_body:
+                    context['final_equation_spectrophotometry'] = f"{label_s} = {equation_body}"
 
         return context

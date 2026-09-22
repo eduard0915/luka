@@ -208,6 +208,32 @@ class AnalyticalMethodSampleGramUpdateView(LoginRequiredMixin, BaseAnalyticalMet
         context['action'] = 'edit'
         return context
 
+# Agregar Absorbancia (Espectrofotometría)
+class AnalyticalMethodAbsorbanceCreateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, CreateView):
+    """)Vista para registrar la absorbancia de un cálculo espectrofotométrico."""
+    model = AnalyticalMethodCalculate
+    form_class = AnalyticalMethodAbsorbanceForm
+
+    def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Registrar Absorbancia'
+        context['action'] = 'add'
+        return context
+
+# Editar Absorbancia (Espectrofotometría)
+class AnalyticalMethodAbsorbanceUpdateView(LoginRequiredMixin, BaseAnalyticalMethodDetailView, UpdateView):
+    """)Vista para editar la absorbancia de un cálculo espectrofotométrico."""
+    model = AnalyticalMethodCalculate
+    form_class = AnalyticalMethodAbsorbanceForm
+
+    def get_context_data(self, **kwargs):
+        """Agrega variables de contexto adicionales al template."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Editar Absorbancia'
+        context['action'] = 'edit'
+        return context
+
 # Eliminación de variable de calculo
 class AnalyticalMethodCalculateDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DeleteView):
     """)Vista para eliminar un cálculo de un método analítico."""

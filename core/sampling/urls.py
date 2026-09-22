@@ -40,6 +40,7 @@ urlpatterns = [
     path('analysis/detail/<uuid:pk>/', SamplingAnalysisDetailView.as_view(), name='detail_sampling_analysis'),
     path('analysis/processing_volumetry/add/<uuid:pk>/', SamplingAnalysisProcessingCreateView.as_view(), name='sampling_analysis_volumetry'),
     path('analysis/processing_gravimetry/add/<uuid:pk>/', SamplingAnalysisProcessingGravimetryCreateView.as_view(), name='sampling_analysis_gravimetry'),
+    path('analysis/processing_spectrophotometry/add/<uuid:pk>/', SamplingAnalysisProcessingSpectrophotometryCreateView.as_view(), name='sampling_analysis_spectrophotometry'),
     path('analysis/processing_direct/add/<uuid:pk>/', SamplingAnalysisProcessingDirectCreateView.as_view(), name='sampling_analysis_direct'),
     path('analysis/processing/relation/add/<uuid:pk>/', SamplingAnalysisProcessingRelationCreateView.as_view(), name='create_sampling_analysis_processing_relation'),
     path('analysis/processing/relation/delete/<uuid:pk>/', SamplingAnalysisProcessingRelationDeleteView.as_view(), name='delete_sampling_analysis_processing_relation'),
