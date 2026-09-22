@@ -20,7 +20,7 @@ from core.company.models import Company
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.models import SpecificationProduct
 from core.sampling.forms import *
-from core.sampling.models import SamplingProcess, SamplingAnalysis, SamplingAnalysisProcessingRelation
+from core.sampling.models import SamplingProcess, SamplingAnalysis, SamplingAnalysisProcessing, SamplingAnalysisProcessingRelation
 from core.utils import format_form_errors
 from luka import settings
 
@@ -315,20 +315,39 @@ class SamplingProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMi
         # Mapear unidades de SpecificationProduct
         if sampling_point:
             specs = sampling_point.specification.all()
-            # spec_units = {spec.method_test.analytical_method_id: spec.unit_measure for spec in specs}
-            spec_units = {
-                (spec.method_test or spec.method_test_relacional).analytical_method_id: spec.unit_measure
-                for spec in specs
-                if spec.method_test or spec.method_test_relacional
-            }
-            
+            spec_units = {}
+            spec_units_relation = {}
+            for spec in specs:
+                if spec.method_test:
+                    spec_units[spec.method_test.analytical_method_id] = spec.unit_measure
+                if spec.method_test_relacional:
+                    spec_units_relation[spec.method_test_relacional_id] = spec.unit_measure
+
             # También intentar obtener unidades de AnalyticalMethodCalculate si no están en SpecificationProduct
             method_ids = [sa.analytical_method_id for sa in sampling_analysis]
             calculates = AnalyticalMethodCalculate.objects.filter(analytical_method_id__in=method_ids)
             calculate_units = {c.analytical_method_id: c.unit_measure_calculate for c in calculates}
-            
+
             for sa in sampling_analysis:
-                sa.unit_measure_prod = spec_units.get(sa.analytical_method_id) or calculate_units.get(sa.analytical_method_id)
+                unit = (
+                    spec_units.get(sa.analytical_method_id)
+                    or calculate_units.get(sa.analytical_method_id)
+                    or spec_units_relation.get(sa.analytical_method_relation_id)
+                )
+                if not unit:
+                    processing = SamplingAnalysisProcessing.objects.filter(
+                        sample_analysis_id=sa.id
+                    ).select_related('analytical_method_calculate', 'analytical_method_calculate_relation').first()
+                    if processing:
+                        unit = (
+                            processing.analytical_method_calculate.unit_measure_calculate
+                            if processing.analytical_method_calculate
+                            else None
+                        )
+                        if not unit and processing.analytical_method_calculate_relation:
+                            unit = processing.analytical_method_calculate_relation.unit_measure_calculate
+                sa.unit_measure_prod = unit
+                sa.unit_measure = unit
         
         context['sampling_analysis'] = sampling_analysis
 
@@ -643,6 +662,7 @@ class SamplingProcessQualityCertificatePDFView(LoginRequiredMixin, ValidatePermi
 
                 for sa in sampling_analysis:
                     sa.unit_measure_prod = spec_units.get(sa.analytical_method_id) or calculate_units.get(sa.analytical_method_id)
+                    sa.unit_measure = sa.unit_measure_prod
                     sa.spec_prod = (
                         spec_by_method.get(sa.analytical_method_id)
                         or spec_by_relation.get(sa.analytical_method_relation_id)
