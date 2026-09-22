@@ -177,6 +177,16 @@ def _check_compliance(sampling_point, analytical_method, concentration_value):
     specification = sampling_point.specification.select_related('method_test__analytical_method').filter(
         method_test__analytical_method=analytical_method).first()
 
+    # Si no se encuentra en el punto de muestreo, intentar por el producto
+    # (igual que en el detalle del análisis).
+    if not specification:
+        specification = SpecificationProduct.objects.select_related(
+            'method_test__analytical_method'
+        ).filter(
+            product=sampling_point.product,
+            method_test__analytical_method=analytical_method
+        ).first()
+
     if not specification:
         return None
 

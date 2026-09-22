@@ -10,12 +10,14 @@ from core.analytical_method.models import (
     AnalyticalMethod, AnalyticalMethodCalculate, AnalyticalMethodSolutionStd, GravimetryTerm,
 )
 from core.laboratory.models import Laboratory
+from core.product.models import AnalyticalMethodProduct, SpecificationProduct
 from core.reagent.models import InventoryReagent, Reagent
 from core.sampling.forms import (
-    SamplingAnalysisProcessingForm, SamplingAnalysisProcessingGravimetryForm, SamplingGroupForm,
+    SamplingAnalysisProcessingForm, SamplingAnalysisProcessingGravimetryForm,
+    SamplingAnalysisProcessingSpectrophotometryForm, SamplingGroupForm,
     SamplingProcessForm,
 )
-from core.sampling.models import SamplingAnalysis, SamplingProcess
+from core.sampling.models import SamplingAnalysis, SamplingAnalysisProcessing, SamplingProcess
 from core.sampling.tests.factories import build_sample_point, build_sampling_group
 from core.solution.models import SolutionStd, SolutionStdBase
 from core.user.models import User
@@ -112,6 +114,48 @@ def build_volumetry_setup(sig_figs_result=4, code='VOL-09', concentration_std=0.
     )
     analysis = SamplingAnalysis.objects.create(sampling_process=sampling, analytical_method=method)
     return user, method, analysis, solution_std
+
+
+def build_spectrophotometry_setup(sig_figs_result=4, code='ESP-01', with_sample=True, suffix='1'):
+    """Crea analista, método espectrofotométrico y análisis con absorbancia, muestra, constante y término."""
+    point = build_sample_point(code=f'ESPP{suffix}')
+    laboratory = Laboratory.objects.create(
+        laboratory_name=f'Lab Espectrofotometría {suffix}', site=point.product.site)
+    user = User.objects.create_user(
+        username=f'analista-esp{suffix}', password='test1234', laboratory=laboratory,
+    )
+    user.user_permissions.add(Permission.objects.get(codename='add_reagent'))
+
+    method = AnalyticalMethod.objects.create(
+        description_analytical_method='Fósforo Total',
+        code_analytical_method=code,
+        sample_size=20.0,
+        type_method='Espectrofotometrico',
+        laboratory=laboratory,
+        sig_figs_result=sig_figs_result,
+    )
+    AnalyticalMethodCalculate.objects.create(
+        analytical_method=method, calculate_description='Concentración',
+        unit_measure_calculate='mg/L')
+    AnalyticalMethodCalculate.objects.create(
+        analytical_method=method, absorbance='Absorbancia', position='Numerador')
+    if with_sample:
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, sample_quantity='Gramos de Muestra', position='Denominador')
+    AnalyticalMethodCalculate.objects.create(
+        analytical_method=method, factor=2.5, position='Numerador')
+    AnalyticalMethodCalculate.objects.create(
+        analytical_method=method, factor=100, term_type='constant',
+        operation='multiply', consecutive=2)
+
+    sampling = SamplingProcess.objects.create(
+        point_sampling=point,
+        type_sampling='Producto Terminado',
+        date_sampling_scheduled=timezone.now(),
+        number_sample=f'ESPP{suffix}-20260101-1',
+    )
+    analysis = SamplingAnalysis.objects.create(sampling_process=sampling, analytical_method=method)
+    return user, method, analysis
 
 
 class SamplingProcessFormTests(TestCase):
@@ -469,6 +513,146 @@ class SamplingAnalysisProcessingVolumetryFormTests(TestCase):
         self.assertIn('quantity_standard_two', form.errors)
 
 
+class SamplingAnalysisProcessingSpectrophotometryFormTests(TestCase):
+    """Pruebas para el cálculo de la concentración en el formulario espectrofotométrico."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user, cls.method, cls.analysis = build_spectrophotometry_setup()
+
+    def _save(self, absorbance, quantity_sample=None, analysis=None):
+        """Guarda el formulario espectrofotométrico con los valores indicados."""
+        form = SamplingAnalysisProcessingSpectrophotometryForm(
+            data={'absorbance': absorbance, 'quantity_sample': quantity_sample},
+            analysis=analysis or self.analysis,
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+        with impersonate(self.user):
+            return form.save()
+
+    def _add_specification(self, lower, upper):
+        """Crea la especificación del producto y la asocia al punto de muestreo."""
+        point = self.analysis.sampling_process.point_sampling
+        method_product = AnalyticalMethodProduct.objects.create(
+            product=point.product, analytical_method=self.method)
+        spec = SpecificationProduct.objects.create(
+            product=point.product, type_test='Químico', test_prod='Fósforo Total',
+            method_test=method_product, lower_limit_prod=lower, upper_limit_prod=upper,
+            unit_measure='mg/L')
+        point.specification.add(spec)
+        return spec
+
+    def test_calculo_con_absorbancia_muestra_constante_y_termino(self):
+        """La concentración sigue la ecuación: (Absorbancia × 2.5 / Muestra) × 100."""
+        instance = self._save(absorbance=0.5, quantity_sample=10.0)
+
+        self.assertAlmostEqual(instance.concentration_sample, 12.5, places=6)
+
+        self.analysis.refresh_from_db()
+        self.assertAlmostEqual(self.analysis.average_concentration, 12.5, places=6)
+
+    def test_metodo_sin_cantidad_de_muestra_no_la_exige(self):
+        """Sin fila de muestra en la ecuación la cantidad de muestra no es obligatoria."""
+        user, method, analysis = build_spectrophotometry_setup(
+            code='ESP-02', with_sample=False, suffix='2')
+
+        form = SamplingAnalysisProcessingSpectrophotometryForm(
+            data={'absorbance': 0.5}, analysis=analysis)
+        self.assertTrue(form.is_valid(), form.errors)
+        with impersonate(user):
+            instance = form.save()
+
+        # Absorbancia × 2.5 × 100 = 125.0
+        self.assertAlmostEqual(instance.concentration_sample, 125.0, places=6)
+
+    def test_absorbancia_es_obligatoria(self):
+        """Sin lectura de absorbancia el formulario es inválido."""
+        form = SamplingAnalysisProcessingSpectrophotometryForm(
+            data={'absorbance': '', 'quantity_sample': 10.0}, analysis=self.analysis)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('absorbance', form.errors)
+
+    def test_comply_cumple_dentro_de_limites(self):
+        """El concepto del análisis es 'Cumple' cuando el resultado está dentro de los límites."""
+        self._add_specification(lower=1.0, upper=20.0)
+
+        self._save(absorbance=0.5, quantity_sample=10.0)
+
+        self.analysis.refresh_from_db()
+        self.assertEqual(self.analysis.comply, 'Cumple')
+
+    def test_comply_no_cumple_fuera_de_limites(self):
+        """El concepto del análisis es 'No Cumple' cuando el resultado supera el límite."""
+        self._add_specification(lower=1.0, upper=20.0)
+
+        # (1.0 × 2.5 / 0.1) × 100 = 2500.0
+        self._save(absorbance=1.0, quantity_sample=0.1)
+
+        self.analysis.refresh_from_db()
+        self.assertEqual(self.analysis.comply, 'No Cumple')
+
+    def test_comply_con_especificacion_del_producto_sin_punto(self):
+        """El concepto se evalúa con la especificación del producto aunque no esté en el punto."""
+        point = self.analysis.sampling_process.point_sampling
+        method_product = AnalyticalMethodProduct.objects.create(
+            product=point.product, analytical_method=self.method)
+        SpecificationProduct.objects.create(
+            product=point.product, type_test='Químico', test_prod='Fósforo Total',
+            method_test=method_product, lower_limit_prod=1.0, upper_limit_prod=20.0,
+            unit_measure='mg/L')
+
+        self._save(absorbance=0.5, quantity_sample=10.0)
+
+        self.analysis.refresh_from_db()
+        self.assertAlmostEqual(self.analysis.average_concentration, 12.5, places=6)
+        self.assertEqual(self.analysis.comply, 'Cumple')
+
+    def test_detalle_muestra_datos_del_procesamiento(self):
+        """El detalle muestra la absorbancia, la muestra, el resultado y el concepto."""
+        self._add_specification(lower=1.0, upper=20.0)
+        self._save(absorbance=0.5, quantity_sample=10.0)
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse('sampling:detail_sampling_analysis', args=[self.analysis.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Absorbancia')
+        self.assertContains(response, 'Gramos de Muestra')
+        self.assertContains(response, '0,5')
+        self.assertContains(response, '10,0')
+        self.assertContains(response, '12,5')
+        self.assertContains(response, 'Cumple')
+
+    def test_detalle_url_procesamiento_espectrofotometrico(self):
+        """El detalle del análisis ofrece la URL de procesamiento espectrofotométrico."""
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse('sampling:detail_sampling_analysis', args=[self.analysis.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context['create_processing_url'],
+            reverse('sampling:sampling_analysis_spectrophotometry', args=[self.analysis.pk]))
+        self.assertContains(response, 'Absorbancia')
+        self.assertContains(response, 'Gramos de Muestra')
+
+    def test_vista_registra_procesamiento_espectrofotometrico(self):
+        """La vista crea el procesamiento y actualiza el análisis con el resultado."""
+        self.client.force_login(self.user)
+        url = reverse('sampling:sampling_analysis_spectrophotometry', args=[self.analysis.pk])
+        response = self.client.post(url, {
+            'action': 'add', 'absorbance': '0.5', 'quantity_sample': '10'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {})
+        processing = SamplingAnalysisProcessing.objects.get(sample_analysis=self.analysis)
+        self.assertAlmostEqual(processing.concentration_sample, 12.5, places=6)
+        self.analysis.refresh_from_db()
+        self.assertAlmostEqual(self.analysis.average_concentration, 12.5, places=6)
+
+
 class SamplingAnalysisDetailEquationTests(TestCase):
     """Pruebas de la ecuación del método mostrada en el detalle del análisis."""
 
@@ -522,6 +706,43 @@ class SamplingAnalysisDetailEquationTests(TestCase):
         equation = response.context['method_equation']
         self.assertIn(r'100 - \left(\frac', equation)
         self.assertIn(r'\text{Residuo}', equation)
+
+    def test_detalle_muestra_ecuacion_espectrofotometrica(self):
+        """El detalle muestra la ecuación espectrofotométrica con todos sus campos asociados."""
+        method = AnalyticalMethod.objects.create(
+            description_analytical_method='Fósforo Espectrofotométrico',
+            code_analytical_method='ESP-01',
+            sample_size=20.0,
+            type_method='Espectrofotometrico',
+            laboratory=self.method.laboratory,
+        )
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, calculate_description='Concentración',
+            unit_measure_calculate='mg/L')
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, absorbance='Absorbancia', position='Numerador')
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, sample_quantity='Gramos de Muestra', position='Denominador')
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, factor=2.5, position='Numerador')
+        AnalyticalMethodCalculate.objects.create(
+            analytical_method=method, factor=100, term_type='constant',
+            operation='multiply', consecutive=2)
+        analysis = SamplingAnalysis.objects.create(
+            sampling_process=self.analysis.sampling_process, analytical_method=method)
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse('sampling:detail_sampling_analysis', args=[analysis.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        equation = response.context['method_equation']
+        self.assertIn(r'\text{Concentración}', equation)
+        self.assertIn(r'\text{Absorbancia}', equation)
+        self.assertIn(r'\text{Gramos de Muestra}', equation)
+        self.assertIn(r'\frac{\text{Absorbancia}}{\text{Gramos de Muestra}}', equation)
+        self.assertIn(r'2.5', equation)
+        self.assertIn(r'\times 100', equation)
 
     def test_detalle_muestra_ecuacion_volumetrica(self):
         """Los métodos no gravimétricos muestran sus términos en numerador y denominador."""

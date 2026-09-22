@@ -223,13 +223,73 @@ def build_gravimetry_data(calcules):
     return basic_latex, term_units
 
 
+def build_spectrophotometry_data(calcules):
+    """Construye el LaTeX de absorbancia y las unidades de término de un método espectrofotométrico.
+
+    La fila de ``AnalyticalMethodCalculate`` con ``absorbance`` actúa como término
+    base de la ecuación. La Cantidad de Muestra y las constantes registradas (filas
+    sin ``term_type``) se ubican en el numerador o denominador según su posición
+    (la Cantidad de Muestra sin posición va al denominador y la constante sin
+    posición multiplica el numerador); los términos con ``term_type='constant'``
+    se combinan con sus operaciones (+, −, ×, ÷). Retorna
+    ``(basic_latex, term_units)``.
+    """
+    calcules = list(calcules)
+    absorbance_row = next((c for c in calcules if c.absorbance), None)
+
+    basic_latex = ''
+    term_units = []
+
+    if absorbance_row:
+        num_parts = [f"\\text{{{absorbance_row.absorbance}}}"]
+        den_parts = []
+        den_factors = []
+        multiplier_parts = []
+
+        for c in calcules:
+            if c is absorbance_row or c.term_type:
+                continue
+            if c.sample_quantity and str(c.sample_quantity).strip():
+                if c.position == 'Numerador':
+                    num_parts.append(f"\\text{{{c.sample_quantity}}}")
+                else:
+                    den_parts.append(f"\\text{{{c.sample_quantity}}}")
+            if c.factor is not None:
+                if c.position == 'Denominador':
+                    den_factors.append(_format_latex_number(c.factor))
+                else:
+                    multiplier_parts.append(_format_latex_number(c.factor))
+
+        den_parts += den_factors
+
+        str_num = " \\cdot ".join(num_parts)
+        if den_parts:
+            str_den = " \\cdot ".join(den_parts)
+            basic_latex = f"\\frac{{{str_num}}}{{{str_den}}}"
+        else:
+            basic_latex = str_num
+        if multiplier_parts:
+            basic_latex += f" \\times {' \\cdot '.join(multiplier_parts)}"
+
+        term_units.append(GravimetryTermUnit(
+            'absorbance', None, absorbance_row.operation,
+            absorbance_row.consecutive, absorbance_row.date_creation))
+
+    for c in calcules:
+        if c.term_type == 'constant' and c.factor is not None:
+            term_units.append(GravimetryTermUnit(
+                'constant', c.factor, c.operation, c.consecutive, c.date_creation))
+
+    return basic_latex, term_units
+
+
 def evaluate_gravimetry_terms(basic_value, terms):
     """Evalúa numéricamente la ecuación gravimétrica a partir de sus términos.
 
     El primer término se toma como base y no aplica su operación; los siguientes
     se combinan con el acumulado mediante suma (+), resta (−), multiplicación (×)
-    o división (÷). Un término de tipo 'basic' usa ``basic_value``; los de tipo
-    'constant' su valor almacenado.
+    o división (÷). Un término de tipo 'basic' o 'absorbance' usa ``basic_value``;
+    los de tipo 'constant' su valor almacenado.
 
     Retorna ``None`` cuando no existen términos evaluables. Una división por cero
     deja el acumulado en cero.
@@ -237,7 +297,7 @@ def evaluate_gravimetry_terms(basic_value, terms):
     ordered = sorted(terms, key=lambda term: (term.consecutive or 0, term.date_creation))
     values = []
     for term in ordered:
-        value = basic_value if term.term_type == 'basic' else term.constant_value
+        value = basic_value if term.term_type in ('basic', 'absorbance') else term.constant_value
         if value is None:
             continue
         values.append((term.operation, float(value)))
@@ -278,13 +338,13 @@ def _build_gravimetry_equation(basic_latex, terms):
     ordered = sorted(terms, key=lambda term: (term.consecutive or 0, term.date_creation))
     pieces = []
     for term in ordered:
-        if term.term_type == 'basic':
+        if term.term_type in ('basic', 'absorbance'):
             latex = basic_latex
         else:
             latex = _format_latex_number(term.constant_value)
         if not latex:
             continue
-        pieces.append((term.operation, latex, term.term_type == 'basic'))
+        pieces.append((term.operation, latex, term.term_type in ('basic', 'absorbance')))
 
     if not pieces:
         return ''

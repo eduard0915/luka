@@ -13,7 +13,9 @@ from core.product.models import SpecificationProduct
 from core.sampling.forms import *
 from core.sampling.models import *
 from core.analytical_method.models import AnalyticalMethodCalculateRelation
-from core.analytical_method.services import _build_gravimetry_equation, build_gravimetry_data
+from core.analytical_method.services import (
+    _build_gravimetry_equation, build_gravimetry_data, build_spectrophotometry_data,
+)
 from core.utils import round_sig_figs
 
 
@@ -118,6 +120,8 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
 
         sample_quantity_calc = calcules.exclude(sample_quantity__isnull=True).exclude(sample_quantity='').first()
         context['sample_quantity'] = sample_quantity_calc.sample_quantity if sample_quantity_calc else None
+        absorbance_calc = calcules.exclude(absorbance__isnull=True).exclude(absorbance='').first()
+        context['absorbance_label'] = absorbance_calc.absorbance if absorbance_calc else 'Absorbancia'
         context['has_aliquot'] = calcules.filter(aliquot=True).exists()
         context['has_standard_two'] = context['analysis_processing'].filter(
             quantity_standard_two__isnull=False
@@ -140,6 +144,14 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
                 method_equation = basic_latex
             if term_units:
                 term_equation = _build_gravimetry_equation(basic_latex or '', term_units)
+                if term_equation:
+                    method_equation = term_equation
+        elif method.type_method == 'Espectrofotometrico':
+            basic_latex, spectro_terms = build_spectrophotometry_data(calcules)
+            if basic_latex:
+                method_equation = basic_latex
+            if spectro_terms:
+                term_equation = _build_gravimetry_equation(basic_latex, spectro_terms)
                 if term_equation:
                     method_equation = term_equation
         else:
@@ -248,6 +260,8 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
             context['create_processing_url'] = reverse_lazy('sampling:create_millimole_reacted', kwargs={'pk': self.object.id})
         elif self.object.analytical_method.type_method == 'Gravimetrico':
             context['create_processing_url'] = reverse_lazy('sampling:sampling_analysis_gravimetry', kwargs={'pk': self.object.id})
+        elif self.object.analytical_method.type_method == 'Espectrofotometrico':
+            context['create_processing_url'] = reverse_lazy('sampling:sampling_analysis_spectrophotometry', kwargs={'pk': self.object.id})
         elif self.object.analytical_method.type_method == 'Lectura Directa':
             context['create_processing_url'] = reverse_lazy('sampling:sampling_analysis_direct', kwargs={'pk': self.object.id})
         return context
@@ -340,6 +354,51 @@ class SamplingAnalysisProcessingGravimetryCreateView(LoginRequiredMixin, Validat
         context = super().get_context_data(**kwargs)
         context['action'] = 'add'
         context['entity'] = 'Registro de Procesamiento de Análisis Gravimétrico'
+        return context
+
+
+class SamplingAnalysisProcessingSpectrophotometryCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """Vista para el registro de procesamiento de análisis espectrofotométrico."""
+    model = SamplingAnalysisProcessing
+    form_class = SamplingAnalysisProcessingSpectrophotometryForm
+    template_name = 'analysis_sampling/create_sampling_analysis_processing.html'
+    permission_required = 'reagent.add_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        """Procesa la solicitud con protección CSRF exceptuada."""
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Procesa el formulario de registro de procesamiento espectrofotométrico."""
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'add':
+                form = self.get_form()
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, '¡Procesamiento Registrado Satisfactoriamente!')
+                else:
+                    data['error'] = form.errors
+            else:
+                data['error'] = 'No ha ingresado datos en los campos'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
+    def get_form_kwargs(self):
+        """Agrega el análisis a los kwargs del formulario."""
+        kwargs = super().get_form_kwargs()
+        analysis = SamplingAnalysis.objects.get(pk=self.kwargs.get('pk'))
+        kwargs.update({'analysis': analysis})
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        """Agrega la entidad y acción al contexto."""
+        context = super().get_context_data(**kwargs)
+        context['action'] = 'add'
+        context['entity'] = 'Registro de Procesamiento de Análisis Espectrofotométrico'
         return context
 
 

@@ -13,7 +13,9 @@ from core.product.models import SamplePoint, AnalyticalMethodProduct
 from core.sampling.services import DAILY_PERIODICITY
 from core.solution.models import SolutionStd
 from core.analytical_method.models import AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation, AnalyticalMethod
-from core.analytical_method.services import build_gravimetry_data, evaluate_gravimetry_terms
+from core.analytical_method.services import (
+    build_gravimetry_data, build_spectrophotometry_data, evaluate_gravimetry_terms,
+)
 from core.utils import round_sig_figs
 
 TYPE_SAMPLING = [('En Proceso', 'En Proceso'), ('Producto Terminado', 'Producto Terminado')]
@@ -63,7 +65,7 @@ class SamplingAnalysisProcessingForm(ModelForm):
         if calcs.exclude(volumen_std__isnull=True).exclude(volumen_std='').count() >= 2:
             self.fields['quantity_standard_two'].required = True
             self.fields['quantity_standard'].label = 'mL STD Totales'
-            self.fields['quantity_standard_two'].label = 'mL STD 2'
+            self.fields['quantity_standard_two'].label = 'mL STD 1'
         else:
             self.fields['quantity_standard_two'].required = False
             self.fields['quantity_standard_two'].widget = HiddenInput()
@@ -83,7 +85,7 @@ class SamplingAnalysisProcessingForm(ModelForm):
 
     class Meta:
         model = SamplingAnalysisProcessing
-        fields = ['standard_solution', 'quantity_standard', 'quantity_standard_two', 'quantity_sample', 'aliquot']
+        fields = ['standard_solution', 'quantity_standard_two', 'quantity_standard', 'quantity_sample', 'aliquot']
         widgets = {
             'standard_solution': Select(attrs={'class': 'form-control select2', 'required': True, 'style': 'width: 100%'}),
             'quantity_standard': TextInput(attrs={'class': 'form-control', 'required': True}),
@@ -327,6 +329,116 @@ class SamplingAnalysisProcessingGravimetryForm(ModelForm):
                 instance.concentration_sample = round_sig_figs(raw_value, cifras_sign)
             else:
                 instance.concentration_sample = 0
+
+            if commit:
+                instance.save()
+            return instance
+        except Exception as e:
+            raise ValidationError({'error': str(e)})
+
+
+class SamplingAnalysisProcessingSpectrophotometryForm(ModelForm):
+    """Formulario para el registro de procesamiento de análisis espectrofotométrico."""
+
+    def __init__(self, *args, **kwargs):
+        """Inicializa el formulario con el análisis y configura la absorbancia y la muestra."""
+        self.analysis = kwargs.pop('analysis')
+        super().__init__(*args, **kwargs)
+
+        calcs = AnalyticalMethodCalculate.objects.select_related('analytical_method').filter(
+            analytical_method_id=self.analysis.analytical_method.id)
+
+        absorbance_calc = calcs.exclude(absorbance__isnull=True).exclude(absorbance='').first()
+        self.fields['absorbance'].label = str(absorbance_calc.absorbance) if absorbance_calc else 'Absorbancia'
+        self.fields['absorbance'].required = True
+
+        # La cantidad de muestra solo se solicita cuando la ecuación la incluye.
+        filter_sample = calcs.exclude(Q(sample_quantity__isnull=True) | Q(sample_quantity='')).first()
+        if filter_sample:
+            self.fields['quantity_sample'].label = str(filter_sample.sample_quantity)
+            self.fields['quantity_sample'].required = True
+        else:
+            self.fields['quantity_sample'].required = False
+            self.fields['quantity_sample'].widget = HiddenInput()
+
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+        col_classes = {
+            'absorbance': 'col-md-3',
+            'quantity_sample': 'col-md-3',
+        }
+
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
+    class Meta:
+        model = SamplingAnalysisProcessing
+        fields = ['absorbance', 'quantity_sample']
+        widgets = {
+            'absorbance': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'quantity_sample': TextInput(attrs={'class': 'form-control', 'required': True}),
+        }
+
+    def save(self, commit=True):
+        """Guarda el procesamiento espectrofotométrico calculando la concentración de la muestra."""
+        user = get_current_user()
+        analytical_method = self.analysis.analytical_method
+        calcules = AnalyticalMethodCalculate.objects.filter(analytical_method=analytical_method)
+
+        try:
+            instance = super().save(commit=False)
+            instance.sample_analysis_id = self.analysis.id
+            instance.analyzed_by_id = user.id
+            instance.analyzed_date = timezone.now()
+            instance.relational_calculation = False
+
+            base_calc = calcules.exclude(
+                calculate_description__isnull=True).exclude(calculate_description='').first()
+            if base_calc:
+                instance.analytical_method_calculate = base_calc
+
+            if instance.absorbance is None:
+                raise ValidationError("El campo Absorbancia es obligatorio")
+
+            qty_absorbance = float(instance.absorbance)
+            qty_sample = float(instance.quantity_sample) if instance.quantity_sample is not None else None
+            cifras_sign = analytical_method.sig_figs_result
+
+            # La absorbancia es el término base; la cantidad de muestra y las
+            # constantes se ubican en el numerador o denominador según su posición,
+            # igual que en build_spectrophotometry_data.
+            numerator = qty_absorbance
+            denominator = 1.0
+
+            for calc in calcules:
+                if calc.term_type or calc.absorbance:
+                    continue
+                if calc.sample_quantity and str(calc.sample_quantity).strip():
+                    if qty_sample is None:
+                        raise ValidationError(
+                            "La ecuación incluye la cantidad de muestra: regístrela")
+                    if calc.position == 'Numerador':
+                        numerator *= qty_sample
+                    else:
+                        denominator *= qty_sample
+                if calc.factor is not None:
+                    if calc.position == 'Denominador':
+                        denominator *= float(calc.factor)
+                    else:
+                        numerator *= float(calc.factor)
+
+            raw_value = numerator / denominator if denominator else 0
+
+            # La ecuación del método puede combinar el cálculo base con términos
+            # constantes (por ejemplo cálculo base × 100).
+            _, spectro_terms = build_spectrophotometry_data(calcules)
+            if spectro_terms:
+                evaluated = evaluate_gravimetry_terms(raw_value, spectro_terms)
+                if evaluated is not None:
+                    raw_value = evaluated
+
+            instance.concentration_sample = round_sig_figs(raw_value, cifras_sign)
 
             if commit:
                 instance.save()

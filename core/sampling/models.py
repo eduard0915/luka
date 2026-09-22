@@ -199,6 +199,7 @@ class SamplingAnalysisProcessing(BaseModel):
     aliquot = models.FloatField(verbose_name='Blanco', null=True, blank=True)
     blank = models.FloatField(verbose_name='Blanco', null=True, blank=True)
     weight_obtained = models.FloatField(verbose_name='Peso Obtenido', null=True, blank=True)
+    absorbance = models.FloatField(verbose_name='Lectura del Equipo', null=True, blank=True)
     weight_of_filter = models.FloatField(verbose_name='Peso Filtro', null=True, blank=True)
     millimole_reacted = models.FloatField(verbose_name='Milimoles que Reaccionan', null=True, blank=True)
     quantity_sample = models.FloatField(verbose_name='Cant. de Muestra', blank=True, null=True)
