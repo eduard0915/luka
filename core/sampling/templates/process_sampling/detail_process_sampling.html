@@ -192,8 +192,16 @@
                                                                 {{ foo.method_test_relacional }}
                                                             {% endif %}
                                                         </td>
-                                                        <td class="text-center align-middle">{{ foo.lower_limit_prod|default_if_none:"Menor que" }}
-                                                            {% if foo.lower_limit_prod %} - {% endif %}{{ foo.upper_limit_prod }} {{ foo.unit_measure|default_if_none:" " }}</td>
+                                                        <td class="text-center align-middle">
+                                                            {% if foo.lower_limit_prod and foo.upper_limit_prod %}
+                                                                {{ foo.lower_limit_prod }} - {{ foo.upper_limit_prod }}
+                                                            {% elif foo.lower_limit_prod %}
+                                                                Mayor que {{ foo.lower_limit_prod }}
+                                                            {% elif foo.upper_limit_prod %}
+                                                                Menor que {{ foo.upper_limit_prod }}
+                                                            {% endif %}
+                                                            {{ foo.unit_measure|default_if_none:"" }}
+                                                        </td>
                                                         <td class="text-center align-middle">
                                                             {% if foo.method_test %}
                                                                 {{ foo.method_test.analytical_method.code_analytical_method }}
@@ -250,7 +258,7 @@
                                                                 {{ sa.analytical_method_relation.calculate_description_relation }}
                                                             {% endif %}
                                                         </td>
-                                                        <td class="text-center align-middle">{{ sa.average_concentration|default_if_none:'Pendiente' }} {% if sa.average_concentration %}{{ sa.unit_measure_prod|default_if_none:"" }}{% endif %}</td>
+                                                        <td class="text-center align-middle">{{ sa.average_concentration|default_if_none:'Pendiente' }} {% if sa.average_concentration %}{{ sa.unit_measure_prod|default:sa.unit_measure }}{% endif %}</td>
                                                         <td class="text-center align-middle {% if sa.comply == 'No Cumple' %}text-danger{% endif %}">
                                                             {{ sa.comply|default_if_none:"Pendiente" }}
                                                         </td>
