@@ -559,8 +559,11 @@ class SamplingProcessApprovedUpdateView(LoginRequiredMixin, ValidatePermissionRe
         try:
             form = self.get_form()
             if form.is_valid():
-                form.save()
-                messages.success(request, f'Control de Calidad Aprobado satisfactoriamente!')
+                result = form.save()
+                if isinstance(result, dict) and result.get('error'):
+                    messages.error(request, f'Por favor corrija los errores: {result["error"]}')
+                else:
+                    messages.success(request, f'Control de Calidad Aprobado satisfactoriamente!')
             else:
                 error_messages = format_form_errors(form)
                 messages.error(request, f'Por favor corrija los errores: {error_messages}')

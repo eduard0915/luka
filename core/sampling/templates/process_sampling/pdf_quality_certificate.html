@@ -6,7 +6,14 @@
     <style>
         @page {
             size: letter portrait;
-            margin: 1cm;
+            margin: 1cm 1cm 2.4cm 1cm;
+            @frame footer_frame {
+                -pdf-frame-content: footer_content;
+                left: 1cm;
+                width: 19.59cm;
+                top: 25.6cm;
+                height: 1.3cm;
+            }
         }
         body {
             font-family: Arial, sans-serif;
@@ -55,8 +62,9 @@
         .section-title {
             font-size: 10pt;
             font-weight: bold;
+            line-height: 1;
             background-color: #f0f0f0;
-            padding: 4px 6px;
+            padding: 7px 6px 5px 6px;
             border-left: 4px solid #333;
             margin-bottom: 8px;
         }
@@ -68,11 +76,15 @@
         table th, table td {
             border: 1px solid #ddd;
             padding: 5px;
-            text-align: left;
+            vertical-align: middle;
+            line-height: 1;
         }
         table th {
             background-color: #f9f9f9;
             text-align: center;
+        }
+        table td {
+            text-align: left;
         }
         .info-table th {
             width: 25%;
@@ -93,7 +105,7 @@
             color: #cc0000;
         }
         .signatures {
-            margin-top: 30px;
+            margin-top: 12px;
         }
         .signature {
             display: inline-block;
@@ -106,15 +118,22 @@
             margin-top: 45px;
             padding-top: 5px;
             font-weight: bold;
+            line-height: 1;
         }
         .signature .role {
+            font-weight: normal;
             font-size: 8pt;
             color: #666;
         }
+        .signature.approved-signature {
+            width: 45%;
+            text-align: left;
+        }
+        .signature.approved-signature .line {
+            margin-top: 8px;
+            padding-top: 3px;
+        }
         .footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
             text-align: center;
             font-size: 7pt;
             color: #999;
@@ -139,52 +158,52 @@
         </table>
         <div class="clear"></div>
     </div>
-
+    <br>
     <div class="section">
         <div class="section-title">DATOS DE LA MUESTRA</div>
         <table class="info-table">
             <tr>
-                <th>N° de Muestra</th>
-                <td>{{ object.number_sample }}</td>
-                <th>N° de Lote</th>
-                <td>{{ object.batch_number|default_if_none:"No Aplica" }}</td>
+                <th style="width:20%;text-align:right">N° de Muestra</th>
+                <td style="width:30%;">{{ object.number_sample }}</td>
+                <th style="width:20%;text-align:right">N° de Lote</th>
+                <td style="width:30%;">{{ object.batch_number|default_if_none:"No Aplica" }}</td>
             </tr>
             <tr>
-                <th>Producto</th>
-                <td>
+                <th style="width:20%;text-align:right">Producto</th>
+                <td style="width:30%;">
                     {% if sampling_point %}
                         {{ sampling_point.product.code_product }} - {{ sampling_point.product.description_product }}
                     {% else %}
                         No Aplica
                     {% endif %}
                 </td>
-                <th>Estado</th>
-                <td>{{ object.status_sampling }}</td>
+                <th style="width:20%;text-align:right">Estado</th>
+                <td style="width:30%;{% if object.status_sampling == 'Rechazado' %}font-weight:bold;color:#cc0000;{% endif %}">{{ object.status_sampling }}</td>
             </tr>
             <tr>
-                <th>Punto de Muestreo</th>
-                <td>
+                <th style="width:20%;text-align:right">Punto de Muestreo</th>
+                <td style="width:30%;">
                     {% if sampling_point %}
                         {{ sampling_point.sample_point_code }} - {{ sampling_point.sample_point_name }}
                     {% else %}
                         No Aplica
                     {% endif %}
                 </td>
-                <th>Fecha de Muestreo</th>
-                <td>{{ object.date_sampling|date:"d/m/Y H:i"|default:"Pendiente" }}</td>
+                <th style="width:20%;text-align:right">Fecha de Muestreo</th>
+                <td style="width:30%;">{{ object.date_sampling|date:"d/m/Y H:i"|default:"Pendiente" }}</td>
             </tr>
         </table>
     </div>
-
+    <br>
     <div class="section">
         <div class="section-title">RESULTADOS DE ANÁLISIS DE CONTROL DE CALIDAD</div>
         <table>
             <thead>
                 <tr>
-                    <th style="width:45%">Ensayo</th>
-                    <th style="width:20%">Especificación</th>
-                    <th style="width:20%">Resultado</th>
-                    <th style="width:15%">Concepto</th>
+                    <th style="width:45%;text-align:center">Ensayo</th>
+                    <th style="width:20%;text-align:center">Especificación</th>
+                    <th style="width:20%;text-align:center">Resultado</th>
+                    <th style="width:15%;text-align:center">Concepto</th>
                 </tr>
             </thead>
             <tbody>
@@ -241,6 +260,7 @@
     </div>
 
     {% if observations %}
+        <br>
         <div class="section">
             <div class="section-title">OBSERVACIONES</div>
             <table>
@@ -261,30 +281,19 @@
             </table>
         </div>
     {% endif %}
-
+    <br>
     <div class="section">
-        <div class="section-title">RESPONSABLES</div>
+        <div class="section-title">RESPONSABLE</div>
         <div class="signatures">
-            <div class="signature">
-                <div>Realizado por</div>
-                <div class="line">{{ object.sampling_created_by.get_full_name|default:"N/A" }}</div>
-                <div class="role">Toma de Muestra</div>
-            </div>
-            <div class="signature">
-                <div>Confirmado por</div>
-                <div class="line">{{ object.sampling_confirmed_by.get_full_name|default:"N/A" }}</div>
-                <div class="role">Recepción de Muestra</div>
-            </div>
-            <div class="signature">
-                <div>Autorizado por</div>
-                <div class="line">{{ object.approved_by.get_full_name|default:"N/A" }}</div>
-                <div class="role">Control de Calidad</div>
+            <div class="signature approved-signature">
+                <div>Aprobado por</div>
+                <div class="line">{{ object.approved_by.get_full_name|default:"Pendiente" }}<br><span class="role">{{ object.approved_by.cargo|default:"Control de Calidad" }}{% if object.date_approved %} - {{ object.date_approved|date:"d/m/Y" }}{% endif %}</span></div>
             </div>
         </div>
     </div>
 
-    <div class="footer">
-        Generado el {{ today|date:"d/m/Y H:i" }} | Página <pdf:pagenumber/> de <pdf:pagecount/>
+    <div class="footer" id="footer_content">
+        Página <pdf:pagenumber/> de <pdf:pagecount/>
     </div>
 </body>
 </html>
