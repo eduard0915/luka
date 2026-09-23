@@ -31,6 +31,7 @@ urlpatterns = [
     path('update_std/<uuid:pk>/', SolutionStandardUpdateView.as_view(), name='update_solution_std'),
     path('confirmed/<uuid:pk>/', SolutionConfirmedUpdateView.as_view(), name='confirmed_solution'),
     path('confirmed_std/<uuid:pk>/', SolutionStdConfirmedUpdateView.as_view(), name='confirmed_solution_std'),
+    path('discard_remaining_std/<uuid:pk>/', SolutionStdDiscardRemainingView.as_view(), name='discard_remaining_std'),
     path('solution_label/<uuid:pk>/', SolutionLabelPDFDetailView.as_view(), name='solution_label_pdf'),
     path('solution_label_std/<uuid:pk>/', SolutionStdLabelPDFDetailView.as_view(), name='solution_label_std_pdf'),
     path('api/inventory-reagent/<uuid:reagent_id>/', get_inventory_reagent_data, name='inventory_reagent_data'),

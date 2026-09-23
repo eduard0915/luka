@@ -8,12 +8,14 @@
 {% block head %}
     {% block head_list %}
         <style>
-            /* Ajustes para la tabla con id data_0 */
-            #data_0, #data_0 th, #data_0 td {
+            /* Ajustes para las tablas de detalle */
+            #data_standardizations, #data_standardizations th, #data_standardizations td,
+            #data_transactions, #data_transactions th, #data_transactions td {
                 font-size: 0.85rem;
             }
 
-            #data_0 thead th {
+            #data_standardizations thead th,
+            #data_transactions thead th {
                 text-align: center;
                 vertical-align: middle;
             }
@@ -266,7 +268,7 @@
                     </div>
                     <div class="tile-body">
                         <div class="table-responsive">
-                            <table class="table table-hover table-bordered" id="data_0">
+                            <table class="table table-hover table-bordered" id="data_standardizations">
                                 <thead>
                                 <tr>
                                     <th style="width:10%">Fecha</th>
@@ -334,7 +336,7 @@
                     </div>
                     <div class="tile-body">
                         <div class="table-responsive">
-                            <table class="table table-hover table-bordered" id="data_0">
+                            <table class="table table-hover table-bordered" id="data_transactions">
                                 <thead>
                                 <tr>
                                     <th style="width:15%">Fecha</th>
@@ -394,36 +396,50 @@
 
     <script>
 
+        function initDetailDataTable(selector, orderColumn, columnDefs) {
+            const $table = $(selector);
+            if (!$table.length) {
+                return;
+            }
+            // Solo inicializar DataTable si hay filas de datos
+            const hasData = $table.find('tbody tr').length > 0 && !$table.find('tbody tr td[colspan]').length;
+            if (!hasData) {
+                console.info('DataTable no inicializado: ' + selector);
+                return;
+            }
+            $table.DataTable({
+                responsive: true,
+                autoWidth: false,
+                searching: false,
+                info: false,
+                order: [[orderColumn, 'desc']],
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
+                },
+                columnDefs: columnDefs
+            });
+        }
+
         try {
             $(function () {
-                // Solo inicializar DataTable si hay filas de datos
-                const hasData = $('#data_0 tbody tr').length > 0 && !$('#data_0 tbody tr td[colspan]').length;
+                initDetailDataTable('#data_standardizations', 0, [
+                    {
+                        targets: [1, 5],
+                        className: 'td-actions text-center',
+                        orderable: false,
+                    },
+                    {
+                        targets: [2, 3, 4],
+                        className: 'td-actions text-center',
+                    }
+                ]);
 
-                if (hasData) {
-                    $('#data_0').DataTable({
-                        responsive: true,
-                        autoWidth: false,
-                        searching: false,
-                        info: false,
-                        order: [[3, 'desc']],
-                        language: {
-                            url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
-                        },
-                        columnDefs: [
-                            {
-                                targets: [1, 5],
-                                className: 'td-actions text-center',
-                                orderable: false,
-                            },
-                            {
-                                targets: [2, 3, 4],
-                                className: 'td-actions text-center',
-                            }
-                        ]
-                    });
-                } else {
-                    console.info('DataTable no inicializado: tabla vacía o sin datos válidos');
-                }
+                initDetailDataTable('#data_transactions', 0, [
+                    {
+                        targets: '_all',
+                        className: 'td-actions text-center',
+                    }
+                ]);
             })
         } catch (error) {
             console.error('Error al inicializar DataTable:', error);

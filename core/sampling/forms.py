@@ -919,18 +919,16 @@ class SamplingProcessApprovedForm(ModelForm):
         widgets = {'approved': Select(attrs={'class': 'form-control'}, choices=SELECT)}
 
     def save(self, commit=True):
-        """Aprueba la muestra cambiando el estado a 'Aprobado' y asignando el usuario."""
-        data = {}
+        """Aprueba o rechaza la muestra según el campo approved y asigna el usuario."""
         form = super()
         try:
-            if form.is_valid():
-                data = form.save(commit=False)
-                data.approved_by_id = get_current_user().id
-                data.date_approved = timezone.now()()
-                data.status_sampling = 'Aprobado'
-                data.save()
-            else:
-                data['error'] = form.errors
+            if not form.is_valid():
+                return {'error': form.errors}
+            instance = form.save(commit=False)
+            instance.approved_by_id = get_current_user().id
+            instance.date_approved = timezone.now()
+            instance.status_sampling = 'Aprobado' if instance.approved else 'Rechazado'
+            instance.save()
+            return instance
         except Exception as e:
-            data['error'] = str(e)
-        return data
+            return {'error': str(e)}

@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import get_template
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -194,6 +194,7 @@ class SolutionStdListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, L
                     'preparation_std_date',
                     'expire_std_date_solution',
                     'quantity_solution_std',
+                    'quantity_available_std',
                     'preparated_std_by__first_name',
                     'preparated_std_by__last_name',
                     'preparated_std_by__cargo',
@@ -268,6 +269,44 @@ class SolutionStandardUpdateView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['icon'] = 'fa-solid fa-flask-vial'
         context['list_url'] = reverse_lazy('solution:detail_solution_std', kwargs={'pk': self.object.pk})
         return context
+
+
+# Desechar Remanente de Solución Estándar
+class SolutionStdDiscardRemainingView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista para desechar el remanente de una solución estándar (quantity_available_std = 0)."""
+    permission_required = 'reagent.change_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        """Maneja la petición de descarte del remanente."""
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        """Renderiza el modal de confirmación para desechar el remanente."""
+        instance = get_object_or_404(SolutionStd, pk=kwargs['pk'])
+        context = {
+            'entity': 'Desechar Remanente',
+            'object': instance,
+            'action_url': reverse_lazy('solution:discard_remaining_std', kwargs={'pk': instance.pk}),
+        }
+        return render(request, 'solution_std/discard_remaining_solution.html', context)
+
+    def post(self, request, *args, **kwargs):
+        """Procesa el descarte del remanente dejando la cantidad disponible en cero."""
+        data = {}
+        try:
+            action = request.POST.get('action')
+            if action == 'discard':
+                instance = SolutionStd.objects.get(pk=kwargs['pk'])
+                instance.quantity_available_std = 0
+                instance.save()
+                data['success'] = True
+                messages.success(request, f'Remanente de la solución "{instance.code_solution_std}" desechado satisfactoriamente!')
+            else:
+                data['error'] = 'No ha ingresado datos en los campos'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
 
 
 # Detalle de Solución Estándar
