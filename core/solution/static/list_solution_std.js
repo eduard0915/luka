@@ -98,11 +98,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         let actions
                         actions = '<a href="/solution/detail_std/' + row['id'] + '/" type="button" title="Detalle de Preparación"><i class="bi bi-info-square text-info"></i></a> &nbsp';
                         // actions += '<a href="/solution/update/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a>';
-
-                        // Mostrar el botón de desechar solo si hay remanente y es menor al 5% de lo preparado
                         let qtyAvailable = parseFloat(row['quantity_available_std']);
-                        let qtySolution = parseFloat(row['quantity_solution_std']);
-                        if (!isNaN(qtyAvailable) && !isNaN(qtySolution) && qtySolution > 0 && qtyAvailable > 0 && qtyAvailable < (qtySolution * 0.05)) {
+                        if (!isNaN(qtyAvailable) && qtyAvailable > 0 && row['preparation_std_date'] !== null && row['preparation_std_date'] !== undefined) {
                             actions += '<a onclick="open_modal(\'/solution/discard_remaining_std/' + row['id'] + '/\')" type="button" title="Desechar Remanente"><i class="bi bi-trash3 text-danger"></i></a> &nbsp';
                         }
                         return actions

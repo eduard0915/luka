@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import get_template
 from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
@@ -309,6 +309,44 @@ class SolutionConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionRequired
         context['class'] = 'col-md-6'
         context['info_form'] = 'Confirma Preparación de la Solución?'
         return context
+
+
+# Desechar Remanente de Solución
+class SolutionDiscardRemainingView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
+    """Vista para desechar el remanente de una solución (quantity_available_sln = 0)."""
+    permission_required = 'reagent.change_reagent'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        """Maneja la petición de descarte del remanente."""
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        """Renderiza el modal de confirmación para desechar el remanente."""
+        instance = get_object_or_404(Solution, pk=kwargs['pk'])
+        context = {
+            'entity': 'Desechar Remanente',
+            'object': instance,
+            'action_url': reverse_lazy('solution:discard_remaining_solution', kwargs={'pk': instance.pk}),
+        }
+        return render(request, 'solution/discard_remaining_solution.html', context)
+
+    def post(self, request, *args, **kwargs):
+        """Procesa el descarte del remanente dejando la cantidad disponible en cero."""
+        data = {}
+        try:
+            action = request.POST.get('action')
+            if action == 'discard':
+                instance = Solution.objects.get(pk=kwargs['pk'])
+                instance.quantity_available_sln = 0
+                instance.save()
+                data['success'] = True
+                messages.success(request, f'Remanente de la solución "{instance.code_solution}" desechado satisfactoriamente!')
+            else:
+                data['error'] = 'No ha ingresado datos en los campos'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
 
 
 # Detalle de Soluciones

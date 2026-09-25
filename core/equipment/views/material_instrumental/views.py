@@ -122,9 +122,9 @@ class MaterialInstrumentalListView(LoginRequiredMixin, ValidatePermissionRequire
     def get_context_data(self, **kwargs):
         """Agrega datos de contexto adicionales para la plantilla de listado."""
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Material Instrumental'
+        context['title'] = 'Materiales de Laboratorio'
         context['create_url'] = reverse_lazy('equipment:create_material_instrumental')
-        context['entity'] = 'Material Instrumental'
+        context['entity'] = 'Material de Laboratorio'
         context['div'] = '12'
         context['icon'] = 'fa-solid fa-flask'
         return context

@@ -109,7 +109,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         let actions
                         actions = '<a href="/solution/detail/' + row['id'] + '/" type="button" title="Detalle de Preparación"><i class="bi bi-info-square text-info"></i></a> &nbsp';
                         if (row['preparation_confirmed'] === false){
-                            actions += '<a href="/solution/update/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a>';
+                            actions += '<a href="/solution/update/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a> &nbsp';
+                        }
+                        let qtyAvailable = parseFloat(row['quantity_available_sln']);
+                        if (!isNaN(qtyAvailable) && qtyAvailable > 0 && row['preparation_date'] !== null && row['preparation_date'] !== undefined) {
+                            actions += '<a onclick="open_modal(\'/solution/discard_remaining/' + row['id'] + '/\')" type="button" title="Desechar Remanente"><i class="bi bi-trash3 text-danger"></i></a>';
                         }
                         return actions
                     }
