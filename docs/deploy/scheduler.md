@@ -42,6 +42,10 @@ desplegar**: solo levanta las dependencias de desarrollo local y publica el puer
 base. Si Dokploy sigue apuntando a `docker-compose.yml`, el despliegue quedaría sin
 `web-luka` y con PostgreSQL escuchando en el host.
 
+Si el despliegue aborta con `cannot create .../code/docker-compose.dokploy.yml/.env:
+Directory nonexistent`, es el bug del `.env` de Dokploy. Ver
+`docs/deploy/dokploy.md` para el Custom Command que lo evita.
+
 El servicio `scheduler-luka` ya está en ese archivo: se despliega solo con el resto del
 stack. Requisitos:
 

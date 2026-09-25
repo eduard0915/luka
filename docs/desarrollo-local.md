@@ -54,7 +54,8 @@ docker compose down                     # parar (con -v además borra los datos)
 ```
 
 `docker-compose.yml` es solo para esto. El despliegue usa `docker-compose.dokploy.yml`,
-que lleva el stack completo y no publica el puerto de la base.
+que lleva el stack completo y no publica el puerto de la base (ver
+`docs/deploy/dokploy.md`).
 
 ## 3. Entorno virtual e instalación
 
