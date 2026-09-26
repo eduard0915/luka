@@ -15,7 +15,8 @@ from core.analytical_method.forms import *
 class BaseAnalyticalMethodDetailView(ValidatePermissionRequiredMixin):
     """)Vista base para gestionar los recursos asociados a un método analítico."""
     permission_required = 'analytical_method.view_analyticalmethod'
-    template_name = 'modal_one.html'
+    template_name = 'modal_three.html'
+    # template_name = 'modal_one.html'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):

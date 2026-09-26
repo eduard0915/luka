@@ -112,11 +112,19 @@ class AnalyticalMethodSolutionForm(ModelForm):
             form.field.widget.attrs['class'] = 'form-control'
             form.field.widget.attrs['autocomplete'] = 'off'
 
+        col_classes = {
+            'solution': 'col-md-8',
+            'milliliter_sln': 'col-md-4',
+        }
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
     class Meta:
         model = AnalyticalMethodSolution
-        fields = ['solution']
+        fields = ['solution', 'milliliter_sln']
         widgets = {
             'solution': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+            'milliliter_sln': TextInput(attrs={'class': 'form-control', 'style': 'width: 100%'}),
         }
 
     def save(self, commit=True):
@@ -181,11 +189,19 @@ class AnalyticalMethodReagentForm(ModelForm):
             form.field.widget.attrs['class'] = 'form-control'
             form.field.widget.attrs['autocomplete'] = 'off'
 
+        col_classes = {
+            'reagent': 'col-md-8',
+            'amount_reagent': 'col-md-4',
+        }
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
     class Meta:
         model = AnalyticalMethodReagent
-        fields = ['reagent']
+        fields = ['reagent', 'amount_reagent']
         widgets = {
             'reagent': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
+            'amount_reagent': TextInput(attrs={'class': 'form-control', 'style': 'width: 100%'}),
         }
 
     def save(self, commit=True):

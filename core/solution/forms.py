@@ -1191,3 +1191,105 @@ class SolutionStdBaseForm(ModelForm):
         except Exception as e:
             data['error'] = str(e)
         return data
+
+
+# Registro de uso de Solución en análisis de muestra
+class TransactionSolutionForm(ModelForm):
+    """Formulario para registrar el uso de una solución preparada en un análisis."""
+
+    def __init__(self, *args, **kwargs):
+        """Filtra las soluciones de inventario relacionadas con la solución base del método."""
+        self.analytical_method_solution = kwargs.pop('analytical_method_solution')
+        super().__init__(*args, **kwargs)
+
+        user = get_current_user()
+        solution_qs = Solution.objects.filter(
+            solution_base=self.analytical_method_solution.solution,
+            quantity_available_sln__gt=0,
+            expire_date_solution__gte=timezone.localdate(),
+        )
+        if user and user.laboratory:
+            solution_qs = solution_qs.filter(laboratory=user.laboratory)
+        self.fields['solution_inventory'].queryset = solution_qs.select_related('solution_base')
+
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+        col_classes = {'solution_inventory': 'col-md-8', 'quantity': 'col-md-4'}
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
+    class Meta:
+        model = TransactionSolution
+        fields = ['solution_inventory', 'quantity']
+        widgets = {
+            'solution_inventory': Select(attrs={'class': 'form-control', 'required': True}),
+            'quantity': NumberInput(attrs={'class': 'form-control', 'required': True, 'step': 'any', 'min': '0'}),
+        }
+
+    def clean(self):
+        """Valida que la cantidad no exceda la disponible de la solución seleccionada."""
+        cleaned_data = super().clean()
+        solution = cleaned_data.get('solution_inventory')
+        quantity = cleaned_data.get('quantity')
+        if solution is not None and quantity is not None:
+            available = solution.quantity_available_sln or 0
+            if quantity <= 0:
+                self.add_error('quantity', 'La cantidad debe ser mayor que cero')
+            elif quantity > available:
+                self.add_error(
+                    'quantity',
+                    f'La cantidad ingresada ({quantity} mL) excede la disponible ({available} mL)',
+                )
+        return cleaned_data
+
+
+# Edición de uso de Solución en análisis de muestra
+class TransactionSolutionUpdateForm(ModelForm):
+    """Formulario para editar el uso de una solución registrado en un análisis."""
+
+    def __init__(self, *args, **kwargs):
+        """Filtra las soluciones de la misma base e incluye la solución actual de la transacción."""
+        super().__init__(*args, **kwargs)
+
+        user = get_current_user()
+        solution_qs = Solution.objects.none()
+        if self.instance and self.instance.pk:
+            solution_qs = Solution.objects.filter(solution_base=self.instance.solution_inventory.solution_base)
+            if user and user.laboratory:
+                solution_qs = solution_qs.filter(laboratory=user.laboratory)
+            solution_qs = solution_qs | Solution.objects.filter(pk=self.instance.solution_inventory_id)
+        self.fields['solution_inventory'].queryset = solution_qs.select_related('solution_base')
+
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+        col_classes = {'solution_inventory': 'col-md-8', 'quantity': 'col-md-4'}
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
+    class Meta:
+        model = TransactionSolution
+        fields = ['solution_inventory', 'quantity']
+        widgets = {
+            'solution_inventory': Select(attrs={'class': 'form-control', 'required': True}),
+            'quantity': NumberInput(attrs={'class': 'form-control', 'required': True, 'step': 'any', 'min': '0'}),
+        }
+
+    def clean(self):
+        """Valida la cantidad considerando lo ya descontado por esta transacción."""
+        cleaned_data = super().clean()
+        solution = cleaned_data.get('solution_inventory')
+        quantity = cleaned_data.get('quantity')
+        if solution is not None and quantity is not None:
+            available = solution.quantity_available_sln or 0
+            if self.instance and self.instance.pk and solution.pk == self.instance.solution_inventory_id:
+                available += self.instance.quantity or 0
+            if quantity <= 0:
+                self.add_error('quantity', 'La cantidad debe ser mayor que cero')
+            elif quantity > available:
+                self.add_error(
+                    'quantity',
+                    f'La cantidad ingresada ({quantity} mL) excede la disponible ({available} mL)',
+                )
+        return cleaned_data

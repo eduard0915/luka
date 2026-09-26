@@ -18,7 +18,7 @@ from xhtml2pdf import pisa
 
 from core.company.models import Company
 from core.equipment.forms import EquipmentInstrumentalForm
-from core.equipment.models import EquipmentInstrumental
+from core.equipment.models import EquipmentInstrumental, EquipmentUsageLog
 from core.mixins import ValidatePermissionRequiredMixin
 from luka import settings
 
@@ -161,6 +161,69 @@ class EquipmentInstrumentalListView(LoginRequiredMixin, ValidatePermissionRequir
         context['entity'] = 'Equipos Instrumentales'
         context['div'] = '12'
         context['icon'] = 'fa-solid fa-microscope'
+        return context
+
+
+class EquipmentUsageLogListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """Vista de listado de la bitácora de uso de un equipo instrumental."""
+
+    model = EquipmentUsageLog
+    template_name = 'equipment_instrumental/list_equipment_usage_log.html'
+    permission_required = 'equipment.view_equipmentinstrumental'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        """Dispacha la solicitud HTTP aplicando la exención de CSRF."""
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Procesa las solicitudes POST para la búsqueda de la bitácora de uso del equipo."""
+        data = {}
+        try:
+            action = request.POST.get('action')
+            if action == 'searchdata':
+                usage_logs = list(EquipmentUsageLog.objects.select_related(
+                    'responsible_user',
+                    'sampling_analysis',
+                    'sampling_analysis__sampling_process',
+                    'sampling_analysis__analytical_method',
+                ).values(
+                    'id',
+                    'use_date',
+                    'responsible_user__first_name',
+                    'responsible_user__last_name',
+                    'responsible_user__cargo',
+                    'sampling_analysis__sampling_process__number_sample',
+                    'sampling_analysis__analytical_method__description_analytical_method',
+                ).filter(equipment_id=self.kwargs['pk']).order_by('-use_date'))
+
+                for log in usage_logs:
+                    first_name = log.get('responsible_user__first_name', '') or ''
+                    last_name = log.get('responsible_user__last_name', '') or ''
+                    cargo = log.get('responsible_user__cargo', '') or ''
+                    full_name = f"{first_name} {last_name}".strip()
+                    log['responsible_user__full_name'] = f"{full_name}, {cargo}" if cargo else full_name
+                    use_date = log.get('use_date')
+                    log['use_date'] = timezone.localtime(use_date).strftime('%Y-%m-%d %H:%M') if use_date else ''
+
+                return JsonResponse(usage_logs, safe=False)
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        """Agrega datos de contexto adicionales para la plantilla de listado."""
+        context = super().get_context_data(**kwargs)
+        equipment = EquipmentInstrumental.objects.get(pk=self.kwargs['pk'])
+        context['title'] = f'Bitácora de Uso del Equipo {equipment.code_equipment}'
+        context['entity'] = f'Bitácora de Uso del Equipo: {equipment.code_equipment} - {equipment.description_equipment}'
+        context['div'] = '10'
+        context['icon'] = 'fa-solid fa-clipboard-list'
+        context['equipment'] = equipment
+        context['list_url'] = reverse_lazy('equipment:list_equipment_instrumental')
+        context['back'] = reverse_lazy('equipment:list_equipment_instrumental')
         return context
 
 

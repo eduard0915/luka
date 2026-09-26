@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 data: function (d) {
                     d['action'] = 'searchdata';
                     d['filter_laboratory'] = $('#id_filter_laboratory').val() || '';
+                    d['filter_code'] = $('#id_filter_code').val() || '';
                     d['filter_description'] = $('#id_filter_description').val() || '';
                     d['filter_prep_date_start'] = $('#id_filter_prep_date_start').val() || '';
                     d['filter_prep_date_end'] = $('#id_filter_prep_date_end').val() || '';
@@ -128,6 +129,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         $('#id_filter_description').on('keyup', function () {
+            table.ajax.reload();
+        });
+
+        $('#id_filter_code').on('keyup', function () {
             table.ajax.reload();
         });
 

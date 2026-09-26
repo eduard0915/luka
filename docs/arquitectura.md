@@ -252,8 +252,13 @@ dentro de `#modal_template` y muestra el modal con Bootstrap.
 - Formulario modal `#modal_form`, envío con **`$.ajax`** (jQuery) y `FormData`.
 - Helper `format_errors(error)` convierte el dict de errores de Django en HTML para SweetAlert.
 - Si la respuesta trae `redirect_url` redirige a ella; si no, recarga la página actual.
-- Inicializa **Datepicker** (Bootstrap 5) para inputs con `[data-datepicker="1"]` o
-  `.js-datepicker`, envolviéndolos en un `input-group` con botón de calendario.
+- El `<script>` va dentro de una **IIFE** para no filtrar variables al scope global
+  (evita `SyntaxError: Identifier 'dateInputs' has already been declared` al reinyectar
+  el modal vía `open_modal()`).
+- Inicializa los pickers llamando a los helpers globales de `static/js/datetime.js`
+  (`initDatePickers()`, `initDateTimePickers()`, `initTimePickers()`) para inputs con
+  `[data-datepicker="1"]` o `.js-datepicker`, envolviéndolos en un `input-group` con
+  botón de calendario.
 
 ## 7.1 Cómo estructurar plantillas de tipo formulario (Create/Modal)
 
@@ -381,14 +386,17 @@ basta añadir un `{% if entity == '...' %}`.
 
 ### Anatomía del envío AJAX de `modal_three.html`
 
-1. `$(document).on('submit', '#modal_form')` (delegación, por si el modal se carga
-   después de `DOMContentLoaded`).
+1. `$('#modal_form').off('submit.lukaModal').on('submit.lukaModal', ...)`: binding con
+   namespace directo sobre el formulario ya insertado; el `off` previo evita handlers
+   duplicados al reabrir el modal.
 2. Mismo patrón de spinner + `$.ajax` con `FormData`, `processData: false`,
    `contentType: false`.
 3. `format_errors(data.error)` convierte dict → `<ul>` con cada campo y su error.
 4. Éxito → SweetAlert y redirección a `data.redirect_url` o recarga de la página.
-5. Al final, inicializa **Datepicker** para `[data-datepicker="1"]` / `.js-datepicker`
-   dentro del modal (contenedor = el modal para respetar el z-index).
+5. Al final, inicializa los pickers llamando a los helpers globales de
+   `static/js/datetime.js` (`initDatePickers()`, `initDateTimePickers()`,
+   `initTimePickers()`) para `[data-datepicker="1"]` / `.js-datepicker` dentro del modal
+   (contenedor = el modal para respetar el z-index).
 
 ### Estructura de un modal de Detalle (solo lectura)
 

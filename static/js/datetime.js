@@ -2,7 +2,7 @@
 
 // Función para inicializar DatePickers (solo fecha)
 function initDatePickers() {
-    const dateInputs = document.querySelectorAll('[data-datepicker="1"]:not([data-datetime="1"])');
+    const dateInputs = document.querySelectorAll('[data-datepicker="1"]:not([data-datetime="1"]), .js-datepicker:not([data-datetime="1"])');
 
     dateInputs.forEach(function (input) {
         if (input.dataset.datepickerInitialized) return;

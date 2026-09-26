@@ -69,8 +69,9 @@ class AnalyticalMethod(BaseModel):
 class AnalyticalMethodSolution(BaseModel):
     """Modelo que relaciona una solución con un método analítico."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE)
+    analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analítico', on_delete=models.CASCADE)
     solution = models.ForeignKey(SolutionBase, verbose_name='Solución', on_delete=models.CASCADE)
+    milliliter_sln = models.FloatField(verbose_name='Mililitros', null=True, blank=True)
 
     def __str__(self):
         """Retorna la solución asociada al método analítico."""
@@ -121,8 +122,9 @@ class AnalyticalMethodSolutionStd(BaseModel):
 class AnalyticalMethodReagent(BaseModel):
     """Modelo que relaciona un reactivo con un método analítico."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analitico', on_delete=models.CASCADE)
+    analytical_method = models.ForeignKey(AnalyticalMethod, verbose_name='Método Analítico', on_delete=models.CASCADE)
     reagent = models.ForeignKey(Reagent, verbose_name='Reactivo', on_delete=models.CASCADE)
+    amount_reagent = models.FloatField(verbose_name='Cantidad', null=True, blank=True)
 
     def __str__(self):
         """Retorna el reactivo asociado al método analítico."""

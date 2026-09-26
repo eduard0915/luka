@@ -293,3 +293,29 @@ class DailyVerification(BaseModel):
             else:
                 self.user_updated = user
         return super(DailyVerification, self).save(*args, **kwargs)
+
+
+class EquipmentUsageLog(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    equipment = models.ForeignKey(EquipmentInstrumental, verbose_name='Equipo', on_delete=models.CASCADE)
+    use_date = models.DateTimeField(verbose_name='Fecha y Hora')
+    sampling_analysis = models.ForeignKey('sampling.SamplingAnalysis', verbose_name='', on_delete=models.CASCADE)
+    responsible_user = models.ForeignKey(User, verbose_name='Responsable', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.equipment} - {self.use_date} - {self.sampling_analysis}'
+
+    class Meta:
+        verbose_name = 'EquipmentUsageLog'
+        verbose_name_plural = 'EquipmentUsageLogs'
+        db_table = 'EquipmentUsageLog'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None, *args, **kwargs):
+        """Guarda la verificación diaria asignando el usuario de creación o actualización."""
+        user = get_current_user()
+        if user:
+            if not self.user_creation:
+                self.user_creation = user
+            else:
+                self.user_updated = user
+        return super(EquipmentUsageLog, self).save(*args, **kwargs)

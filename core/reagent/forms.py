@@ -7,6 +7,7 @@ transferencia de reactivos, inventario de reactivos y transacciones.
 from crum import get_current_user
 from django import forms
 from django.forms import ModelForm, TextInput, FileInput, Select, DateInput, NumberInput, CheckboxInput
+from django.utils import timezone
 
 from core.reagent.models import Reagent, TransactionReagent, InventoryReagent
 from core.solution.models import SolutionStdBase
@@ -243,3 +244,107 @@ class TransactionReagentUpdateForm(ModelForm):
         except Exception as e:
             data['error'] = str(e)
         return data
+
+
+# Registro de uso de Reactivo en análisis de muestra
+class TransactionReagentAnalysisForm(ModelForm):
+    """Formulario para registrar el uso de un reactivo de inventario en un análisis."""
+
+    def __init__(self, *args, **kwargs):
+        """Filtra el inventario relacionado con el reactivo del método analítico."""
+        self.analytical_method_reagent = kwargs.pop('analytical_method_reagent')
+        super().__init__(*args, **kwargs)
+
+        user = get_current_user()
+        inventory_qs = InventoryReagent.objects.filter(
+            reagent=self.analytical_method_reagent.reagent,
+            quantity_stock__gt=0,
+            date_expire__gte=timezone.localdate(),
+        )
+        if user and user.laboratory:
+            inventory_qs = inventory_qs.filter(reagent__site=user.laboratory.site)
+        self.fields['reagent_inventory'].queryset = inventory_qs.select_related('reagent')
+
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+        col_classes = {'reagent_inventory': 'col-md-8', 'quantity': 'col-md-4'}
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
+    class Meta:
+        model = TransactionReagent
+        fields = ['reagent_inventory', 'quantity']
+        widgets = {
+            'reagent_inventory': Select(attrs={'class': 'form-control', 'required': True}),
+            'quantity': NumberInput(attrs={'class': 'form-control', 'required': True, 'step': 'any', 'min': '0'}),
+        }
+
+    def clean(self):
+        """Valida que la cantidad no exceda el stock disponible del inventario seleccionado."""
+        cleaned_data = super().clean()
+        inventory = cleaned_data.get('reagent_inventory')
+        quantity = cleaned_data.get('quantity')
+        if inventory is not None and quantity is not None:
+            available = inventory.quantity_stock or 0
+            if quantity <= 0:
+                self.add_error('quantity', 'La cantidad debe ser mayor que cero')
+            elif quantity > available:
+                self.add_error(
+                    'quantity',
+                    f'La cantidad ingresada ({quantity} {inventory.reagent.umb}) '
+                    f'excede el stock disponible ({available} {inventory.reagent.umb})',
+                )
+        return cleaned_data
+
+
+# Edición de uso de Reactivo en análisis de muestra
+class TransactionReagentAnalysisUpdateForm(ModelForm):
+    """Formulario para editar el uso de un reactivo registrado en un análisis."""
+
+    def __init__(self, *args, **kwargs):
+        """Filtra el inventario del mismo reactivo e incluye el inventario actual de la transacción."""
+        super().__init__(*args, **kwargs)
+
+        user = get_current_user()
+        inventory_qs = InventoryReagent.objects.none()
+        if self.instance and self.instance.pk:
+            inventory_qs = InventoryReagent.objects.filter(reagent=self.instance.reagent_inventory.reagent)
+            if user and user.laboratory:
+                inventory_qs = inventory_qs.filter(reagent__site=user.laboratory.site)
+            inventory_qs = inventory_qs | InventoryReagent.objects.filter(pk=self.instance.reagent_inventory_id)
+        self.fields['reagent_inventory'].queryset = inventory_qs.select_related('reagent')
+
+        for form in self.visible_fields():
+            form.field.widget.attrs['autocomplete'] = 'off'
+
+        col_classes = {'reagent_inventory': 'col-md-8', 'quantity': 'col-md-4'}
+        for field_name, field in self.fields.items():
+            field.col_class = col_classes.get(field_name, 'col-md-3')
+
+    class Meta:
+        model = TransactionReagent
+        fields = ['reagent_inventory', 'quantity']
+        widgets = {
+            'reagent_inventory': Select(attrs={'class': 'form-control', 'required': True}),
+            'quantity': NumberInput(attrs={'class': 'form-control', 'required': True, 'step': 'any', 'min': '0'}),
+        }
+
+    def clean(self):
+        """Valida la cantidad considerando lo ya descontado por esta transacción."""
+        cleaned_data = super().clean()
+        inventory = cleaned_data.get('reagent_inventory')
+        quantity = cleaned_data.get('quantity')
+        if inventory is not None and quantity is not None:
+            available = inventory.quantity_stock or 0
+            if self.instance and self.instance.pk and inventory.pk == self.instance.reagent_inventory_id:
+                available += self.instance.quantity or 0
+            if quantity <= 0:
+                self.add_error('quantity', 'La cantidad debe ser mayor que cero')
+            elif quantity > available:
+                self.add_error(
+                    'quantity',
+                    f'La cantidad ingresada ({quantity} {inventory.reagent.umb}) '
+                    f'excede el stock disponible ({available} {inventory.reagent.umb})',
+                )
+        return cleaned_data

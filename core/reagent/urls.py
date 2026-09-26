@@ -10,6 +10,16 @@ from django.urls import path
 from core.reagent.views.inventory_reagent.views import *
 from core.reagent.views.reagent.views import *
 from core.reagent.views.transaction_reagent.views import TransactionReagentCreateView
+from core.reagent.views.transaction_reagent_analysis.views import (
+    TransactionReagentAnalysisCreateView,
+    TransactionReagentAnalysisDeleteView,
+    TransactionReagentAnalysisUpdateView,
+)
+from core.reagent.views.transaction_reagent_analysis.views import (
+    TransactionReagentAnalysisCreateView,
+    TransactionReagentAnalysisDeleteView,
+    TransactionReagentAnalysisUpdateView,
+)
 from luka import settings
 
 app_name = 'reagent'
@@ -29,6 +39,10 @@ urlpatterns = [
     path('get-reagent-info/<uuid:reagent_id>/', get_reagent_info, name='get_reagent_info'),
     path('transaction_reagent/add/<uuid:pk>/', TransactionReagentCreateView.as_view(), name='create_transaction_reagent'),
     path('transaction_reagent/coa/', CertificateQualityDownloadView.as_view(), name='download_reagent_coa'),
+    # Transacciones (usos) de Reactivo en análisis de muestra
+    path('transaction_reagent_analysis/add/<uuid:analysis_pk>/<uuid:amr_pk>/', TransactionReagentAnalysisCreateView.as_view(), name='create_transaction_reagent_analysis'),
+    path('transaction_reagent_analysis/update/<uuid:pk>/', TransactionReagentAnalysisUpdateView.as_view(), name='update_transaction_reagent_analysis'),
+    path('transaction_reagent_analysis/delete/<uuid:pk>/', TransactionReagentAnalysisDeleteView.as_view(), name='delete_transaction_reagent_analysis'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL,

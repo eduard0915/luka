@@ -308,6 +308,7 @@ class TransactionSolution(BaseModel):
     detail_transaction = models.CharField(max_length=250, verbose_name='Detalle de Registro')
     quantity = models.FloatField(verbose_name='Cantidad')
     user_transaction = models.ForeignKey(User, verbose_name='', on_delete=models.CASCADE)
+    sampling_analysis = models.ForeignKey('sampling.SamplingAnalysis', verbose_name='', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         """Retorna la cantidad de la transacción."""

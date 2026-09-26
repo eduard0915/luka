@@ -21,6 +21,7 @@ urlpatterns = [
     path('instrumental/list/', EquipmentInstrumentalListView.as_view(), name='list_equipment_instrumental'),
     path('instrumental/update/<uuid:pk>/', EquipmentInstrumentalUpdateView.as_view(), name='update_equipment_instrumental'),
     path('instrumental/detail/<uuid:pk>/', EquipmentInstrumentalDetailView.as_view(), name='detail_equipment_instrumental'),
+    path('instrumental/usage_log/<uuid:pk>/', EquipmentUsageLogListView.as_view(), name='list_equipment_usage_log'),
     path('instrumental/pdf/<uuid:pk>/', EquipmentInstrumentalPDFView.as_view(), name='equipment_instrumental_pdf'),
     # Material Instrumental
     path('material/add/', MaterialInstrumentalCreateView.as_view(), name='create_material_instrumental'),

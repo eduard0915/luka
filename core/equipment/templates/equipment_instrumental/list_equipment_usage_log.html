@@ -1,0 +1,22 @@
+{% extends 'list_one.html' %}
+{% load static %}
+
+{% block head_list %}
+    <script src="{% static 'js/list_equipment_usage_log.js' %}"></script>
+{% endblock %}
+
+{% block columns %}
+    <tr>
+        <th>Fecha y Hora</th>
+        <th>Responsable</th>
+        <th>Muestra</th>
+        <th>Método Analítico</th>
+    </tr>
+{% endblock %}
+
+{% block rows %}
+{% endblock %}
+
+{% block scripts_detail %}
+    {{ block.super }}
+{% endblock %}

@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, DetailView, DeleteView, ListView
@@ -16,6 +17,9 @@ from core.analytical_method.models import AnalyticalMethodCalculateRelation
 from core.analytical_method.services import (
     _build_gravimetry_equation, build_gravimetry_data, build_spectrophotometry_data,
 )
+from core.equipment.models import EquipmentUsageLog
+from core.solution.models import Solution, TransactionSolution
+from core.reagent.models import InventoryReagent, TransactionReagent
 from core.utils import round_sig_figs
 
 
@@ -54,6 +58,81 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
         context['equipments'] = method.analyticalmethodequipment_set.all()
         context['materials'] = method.analyticalmethodmaterial_set.all()
         context['procedures'] = method.analyticalmethodprocedure_set.all()
+
+        # Soluciones del método con su inventario preparado y los usos registrados en este análisis
+        base_ids = [item.solution_id for item in context['solutions']]
+        inventories_by_base = {}
+        for solution in Solution.objects.filter(
+            solution_base_id__in=base_ids,
+            expire_date_solution__gte=timezone.localdate(),
+        ).select_related('solution_base').order_by('-code_solution'):
+            inventories_by_base.setdefault(solution.solution_base_id, []).append(solution)
+
+        transactions_by_solution = {}
+        for transaction in TransactionSolution.objects.filter(
+            sampling_analysis=self.object,
+            solution_inventory__solution_base_id__in=base_ids,
+        ).select_related('user_transaction').order_by('-date_creation'):
+            transactions_by_solution.setdefault(transaction.solution_inventory_id, []).append(transaction)
+
+        context['solutions_data'] = [
+            {
+                'item': item,
+                'inventories': [
+                    {
+                        'solution': solution,
+                        'transactions': transactions_by_solution.get(solution.id, []),
+                    }
+                    for solution in inventories_by_base.get(item.solution_id, [])
+                ],
+            }
+            for item in context['solutions']
+        ]
+
+        # Reactivos del método con su inventario y los usos registrados en este análisis
+        reagent_ids = [item.reagent_id for item in context['reagents']]
+        inventories_by_reagent = {}
+        for inventory in InventoryReagent.objects.filter(
+            reagent_id__in=reagent_ids,
+            date_expire__gte=timezone.localdate(),
+        ).select_related('reagent').order_by('-date_expire', '-date_creation'):
+            inventories_by_reagent.setdefault(inventory.reagent_id, []).append(inventory)
+
+        reagent_transactions_by_inventory = {}
+        for transaction in TransactionReagent.objects.filter(
+            sampling_analysis=self.object,
+            reagent_inventory__reagent_id__in=reagent_ids,
+        ).select_related('user_transaction').order_by('-date_creation'):
+            reagent_transactions_by_inventory.setdefault(transaction.reagent_inventory_id, []).append(transaction)
+
+        context['reagents_data'] = [
+            {
+                'item': item,
+                'inventories': [
+                    {
+                        'inventory': inventory,
+                        'transactions': reagent_transactions_by_inventory.get(inventory.id, []),
+                    }
+                    for inventory in inventories_by_reagent.get(item.reagent_id, [])
+                ],
+            }
+            for item in context['reagents']
+        ]
+
+        # Equipos del método con los usos registrados en este análisis
+        usage_logs_by_equipment = {}
+        for log in EquipmentUsageLog.objects.filter(
+            sampling_analysis=self.object,
+        ).select_related('responsible_user').order_by('-use_date'):
+            usage_logs_by_equipment.setdefault(log.equipment_id, []).append(log)
+
+        context['equipments_data'] = [
+            {
+                'item': item,
+                'logs': usage_logs_by_equipment.get(item.equipment_instrumental_id, []),
+            }
+            for item in context['equipments']
+        ]
         # Agrupar relaciones de cálculo por descripción y generar LaTeX
         calculate_relations_all = method.analyticalmethodcalculaterelation_set.select_related(
             'analytical_method_calculate'

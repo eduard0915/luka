@@ -110,7 +110,7 @@
                                             <ol class="list-group list-group-numbered list-group-flush">
                                                 {% for item in solutions %}
                                                     <li class="list-group-item py-1 p-1 border-0 d-flex align-items-center">
-                                                        <span>{{ item.solution }}</span>
+                                                        <span>{{ item.solution }}{% if item.milliliter_sln is not None %} - {{ item.milliliter_sln|default_if_none:'' }} mL{% endif %}</span>
                                                         <a href="javascript:void(0);"
                                                            onclick="open_modal('{% url 'analytical_method:update_solution' item.id %}')"
                                                            class="btn btn-link btn-sm p-0 text-primary">
@@ -191,7 +191,7 @@
                                             <ol class="list-group list-group-numbered list-group-flush">
                                                 {% for item in reagents %}
                                                     <li class="list-group-item py-1 p-1 border-0 d-flex align-items-center">
-                                                        <span>{{ item.reagent }}</span>
+                                                        <span>{{ item.reagent }}{% if item.amount_reagent is not None %} - {{ item.amount_reagent|default_if_none:'' }} {{ item.reagent.umb }}{% endif %}</span>
                                                         <a href="javascript:void(0);"
                                                            onclick="open_modal('{% url 'analytical_method:update_reagent' item.id %}')"
                                                            class="btn btn-link btn-sm p-0 text-primary">

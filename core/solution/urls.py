@@ -9,6 +9,7 @@ from core.solution.views.solution_stb_base.views import *
 from core.solution.views.solution_std.views import *
 from core.solution.views.standardization_sln.views import *
 from core.solution.views.standarization.views import StandardizationCreateView, StandardizationUpdateView
+from core.solution.views.transaction_solution.views import *
 
 from luka import settings
 
@@ -46,6 +47,10 @@ urlpatterns = [
     path('update_standardization/<uuid:pk>/', StandardizationUpdateView.as_view(), name='update_standardization'),
     path('add_standardization_sln/<uuid:pk>/', StandardizationSolutionCreateView.as_view(), name='create_std_solution'),
     path('delete_standardization_sln/<uuid:pk>/', StandardizationSolutionDeleteView.as_view(), name='delete_standardization_solution'),
+    # Transacciones (usos) de Solución en análisis de muestra
+    path('transaction_solution/add/<uuid:analysis_pk>/<uuid:ams_pk>/', TransactionSolutionCreateView.as_view(), name='create_transaction_solution'),
+    path('transaction_solution/update/<uuid:pk>/', TransactionSolutionUpdateView.as_view(), name='update_transaction_solution'),
+    path('transaction_solution/delete/<uuid:pk>/', TransactionSolutionDeleteView.as_view(), name='delete_transaction_solution'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL,

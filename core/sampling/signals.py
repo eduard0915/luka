@@ -2,13 +2,19 @@
 
 from decimal import Decimal
 
+from crum import get_current_user
 from django.db import transaction
 from django.db.models.aggregates import Avg, StdDev
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
-from core.analytical_method.models import AnalyticalMethodCalculate, AnalyticalMethodCalculateRelation
+from core.analytical_method.models import (
+    AnalyticalMethodCalculate,
+    AnalyticalMethodCalculateRelation,
+    AnalyticalMethodEquipment,
+)
+from core.equipment.models import EquipmentUsageLog
 from core.product.models import SpecificationProduct
 from core.sampling.models import *
 from core.sampling.services import send_oss_notification_email
@@ -244,6 +250,49 @@ def _create_solution_transaction(solution_id, quantity, user_id, detail_text):
         quantity=quantity,
         user_transaction_id=user_id,
     )
+
+
+@receiver(post_save, sender=SamplingAnalysisProcessing)
+def create_equipment_usage_log(sender, instance, created, **kwargs):
+    """Registra el uso de los equipos instrumentales del método analítico.
+
+    Se crea un ``EquipmentUsageLog`` por cada equipo asociado al método analítico
+    del análisis actual. Solo se registra con el primer procesamiento del día y
+    cuando la fecha (año, mes y día) difiere de los registros existentes.
+    """
+    if not created:
+        return
+
+    sample_analysis = instance.sample_analysis
+    analytical_method = sample_analysis.analytical_method
+    if not analytical_method:
+        return
+
+    user = get_current_user()
+    if not user or not getattr(user, 'is_authenticated', False):
+        return
+
+    today = timezone.localdate()
+
+    already_logged = EquipmentUsageLog.objects.filter(
+        sampling_analysis=sample_analysis,
+        use_date__date=today,
+    ).exists()
+    if already_logged:
+        return
+
+    equipment_ids = AnalyticalMethodEquipment.objects.filter(
+        analytical_method=analytical_method
+    ).values_list('equipment_instrumental_id', flat=True)
+
+    now = timezone.now()
+    for equipment_id in equipment_ids:
+        EquipmentUsageLog.objects.create(
+            equipment_id=equipment_id,
+            use_date=now,
+            sampling_analysis=sample_analysis,
+            responsible_user=user,
+        )
 
 
 @receiver(post_save, sender=MillimoleReacted)

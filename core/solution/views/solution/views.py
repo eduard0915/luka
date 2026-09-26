@@ -149,6 +149,7 @@ class SolutionListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, List
                 filters = Q()
 
                 laboratory_id = request.POST.get('filter_laboratory', '').strip()
+                code = request.POST.get('filter_code', '').strip()
                 description = request.POST.get('filter_description', '').strip()
                 prep_date_start = request.POST.get('filter_prep_date_start', '').strip()
                 prep_date_end = request.POST.get('filter_prep_date_end', '').strip()
@@ -160,6 +161,8 @@ class SolutionListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, List
 
                 if laboratory_id:
                     filters &= Q(laboratory_id=laboratory_id)
+                if code:
+                    filters &= Q(code_solution__icontains=code)
                 if description:
                     filters &= Q(solute_reagent__reagent__description_reagent__icontains=description)
                 if prep_date_start:
@@ -369,8 +372,8 @@ class SolutionDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, De
         context['std_config'] = Standardization.objects.filter(solution_base_id=self.object.solution_base.id).first()
         context['icon'] = 'fa-solid fa-flask-vial'
         context['list_url'] = reverse_lazy('solution:list_solution')
-        context['standardizations'] = StandardizationSolution.objects.select_related('solution').filter(solution_id=self.object.id)
-        context['standard_count'] = StandardizationSolution.objects.select_related('solution').filter(solution_id=self.object.id).count()
+        context['standardizations'] = StandardizationSolution.objects.select_related('solution_to_standardize').filter(solution_to_standardize_id=self.object.id)
+        context['standard_count'] = StandardizationSolution.objects.filter(solution_to_standardize_id=self.object.id).count()
         context['transactions'] = TransactionSolution.objects.select_related('solution_inventory').filter(solution_inventory_id=self.object.id)
         context['update_solution'] = reverse_lazy('solution:update_solution', kwargs={'pk': self.object.pk})
         context['add_standardization'] = reverse_lazy('solution:create_std_solution', kwargs={'pk': self.object.pk})
