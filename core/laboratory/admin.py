@@ -8,7 +8,8 @@ from core.laboratory.models import Laboratory
 class LaboratoryAdmin(admin.ModelAdmin):
     """Configuración de la vista de administración para el modelo Laboratory."""
 
-    search_fields = ('id', 'laboratory_name', 'site', 'code_solution')
+    search_fields = ('id', 'laboratory_name', 'site__site_name')
     list_display = ('id', 'laboratory_name', 'site', 'enable_laboratory')
+
 
 admin.site.register(Laboratory, LaboratoryAdmin)
