@@ -1,0 +1,47 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block title %}Importar permisos de grupos {{ block.super }}{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+    &rsaquo; <a href="{% url 'admin:auth_group_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+    &rsaquo; Importar permisos
+  </div>
+{% endblock %}
+
+{% block content %}
+  <div id="content-main">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <fieldset class="module aligned">
+        <div class="form-row">
+          <label for="id_excel_file" class="required">Archivo Excel (.xlsx):</label>
+          <input type="file" name="excel_file" id="id_excel_file" accept=".xlsx" required>
+          <div class="help">
+            Seleccione un archivo con una pestaña por grupo de usuario. Puede
+            descargar primero la exportación de permisos y usarla como plantilla.
+          </div>
+        </div>
+      </fieldset>
+      <div class="submit-row">
+        <input type="submit" value="Importar permisos" class="default">
+        <a href="{% url 'admin:auth_group_changelist' %}" class="closelink">Cancelar</a>
+      </div>
+    </form>
+
+    <div class="module">
+      <h2>Formato esperado</h2>
+      <p>
+        Cada pestaña representa un grupo de usuario. La fila 1 contiene la celda
+        <strong>Grupo de usuario</strong> con el nombre del grupo; la fila 2 los
+        encabezados y a partir de la fila 3 una fila por permiso. Solo la columna
+        <strong>Asignado</strong> determina si el permiso se otorga
+        (<em>Sí</em>, <em>X</em>, <em>1</em>) o se retira (<em>No</em>).
+        Los grupos que no existan se crean automáticamente.
+      </p>
+    </div>
+  </div>
+{% endblock %}

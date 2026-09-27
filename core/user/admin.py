@@ -2,7 +2,9 @@
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import Group
 
+from core.user.admin_group import GroupAdmin
 from core.user.models import Competence, PasswordHistoryUser, Training, User
 
 
@@ -60,3 +62,9 @@ admin.site.register(User, UserAdmin)
 admin.site.register(PasswordHistoryUser, PasswordHistoryUserAdmin)
 admin.site.register(Competence, CompetenceAdmin)
 admin.site.register(Training, TrainingAdmin)
+
+try:
+    admin.site.unregister(Group)
+except admin.sites.NotRegistered:
+    pass
+admin.site.register(Group, GroupAdmin)

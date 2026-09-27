@@ -1,0 +1,20 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls %}
+
+{% block object-tools-items %}
+  {% if can_export_group_permissions %}
+    <li>
+      <a href="{% url 'admin:auth_group_export_permissions' %}" class="changelink">
+        Exportar permisos
+      </a>
+    </li>
+  {% endif %}
+  {% if can_import_group_permissions %}
+    <li>
+      <a href="{% url 'admin:auth_group_import_permissions' %}" class="addlink">
+        Importar permisos
+      </a>
+    </li>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}
