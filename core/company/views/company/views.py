@@ -47,8 +47,9 @@ class CompanyCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
             if action == 'add':
                 form = self.get_form()
                 if form.is_valid():
-                    form.save()
+                    company = form.save()
                     messages.success(request, f'Empresa configurada satisfactoriamente!')
+                    return JsonResponse({'success': True, 'redirect_url': reverse_lazy('company:company_detail', kwargs={'pk': company.id})})
                 else:
                     messages.error(request, form.errors)
             else:

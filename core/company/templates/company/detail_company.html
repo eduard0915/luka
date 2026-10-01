@@ -76,14 +76,11 @@
                                             <a href="{% url 'company:update_site' site.id %}" type="button">
                                                 <i class="bi bi-pencil-square text-warning me-2"></i>
                                             </a>
-                                            <a href="{% url 'company:detail_site' site.id %}" type="button">
-                                                <i class="bi bi-info-square text-info"></i>
-                                            </a>
                                         </td>
                                     </tr>
                                 {% empty %}
                                     <tr>
-                                        <td colspan="5" class="text-center">No hay sites disponibles.</td>
+                                        <td colspan="6" class="text-center">No hay sites disponibles.</td>
                                     </tr>
                                 {% endfor %}
 

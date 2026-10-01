@@ -7,7 +7,6 @@ asociadas a una empresa dentro del sistema LIMS.
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
-from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -45,6 +44,8 @@ class SiteCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Create
                 if form.is_valid():
                     form.save()
                     messages.success(request, f'Planta creada satisfactoriamente!')
+                    company = Company.objects.first()
+                    return JsonResponse({'success': True, 'redirect_url': reverse_lazy('company:company_detail', kwargs={'pk': company.id})})
                 else:
                     messages.error(request, form.errors)
             else:
@@ -99,9 +100,11 @@ class SiteUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Update
                 if form.is_valid():
                     form.save()
                     messages.success(request, f'Planta editada satisfactoriamente!')
+                    company = Company.objects.first()
+                    return JsonResponse({'success': True, 'redirect_url': reverse_lazy('company:company_detail', kwargs={'pk': company.id})})
                 else:
                     messages.error(request, form.errors)
-                return redirect(self.get_context_data()['list_url'])
+                    data['error'] = form.errors
             else:
                 data['error'] = 'No ha ingresado datos en los campos'
         except Exception as e:
