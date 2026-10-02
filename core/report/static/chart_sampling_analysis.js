@@ -231,7 +231,11 @@ $(function () {
         });
     });
 
-    $('#id_analytical_method, #id_sample_point, #id_date_from, #id_date_to').on('change', function () {
+    $('#id_analytical_method, #id_sample_point').on('change', function () {
+        get_graph_data();
+    });
+
+    $('#id_date_from, #id_date_to').on('change changeDate', function () {
         get_graph_data();
     });
 
@@ -240,6 +244,15 @@ $(function () {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(today.getDate() - 30);
 
-    $('#id_date_to').val(today.toISOString().split('T')[0]);
-    $('#id_date_from').val(thirtyDaysAgo.toISOString().split('T')[0]);
+    set_datepicker_value('#id_date_from', thirtyDaysAgo.toISOString().split('T')[0]);
+    set_datepicker_value('#id_date_to', today.toISOString().split('T')[0]);
 });
+
+function set_datepicker_value(selector, value) {
+    const input = document.querySelector(selector);
+    if (!input) return;
+    input.value = value;
+    if (input.datepicker) {
+        input.datepicker.setDate(value);
+    }
+}

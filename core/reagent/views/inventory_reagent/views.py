@@ -4,12 +4,6 @@ Define las vistas para el registro, listado, detalle, edición, eliminación,
 transferencia de inventario de reactivos y descarga de certificados de calidad.
 """
 
-from urllib.request import urlopen
-
-import boto3
-from botocore.config import Config
-from botocore.exceptions import ClientError
-from decouple import config
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
@@ -28,6 +22,7 @@ from core.reagent.forms import InventoryReagentForm, InventoryReagentTransferFor
 from core.reagent.models import InventoryReagent, TransactionReagent, Reagent
 from core.solution.models import SolutionStd, code_solution_std_generator, TransactionSolutionStd, SolutionStdBase
 from core.solution.services import transfer_inventory_reagent_to_std
+from core.utils import redirect_to_file
 
 
 class InventoryReagentCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
@@ -302,55 +297,24 @@ class InventoryReagentTransferView(LoginRequiredMixin, ValidatePermissionRequire
 
 
 class CertificateQualityDownloadView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
-    """Vista para descargar el certificado de calidad de un reactivo desde S3."""
+    """Vista para descargar el certificado de calidad de un reactivo."""
 
     permission_required = 'reagent.view_reagent'
 
     @staticmethod
     def get(request):
-        """Descarga el certificado de calidad desde Amazon S3 usando una URL prefirmada."""
-        s3 = boto3.client(
-            's3',
-            aws_access_key_id=config('AWS_ACCESS_KEY_ID'),
-            aws_secret_access_key=config('AWS_SECRET_ACCESS_KEY'),
-            config=Config(signature_version='s3v4', region_name=config('REGION_NAME')))
+        """Redirige al certificado de calidad del inventario alojado en el storage."""
         doc_id = request.GET.get('id')
         doc_type = request.GET.get('type')
-        if doc_id and doc_type:
-            try:
-                document = InventoryReagent.objects.get(id=doc_id)
-            except InventoryReagent.DoesNotExist:
-                return HttpResponse('El documento solicitado no existe')
-            if document is not None:
-                if doc_type:
-                    if doc_type == 'certificate_quality':
-                        object_name = 'media/' + str(document.certificate_quality)
-                    else:
-                        return HttpResponse('El documento solicitado no existe para el tipo de archivo')
-                    try:
-                        link = s3.generate_presigned_url(
-                            'get_object',
-                            Params={'Bucket': config('BUCKET'), 'Key': object_name},
-                            ExpiresIn=8000
-                        )
-                        ext = object_name.split(".")[-1]
-                        url = urlopen(link)
-                        doc = url.read()
-                        disposition = 'attachment'
-                        filename = 'coa_' + document.batch_number + '.' + ext
-                        filename = filename.replace(" ", "_")
-                        if ext == 'pdf':
-                            disposition = 'inline'
-                        response = HttpResponse(doc, content_type="application/" + str(ext))
-                        response['Content-Disposition'] = str(disposition) + '; filename=' + filename
-                        return response
-                    except ClientError as e:
-                        return HttpResponse(e)
-                return None
-            else:
-                return HttpResponse('El documento solicitado no existe')
-        else:
-            return HttpResponse('La solicitud es incorrecta, faltan parámetros')
+        if not doc_id or not doc_type:
+            return HttpResponse('La solicitud es incorrecta, faltan parámetros', status=400)
+        if doc_type != 'certificate_quality':
+            return HttpResponse('El documento solicitado no existe para el tipo de archivo', status=404)
+        try:
+            document = InventoryReagent.objects.get(id=doc_id)
+        except InventoryReagent.DoesNotExist:
+            return HttpResponse('El documento solicitado no existe', status=404)
+        return redirect_to_file(document.certificate_quality)
 
 
 @require_http_methods(["GET"])

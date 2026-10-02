@@ -38,14 +38,16 @@
             </div>
             <div class="col-lg-2">
                 <div class="form-group">
-                    <label for="id_date_from">Desde:</label>
-                    <input type="date" class="form-control" name="date_from" id="id_date_from">
+                    <label class="control-label" for="id_date_from">Desde:</label>
+                    <input type="text" class="form-control" name="date_from" id="id_date_from"
+                           data-datepicker="1" placeholder="yyyy-mm-dd" autocomplete="off">
                 </div>
             </div>
             <div class="col-lg-2">
                 <div class="form-group">
-                    <label for="id_date_to">Hasta:</label>
-                    <input type="date" class="form-control" name="date_to" id="id_date_to">
+                    <label class="control-label" for="id_date_to">Hasta:</label>
+                    <input type="text" class="form-control" name="date_to" id="id_date_to"
+                           data-datepicker="1" placeholder="yyyy-mm-dd" autocomplete="off">
                 </div>
             </div>
         </div>
@@ -102,5 +104,5 @@
 
 {% block scripts_detail %}
     {{ block.super }}
-    <script src="{% static 'chart_sampling_analysis.js' %}"></script>
+    <script src="{% static 'chart_sampling_analysis.js' %}?v=2"></script>
 {% endblock %}

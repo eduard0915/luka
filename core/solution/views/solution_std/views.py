@@ -139,7 +139,7 @@ class SolutionStdListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, L
     """Vista para listar todas las soluciones estándar registradas."""
     model = SolutionStd
     template_name = 'solution/list_solution.html'
-    permission_required = 'reagent.view_reagent'
+    permission_required = 'solution.view_solutionstd'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):

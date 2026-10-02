@@ -40,6 +40,7 @@ class ReagentForm(ModelForm):
             'density_enable': 'col-md-2',
             'standard': 'col-md-2',
             'ready_to_use': 'col-md-2',
+            'sig_figs_solution': 'col-md-2',
         }
 
         for field_name, field in self.fields.items():
@@ -50,12 +51,13 @@ class ReagentForm(ModelForm):
         fields = [
             'description_reagent', 'umb', 'manufacturer', 'site', 'technical_sheet', 'purity_unit',
             'molecular_weight', 'gram_equivalent', 'volumetric', 'solvent', 'density_enable',
-            'standard', 'ready_to_use']
+            'standard', 'ready_to_use', 'sig_figs_solution']
         widgets = {
             'description_reagent': TextInput(attrs={'class': 'form-control', 'required': True}),
             'manufacturer': TextInput(attrs={'class': 'form-control', 'required': True}),
             'molecular_weight': TextInput(attrs={'class': 'form-control', 'required': True}),
             'gram_equivalent': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'sig_figs_solution': TextInput(attrs={'class': 'form-control', 'required': True}),
             'technical_sheet': FileInput(attrs={'class': 'form-control', 'type': 'file'}),
             'site': Select(attrs={'class': 'form-control', 'required': True}),
             'umb': Select(attrs={'class': 'form-control', 'required': True}, choices=UMB),
@@ -123,7 +125,7 @@ class InventoryReagentForm(ModelForm):
             'reagent': Select(attrs={'class': 'form-control select2', 'required': True, 'placeholder': 'Seleccione un reactivo'}),
             'batch_number': TextInput(attrs={'class': 'form-control', 'required': True}),
             'density': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'date_expire': DateInput(attrs={'class': 'form-control', 'required': True, 'type': 'text', 'data-datepicker': '1', 'placeholder': 'yyyy-mm-dd'}),
+            'date_expire': DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'required': True, 'type': 'text', 'data-datepicker': '1', 'placeholder': 'yyyy-mm-dd'}),
         }
 
     def save(self, commit=True):

@@ -4,16 +4,9 @@ Define las vistas para la creación, listado, edición, detalle y descarga
 de fichas técnicas de reactivos.
 """
 
-from urllib.request import urlopen
-
-import boto3
-from botocore.config import Config
-from botocore.exceptions import ClientError
-from decouple import config
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse, HttpResponse
-from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -23,7 +16,7 @@ from django.views.generic import CreateView, ListView, UpdateView, DetailView
 from core.mixins import ValidatePermissionRequiredMixin
 from core.reagent.forms import ReagentForm
 from core.reagent.models import Reagent
-from core.utils import format_form_errors
+from core.utils import format_form_errors, redirect_to_file
 
 
 class ReagentCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
@@ -174,7 +167,7 @@ class ReagentUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
         context['list_url'] = self.success_url
         context['entity'] = 'Editar Reactivo'
         context['action'] = 'edit'
-        context['div'] = '10'
+        context['div'] = '12'
         context['icon'] = 'fa-solid fa-flask-vial'
         return context
 
@@ -195,52 +188,21 @@ class ReagentDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Det
 
 
 class ReagentDownloadView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
-    """Vista para descargar la ficha técnica de un reactivo desde S3."""
+    """Vista para descargar la ficha técnica de un reactivo."""
 
     permission_required = 'reagent.view_reagent'
 
     @staticmethod
     def get(request):
-        """Descarga la ficha técnica desde Amazon S3 usando una URL prefirmada."""
-        s3 = boto3.client(
-            's3',
-            aws_access_key_id=config('AWS_ACCESS_KEY_ID'),
-            aws_secret_access_key=config('AWS_SECRET_ACCESS_KEY'),
-            config=Config(signature_version='s3v4', region_name=config('REGION_NAME')))
+        """Redirige a la ficha técnica del reactivo alojada en el storage."""
         docid = request.GET.get('id')
         doctype = request.GET.get('type')
-        if docid and doctype:
-            try:
-                document = Reagent.objects.get(id=docid)
-            except Reagent.DoesNotExist:
-                return HttpResponse('El documento solicitado no existe')
-            if document is not None:
-                if doctype:
-                    if doctype == 'technical_sheet':
-                        object_name = 'media/' + str(document.technical_sheet)
-                    else:
-                        return HttpResponse('El documento solicitado no existe para el tipo de archivo')
-                    try:
-                        link = s3.generate_presigned_url(
-                            'get_object',
-                            Params={'Bucket': config('BUCKET'), 'Key': object_name},
-                            ExpiresIn=8000
-                        )
-                        ext = object_name.split(".")[-1]
-                        url = urlopen(link)
-                        doc = url.read()
-                        disposition = 'attachment'
-                        filename = 'sheet_' + document.description_reagent + '.' + ext
-                        filename = filename.replace(" ", "_")
-                        if ext == 'pdf':
-                            disposition = 'inline'
-                        response = HttpResponse(doc, content_type="application/" + str(ext))
-                        response['Content-Disposition'] = str(disposition) + '; filename=' + filename
-                        return response
-                    except ClientError as e:
-                        return HttpResponse(e)
-                return None
-            else:
-                return HttpResponse('El documento solicitado no existe')
-        else:
-            return HttpResponse('La solicitud es incorrecta, faltan parámetros')
+        if not docid or not doctype:
+            return HttpResponse('La solicitud es incorrecta, faltan parámetros', status=400)
+        if doctype != 'technical_sheet':
+            return HttpResponse('El documento solicitado no existe para el tipo de archivo', status=404)
+        try:
+            document = Reagent.objects.get(id=docid)
+        except Reagent.DoesNotExist:
+            return HttpResponse('El documento solicitado no existe', status=404)
+        return redirect_to_file(document.technical_sheet)

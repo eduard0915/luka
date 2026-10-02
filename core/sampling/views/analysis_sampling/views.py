@@ -27,7 +27,7 @@ class SamplingAnalysisDetailView(LoginRequiredMixin, ValidatePermissionRequiredM
     """Vista para el detalle del análisis de una muestra."""
     model = SamplingAnalysis
     template_name = 'analysis_sampling/detail_sampling_analysis.html'
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.view_samplinganalysis'
     queryset = SamplingAnalysis.objects.select_related('analytical_method')
 
     def get_context_data(self, **kwargs):

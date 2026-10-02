@@ -4,7 +4,36 @@ Incluye funciones auxiliares como el formateo legible de errores
 de formularios de Django.
 """
 
+import logging
 import math
+
+from django.http import HttpResponse, HttpResponseRedirect
+
+logger = logging.getLogger(__name__)
+
+
+def redirect_to_file(file_field, missing_message='El documento solicitado no existe'):
+    """
+    Redirige a la URL del archivo almacenado en el storage configurado.
+
+    Retorna 404 si el campo está vacío o si el archivo no existe en el storage.
+
+    Args:
+        file_field: FieldFile con el archivo a servir
+        missing_message: Mensaje a mostrar cuando el archivo no existe
+
+    Returns:
+        HttpResponseRedirect a la URL del archivo o HttpResponse 404
+    """
+    if not file_field:
+        return HttpResponse(missing_message, status=404)
+    try:
+        if not file_field.storage.exists(file_field.name):
+            return HttpResponse(missing_message, status=404)
+    except Exception:
+        logger.exception('Error verificando la existencia del archivo %s', file_field.name)
+        return HttpResponse(missing_message, status=404)
+    return HttpResponseRedirect(file_field.url)
 
 
 def round_sig_figs(value, sig_figs=4):

@@ -12,6 +12,7 @@ from core.product.models import Product
 
 
 class BaseDependentCalculationView(ValidatePermissionRequiredMixin):
+    """Vista base para las operaciones CRUD de cálculos dependientes."""
 
     permission_required = 'reagent.add_reagent'
     template_name = 'modal_one.html'
@@ -55,6 +56,7 @@ class BaseDependentCalculationView(ValidatePermissionRequiredMixin):
 
 
 class DependentCalculationCreateView(LoginRequiredMixin, BaseDependentCalculationView, CreateView):
+    """Vista para agregar un cálculo dependiente a un producto."""
 
     model = DependentCalculation
     form_class = DependentCalculationForm
@@ -67,6 +69,7 @@ class DependentCalculationCreateView(LoginRequiredMixin, BaseDependentCalculatio
 
 
 class DependentCalculationUpdateView(LoginRequiredMixin, BaseDependentCalculationView, UpdateView):
+    """Vista para editar un cálculo dependiente de un producto."""
 
     model = DependentCalculation
     form_class = DependentCalculationForm
@@ -79,6 +82,7 @@ class DependentCalculationUpdateView(LoginRequiredMixin, BaseDependentCalculatio
 
 
 class DependentCalculationDeleteView(LoginRequiredMixin, BaseDependentCalculationView, DeleteView):
+    """Vista para eliminar un cálculo dependiente de un producto."""
 
     model = DependentCalculation
     template_name = 'delete_modal.html'

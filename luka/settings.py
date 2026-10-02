@@ -167,8 +167,7 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
-MEDIA_URL = '/media/'
-# MEDIA_URL = config('MEDIA_URL')
+MEDIA_URL = config('MEDIA_URL', default='') or config('MEDIA', default='/media/')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -199,14 +198,17 @@ CORS_ORIGIN_WHITELIST = [
 ]
 
 # Conexión AWS S3
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STORAGES = {
+    'default': {'BACKEND': 'luka.storages.MediaStore'},
+    'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+}
 AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = config('BUCKET')
+AWS_S3_REGION_NAME = config('REGION_NAME')
 REGION_NAME = config('REGION_NAME')
 AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL = None
-DEFAULT_FILE_STORAGE = 'config.storages.MediaStore'
 
 # Configuración de sesiones
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'

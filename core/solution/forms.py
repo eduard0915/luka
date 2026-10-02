@@ -25,7 +25,7 @@ class SolutionForm(ModelForm):
         user = get_current_user()
         if user.laboratory:
             solute_qs = InventoryReagent.objects.select_related('reagent').filter(
-                date_expire__gte=timezone.localtime(), reagent__solvent=False, quantity_stock__gt=0,
+                date_expire__gte=timezone.now(), reagent__solvent=False, quantity_stock__gt=0,
                 reagent__standard=False, reagent__site=user.laboratory.site)
         else:
             solute_qs = InventoryReagent.objects.none()
@@ -36,7 +36,7 @@ class SolutionForm(ModelForm):
 
         if user.laboratory:
             solvent_qs = InventoryReagent.objects.select_related('reagent').filter(
-                date_expire__gte=timezone.localtime(), reagent__solvent=True, quantity_stock__gt=0,
+                date_expire__gte=timezone.now(), reagent__solvent=True, quantity_stock__gt=0,
                 reagent__standard=False, reagent__site=user.laboratory.site)
         else:
             solvent_qs = InventoryReagent.objects.none()
@@ -237,7 +237,7 @@ class SolutionUpdateForm(ModelForm):
 
         if user.laboratory:
             solute_qs = InventoryReagent.objects.select_related('reagent').filter(
-                date_expire__gte=timezone.localtime(), reagent__solvent=False, quantity_stock__gt=0,
+                date_expire__gte=timezone.now(), reagent__solvent=False, quantity_stock__gt=0,
                 reagent__standard=False, reagent__site=user.laboratory.site)
         else:
             solute_qs = InventoryReagent.objects.none()
@@ -251,7 +251,7 @@ class SolutionUpdateForm(ModelForm):
 
         if user.laboratory:
             solvent_qs = InventoryReagent.objects.select_related('reagent').filter(
-                date_expire__gte=timezone.localtime(), reagent__solvent=True, quantity_stock__gt=0,
+                date_expire__gte=timezone.now(), reagent__solvent=True, quantity_stock__gt=0,
                 reagent__standard=False, reagent__site=user.laboratory.site)
         else:
             solvent_qs = InventoryReagent.objects.none()
@@ -429,7 +429,7 @@ class SolutionStandardForm(ModelForm):
         user = get_current_user()
         if user.laboratory:
             solute_qs = InventoryReagent.objects.select_related('reagent').filter(
-                date_expire__gte=timezone.localdate(),
+                date_expire__gte=timezone.now(),
                 reagent__solvent=False, quantity_stock__gt=0, reagent__standard=True,
                 reagent__site=user.laboratory.site).exclude(reagent__ready_to_use=True)
         else:
@@ -442,7 +442,7 @@ class SolutionStandardForm(ModelForm):
 
         if user.laboratory:
             solvent_qs = InventoryReagent.objects.select_related('reagent').filter(
-                date_expire__gte=timezone.localdate(), reagent__solvent=True, quantity_stock__gt=0,
+                date_expire__gte=timezone.now(), reagent__solvent=True, quantity_stock__gt=0,
                 reagent__site=user.laboratory.site)
         else:
             solvent_qs = InventoryReagent.objects.none()
@@ -580,7 +580,7 @@ class SolutionStdUpdateForm(ModelForm):
         user = get_current_user()
         if user.laboratory:
             solute_qs = InventoryReagent.objects.select_related('reagent').filter(
-                date_expire__gte=timezone.localdate(),
+                date_expire__gte=timezone.now(),
                 reagent__solvent=False, quantity_stock__gt=0, reagent__standard=True,
                 reagent__site=user.laboratory.site).exclude(reagent__ready_to_use=True)
         else:
@@ -598,7 +598,7 @@ class SolutionStdUpdateForm(ModelForm):
 
         if user.laboratory:
             solvent_qs = InventoryReagent.objects.select_related('reagent').filter(
-                date_expire__gte=timezone.localdate(), reagent__solvent=True, quantity_stock__gt=0,
+                date_expire__gte=timezone.now(), reagent__solvent=True, quantity_stock__gt=0,
                 reagent__site=user.laboratory.site)
         else:
             solvent_qs = InventoryReagent.objects.none()
@@ -750,7 +750,7 @@ class SolutionConfirmedForm(ModelForm):
                 instance = super().save(commit=False)
                 user = get_current_user()
 
-                instance.preparation_date = timezone.localdate()
+                instance.preparation_date = timezone.now()
                 instance.preparation_confirmed = True
                 instance.quantity_available_sln = instance.quantity_solution
                 instance.preparated_by_id = user.id
@@ -797,7 +797,7 @@ class SolutionStdConfirmedForm(ModelForm):
                 user = get_current_user()
 
                 instance.preparated_std_by_id = user.id
-                instance.preparation_std_date = timezone.localdate()
+                instance.preparation_std_date = timezone.now()
                 instance.preparation_confirmed = True
 
                 if instance.solution_std_base.stability_solution:
@@ -1039,11 +1039,11 @@ class StandardizationSolutionForm(ModelForm):
                         raise ValidationError('El soluto de la solución no tiene equivalente gramo registrado')
                     mg_analyte = meq_analyte * pe_sln
                 if target == '%':
-                    instance.concentration_sln = round((mg_analyte / (10 * vol)), 3)
+                    instance.concentration_sln = round((mg_analyte / (10 * vol)), 4)
                 elif target == 'mg/L':
-                    instance.concentration_sln = round((mg_analyte / vol) * 1000, 3)
+                    instance.concentration_sln = round((mg_analyte / vol) * 1000, 4)
                 else:  # g/L o mg/mL
-                    instance.concentration_sln = round((mg_analyte / vol), 3)
+                    instance.concentration_sln = round((mg_analyte / vol), 4)
             else:
                 raise ValidationError(f'Unidad de concentración de la solución no soportada: {target}')
 
@@ -1206,7 +1206,7 @@ class TransactionSolutionForm(ModelForm):
         solution_qs = Solution.objects.filter(
             solution_base=self.analytical_method_solution.solution,
             quantity_available_sln__gt=0,
-            expire_date_solution__gte=timezone.localdate(),
+            expire_date_solution__gte=timezone.now(),
         )
         if user and user.laboratory:
             solution_qs = solution_qs.filter(laboratory=user.laboratory)

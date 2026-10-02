@@ -58,6 +58,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     className: 'td-actions text-center',
                     orderable: false,
                     render: function (data, type, row) {
+                        if (!row['technical_sheet']) {
+                            return '';
+                        }
                         return '<a title="Descargar" target="_blank" class="bi bi-file-earmark-pdf text-danger" href="/reagent/technical_sheet/?id=' + row.id + '&type=technical_sheet">';
                     }
                 },

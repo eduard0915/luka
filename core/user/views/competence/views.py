@@ -1,11 +1,5 @@
 """Vistas para la gestión de competencias (certificaciones) de usuarios."""
 
-from urllib.request import urlopen
-
-import boto3
-from botocore.config import Config
-from botocore.exceptions import ClientError
-from decouple import config
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse, HttpResponse
@@ -17,6 +11,7 @@ from django.views.generic import CreateView, UpdateView, DeleteView
 from core.mixins import ValidatePermissionRequiredMixin
 from core.user.forms import CompetenceForm, CompetenceUpdateForm
 from core.user.models import Competence, User
+from core.utils import redirect_to_file
 
 
 # Registro de competencia
@@ -107,55 +102,24 @@ class CompetenceUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
 
 # Descarga de soporte de competencia
 class CompetenceDownloadView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
-    """Vista para descargar el soporte de una competencia desde Amazon S3."""
+    """Vista para descargar el soporte de una competencia."""
 
     permission_required = 'user.view_user'
 
     @staticmethod
     def get(request):
-        """Descarga el archivo de soporte de una competencia desde S3 usando una URL prefirmada."""
-        s3 = boto3.client(
-            's3',
-            aws_access_key_id=config('AWS_ACCESS_KEY_ID'),
-            aws_secret_access_key=config('AWS_SECRET_ACCESS_KEY'),
-            config=Config(signature_version='s3v4', region_name=config('REGION_NAME')))
+        """Redirige al soporte de la competencia alojado en el storage."""
         docid = request.GET.get('id')
         doctype = request.GET.get('type')
-        if docid and doctype:
-            try:
-                document = Competence.objects.get(id=docid)
-            except Competence.DoesNotExist:
-                return HttpResponse('El documento solicitado no existe')
-            if document is not None:
-                if doctype:
-                    if doctype == 'support_competence':
-                        object_name = 'media/' + str(document.support_competence)
-                    else:
-                        return HttpResponse('El documento solicitado no existe para el tipo de archivo')
-                    try:
-                        link = s3.generate_presigned_url(
-                            'get_object',
-                            Params={'Bucket': config('BUCKET'), 'Key': object_name},
-                            ExpiresIn=8000
-                        )
-                        ext = object_name.split(".")[-1]
-                        url = urlopen(link)
-                        doc = url.read()
-                        disposition = 'attachment'
-                        filename = 'soporte_competencia_' + document.description_competence + '.' + ext
-                        filename = filename.replace(" ", "_")
-                        if ext == 'pdf':
-                            disposition = 'inline'
-                        response = HttpResponse(doc, content_type="application/" + str(ext))
-                        response['Content-Disposition'] = str(disposition) + '; filename=' + filename
-                        return response
-                    except ClientError as e:
-                        return HttpResponse(e)
-                return None
-            else:
-                return HttpResponse('El documento solicitado no existe')
-        else:
-            return HttpResponse('La solicitud es incorrecta, faltan parámetros')
+        if not docid or not doctype:
+            return HttpResponse('La solicitud es incorrecta, faltan parámetros', status=400)
+        if doctype != 'support_competence':
+            return HttpResponse('El documento solicitado no existe para el tipo de archivo', status=404)
+        try:
+            document = Competence.objects.get(id=docid)
+        except Competence.DoesNotExist:
+            return HttpResponse('El documento solicitado no existe', status=404)
+        return redirect_to_file(document.support_competence)
 
 
 # Eliminación de competencia

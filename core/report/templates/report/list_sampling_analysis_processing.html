@@ -3,18 +3,20 @@
 
 {% block scripts_detail %}
     {{ block.super }}
-    <script src="{% static 'list_sampling_analysis_processing.js' %}"></script>
+    <script src="{% static 'list_sampling_analysis_processing.js' %}?v=2"></script>
 {% endblock %}
 
 {% block content %}
     <div class="row mb-3">
         <div class="col-md-2">
-            <label>Fecha Inicio</label>
-            <input type="date" class="form-control" name="date_from" id="id_date_from">
+            <label class="control-label" for="id_date_from">Fecha Inicio</label>
+            <input type="text" class="form-control" name="date_from" id="id_date_from"
+                   data-datepicker="1" placeholder="yyyy-mm-dd" autocomplete="off">
         </div>
         <div class="col-md-2">
-            <label>Fecha Final</label>
-            <input type="date" class="form-control" name="date_to" id="id_date_to">
+            <label class="control-label" for="id_date_to">Fecha Final</label>
+            <input type="text" class="form-control" name="date_to" id="id_date_to"
+                   data-datepicker="1" placeholder="yyyy-mm-dd" autocomplete="off">
         </div>
         <div class="col-md-2">
             <label>Analista</label>

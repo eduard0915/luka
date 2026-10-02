@@ -3,7 +3,7 @@
 
 {% block scripts_detail %}
     {{ block.super }}
-    <script src="{% static 'list_sampling_analysis_by_point.js' %}"></script>
+    <script src="{% static 'list_sampling_analysis_by_point.js' %}?v=2"></script>
 {% endblock %}
 
 {% block buttons %}
@@ -32,12 +32,14 @@
             </select>
         </div>
         <div class="col-md-2">
-            <label>Fecha Inicio</label>
-            <input type="date" class="form-control" name="start_date" id="id_start_date">
+            <label class="control-label" for="id_start_date">Fecha Inicio</label>
+            <input type="text" class="form-control" name="start_date" id="id_start_date"
+                   data-datepicker="1" placeholder="yyyy-mm-dd" autocomplete="off">
         </div>
         <div class="col-md-2">
-            <label>Fecha Final</label>
-            <input type="date" class="form-control" name="end_date" id="id_end_date">
+            <label class="control-label" for="id_end_date">Fecha Final</label>
+            <input type="text" class="form-control" name="end_date" id="id_end_date"
+                   data-datepicker="1" placeholder="yyyy-mm-dd" autocomplete="off">
         </div>
         <div class="col-md-2 d-flex align-items-end">
             <button type="button" class="btn btn-success btnExcel">
@@ -46,12 +48,11 @@
         </div>
     </div>
 
+    <div id="table_loading" class="text-center py-5 d-none">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+    </div>
+
     {{ block.super }}
-{% endblock %}
-
-{% block columns %}
-    <th>Fecha y Hora</th>
-{% endblock %}
-
-{% block rows %}
 {% endblock %}

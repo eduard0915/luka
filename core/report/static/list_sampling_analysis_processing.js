@@ -1,28 +1,27 @@
 var tblAnalysis;
 
 function loadData() {
-    var date_from = $('#id_date_from').val();
-    var date_to = $('#id_date_to').val();
-    var analyzed_by = $('#id_analyzed_by').val();
-    var profile = $('#id_profile').val();
+    if ($.fn.DataTable.isDataTable('#data')) {
+        tblAnalysis.ajax.reload();
+        return;
+    }
 
     tblAnalysis = $('#data').DataTable({
         responsive: {
             details: false
         },
         autoWidth: false,
-        destroy: true,
         deferRender: true,
         order: [[ 0, "desc" ]],
         ajax: {
             url: window.location.pathname,
             type: 'POST',
-            data: {
-                'action': 'searchdata',
-                'date_from': date_from,
-                'date_to': date_to,
-                'analyzed_by': analyzed_by,
-                'profile': profile,
+            data: function (d) {
+                d.action = 'searchdata';
+                d.date_from = $('#id_date_from').val();
+                d.date_to = $('#id_date_to').val();
+                d.analyzed_by = $('#id_analyzed_by').val();
+                d.profile = $('#id_profile').val();
             },
             dataSrc: "data"
         },
@@ -55,7 +54,11 @@ $(function () {
         width: '100%'
     });
 
-    $('#id_date_from, #id_date_to, #id_analyzed_by, #id_profile').on('change', function () {
+    $('#id_date_from, #id_date_to').on('change changeDate', function () {
+        loadData();
+    });
+
+    $('#id_analyzed_by, #id_profile').on('change', function () {
         loadData();
     });
 

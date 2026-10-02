@@ -31,7 +31,7 @@ class SamplingProcessCreateView(LoginRequiredMixin, ValidatePermissionRequiredMi
     form_class = SamplingProcessForm
     template_name = 'process_sampling/create_process_sampling.html'
     success_url = reverse_lazy('sampling:list_sampling_process')
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.add_samplingprocess'
     url_redirect = success_url
 
     @method_decorator(csrf_exempt)
@@ -78,7 +78,7 @@ class SamplingProcessUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMi
     form_class = SamplingProcessForm
     template_name = 'process_sampling/create_process_sampling.html'
     success_url = reverse_lazy('sampling:list_sampling_process')
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.change_samplingprocess'
     url_redirect = success_url
 
     @method_decorator(csrf_exempt)
@@ -123,7 +123,7 @@ class SamplingProcessListView(LoginRequiredMixin, ValidatePermissionRequiredMixi
     """Vista para el listado de procesos de muestreo."""
     model = SamplingProcess
     template_name = 'process_sampling/list_process_sampling.html'
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.view_samplingprocess'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -432,7 +432,7 @@ class SamplingProcessImageUpdateView(LoginRequiredMixin, ValidatePermissionRequi
     model = SamplingProcess
     form_class = SamplingProcessImageForm
     template_name = 'process_sampling/confirmation_sampling.html'
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.change_samplingprocess'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -468,7 +468,7 @@ class SamplingProcessConfirmedUpdateView(LoginRequiredMixin, ValidatePermissionR
     model = SamplingProcess
     form_class = SamplingProcessConfirmedForm
     template_name = 'process_sampling/confirmation_sampling.html'
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.change_samplingprocess'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -505,7 +505,7 @@ class SamplingProcessInProcessUpdateView(LoginRequiredMixin, ValidatePermissionR
     model = SamplingProcess
     form_class = SamplingProcessInProcessForm
     template_name = 'process_sampling/confirmation_sampling.html'
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.change_samplingprocess'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -545,7 +545,7 @@ class SamplingProcessApprovedUpdateView(LoginRequiredMixin, ValidatePermissionRe
     model = SamplingProcess
     form_class = SamplingProcessApprovedForm
     template_name = 'process_sampling/confirmation_sampling.html'
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.change_samplingprocess'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):

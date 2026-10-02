@@ -10,20 +10,32 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, TemplateView, View
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+from openpyxl.utils import get_column_letter
 from datetime import datetime
 from django.utils import timezone
 
+from core.analytical_method.models import AnalyticalMethodCalculateRelation
 from core.mixins import ValidatePermissionRequiredMixin
 from core.product.models import Product, SamplePoint, AnalyticalMethodProduct, SpecificationProduct
 from core.sampling.models import SamplingAnalysis, SamplingAnalysisProcessing
 from core.user.models import User
 
 
+def _analysis_method_label(analysis):
+    """Retorna el nombre del método analítico o del cálculo relacional del análisis."""
+    if analysis.analytical_method:
+        return analysis.analytical_method.description_analytical_method
+    relation = analysis.analytical_method_relation
+    if relation and relation.calculate_description_relation:
+        return relation.calculate_description_relation
+    return None
+
+
 class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
     """Vista para el reporte de análisis agrupados por método analítico."""
     model = SamplingAnalysis
     template_name = 'report/list_sampling_analysis.html'
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.view_samplinganalysis'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -52,16 +64,14 @@ class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMix
                             Q(sampling_process__group_sampling__sampling_point__product_id=product_id)
                         )
 
-                    # Filtro por fecha de análisis
+                    # Filtro por fecha de análisis (rango abierto en cualquiera de los extremos)
                     start_date = request.POST.get('start_date')
                     end_date = request.POST.get('end_date')
 
-                    if start_date and end_date:
-                        filters &= Q(date_analysis__range=[start_date, end_date + ' 23:59:59'])
-                    else:
-                        # Por defecto, año actual
-                        current_year = datetime.now().year
-                        filters &= Q(date_analysis__year=current_year)
+                    if start_date:
+                        filters &= Q(date_analysis__date__gte=start_date)
+                    if end_date:
+                        filters &= Q(date_analysis__date__lte=end_date)
 
                     analyses = SamplingAnalysis.objects.filter(filters).select_related(
                         'sampling_process',
@@ -176,11 +186,10 @@ class SamplingAnalysisExcelView(LoginRequiredMixin, ValidatePermissionRequiredMi
                     Q(sampling_process__group_sampling__sampling_point__product_id=product_id)
                 )
 
-            if start_date and end_date:
-                filters &= Q(date_analysis__range=[start_date, end_date + ' 23:59:59'])
-            else:
-                current_year = datetime.now().year
-                filters &= Q(date_analysis__year=current_year)
+            if start_date:
+                filters &= Q(date_analysis__date__gte=start_date)
+            if end_date:
+                filters &= Q(date_analysis__date__lte=end_date)
 
             analyses = SamplingAnalysis.objects.filter(filters).select_related(
                 'sampling_process',
@@ -477,7 +486,7 @@ class SamplingAnalysisByPointListView(LoginRequiredMixin, ValidatePermissionRequ
     """Vista para el reporte de análisis agrupados por punto de muestreo."""
     model = SamplingAnalysis
     template_name = 'report/list_sampling_analysis_by_point.html'
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.view_samplinganalysis'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -514,37 +523,52 @@ class SamplingAnalysisByPointListView(LoginRequiredMixin, ValidatePermissionRequ
                     
                     analyses = SamplingAnalysis.objects.filter(filters).select_related(
                         'sampling_process',
-                        'analytical_method'
+                        'analytical_method',
+                        'analytical_method_relation'
                     ).order_by('sampling_process__date_sampling')
 
                     # Obtener métodos analíticos asociados al producto
-                    from core.product.models import AnalyticalMethodProduct
                     methods_query = AnalyticalMethodProduct.objects.filter(product_id=product_id).select_related('analytical_method')
                     methods = [m.analytical_method.description_analytical_method for m in methods_query]
+
+                    # Agregar los cálculos relacionales definidos para el producto
+                    relation_names = AnalyticalMethodCalculateRelation.objects.filter(
+                        product_id=product_id
+                    ).exclude(calculate_description_relation='').values_list(
+                        'calculate_description_relation', flat=True
+                    ).distinct()
+                    for relation_name in relation_names:
+                        if relation_name not in methods:
+                            methods.append(relation_name)
 
                     # Si no hay métodos explícitos, usar los encontrados en los análisis
                     if not methods:
                         found_methods = set()
                         for a in analyses:
-                            found_methods.add(a.analytical_method.description_analytical_method)
+                            label = _analysis_method_label(a)
+                            if label:
+                                found_methods.add(label)
                         methods = sorted(list(found_methods))
 
                     # Agrupar datos por fecha y hora
                     rows = {}
                     for a in analyses:
+                        method_name = _analysis_method_label(a)
+                        if not method_name:
+                            continue
+
                         dt_str = a.sampling_process.date_sampling.strftime('%Y-%m-%d %H:%M:%S') if a.sampling_process.date_sampling else 'N/A'
                         if dt_str not in rows:
                             rows[dt_str] = {'date_analysis': dt_str}
                             for m in methods:
                                 rows[dt_str][m] = '-'
-                        
-                        method_name = a.analytical_method.description_analytical_method
+
                         if method_name not in methods:
                             methods.append(method_name)
                             for r_key in rows:
                                 if method_name not in rows[r_key]:
                                     rows[r_key][method_name] = '-'
-                        
+
                         rows[dt_str][method_name] = a.average_concentration
 
                     data = {
@@ -605,7 +629,8 @@ class SamplingAnalysisByPointExcelView(LoginRequiredMixin, ValidatePermissionReq
 
             analyses = SamplingAnalysis.objects.filter(filters).select_related(
                 'sampling_process',
-                'analytical_method'
+                'analytical_method',
+                'analytical_method_relation'
             ).order_by('sampling_process__date_sampling')
 
             # Obtener métodos analíticos asociados al producto
@@ -613,16 +638,32 @@ class SamplingAnalysisByPointExcelView(LoginRequiredMixin, ValidatePermissionReq
                 'analytical_method')
             methods = [m.analytical_method.description_analytical_method for m in methods_query]
 
+            # Agregar los cálculos relacionales definidos para el producto
+            relation_names = AnalyticalMethodCalculateRelation.objects.filter(
+                product_id=product_id
+            ).exclude(calculate_description_relation='').values_list(
+                'calculate_description_relation', flat=True
+            ).distinct()
+            for relation_name in relation_names:
+                if relation_name not in methods:
+                    methods.append(relation_name)
+
             # Si no hay métodos explícitos, usar los encontrados en los análisis
             if not methods:
                 found_methods = set()
                 for a in analyses:
-                    found_methods.add(a.analytical_method.description_analytical_method)
+                    label = _analysis_method_label(a)
+                    if label:
+                        found_methods.add(label)
                 methods = sorted(list(found_methods))
 
             # Agrupar datos por fecha y hora
             rows = {}
             for a in analyses:
+                method_name = _analysis_method_label(a)
+                if not method_name:
+                    continue
+
                 dt_str = a.sampling_process.date_sampling.strftime(
                     '%Y-%m-%d %H:%M:%S') if a.sampling_process.date_sampling else 'N/A'
                 if dt_str not in rows:
@@ -630,7 +671,6 @@ class SamplingAnalysisByPointExcelView(LoginRequiredMixin, ValidatePermissionReq
                     for m in methods:
                         rows[dt_str][m] = '-'
 
-                method_name = a.analytical_method.description_analytical_method
                 if method_name not in methods:
                     methods.append(method_name)
                     for r_key in rows:
@@ -683,17 +723,15 @@ class SamplingAnalysisByPointExcelView(LoginRequiredMixin, ValidatePermissionReq
                     ws.cell(row=row_num, column=col_num, value=row_data.get(method, '-')).border = border
 
             # Ajustar ancho de columnas
-            for col in ws.columns:
+            for col_idx, col in enumerate(ws.columns, 1):
                 max_length = 0
-                column = col[0].column_letter
                 for cell in col:
                     try:
                         if len(str(cell.value)) > max_length:
                             max_length = len(str(cell.value))
-                    except:
+                    except Exception:
                         pass
-                adjusted_width = (max_length + 2)
-                ws.column_dimensions[column].width = adjusted_width
+                ws.column_dimensions[get_column_letter(col_idx)].width = max_length + 2
 
             response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
             response['Content-Disposition'] = f'attachment; filename="reporte_analisis_{datetime.now().strftime("%Y%m%d%H%M%S")}.xlsx"'
@@ -709,7 +747,7 @@ class SamplingAnalysisProcessingListView(LoginRequiredMixin, ValidatePermissionR
     """Vista para el reporte de procesamiento de muestras por analista."""
     model = SamplingAnalysisProcessing
     template_name = 'report/list_sampling_analysis_processing.html'
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.view_samplinganalysis'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -902,17 +940,15 @@ class SamplingAnalysisProcessingExcelView(LoginRequiredMixin, ValidatePermission
                     cell.border = border
 
             # Ajustar ancho de columnas
-            for col in ws.columns:
+            for col_idx, col in enumerate(ws.columns, 1):
                 max_length = 0
-                column = col[0].column_letter
                 for cell in col:
                     try:
                         if len(str(cell.value)) > max_length:
                             max_length = len(str(cell.value))
-                    except:
+                    except Exception:
                         pass
-                adjusted_width = (max_length + 2)
-                ws.column_dimensions[column].width = adjusted_width
+                ws.column_dimensions[get_column_letter(col_idx)].width = max_length + 2
 
             response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
             response['Content-Disposition'] = f'attachment; filename="procesamiento_muestras_{datetime.now().strftime("%Y%m%d%H%M%S")}.xlsx"'
