@@ -218,8 +218,11 @@
                         </td>
                         <td class="text-center">
                             {% if sa.average_concentration and sa.spec_prod %}
-                                {{ sa.spec_prod.lower_limit_prod|default_if_none:"Menor que" }}
-                                {% if sa.spec_prod.lower_limit_prod %} - {% endif %}{{ sa.spec_prod.upper_limit_prod }}
+                                {% if sa.spec_prod.upper_limit_prod %}
+                                    {% if sa.spec_prod.lower_limit_prod %}{{ sa.spec_prod.lower_limit_prod }} - {% endif %}{{ sa.spec_prod.upper_limit_prod }}
+                                {% else %}
+                                    Mayor que {{ sa.spec_prod.lower_limit_prod }}
+                                {% endif %}
                             {% else %}
                                 -
                             {% endif %}
@@ -238,8 +241,11 @@
                         <td>{{ cr.analytical_method_calculate_relation.calculate_description_relation }}</td>
                         <td class="text-center">
                             {% if cr.spec_prod %}
-                                {{ cr.spec_prod.lower_limit_prod|default_if_none:"Menor que" }}
-                                {% if cr.spec_prod.lower_limit_prod %} - {% endif %}{{ cr.spec_prod.upper_limit_prod }}
+                                {% if cr.spec_prod.upper_limit_prod %}
+                                    {% if cr.spec_prod.lower_limit_prod %}{{ cr.spec_prod.lower_limit_prod }} - {% endif %}{{ cr.spec_prod.upper_limit_prod }}
+                                {% else %}
+                                    Mayor que {{ cr.spec_prod.lower_limit_prod }}
+                                {% endif %}
                             {% else %}
                                 -
                             {% endif %}
