@@ -41,7 +41,7 @@ class LaboratoryForm(ModelForm):
                 'required': True,
                 'placeholder': 'Ingrese el nombre del laboratorio'
             }),
-            'process': TextInput(attrs={'class': 'form-control', 'required': True}),
+            'process': Select(attrs={'class': 'form-control', 'required': True}),
             'site': Select(attrs={'class': 'form-control', 'required': True}),
             'enable_laboratory': Select(attrs={
                 'class': 'form-control',
