@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
             columns: [
                 {'data': 'laboratory_name'},
                 {'data': 'site__site_name'},
-                {'data': 'process'},
+                {'data': 'process__process_name'},
                 {'data': 'enable_laboratory'},
                 {'data': 'id'}
             ],

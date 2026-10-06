@@ -100,12 +100,12 @@ class LaboratoryListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Li
         try:
             action = request.POST['action']
             if action == 'searchdata':
-                laboratories = list(Laboratory.objects.select_related('site').values(
+                laboratories = list(Laboratory.objects.select_related('site', 'process').values(
                     'id',
                     'laboratory_name',
                     'site__site_name',
                     'enable_laboratory',
-                    'process'
+                    'process__process_name'
                 ).order_by('laboratory_name'))
 
                 for lab in laboratories:
