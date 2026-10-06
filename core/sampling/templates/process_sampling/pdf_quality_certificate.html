@@ -218,10 +218,14 @@
                         </td>
                         <td class="text-center">
                             {% if sa.average_concentration and sa.spec_prod %}
-                                {% if sa.spec_prod.upper_limit_prod %}
-                                    {% if sa.spec_prod.lower_limit_prod %}{{ sa.spec_prod.lower_limit_prod }} - {% endif %}{{ sa.spec_prod.upper_limit_prod }}
+                                {% if sa.spec_prod.lower_limit_prod and sa.spec_prod.upper_limit_prod %}
+                                    {{ sa.spec_prod.lower_limit_prod }} - {{ sa.spec_prod.upper_limit_prod }} {{ sa.unit_measure_prod|default_if_none:"" }}
+                                {% elif sa.spec_prod.upper_limit_prod %}
+                                    Menor que {{ sa.spec_prod.upper_limit_prod }} {{ sa.unit_measure_prod|default_if_none:"" }}
+                                {% elif sa.spec_prod.lower_limit_prod %}
+                                    Mayor que {{ sa.spec_prod.lower_limit_prod }} {{ sa.unit_measure_prod|default_if_none:"" }}
                                 {% else %}
-                                    Mayor que {{ sa.spec_prod.lower_limit_prod }}
+                                    -
                                 {% endif %}
                             {% else %}
                                 -
@@ -241,10 +245,14 @@
                         <td>{{ cr.analytical_method_calculate_relation.calculate_description_relation }}</td>
                         <td class="text-center">
                             {% if cr.spec_prod %}
-                                {% if cr.spec_prod.upper_limit_prod %}
-                                    {% if cr.spec_prod.lower_limit_prod %}{{ cr.spec_prod.lower_limit_prod }} - {% endif %}{{ cr.spec_prod.upper_limit_prod }}
-                                {% else %}
+                                {% if cr.spec_prod.lower_limit_prod and cr.spec_prod.upper_limit_prod %}
+                                    {{ cr.spec_prod.lower_limit_prod }} - {{ cr.spec_prod.upper_limit_prod }}
+                                {% elif cr.spec_prod.upper_limit_prod %}
+                                    Menor que {{ cr.spec_prod.upper_limit_prod }}
+                                {% elif cr.spec_prod.lower_limit_prod %}
                                     Mayor que {{ cr.spec_prod.lower_limit_prod }}
+                                {% else %}
+                                    -
                                 {% endif %}
                             {% else %}
                                 -
