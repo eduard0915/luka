@@ -76,7 +76,7 @@ class LaboratoryCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
         context['title'] = 'Crear Laboratorio'
         context['action'] = 'add'
         context['entity'] = 'Laboratorios'
-        context['div'] = '8'
+        context['div'] = '12'
         context['icon'] = 'fa-solid fa-flask'
         context['list_url'] = reverse_lazy('laboratory:list_laboratory')
         return context
@@ -104,7 +104,8 @@ class LaboratoryListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Li
                     'id',
                     'laboratory_name',
                     'site__site_name',
-                    'enable_laboratory'
+                    'enable_laboratory',
+                    'process'
                 ).order_by('laboratory_name'))
 
                 for lab in laboratories:
@@ -187,27 +188,4 @@ class LaboratoryUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
         context['div'] = '8'
         context['icon'] = 'fa-solid fa-flask'
         context['list_url'] = reverse_lazy('laboratory:list_laboratory')
-        return context
-
-
-class LaboratoryDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
-    """Vista de detalle de un laboratorio, incluyendo su equipamiento."""
-
-    model = Laboratory
-    template_name = 'lab/detail_laboratory.html'
-    permission_required = 'laboratory.view_laboratory'
-
-    def dispatch(self, request, *args, **kwargs):
-        """Despacha la solicitud."""
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        """Agrega títulos, equipamiento asociado y URLs al contexto."""
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Detalle de Laboratorio'
-        context['entity'] = 'Detalle de Laboratorio'
-        context['icon'] = 'fa-solid fa-flask'
-        context['equipment'] = EquipmentInstrumental.objects.select_related('laboratory').filter(laboratory=self.object)
-        context['list_url'] = reverse_lazy('laboratory:list_laboratory')
-        context['update_url'] = reverse_lazy('laboratory:update_laboratory', kwargs={'pk': self.object.pk})
         return context

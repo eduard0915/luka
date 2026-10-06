@@ -1,4 +1,5 @@
 """Formularios para la aplicación de muestreo del laboratorio."""
+from urllib import request
 
 from django.db.models import Q
 from django.forms import ModelForm, Form, TextInput, Select, TimeInput, DateTimeInput, FloatField, FileField, FileInput, HiddenInput
@@ -683,9 +684,19 @@ class SamplingProcessForm(ModelForm):
     def __init__(self, *args, **kwargs):
         """Inicializa el formulario configurando los campos de punto y grupo de muestreo."""
         super().__init__(*args, **kwargs)
+
+        user = get_current_user()
+        points = SamplePoint.objects.filter(
+            enable_point=True, sample_type='Producto Terminado')
+        if not (user and (user.is_superuser or user.groups.filter(name='Administrador').exists())):
+            laboratory = getattr(user, 'laboratory', None)
+            process = laboratory.process if laboratory else None
+            points = points.filter(product__process=process) if process else points.none()
+        if self.instance.point_sampling_id:
+            points = points | SamplePoint.objects.filter(pk=self.instance.point_sampling_id)
+        self.fields['point_sampling'].queryset = points.distinct()
+
         for form in self.visible_fields():
-            self.fields['point_sampling'].queryset = SamplePoint.objects.filter(enable_point=True, sample_type='Producto Terminado')
-            # self.fields['point_sampling'].queryset = SamplePoint.objects.filter(enable_point=True, sample_type='Producto Terminado', sample_frequency__isnull=True)
             form.field.widget.attrs['autocomplete'] = 'off'
         col_classes = {'point_sampling': 'col-md-4', 'group_sampling': 'col-md-4', 'batch_number': 'col-md-2'}
         for field_name, field in self.fields.items():

@@ -76,6 +76,7 @@ class SolutionBase(BaseModel):
     stability_solution = models.PositiveSmallIntegerField(
         verbose_name='Días Estabilidad en Solución', null=True, blank=True)
     standardizable = models.BooleanField(verbose_name='Estandarizable', default=False)
+    sig_figs_solution = models.PositiveSmallIntegerField(verbose_name='Cifras Significativas [ ]', default=4)
 
     def __str__(self):
         """Retorna la representación en texto con el reactivo y la concentración."""

@@ -25,7 +25,8 @@ urlpatterns = [
     path('detail_site/<uuid:pk>/', SiteDetailView.as_view(), name='detail_site'),
     # Procesos
     path('add_process/<uuid:pk>/', ProcessCreateView.as_view(), name='create_process'),
-    path('update_process/<uuid:pk>/', ProcessUpdateView.as_view(), name='update_process')
+    path('update_process/<uuid:pk>/', ProcessUpdateView.as_view(), name='update_process'),
+    path('detail_process/<uuid:pk>/', ProcessDetailView.as_view(), name='detail_process')
 ]
 
 urlpatterns += static(settings.MEDIA_URL,

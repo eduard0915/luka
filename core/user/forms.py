@@ -18,6 +18,7 @@ class UserForm(ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['groups'].label = 'Perfil'
         self.fields['email'].label = 'E-mail'
+        self.fields['laboratory'].label = 'Laboratorio/Proceso'
         for form in self.visible_fields():
             form.field.widget.attrs['autocomplete'] = 'off'
 

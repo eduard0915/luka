@@ -22,7 +22,8 @@ class Product(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     code_product = models.CharField(max_length=30, verbose_name='Código (Id)')
     description_product = models.CharField(max_length=200, verbose_name='Descripción')
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, verbose_name='Planta')
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, verbose_name='Planta', blank=True, null=True)
+    process = models.ForeignKey(Process, on_delete=models.CASCADE, verbose_name='Proceso', blank=True, null=True)
     enable_product = models.BooleanField(default=True, verbose_name='Habilitado')
     version = models.PositiveIntegerField(default=1, verbose_name='Version')
 

@@ -59,9 +59,10 @@ class ProductForm(ModelForm):
             form.field.widget.attrs['autocomplete'] = 'off'
 
         col_classes = {
-            'code_product': 'col-md-3',
-            'description_product': 'col-md-6',
-            'site': 'col-md-3',
+            'code_product': 'col-md-2',
+            'description_product': 'col-md-5',
+            'site': 'col-md-2',
+            'process': 'col-md-2',
         }
 
         for field_name, field in self.fields.items():
@@ -70,11 +71,12 @@ class ProductForm(ModelForm):
     class Meta:
         """Metadatos del formulario ProductForm."""
         model = Product
-        fields = ['code_product', 'description_product', 'site']
+        fields = ['code_product', 'description_product', 'site', 'process']
         widgets = {
             'code_product': TextInput(attrs={'class': 'form-control', 'required': True}),
             'description_product': TextInput(attrs={'class': 'form-control', 'required': True}),
-            'site': Select(attrs={'class': 'form-control', 'required': True})
+            'site': Select(attrs={'class': 'form-control', 'required': True}),
+            'process': Select(attrs={'class': 'form-control', 'required': True})
         }
 
     def save(self, commit=True):

@@ -21,16 +21,17 @@ document.addEventListener('DOMContentLoaded', function () {
             columns: [
                 {'data': 'laboratory_name'},
                 {'data': 'site__site_name'},
+                {'data': 'process'},
                 {'data': 'enable_laboratory'},
                 {'data': 'id'}
             ],
             columnDefs: [
                 {
-                    targets: [0, 1],
+                    targets: [0, 1, 2],
                     class: 'td-actions text-start'
                 },
                 {
-                    targets: [2],
+                    targets: [3],
                     class: 'td-actions text-center',
                     render: function (data, type, row) {
                         if (row['enable_laboratory']) {
@@ -41,29 +42,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 },
                 {
-                    targets: [3],
+                    targets: [4],
                     class: 'td-actions text-center',
                     orderable: false,
                     render: function (data, type, row) {
-                        let actions = '';
-                        actions += '<a href="/laboratory/detail/' + row['id'] + '/" type="button" title="Detalle"><i class="bi bi-info-square text-info"></i></a> &nbsp;';
-                        actions += '<a href="/laboratory/update/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a>';
-                        return actions;
+                        return '<a href="/laboratory/update/' + row['id'] + '/" type="button" title="Editar"><i class="bi bi-pencil-square text-warning"></i></a>';
                     }
                 },
             ],
             initComplete: function (settings, json) {
             }
         });
-
-        // Confirmación de eliminación
-        // $(document).on('click', '.delete-link', function(e) {
-        //     e.preventDefault();
-        //     let url = $(this).attr('href');
-        //
-        //     if (confirm('¿Está seguro de eliminar este laboratorio?')) {
-        //         window.location.href = url;
-        //     }
-        // });
     }
 });

@@ -68,7 +68,7 @@ class ProductCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
         context['action'] = 'add'
         context['entity'] = 'Creación de Producto'
         context['title'] = 'Creación de Producto'
-        context['div'] = '8'
+        context['div'] = '10'
         context['list_url'] = self.url_redirect
         return context
 
@@ -142,14 +142,15 @@ class ProductListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
             action = request.POST['action']
             if action == 'searchdata':
                 data = []
-                for i in Product.objects.all().order_by('-date_creation'):
+                for i in Product.objects.select_related('site', 'process').all().order_by('-date_creation'):
                     data.append({
                         'id': i.id,
                         'code_product': i.code_product,
                         'description_product': i.description_product,
                         'enable_product': i.enable_product,
                         'version': i.version,
-                        'site': i.site.site_name
+                        'process': i.process.process_name if i.process else '',
+                        'site': i.site.site_name if i.site else ''
                     })
                 return JsonResponse(data, safe=False)
             else:

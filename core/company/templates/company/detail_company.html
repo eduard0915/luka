@@ -76,6 +76,14 @@
                                             <a href="{% url 'company:update_site' site.id %}" type="button">
                                                 <i class="bi bi-pencil-square text-warning me-2"></i>
                                             </a>
+                                            <a onclick="open_modal('{% url 'company:create_process' site.id %}')"
+                                               type="button" title="Nuevo Proceso">
+                                                <i class="bi bi-plus-square text-primary me-2"></i>
+                                            </a>
+                                            <a onclick="open_modal('{% url 'company:detail_process' site.id %}')"
+                                               type="button" title="Ver Procesos">
+                                                <i class="bi bi-info-square text-info"></i>
+                                            </a>
                                         </td>
                                     </tr>
                                 {% empty %}

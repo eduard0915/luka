@@ -1,27 +1,28 @@
 """Modelos de la aplicación de laboratorios.
 
 Define la entidad Laboratory que representa un laboratorio asociado a una planta.
-"""  # noqa: E501
+"""
 
 import uuid
 
 from crum import get_current_user
 from django.db import models
 
-from core.company.models import Site
+from core.company.models import Site, Process
 
 
 class Laboratory(models.Model):
     """Representa un laboratorio asociado a una planta (site) dentro del sistema."""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    laboratory_name = models.CharField(max_length=120, verbose_name='Descripción del Laboratorio')
+    laboratory_name = models.CharField(max_length=120, verbose_name='Descripción del Laboratorio', blank=True, null=True)
     site = models.ForeignKey(Site, on_delete=models.CASCADE, verbose_name='Planta')
+    process = models.ForeignKey(Process, verbose_name='Proceso', blank=True, null=True, on_delete=models.CASCADE)
     enable_laboratory = models.BooleanField(default=True, verbose_name='Habilitado')
 
     def __str__(self):
         """Devuelve el nombre del laboratorio como representación legible."""
-        return f'{self.laboratory_name} - {self.site}'
+        return f'{self.laboratory_name} - {self.site} - {self.process}'
     class Meta:
         verbose_name = 'Laboratory'
         verbose_name_plural = 'Laboratories'

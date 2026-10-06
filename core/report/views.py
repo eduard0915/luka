@@ -21,13 +21,31 @@ from core.sampling.models import SamplingAnalysis, SamplingAnalysisProcessing
 from core.user.models import User
 
 
+def _method_header(analytical_method):
+    """Encabezado del método: código + unidad de concentración."""
+    if analytical_method is None:
+        return ''
+    code = analytical_method.code_analytical_method or ''
+    unit = analytical_method.unit_concentration or ''
+    return f'{code} ({unit})' if code and unit else (code or unit)
+
+
+def _relation_header(relation):
+    """Encabezado del cálculo relacional: descripción + unidad a calcular."""
+    if relation is None:
+        return ''
+    description = relation.calculate_description_relation or ''
+    unit = relation.unit_measure_calculate or ''
+    return f'{description} ({unit})' if description and unit else (description or unit)
+
+
 def _analysis_method_label(analysis):
-    """Retorna el nombre del método analítico o del cálculo relacional del análisis."""
+    """Retorna el encabezado (código + unidad) del método o cálculo relacional del análisis."""
     if analysis.analytical_method:
-        return analysis.analytical_method.description_analytical_method
+        return _method_header(analysis.analytical_method)
     relation = analysis.analytical_method_relation
     if relation and relation.calculate_description_relation:
-        return relation.calculate_description_relation
+        return _relation_header(relation)
     return None
 
 
@@ -527,19 +545,18 @@ class SamplingAnalysisByPointListView(LoginRequiredMixin, ValidatePermissionRequ
                         'analytical_method_relation'
                     ).order_by('sampling_process__date_sampling')
 
-                    # Obtener métodos analíticos asociados al producto
+                    # Obtener métodos analíticos asociados al producto (código + unidad)
                     methods_query = AnalyticalMethodProduct.objects.filter(product_id=product_id).select_related('analytical_method')
-                    methods = [m.analytical_method.description_analytical_method for m in methods_query]
+                    methods = [_method_header(m.analytical_method) for m in methods_query]
 
-                    # Agregar los cálculos relacionales definidos para el producto
-                    relation_names = AnalyticalMethodCalculateRelation.objects.filter(
+                    # Agregar los cálculos relacionales definidos para el producto (descripción + unidad)
+                    relations = AnalyticalMethodCalculateRelation.objects.filter(
                         product_id=product_id
-                    ).exclude(calculate_description_relation='').values_list(
-                        'calculate_description_relation', flat=True
-                    ).distinct()
-                    for relation_name in relation_names:
-                        if relation_name not in methods:
-                            methods.append(relation_name)
+                    ).exclude(calculate_description_relation='')
+                    for relation in relations:
+                        label = _relation_header(relation)
+                        if label and label not in methods:
+                            methods.append(label)
 
                     # Si no hay métodos explícitos, usar los encontrados en los análisis
                     if not methods:
@@ -597,7 +614,14 @@ class SamplingAnalysisByPointListView(LoginRequiredMixin, ValidatePermissionRequ
         context['title'] = 'Reporte de Análisis por Punto de Muestreo'
         context['entity'] = 'Reporte de Análisis por Punto de Muestreo'
         context['div'] = '12'
-        context['products'] = Product.objects.filter(enable_product=True)
+
+        products = Product.objects.filter(enable_product=True)
+        user = self.request.user
+        if not (user.is_superuser or user.groups.filter(name='Administrador').exists()):
+            laboratory = getattr(user, 'laboratory', None)
+            process = laboratory.process if laboratory else None
+            products = products.filter(process=process) if process else products.none()
+        context['products'] = products
         return context
 
 
@@ -633,20 +657,19 @@ class SamplingAnalysisByPointExcelView(LoginRequiredMixin, ValidatePermissionReq
                 'analytical_method_relation'
             ).order_by('sampling_process__date_sampling')
 
-            # Obtener métodos analíticos asociados al producto
+            # Obtener métodos analíticos asociados al producto (código + unidad)
             methods_query = AnalyticalMethodProduct.objects.filter(product_id=product_id).select_related(
                 'analytical_method')
-            methods = [m.analytical_method.description_analytical_method for m in methods_query]
+            methods = [_method_header(m.analytical_method) for m in methods_query]
 
-            # Agregar los cálculos relacionales definidos para el producto
-            relation_names = AnalyticalMethodCalculateRelation.objects.filter(
+            # Agregar los cálculos relacionales definidos para el producto (descripción + unidad)
+            relations = AnalyticalMethodCalculateRelation.objects.filter(
                 product_id=product_id
-            ).exclude(calculate_description_relation='').values_list(
-                'calculate_description_relation', flat=True
-            ).distinct()
-            for relation_name in relation_names:
-                if relation_name not in methods:
-                    methods.append(relation_name)
+            ).exclude(calculate_description_relation='')
+            for relation in relations:
+                label = _relation_header(relation)
+                if label and label not in methods:
+                    methods.append(label)
 
             # Si no hay métodos explícitos, usar los encontrados en los análisis
             if not methods:

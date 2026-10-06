@@ -9,7 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import CreateView, UpdateView
+from django.views.generic import CreateView, DetailView, UpdateView
 
 from core.company.forms import ProcessForm, ProcessUpdateForm
 from core.company.models import Process, Site
@@ -105,4 +105,27 @@ class ProcessUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Edición de Proceso'
         context['action'] = 'edit'
+        return context
+
+
+class ProcessDetailView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DetailView):
+    """Vista de detalle de los procesos asociados a una planta.
+
+    Muestra en un modal la información de la planta y el listado de
+    procesos registrados para ella.
+    """
+    model = Site
+    template_name = 'process/detail_process.html'
+    permission_required = 'company.add_company'
+
+    def dispatch(self, request, *args, **kwargs):
+        """Delega el despacho a la clase padre."""
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        """Agrega el contexto con la planta y sus procesos asociados."""
+        context = super().get_context_data(**kwargs)
+        context['entity'] = 'Detalle de Procesos'
+        context['subtitle'] = self.object.site_name
+        context['processes'] = Process.objects.select_related('site').filter(site_id=self.object.id)
         return context

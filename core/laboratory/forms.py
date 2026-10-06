@@ -23,8 +23,10 @@ class LaboratoryForm(ModelForm):
             form.field.widget.attrs['autocomplete'] = 'off'
 
         col_classes = {
-            'laboratory_name': 'col-md-6',
+            'laboratory_name': 'col-md-4',
+            'process': 'col-md-4',
             'enable_laboratory': 'col-md-2',
+            'site': 'col-md-2',
         }
 
         for field_name, field in self.fields.items():
@@ -32,13 +34,14 @@ class LaboratoryForm(ModelForm):
 
     class Meta:
         model = Laboratory
-        fields = ['laboratory_name', 'site', 'enable_laboratory']
+        fields = ['laboratory_name', 'site', 'process','enable_laboratory']
         widgets = {
             'laboratory_name': TextInput(attrs={
                 'class': 'form-control',
                 'required': True,
                 'placeholder': 'Ingrese el nombre del laboratorio'
             }),
+            'process': TextInput(attrs={'class': 'form-control', 'required': True}),
             'site': Select(attrs={'class': 'form-control', 'required': True}),
             'enable_laboratory': Select(attrs={
                 'class': 'form-control',

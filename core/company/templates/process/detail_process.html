@@ -1,0 +1,65 @@
+{% load static %}
+
+<div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div>
+                <h5 class="modal-title">{{ entity }}</h5>
+                <small class="text-muted">{{ subtitle }}</small>
+            </div>
+            <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"><span
+                    aria-hidden="true"></span></button>
+        </div>
+        <div class="modal-body">
+            <div class="tile-title-w-btn mb-3">
+                <h5 class="title mb-0">Procesos</h5>
+                <p class="mb-0">
+                    <a class="btn btn-primary icon-btn"
+                       onclick="open_modal('{% url 'company:create_process' object.id %}')">
+                        <i class="bi bi-plus-square me-2"></i>Nuevo
+                    </a>
+                </p>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Descripción</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for process in processes %}
+                        <tr>
+                            <td>{{ process.process_name }}</td>
+                            <td>
+                                {% if process.enable_process %}
+                                    <span class="badge bg-primary">Activo</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactivo</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a onclick="open_modal('{% url 'company:update_process' process.id %}')"
+                                   title="Editar">
+                                    <i class="bi bi-pencil-square text-warning me-2"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center">
+                                No hay procesos asociados a esta planta.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+    </div>
+</div>
