@@ -158,6 +158,7 @@ class SolutionStdBase(BaseModel):
     enable_solution_std = models.BooleanField(verbose_name='Habilitado', default=True)
     stability_solution = models.PositiveSmallIntegerField(verbose_name='Días Estabilidad en Solución', null=True, blank=True)
     standardizable = models.BooleanField(verbose_name='Estandarizable', default=False)
+    sig_figs_solution = models.PositiveSmallIntegerField(verbose_name='Cifras Significativas [ ]', default=4)
 
     def __str__(self):
         """Retorna la representación con el estándar y la concentración."""

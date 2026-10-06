@@ -25,6 +25,7 @@ FREQUENCY = [
 ]
 
 PERIODICITY = [
+    ('No aplica', 'No aplica'),
     ('Diaria', 'Diaria'),
     ('Semanal', 'Semanal'),
     ('Mensual', 'Mensual'),

@@ -73,6 +73,7 @@ class AnalyticalMethodForm(ModelForm):
             'sample_size',
             'type_method',
             'laboratory',
+            'unit_concentration',
             'sig_figs_result',
         ]
         widgets = {
@@ -84,6 +85,7 @@ class AnalyticalMethodForm(ModelForm):
             'sample_size': TextInput(attrs={'class': 'form-control', 'required': True, 'step': 'any'}),
             'type_method': Select(attrs={'class': 'form-control', 'required': True}, choices=TYPE_METHOD),
             'laboratory': Select(attrs={'class': 'form-control', 'required': True}),
+            'unit_concentration': Select(attrs={'class': 'form-control', 'required': True}, choices=UNIT_CALCULATE),
             'sig_figs_result': TextInput(attrs={'class': 'form-control', 'required': True, 'min': 0}),
         }
 
