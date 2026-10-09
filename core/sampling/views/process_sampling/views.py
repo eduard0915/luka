@@ -583,7 +583,7 @@ class SamplingProcessApprovedUpdateView(LoginRequiredMixin, ValidatePermissionRe
 class SamplingProcessQualityCertificatePDFView(LoginRequiredMixin, ValidatePermissionRequiredMixin, View):
     """Vista para la generación del Certificado de Calidad de un proceso de muestreo."""
 
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.change_samplingprocess'
     allowed_status = ['Aprobado', 'Rechazado']
 
     @staticmethod

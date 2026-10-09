@@ -27,7 +27,7 @@ class MassiveSampleAnalysisListView(LoginRequiredMixin, ValidatePermissionRequir
     """
     model = MassiveSampleAnalysis
     template_name = 'massive_analysis_sampling/list_massive_analysis.html'
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.change_samplingprocess'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -147,8 +147,7 @@ class MassiveSampleAnalysisUploadView(LoginRequiredMixin, ValidatePermissionRequ
     """
     template_name = 'massive_analysis_sampling/upload_massive_analysis.html'
     form_class = MassiveSampleAnalysisUploadForm
-    permission_required = 'reagent.add_reagent'
-    # permission_required = 'sampling.add_massivesampleanalysis'
+    permission_required = 'sampling.change_samplingprocess'
 
     def get_context_data(self, **kwargs):
         """Agrega la entidad y la acción al contexto del modal."""
@@ -181,7 +180,7 @@ class MassiveSampleAnalysisTemplateView(LoginRequiredMixin, ValidatePermissionRe
     metal de los métodos habilitados del laboratorio del usuario, lista para
     pegar o digitar los registros.
     """
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.change_samplingprocess'
 
     def get(self, request, *args, **kwargs):
         """Genera y retorna la plantilla Excel como archivo adjunto."""

@@ -351,7 +351,7 @@ class SamplingAnalysisProcessingCreateView(LoginRequiredMixin, ValidatePermissio
     model = SamplingAnalysisProcessing
     form_class = SamplingAnalysisProcessingForm
     template_name = 'analysis_sampling/create_sampling_analysis_processing.html'
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.change_samplingprocess'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -396,7 +396,7 @@ class SamplingAnalysisProcessingGravimetryCreateView(LoginRequiredMixin, Validat
     model = SamplingAnalysisProcessing
     form_class = SamplingAnalysisProcessingGravimetryForm
     template_name = 'analysis_sampling/create_sampling_analysis_processing.html'
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.change_samplingprocess'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -441,7 +441,7 @@ class SamplingAnalysisProcessingSpectrophotometryCreateView(LoginRequiredMixin, 
     model = SamplingAnalysisProcessing
     form_class = SamplingAnalysisProcessingSpectrophotometryForm
     template_name = 'analysis_sampling/create_sampling_analysis_processing.html'
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.change_samplingprocess'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -486,7 +486,7 @@ class SamplingAnalysisProcessingDirectCreateView(LoginRequiredMixin, ValidatePer
     model = SamplingAnalysisProcessing
     form_class = SamplingAnalysisProcessingDirectForm
     template_name = 'modal_one.html'
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.change_samplingprocess'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -532,7 +532,7 @@ class SamplingAnalysisProcessingRelationCreateView(LoginRequiredMixin, ValidateP
     model = SamplingAnalysisProcessingRelation
     form_class = SamplingAnalysisProcessingRelationForm
     template_name = 'analysis_sampling/create_sampling_analysis_processing.html'
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.change_samplingprocess'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -718,7 +718,7 @@ class SamplingAnalysisProcessingRelationDeleteView(LoginRequiredMixin, ValidateP
     """Vista para eliminar un cálculo de variables relacionadas."""
     model = SamplingAnalysisProcessingRelation
     template_name = 'analysis_sampling/delete_analysis.html'
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.change_samplingprocess'
 
     def dispatch(self, request, *args, **kwargs):
         """Procesa la solicitud de eliminación."""
@@ -750,7 +750,7 @@ class MillimoleReactedCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
     model = MillimoleReacted
     form_class = MillimoleReactedForm
     template_name = 'analysis_sampling/create_sampling_analysis_processing.html'
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.change_samplingprocess'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -794,7 +794,7 @@ class MillimoleReactedDeleteView(LoginRequiredMixin, ValidatePermissionRequiredM
     """Vista para eliminar un registro de milimoles que reaccionaron."""
     model = MillimoleReacted
     template_name = 'analysis_sampling/delete_analysis.html'
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.change_samplingprocess'
 
     def dispatch(self, request, *args, **kwargs):
         """Procesa la solicitud de eliminación."""
@@ -824,7 +824,7 @@ class SamplingAnalysisListView(LoginRequiredMixin, ValidatePermissionRequiredMix
     """Vista para el listado de análisis de muestras."""
     model = SamplingAnalysis
     template_name = 'analysis_sampling/list_analysis.html'
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.change_samplingprocess'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -872,7 +872,7 @@ class SamplingAnalysisCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
     form_class = SamplingAnalysisForm
     template_name = 'analysis_sampling/create_analysis.html'
     success_url = reverse_lazy('sampling:list_sampling_analysis')
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.change_samplingprocess'
 
     def post(self, request, *args, **kwargs):
         """Procesa el formulario de asociación de método analítico."""
@@ -920,7 +920,7 @@ class SamplingAnalysisDeleteView(LoginRequiredMixin, ValidatePermissionRequiredM
     model = SamplingAnalysis
     template_name = 'analysis_sampling/delete_analysis.html'
     success_url = reverse_lazy('sampling:list_sampling_analysis')
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.change_samplingprocess'
 
     def dispatch(self, request, *args, **kwargs):
         """Procesa la solicitud de eliminación."""
@@ -948,7 +948,7 @@ class SamplingAnalysisProcessingListView(LoginRequiredMixin, ValidatePermissionR
     """Vista para el listado de procesamiento de análisis."""
     model = SamplingAnalysisProcessing
     template_name = 'analysis_sampling/list_processing.html'
-    permission_required = 'reagent.add_reagent'
+    permission_required = 'sampling.change_samplingprocess'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
