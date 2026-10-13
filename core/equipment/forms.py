@@ -185,9 +185,10 @@ class CalibrationForm(ModelForm):
         try:
             if form.is_valid():
                 data = form.save(commit=False)
-                years= relativedelta(date.today(), data.equipment_instrumental.date_calibration_fix).years
-                year_calibration = (data.equipment_instrumental.frequency_calibration / 12)
-                data.date_calibration_next = data.equipment_instrumental.date_calibration_fix + relativedelta(years=1 if years == 0 else years) + relativedelta(years=year_calibration)
+                years_init_today= relativedelta(date.today(), data.equipment_instrumental.date_calibration_fix).years
+                year_calibration = int(data.equipment_instrumental.frequency_calibration / 12)
+                years = years_init_today + year_calibration
+                data.date_calibration_next = data.equipment_instrumental.date_calibration_fix + relativedelta(years=years if years_init_today else year_calibration)
                 data.responsible_user_id = get_current_user().id
                 data.save()
             else:
@@ -241,9 +242,9 @@ class DailyVerificationForm(ModelForm):
                 data = form.save(commit=False)
                 data.date_verification_daily = timezone.now()
                 data.verified_by_id = get_current_user().id
-                data.error = round((data.reference_pattern.magnitude_pattern - data.verification_result_daily) * 1000, 4)
+                data.error = round((data.reference_pattern.magnitude_pattern - data.verification_result_daily), 4)
                 tolerance = data.equipment_instrumental.tolerance
-                if data.error > -tolerance or data.error < tolerance:
+                if -tolerance <= data.error <= tolerance:
                     data.comply = True
                 else:
                     data.comply = False

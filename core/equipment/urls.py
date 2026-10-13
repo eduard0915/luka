@@ -41,7 +41,7 @@ urlpatterns = [
     path('calibration/update/<uuid:pk>/', CalibrationUpdateView.as_view(), name='update_calibration'),
     path('calibration/detail/<uuid:pk>/', CalibrationDetailView.as_view(), name='detail_calibration'),
     path('calibration/pdf/<uuid:pk>/', CalibrationPDFView.as_view(), name='calibration_pdf'),
-    # Verificaciones
+    # Verificaciones Intermedias
     path('verification/add/', VerificationCreateView.as_view(), name='create_verification'),
     path('verification/list/', VerificationListView.as_view(), name='list_verification'),
     path('verification/update/<uuid:pk>/', VerificationUpdateView.as_view(), name='update_verification'),

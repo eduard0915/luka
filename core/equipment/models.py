@@ -223,9 +223,9 @@ class ReferencePattern(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     equipment_instrumental = models.ForeignKey(EquipmentInstrumental, verbose_name='Instrumento', on_delete=models.CASCADE)
     description_pattern = models.CharField(max_length=150, verbose_name='Descripción del Patrón', null=True, blank=True)
-    magnitude_pattern = models.FloatField(verbose_name='Magnitud del Patrón', null=True, blank=True)
-    unit_pattern = models.CharField(verbose_name='Unidad del Patrón', max_length=50, null=True, blank=True)
-    date_expire_calibration = models.DateField(verbose_name='Fecha de Expiración', null=True, blank=True)
+    magnitude_pattern = models.FloatField(verbose_name='Magnitud', null=True, blank=True)
+    unit_pattern = models.CharField(verbose_name='Unidad', max_length=50, null=True, blank=True)
+    date_expire_calibration = models.DateField(verbose_name='Vence', null=True, blank=True)
     certificate_calibration = models.FileField(verbose_name='Certificado de Calibración', upload_to='calibration_certificates_pattern/', null=True, blank=True)
 
     def __str__(self):

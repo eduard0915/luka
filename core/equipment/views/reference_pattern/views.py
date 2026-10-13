@@ -44,10 +44,16 @@ class ReferencePatternCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
             data['error'] = str(e)
         return JsonResponse(data)
 
+    def get_equipment_instrumental(self):
+        """Obtiene y cachea el equipo instrumental asociado a la creación del patrón."""
+        if not hasattr(self, '_equipment_instrumental'):
+            self._equipment_instrumental = EquipmentInstrumental.objects.get(pk=self.kwargs['pk'])
+        return self._equipment_instrumental
+
     def get_form_kwargs(self):
         """Agrega el equipo instrumental al contexto del formulario."""
         kwargs = super().get_form_kwargs()
-        kwargs.update({'equipment_instrumental': EquipmentInstrumental.objects.get(pk=self.kwargs['pk'])})
+        kwargs.update({'equipment_instrumental': self.get_equipment_instrumental()})
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -55,6 +61,7 @@ class ReferencePatternCreateView(LoginRequiredMixin, ValidatePermissionRequiredM
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Registrar Patrón de Referencia'
         context['action'] = 'add'
+        context['equipment_instrumental'] = self.get_equipment_instrumental()
         return context
 
 
@@ -96,6 +103,7 @@ class ReferencePatternUpdateView(LoginRequiredMixin, ValidatePermissionRequiredM
         context = super().get_context_data(**kwargs)
         context['entity'] = 'Editar Patrón de Referencia'
         context['action'] = 'edit'
+        context['equipment_instrumental'] = self.object.equipment_instrumental
         return context
 
 

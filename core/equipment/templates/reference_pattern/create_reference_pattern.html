@@ -1,1 +1,43 @@
 {% extends 'modal_three.html' %}
+{% load static %}
+
+{% block scripts_detail %}
+    {{ block.super }}
+    <script type="application/javascript">
+        (function () {
+            const unitTolerance = '{{ equipment_instrumental.unit_tolerance|default:""|escapejs }}';
+            const unitPattern = document.querySelector('select[name="unit_pattern"]');
+
+            if (!unitPattern) {
+                return;
+            }
+
+            const message = 'La Unidad de medida del patrón debe ser igual a la Unidad de Tolerancia del Equipo';
+            const $modalBody = $(unitPattern).closest('.modal-body');
+            let $feedback = $modalBody.find('.unit-pattern-feedback');
+
+            if ($feedback.length === 0) {
+                $feedback = $(
+                    '<div class="row unit-pattern-feedback d-none">' +
+                    '<div class="col-12"><span class="text-danger"></span></div>' +
+                    '</div>'
+                );
+                $modalBody.append($feedback);
+            }
+
+            function validateUnitPattern() {
+                if (unitPattern.value && unitPattern.value !== unitTolerance) {
+                    $feedback.find('span').text(message);
+                    $feedback.removeClass('d-none');
+                    return false;
+                }
+                $feedback.addClass('d-none');
+                $feedback.find('span').text('');
+                return true;
+            }
+
+            $(unitPattern).on('change', validateUnitPattern);
+            validateUnitPattern();
+        })();
+    </script>
+{% endblock %}
