@@ -6,6 +6,7 @@ transacciones y el cálculo de estadísticas de estandarización.
 
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import F, StdDev, Avg
 from django.db.models.signals import post_save, post_delete
@@ -166,17 +167,23 @@ def discount_inventory_std_solution(sender, instance, created, **kwargs):
             deviation_std=StdDev('concentration_sln')
         )
 
-        # Cifras significativas configuradas en la solución estándar base
-        sig_figs = _get_sig_figs(instance.solution_to_standardize)
-
         # Procesar estadísticas con validaciones robustas
-        media = _round_decimal(stats.get('average'), sig_figs)
-        standard_deviation = _round_decimal(stats.get('deviation_std'), sig_figs)
+        raw_average = stats.get('average')
+        raw_deviation_std = stats.get('deviation_std')
 
-        # Calcular RSD (Coeficiente de Variación)
+        media = _round_solution_value(raw_average, instance.solution_to_standardize)
+        standard_deviation = _round_solution_sig_figs(raw_deviation_std, 4)
+
+        # Calcular RSD (Coeficiente de Variación) desde los valores crudos
+        # None (no hay datos) y 0 (desviación nula) son distintos.
         rsd = None
-        if media and standard_deviation and media > 0:
-            rsd = _round_decimal((standard_deviation / media) * Decimal('100'), sig_figs)
+        if raw_average and raw_average > 0:
+            if raw_deviation_std == 0:
+                rsd = _round_solution_value(Decimal('0'), instance.solution_to_standardize, decimals=2)
+            elif raw_deviation_std is not None:
+                rsd = _round_solution_value(
+                    (raw_deviation_std / raw_average) * 100,
+                    instance.solution_to_standardize, decimals=2)
 
         # Actualizar solución con estadísticas calculadas
         SolutionStd.objects.filter(pk=instance.solution_to_standardize_id).update(
@@ -193,6 +200,15 @@ def recalculate_solution_stats_on_delete(sender, instance, **kwargs):
     Signal para recalcular estadísticas de la solución cuando se elimina
     una estandarización. Actualiza promedio, desviación estándar y RSD.
     """
+    # Sin solución asociada no hay estadísticas que recalcular
+    if not instance.solution_to_standardize_id:
+        return
+
+    # En un borrado en cascada la solución padre ya no existe: no hay nada que actualizar
+    solution = SolutionStd.objects.filter(pk=instance.solution_to_standardize_id).first()
+    if solution is None:
+        return
+
     with transaction.atomic():
         # Recalcular estadísticas con las estandarizaciones restantes
         stats = StandardizationSolution.objects.filter(
@@ -202,52 +218,80 @@ def recalculate_solution_stats_on_delete(sender, instance, **kwargs):
             deviation_std=StdDev('concentration_sln')
         )
 
-        # Cifras significativas configuradas en la solución estándar base
-        sig_figs = _get_sig_figs(instance.solution_to_standardize)
-
         # Procesar estadísticas
-        media = _round_decimal(stats.get('average'), sig_figs)
-        standard_deviation = _round_decimal(stats.get('deviation_std'), sig_figs)
+        raw_average = stats.get('average')
+        raw_deviation_std = stats.get('deviation_std')
 
-        # Calcular RSD (Coeficiente de Variación)
+        media = _round_solution_value(raw_average, solution)
+        standard_deviation = _round_solution_sig_figs(raw_deviation_std, 4)
+
+        # Calcular RSD (Coeficiente de Variación) desde los valores crudos
+        # None (no hay datos) y 0 (desviación nula) son distintos.
         rsd = None
-        if media and standard_deviation and media > 0:
-            rsd = _round_decimal((standard_deviation / media) * Decimal('100'), sig_figs)
+        if raw_average and raw_average > 0:
+            if raw_deviation_std == 0:
+                rsd = _round_solution_value(Decimal('0'), solution, decimals=2)
+            elif raw_deviation_std is not None:
+                rsd = _round_solution_value(
+                    (raw_deviation_std / raw_average) * 100, solution, decimals=2)
 
         # Actualizar solución con nuevas estadísticas
         # Si no quedan estandarizaciones, los valores serán None
-        SolutionStd.objects.filter(pk=instance.solution_to_standardize_id).update(
+        SolutionStd.objects.filter(pk=solution.pk).update(
             average_concentration=media,
             deviation_std=standard_deviation,
             coefficient_variation=rsd
         )
 
 
-def _get_sig_figs(solution_std):
+def _round_solution_value(value, solution_std=None, decimals=None):
     """
-    Obtiene las cifras significativas configuradas en el SolutionStdBase
-    asociado a una SolutionStd.
+    Redondea un valor al número de decimales configurado en el SolutionStdBase
+    de la solución, empleando Decimal para mayor precisión científica.
 
-    Args:
-        solution_std: Instancia de SolutionStd (puede ser None)
-
-    Returns:
-        Número de cifras significativas (default: 4)
-    """
-    try:
-        return solution_std.solution_std_base.sig_figs_solution or 4
-    except AttributeError:
-        return 4
-
-
-def _round_decimal(value, sig_figs=4):
-    """
-    Redondea un valor usando las cifras significativas configuradas en el
-    SolutionStdBase, empleando Decimal para mayor precisión científica.
+    El valor de ``sig_figs_solution`` se interpreta como número de decimales.
+    Si es ``None``, vacío o ``0`` (o si la solución ya no existe), se usa 4.
 
     Args:
         value: Valor a redondear (puede ser None, float, Decimal, etc.)
-        sig_figs: Cifras significativas configuradas (default: 4)
+        solution_std: Instancia de SolutionStd (puede ser None o estar borrada)
+        decimals: Número de decimales explícito. Si es None se toma de
+                  ``sig_figs_solution`` (default 4)
+
+    Returns:
+        Decimal redondeado o None si el valor es None/inválido
+    """
+    if value is None:
+        return None
+
+    if decimals is None:
+        try:
+            decimals = solution_std.solution_std_base.sig_figs_solution or 4
+        except (AttributeError, ObjectDoesNotExist):
+            decimals = 4
+
+    try:
+        decimals = int(decimals)
+        if decimals <= 0:
+            decimals = 4
+
+        decimal_value = Decimal(str(value))
+        quantize_exp = Decimal(10) ** -decimals
+        return decimal_value.quantize(quantize_exp, rounding=ROUND_HALF_UP)
+    except (ValueError, TypeError, InvalidOperation):
+        return None
+
+
+def _round_solution_sig_figs(value, sig_figs=4):
+    """
+    Redondea un valor a cifras significativas reales empleando Decimal y
+    ROUND_HALF_UP.
+
+    Ejemplos: 0.015982 con 4 cifras -> 0.01598; 2.9866 con 4 cifras -> 2.987.
+
+    Args:
+        value: Valor a redondear (puede ser None, float, Decimal, etc.)
+        sig_figs: Número de cifras significativas (default: 4)
 
     Returns:
         Decimal redondeado o None si el valor es None/inválido
@@ -256,14 +300,13 @@ def _round_decimal(value, sig_figs=4):
         return None
 
     try:
-        decimals = int(sig_figs)
-        if decimals < 0:
-            decimals = 4
+        sig_figs = int(sig_figs) if sig_figs and int(sig_figs) > 0 else 4
 
         decimal_value = Decimal(str(value))
         if decimal_value == 0:
             return Decimal('0')
 
+        decimals = sig_figs - 1 - decimal_value.adjusted()
         quantize_exp = Decimal(10) ** -decimals
         return decimal_value.quantize(quantize_exp, rounding=ROUND_HALF_UP)
     except (ValueError, TypeError, InvalidOperation):

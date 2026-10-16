@@ -1161,7 +1161,7 @@ class SolutionStdBaseForm(ModelForm):
             'solvent_reagent_base': 'col-md-4',
             'concentration_std_base': 'col-md-2',
             'concentration_unit_base': 'col-md-2',
-            'standardizable': 'col-md-2',
+            'standardizable': 'col-md-2'
         }
 
         for field_name, field in self.fields.items():
@@ -1169,11 +1169,13 @@ class SolutionStdBaseForm(ModelForm):
 
     class Meta:
         model = SolutionStdBase
-        fields = ['solute_std_base', 'solvent_reagent_base', 'concentration_std_base', 'concentration_unit_base', 'stability_solution', 'standardizable']
+        fields = ['solute_std_base', 'solvent_reagent_base', 'concentration_std_base', 'concentration_unit_base',
+                  'stability_solution', 'standardizable', 'sig_figs_solution']
         widgets = {
             'solute_std_base': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
             'solvent_reagent_base': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%'}),
             'concentration_std_base': TextInput(attrs={'class': 'form-control', 'placeholder': '0.00'}),
+            'sig_figs_solution': TextInput(attrs={'class': 'form-control'}),
             'stability_solution': TextInput(attrs={'class': 'form-control', 'placeholder': '0'}),
             'concentration_unit_base': Select(attrs={'class': 'form-control'}, choices=CONC),
             'standardizable': Select(attrs={'class': 'form-control'}, choices=BOOLEAN),
